@@ -5,7 +5,7 @@ import { parseBoolean } from '~/lib/utils/common_utils';
 export default () => {
   const el = document.getElementById('js-compliance-dashboard');
 
-  const { mergeRequests, emptyStateSvgPath, isLastPage, mergeCommitsCsvExportPath } = el.dataset;
+  const { mergeRequests, emptyStateSvgPath, isLastPage, mergeCommitsCsvExportPath, downloadExportCsvPath, exportStatusCsvPath } = el.dataset;
 
   return new Vue({
     el,
@@ -16,6 +16,8 @@ export default () => {
           isLastPage: parseBoolean(isLastPage),
           emptyStateSvgPath,
           mergeCommitsCsvExportPath,
+          downloadExportCsvPath,
+          exportStatusCsvPath,
         },
       }),
   });

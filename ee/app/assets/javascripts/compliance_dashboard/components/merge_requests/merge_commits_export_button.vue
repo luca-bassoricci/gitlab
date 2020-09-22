@@ -14,7 +14,7 @@ export default {
     },
   },
   strings: {
-    listMergeCommitsButtonText: __('List of all merge commits'),
+    listMergeCommitsButtonText: __('Generate report'),
     exportAsCsv: __('Export as CSV'),
     csvSizeLimit: __('(max size 15 MB)'),
   },

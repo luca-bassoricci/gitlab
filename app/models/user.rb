@@ -185,6 +185,7 @@ class User < ApplicationRecord
   has_one :atlassian_identity, class_name: 'Atlassian::Identity'
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
+  has_many :csv_export_jobs
 
   #
   # Validations

@@ -8,6 +8,10 @@ module EE
           ::Gitlab::EtagCaching::Router::Route.new(
             %r(^/groups/#{::Gitlab::PathRegex.full_namespace_route_regex}/-/epics/\d+/notes\z),
             'epic_notes'
+          ),
+          ::Gitlab::EtagCaching::Router::Route.new(
+            %r(^/groups/#{::Gitlab::PathRegex.full_namespace_route_regex}/-/security/merge_commit_reports/export_status\z),
+            'merge_commit_export_status'
           )
         ].freeze
 

@@ -65,6 +65,7 @@ const Api = {
   tagsPath: '/api/:version/projects/:id/repository/tags',
   freezePeriodsPath: '/api/:version/projects/:id/freeze_periods',
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
+  mergeCommitsCsvExportPath: '/groups/:namespace_path/-/security/merge_commit_reports/status',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -143,6 +144,11 @@ const Api = {
 
   groupLabels(namespace) {
     const url = Api.buildUrl(Api.groupLabelsPath).replace(':namespace_path', namespace);
+    return axios.get(url).then(({ data }) => data);
+  },
+
+  mergeCommits(namespace) {
+    const url = Api.buildUrl(Api.mergeCommitsCsvExportPath).replace(':namespace_path', namespace);
     return axios.get(url).then(({ data }) => data);
   },
 
