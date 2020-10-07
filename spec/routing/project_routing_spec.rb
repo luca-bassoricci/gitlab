@@ -55,6 +55,10 @@ RSpec.describe 'project routing' do
 
         it { expect(get('/gitlab/subgroup/gitlabhq')).to route_to('projects#show', namespace_id: 'gitlab/subgroup', id: 'gitlabhq') }
       end
+
+      context 'with unrecognized nested group' do
+        it { expect(get('/gitlab/unknown/gitlabhq')).to route_to('application#route_not_found', unmatched_route: 'gitlab/unknown/gitlabhq') }
+      end
     end
 
     it 'to #update' do
@@ -752,7 +756,7 @@ RSpec.describe 'project routing' do
       end
 
       it 'routes to application#route_not_found when :template_type is unknown' do
-        expect(get(show_with_template_type('invalid'))).to route_to('application#not_found', unmatched_route: 'gitlab/gitlabhq/templates/invalid/template_name')
+        expect(get(show_with_template_type('invalid'))).to route_to('application#route_not_found', unmatched_route: 'gitlab/gitlabhq/templates/invalid/template_name')
       end
     end
   end
@@ -818,9 +822,9 @@ RSpec.describe 'project routing' do
       expect(get('/gitlab/gitlabhq/-/design_management/designs/1/resized_image/v432x230')).to route_to('projects/design_management/designs/resized_image#show', namespace_id: 'gitlab', project_id: 'gitlabhq', design_id: '1', id: 'v432x230')
       expect(get('/gitlab/gitlabhq/-/design_management/designs/1/c6f00aa50b80887ada30a6fe517670be9f8f9ece/resized_image/v432x230')).to route_to('projects/design_management/designs/resized_image#show', namespace_id: 'gitlab', project_id: 'gitlabhq', design_id: '1', sha: 'c6f00aa50b80887ada30a6fe517670be9f8f9ece', id: 'v432x230')
       # Unknown route because `invalid` needs to be a commit SHA or absent.
-      expect(get('/gitlab/gitlabhq/-/design_management/designs/1/invalid/resized_image/v432x230')).to route_to('application#not_found', unmatched_route: 'gitlab/gitlabhq/-/design_management/designs/1/invalid/resized_image/v432x230')
+      expect(get('/gitlab/gitlabhq/-/design_management/designs/1/invalid/resized_image/v432x230')).to route_to('application#not_found', unmatched_namespace: 'gitlab/gitlabhq', unmatched_path: 'design_management/designs/1/invalid/resized_image/v432x230')
       # Unknown route because `small` is not a recognized image size
-      expect(get('/gitlab/gitlabhq/-/design_management/designs/1/c6f00aa50b80887ada30a6fe517670be9f8f9ece/resized_image/small')).to route_to('application#not_found', unmatched_route: 'gitlab/gitlabhq/-/design_management/designs/1/c6f00aa50b80887ada30a6fe517670be9f8f9ece/resized_image/small')
+      expect(get('/gitlab/gitlabhq/-/design_management/designs/1/c6f00aa50b80887ada30a6fe517670be9f8f9ece/resized_image/small')).to route_to('application#not_found', unmatched_namespace: 'gitlab/gitlabhq', unmatched_path: 'design_management/designs/1/c6f00aa50b80887ada30a6fe517670be9f8f9ece/resized_image/small')
     end
   end
 
@@ -868,28 +872,28 @@ RSpec.describe 'project routing' do
     it 'routes to 404 with invalid page' do
       expect(get: "/gitlab/gitlabhq/-/metrics/invalid_page").to route_to(
         'application#not_found',
-        unmatched_route: 'gitlab/gitlabhq/-/metrics/invalid_page'
+        unmatched_namespace: 'gitlab/gitlabhq', unmatched_path: 'metrics/invalid_page'
       )
     end
 
     it 'routes to 404 with invalid dashboard_path' do
       expect(get: "/gitlab/gitlabhq/-/metrics/invalid_dashboard").to route_to(
         'application#not_found',
-        unmatched_route: 'gitlab/gitlabhq/-/metrics/invalid_dashboard'
+        unmatched_namespace: 'gitlab/gitlabhq', unmatched_path: 'metrics/invalid_dashboard'
       )
     end
 
     it 'routes to 404 with invalid dashboard_path and valid page' do
       expect(get: "/gitlab/gitlabhq/-/metrics/dashboard1/panel/new").to route_to(
         'application#not_found',
-        unmatched_route: 'gitlab/gitlabhq/-/metrics/dashboard1/panel/new'
+        unmatched_namespace: 'gitlab/gitlabhq', unmatched_path: 'metrics/dashboard1/panel/new'
       )
     end
 
     it 'routes to 404 with valid dashboard_path and invalid page' do
       expect(get: "/gitlab/gitlabhq/-/metrics/dashboard1.yml/invalid_page").to route_to(
         'application#not_found',
-        unmatched_route: 'gitlab/gitlabhq/-/metrics/dashboard1.yml/invalid_page'
+        unmatched_namespace: 'gitlab/gitlabhq', unmatched_path: 'metrics/dashboard1.yml/invalid_page'
       )
     end
   end
