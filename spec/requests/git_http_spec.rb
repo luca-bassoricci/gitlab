@@ -144,7 +144,7 @@ RSpec.describe 'Git HTTP requests' do
         end
       end
 
-      context "when the params are anything else" do
+      context "when unrecognized service is requested" do
         let(:params) { { service: 'git-implode-pack' } }
 
         before do
@@ -152,7 +152,7 @@ RSpec.describe 'Git HTTP requests' do
         end
 
         it "redirects to the sign-in page" do
-          expect(response).to redirect_to(new_user_session_path)
+          expect(response).to be_not_found
         end
       end
     end
