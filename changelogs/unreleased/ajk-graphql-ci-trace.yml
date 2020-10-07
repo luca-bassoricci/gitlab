@@ -1,0 +1,5 @@
+---
+title: Add CiJob.trace to access build logs in GraphQL
+merge_request: 50039
+author:
+type: changed
