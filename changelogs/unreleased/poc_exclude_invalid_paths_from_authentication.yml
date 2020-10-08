@@ -1,5 +1,5 @@
 ---
 title: 404 instead of authenticating routes that don't exist
 merge_request: 44175
-author: johnhope
+author:
 type: fixed
