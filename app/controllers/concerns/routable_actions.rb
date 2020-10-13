@@ -11,7 +11,7 @@ module RoutableActions
     else
       perform_not_found_actions(routable, not_found_actions)
 
-      route_not_found unless performed?
+      authenticated_not_found unless performed?
 
       nil
     end

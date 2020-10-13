@@ -24,7 +24,7 @@ class ApplicationController < ActionController::Base
   include Gitlab::Utils::StrongMemoize
   include ControllerWithFeatureCategory
 
-  before_action :authenticate_user!, except: [:not_found, :route_not_found]
+  before_action :authenticate_user!, except: [:not_found, :authenticated_not_found]
   before_action :enforce_terms!, if: :should_enforce_terms?
   before_action :validate_user_service_ticket!
   before_action :check_password_expiration, if: :html_request?
@@ -120,7 +120,7 @@ class ApplicationController < ActionController::Base
     render_404
   end
 
-  def route_not_found
+  def authenticated_not_found
     if current_user
       not_found
     else

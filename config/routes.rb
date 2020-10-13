@@ -277,5 +277,5 @@ Rails.application.routes.draw do
   root to: "root#index"
 
   get '*unmatched_namespace/-/*unmatched_path', to: 'application#not_found', constraints: { unmatched_namespace: Gitlab::PathRegex.full_namespace_route_regex }
-  get '*unmatched_route', to: 'application#route_not_found'
+  get '*unmatched_route', to: 'application#authenticated_not_found'
 end

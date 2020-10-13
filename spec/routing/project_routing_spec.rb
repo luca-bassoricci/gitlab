@@ -57,7 +57,7 @@ RSpec.describe 'project routing' do
       end
 
       context 'with unrecognized nested group' do
-        it { expect(get('/gitlab/unknown/gitlabhq')).to route_to('application#route_not_found', unmatched_route: 'gitlab/unknown/gitlabhq') }
+        it { expect(get('/gitlab/unknown/gitlabhq')).to route_to('application#authenticated_not_found', unmatched_route: 'gitlab/unknown/gitlabhq') }
       end
     end
 
@@ -755,8 +755,8 @@ RSpec.describe 'project routing' do
         expect(get(show_with_template_type('issue'))).to route_to('projects/templates#show', namespace_id: 'gitlab', project_id: 'gitlabhq', template_type: 'issue', key: 'template_name', format: 'json')
       end
 
-      it 'routes to application#route_not_found when :template_type is unknown' do
-        expect(get(show_with_template_type('invalid'))).to route_to('application#route_not_found', unmatched_route: 'gitlab/gitlabhq/templates/invalid/template_name')
+      it 'routes to application#authenticated_not_found when :template_type is unknown' do
+        expect(get(show_with_template_type('invalid'))).to route_to('application#authenticated_not_found', unmatched_route: 'gitlab/gitlabhq/templates/invalid/template_name')
       end
     end
   end

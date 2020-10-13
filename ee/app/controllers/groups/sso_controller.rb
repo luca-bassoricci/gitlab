@@ -26,7 +26,7 @@ class Groups::SsoController < Groups::ApplicationController
   end
 
   def unlink
-    return route_not_found unless linked_identity
+    return authenticated_not_found unless linked_identity
 
     GroupSaml::Identity::DestroyService.new(linked_identity).execute
 
@@ -87,7 +87,7 @@ class Groups::SsoController < Groups::ApplicationController
   end
 
   def check_oauth_data
-    route_not_found unless unauthenticated_group.saml_provider.enforced_group_managed_accounts? && oauth_data.present?
+    authenticated_not_found unless unauthenticated_group.saml_provider.enforced_group_managed_accounts? && oauth_data.present?
   end
 
   def oauth_data
@@ -117,11 +117,11 @@ class Groups::SsoController < Groups::ApplicationController
   end
 
   def require_group_saml_instance!
-    route_not_found unless Gitlab::Auth::GroupSaml::Config.enabled?
+    authenticated_not_found unless Gitlab::Auth::GroupSaml::Config.enabled?
   end
 
   def require_licensed_group!
-    route_not_found unless unauthenticated_group&.feature_available?(:group_saml)
+    authenticated_not_found unless unauthenticated_group&.feature_available?(:group_saml)
   end
 
   def require_saml_provider!
@@ -137,13 +137,13 @@ class Groups::SsoController < Groups::ApplicationController
       flash[:notice] = 'SAML sign on has not been configured for this group'
       redirect_to [@unauthenticated_group, :saml_providers]
     else
-      route_not_found
+      authenticated_not_found
     end
   end
 
   def check_user_can_sign_in_with_provider
     actor = saml_discovery_token_actor || current_user
-    route_not_found unless can?(actor, :sign_in_with_saml_provider, unauthenticated_group.saml_provider)
+    authenticated_not_found unless can?(actor, :sign_in_with_saml_provider, unauthenticated_group.saml_provider)
   end
 
   def saml_discovery_token_actor

@@ -169,10 +169,10 @@ RSpec.describe ApplicationController do
     end
   end
 
-  describe '#route_not_found' do
+  describe '#authenticated_not_found' do
     controller(described_class) do
       def index
-        route_not_found
+        authenticated_not_found
       end
     end
 
