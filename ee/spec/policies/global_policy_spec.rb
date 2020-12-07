@@ -238,55 +238,34 @@ RSpec.describe GlobalPolicy do
     end
   end
 
-  describe 'export_user_permissions' do
-    let(:licensed) { true }
-    let(:flag_enabled) { true }
+  describe ':export_user_permissions', :enable_admin_mode do
+    using RSpec::Parameterized::TableSyntax
 
-    shared_examples 'allowed to export user permissions' do
-      it { is_expected.to be_allowed(:export_user_permissions) }
+    let(:policy) { :export_user_permissions }
+
+    let_it_be(:admin) { build_stubbed(:admin) }
+    let_it_be(:guest) { build_stubbed(:user) }
+
+    where(:role, :flag_enabled, :licensed, :allowed) do
+      :admin      | true  | true  | true
+      :admin      | true  | false | false
+      :admin      | false | true  | false
+      :admin      | false | false | false
+      :guest      | true  | true  | false
+      :guest      | true  | false | false
+      :guest      | false | true  | false
+      :guest      | false | false | false
     end
 
-    shared_examples 'not allowed to export user permissions' do
-      it { is_expected.to be_disallowed(:export_user_permissions) }
-    end
+    with_them do
+      let(:current_user) { public_send(role) }
 
-    before do
-      stub_licensed_features(export_user_permissions: licensed)
-      stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
-    end
-
-    context 'when user is an admin', :enable_admin_mode do
-      let(:current_user) { admin }
-
-      context 'when licensed and feature enabled' do
-        it_behaves_like 'allowed to export user permissions'
+      before do
+        stub_licensed_features(export_user_permissions: licensed)
+        stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
       end
 
-      context 'when not licensed' do
-        let(:licensed) { false }
-
-        it_behaves_like 'not allowed to export user permissions'
-      end
-
-      context 'when feature flag is not enabled' do
-        let(:flag_enabled) { false }
-
-        it_behaves_like 'not allowed to export user permissions'
-      end
-    end
-
-    context 'when user is not an admin' do
-      let(:current_user) { user }
-
-      context 'when licensed' do
-        it_behaves_like 'not allowed to export user permissions'
-      end
-
-      context 'when not licensed' do
-        let(:licensed) { false }
-
-        it_behaves_like 'not allowed to export user permissions'
-      end
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
     end
   end
 end

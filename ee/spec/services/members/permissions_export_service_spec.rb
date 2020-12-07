@@ -8,7 +8,7 @@ RSpec.describe Members::PermissionsExportService do
   let_it_be(:admin) { create(:admin) }
   let_it_be(:user) { create(:user, username: 'Jessica', email: 'jessica@test.com') }
 
-  context 'access', :enable_admin_mode do
+  context 'access' do
     shared_examples 'allowed to export user permissions' do
       it { expect(service.csv_data).to be_success }
     end
@@ -81,7 +81,7 @@ RSpec.describe Members::PermissionsExportService do
     end
 
     specify 'Type' do
-      expect(csv[0]['Type']).to eq('Group') # needs fixing
+      expect(csv[0]['Type']).to eq('Group')
     end
 
     specify 'Path' do
@@ -106,7 +106,7 @@ RSpec.describe Members::PermissionsExportService do
       let_it_be(:sub_group_user) { create(:user, username: 'Oliver', email: 'oliver@test.com') }
       let_it_be(:sub_group_maintainer) { create(:group_member, :maintainer, group: sub_group, user: sub_group_user) }
 
-      specify 'displays attributes correctly', :aggregate_failures do
+      it 'displays attributes correctly', :aggregate_failures do
         row = csv.find { |row| row['Username'] == 'Oliver' }
 
         expect(row['Path']).to eq(sub_group.full_path)
@@ -120,34 +120,12 @@ RSpec.describe Members::PermissionsExportService do
       let_it_be(:project_user) { create(:user, username: 'Theo', email: 'theo@test.com') }
       let_it_be(:project_developer) { create(:project_member, :developer, project: project, user: project_user) }
 
-      specify 'displays attributes correctly', :aggregate_failures do
+      it 'displays attributes correctly', :aggregate_failures do
         row = csv.find { |row| row['Username'] == 'Theo' }
 
         expect(row['Path']).to eq(project.full_path)
         expect(row['Type']).to eq('Project')
         expect(row['Access Level']).to eq('Developer')
-      end
-    end
-
-    context 'when member user is blocked' do
-      let_it_be(:blocked_user) { create(:user, :blocked, username: 'Helvi', email: 'helvi@test.com') }
-      let_it_be(:blocked_member) { create(:group_member, :maintainer, group: group, user: blocked_user) }
-
-      it 'does not report the member' do
-        row = csv.find { |row| row['Username'] == 'Helvi' }
-
-        expect(row).to be nil
-      end
-    end
-
-    context 'when member request is pending' do
-      let_it_be(:requested_user) { create(:user, username: 'Iris', email: 'iris@test.com') }
-      let_it_be(:requested_member) { create(:group_member, :maintainer, group: group, user: requested_user, requested_at: 2.days.ago) }
-
-      it 'does not report the member' do
-        row = csv.find { |row| row['Username'] == 'Iris' }
-
-        expect(row).to be nil
       end
     end
   end

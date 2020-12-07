@@ -2,9 +2,6 @@
 
 module Members
   class PermissionsExportService
-    include Gitlab::Utils::StrongMemoize
-    TARGET_FILESIZE = 15.megabytes
-
     def initialize(current_user)
       @current_user = current_user
     end
@@ -12,7 +9,7 @@ module Members
     def csv_data
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
-      ServiceResponse.success(payload: csv_builder.render(TARGET_FILESIZE))
+      ServiceResponse.success(payload: csv_builder.render)
     end
 
     private
@@ -29,18 +26,18 @@ module Members
 
     def data
       Member
-        .active
-        .includes(:user, source: [:route, children: :route, projects: :route]) # rubocop: disable CodeReuse/ActiveRecord
+        .active_without_invites_and_requests
+        .with_csv_entity_associations
     end
 
     def header_to_value_hash
       {
-        'Username' => -> (member) { member.user&.username },
-        'Email' => -> (member) { member.user&.email },
-        'Type' => -> (member) { member.source.is_a?(Group) && member.source.parent.present? ? 'Sub group' : member.source.class.to_s },
+        'Username' => 'user_username',
+        'Email' => 'user_email',
+        'Type' => 'source_kind',
         'Path' => -> (member) { member.source&.full_path },
-        'Access Level' => -> (member) { member.human_access },
-        'Inherited memberships' => -> (member) { (member.source.children.map(&:full_path) + member.source.projects.map(&:full_path)).join(";") if member.source.is_a?(Group) }
+        'Access Level' => 'human_access',
+        'Inherited memberships' => -> (member) { member.direct_inherited_memberships_path&.join(";") }
       }
     end
   end
