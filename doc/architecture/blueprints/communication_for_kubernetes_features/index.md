@@ -16,6 +16,8 @@ Communication with the in-cluster agent is covered by the [GitLab to Kubernetes 
 
 Configure and other GitLab teams may want to add new functionality to the GitLab Kubernetes Agent (`agentk`), the in-cluster component. Some of the features may need to make requests to GitLab. That may be to send some information from the cluster or to get some data from GitLab, or both. 
 
+An example that prompted this design document is [MVC: Initial Project Level Alert Dashboard](https://gitlab.com/groups/gitlab-org/-/epics/3438), worked on by the Container Security group. More specifically, see issues [#277149](https://gitlab.com/gitlab-org/gitlab/-/issues/277149), [#277153](https://gitlab.com/gitlab-org/gitlab/-/issues/277153), and [#277156](https://gitlab.com/gitlab-org/gitlab/-/issues/277156).
+
 An organic way to build this would be to add API endpoints (gRPC methods) to Kubernetes Agent Server (`gitlab-kas`) that make requests to GitLab. On GitLab side some features would also require new endpoints. This would happen as needed, for each feature.
 
 In the long term this approach would lead to:
@@ -41,7 +43,7 @@ A request can have URL query parameters.
 
 ### Iterations
 
-TBD
+Work is tracked in [#289958](https://gitlab.com/gitlab-org/gitlab/-/issues/289958).
 
 ## Who
 
