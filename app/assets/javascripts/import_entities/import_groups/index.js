@@ -10,12 +10,13 @@ Vue.use(VueApollo);
 export function mountImportGroupsApp(mountElement) {
   if (!mountElement) return undefined;
 
-  const { statusPath, availableNamespacesPath } = mountElement.dataset;
+  const { statusPath, availableNamespacesPath, createBulkImportPath } = mountElement.dataset;
   const apolloProvider = new VueApollo({
     defaultClient: createApolloClient({
       endpoints: {
         status: statusPath,
         availableNamespaces: availableNamespacesPath,
+        createBulkImport: createBulkImportPath,
       },
     }),
   });

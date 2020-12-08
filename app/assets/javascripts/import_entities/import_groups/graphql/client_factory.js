@@ -1,11 +1,14 @@
 import axios from '~/lib/utils/axios_utils';
 import createDefaultClient from '~/lib/graphql';
 import { STATUSES } from '../../constants';
-
-import { clientTypenames } from './client_typenames';
 import availableNamespacesQuery from './queries/available_namespaces.query.graphql';
 import { SourceGroupsManager } from './services/source_groups_manager';
 import { StatusPoller } from './services/status_poller';
+
+export const clientTypenames = {
+  BulkImportSourceGroup: 'ClientBulkImportSourceGroup',
+  AvailableNamespace: 'ClientAvailableNamespace',
+};
 
 export function createResolvers({ endpoints }) {
   let statusPoller;
@@ -17,10 +20,7 @@ export function createResolvers({ endpoints }) {
           data: { availableNamespaces },
         } = await client.query({ query: availableNamespacesQuery });
 
-        statusPoller = new StatusPoller({ client, interval: 3000 });
-
         return axios.get(endpoints.status).then(({ data }) => {
-          statusPoller.startPolling();
           return data.importable_data.map(group => ({
             __typename: clientTypenames.BulkImportSourceGroup,
             ...group,
@@ -42,26 +42,26 @@ export function createResolvers({ endpoints }) {
         ),
     },
     Mutation: {
-      setTargetNamespace(_, { targetNamespace, sourceGroupId }, { cache }) {
-        new SourceGroupsManager({ cache }).updateById(sourceGroupId, sourceGroup => {
+      setTargetNamespace(_, { targetNamespace, sourceGroupId }, { client }) {
+        new SourceGroupsManager({ client }).updateById(sourceGroupId, sourceGroup => {
           // eslint-disable-next-line no-param-reassign
           sourceGroup.import_target.target_namespace = targetNamespace;
         });
       },
 
-      setNewName(_, { newName, sourceGroupId }, { cache }) {
-        new SourceGroupsManager({ cache }).updateById(sourceGroupId, sourceGroup => {
+      setNewName(_, { newName, sourceGroupId }, { client }) {
+        new SourceGroupsManager({ client }).updateById(sourceGroupId, sourceGroup => {
           // eslint-disable-next-line no-param-reassign
           sourceGroup.import_target.new_name = newName;
         });
       },
 
-      async importGroup(_, { sourceGroupId }, { cache }) {
-        const groupManager = new SourceGroupsManager({ cache });
+      async importGroup(_, { sourceGroupId }, { client }) {
+        const groupManager = new SourceGroupsManager({ client });
         const group = groupManager.findById(sourceGroupId);
-        groupManager.setImportStatus({ group, status: STATUSES.SCHEDULING });
+        groupManager.setImportStatus(group, STATUSES.SCHEDULING);
         try {
-          await axios.post('/import/bulk_imports', {
+          await axios.post(endpoints.createBulkImport, {
             bulk_import: [
               {
                 source_type: 'group_entity',
@@ -71,10 +71,14 @@ export function createResolvers({ endpoints }) {
               },
             ],
           });
-          groupManager.setImportStatus({ group, status: STATUSES.STARTED });
-          ``;
+          groupManager.setImportStatus(group, STATUSES.STARTED);
+          if (!statusPoller) {
+            statusPoller = new StatusPoller({ client, interval: 3000 });
+            statusPoller.startPolling();
+          }
         } catch (e) {
-          groupManager.setImportStatus({ group, status: STATUSES.NONE });
+          groupManager.setImportStatus(group, STATUSES.NONE);
+          throw e;
         }
       },
     },

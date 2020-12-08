@@ -6,7 +6,7 @@ function extractTypeConditionFromFragment(fragment) {
   return fragment.definitions[0]?.typeCondition.name.value;
 }
 
-function getGroupId(id) {
+function generateGroupId(id) {
   return defaultDataIdFromObject({
     __typename: extractTypeConditionFromFragment(ImportSourceGroupFragment),
     id,
@@ -14,19 +14,19 @@ function getGroupId(id) {
 }
 
 export class SourceGroupsManager {
-  constructor({ cache }) {
-    this.cache = cache;
+  constructor({ client }) {
+    this.client = client;
   }
 
   findById(id) {
-    const cacheId = getGroupId(id);
-    return this.cache.readFragment({ fragment: ImportSourceGroupFragment, id: cacheId });
+    const cacheId = generateGroupId(id);
+    return this.client.readFragment({ fragment: ImportSourceGroupFragment, id: cacheId });
   }
 
   update(group, fn) {
-    this.cache.writeFragment({
+    this.client.writeFragment({
       fragment: ImportSourceGroupFragment,
-      id: getGroupId(group.id),
+      id: generateGroupId(group.id),
       data: produce(group, fn),
     });
   }
@@ -36,7 +36,7 @@ export class SourceGroupsManager {
     this.update(group, fn);
   }
 
-  setImportStatus({ group, status }) {
+  setImportStatus(group, status) {
     this.update(group, sourceGroup => {
       // eslint-disable-next-line no-param-reassign
       sourceGroup.status = status;

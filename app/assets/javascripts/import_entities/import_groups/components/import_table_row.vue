@@ -24,6 +24,14 @@ export default {
     },
   },
   computed: {
+    isDisabled() {
+      return this.group.status !== STATUSES.NONE;
+    },
+
+    isFinished() {
+      return this.group.status === STATUSES.FINISHED;
+    },
+
     select2Options() {
       return {
         data: this.availableNamespaces.map(namespace => ({
@@ -38,7 +46,6 @@ export default {
       return `${group.import_target.target_namespace}/${group.import_target.new_name}`;
     },
   },
-  STATUSES,
 };
 </script>
 
@@ -50,25 +57,29 @@ export default {
       </a>
     </td>
     <td class="gl-p-4">
-      <gl-link v-if="group.status === $options.STATUSES.FINISHED" :href="getFullPath(group)">{{
-        getFullPath(group)
-      }}</gl-link>
+      <gl-link v-if="isFinished" :href="getFullPath(group)">{{ getFullPath(group) }}</gl-link>
 
-      <div v-else class="import-entities-target-select gl-display-flex gl-align-items-stretch">
+      <div
+        v-else
+        class="import-entities-target-select gl-display-flex gl-align-items-stretch"
+        :class="{
+          disabled: isDisabled,
+        }"
+      >
         <select2-select
-          :disabled="group.status !== $options.STATUSES.NONE"
+          :disabled="isDisabled"
           :options="select2Options"
           :value="group.import_target.target_namespace"
           @input="$emit('update-target-namespace', $event)"
         />
         <div
-          class="gl-px-3 gl-display-flex gl-align-items-center gl-border-solid gl-border-gray-200 gl-border-0 gl-border-t-1 gl-border-b-1"
+          class="import-entities-target-select-separator gl-px-3 gl-display-flex gl-align-items-center gl-border-solid gl-border-0 gl-border-t-1 gl-border-b-1"
         >
           /
         </div>
         <gl-form-input
           class="gl-rounded-top-left-none gl-rounded-bottom-left-none"
-          :disabled="group.status !== $options.STATUSES.NONE"
+          :disabled="isDisabled"
           :value="group.import_target.new_name"
           @input="$emit('update-new-name', $event)"
         />
@@ -79,7 +90,7 @@ export default {
     </td>
     <td class="gl-p-4">
       <gl-button
-        v-if="group.status === $options.STATUSES.NONE"
+        v-if="!isDisabled"
         variant="success"
         category="secondary"
         @click="$emit('import-group')"

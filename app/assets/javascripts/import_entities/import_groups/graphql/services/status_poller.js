@@ -1,4 +1,6 @@
 import gql from 'graphql-tag';
+import createFlash from '~/flash';
+import { s__ } from '~/locale';
 import bulkImportSourceGroupsQuery from '../queries/bulk_import_source_groups.query.graphql';
 import { STATUSES } from '../../../constants';
 import { SourceGroupsManager } from './source_groups_manager';
@@ -23,6 +25,7 @@ export class StatusPoller {
     this.client = client;
     this.interval = interval;
     this.timeoutId = null;
+    this.groupManager = new SourceGroupsManager({ client });
   }
 
   startPolling() {
@@ -30,7 +33,7 @@ export class StatusPoller {
       return;
     }
 
-    this.timeoutId = setTimeout(() => this.checkCurrentImports(), this.interval);
+    this.checkPendingImports();
   }
 
   stopPolling() {
@@ -38,9 +41,9 @@ export class StatusPoller {
     this.timeoutId = null;
   }
 
-  async checkCurrentImports() {
+  async checkPendingImports() {
     try {
-      const { bulkImportSourceGroups } = await this.client.readQuery({
+      const { bulkImportSourceGroups } = this.client.readQuery({
         query: bulkImportSourceGroupsQuery,
       });
       const groupsInProgress = bulkImportSourceGroups.filter(g => g.status === STATUSES.STARTED);
@@ -49,14 +52,15 @@ export class StatusPoller {
           query: generateGroupsQuery(groupsInProgress),
           fetchPolicy: 'no-cache',
         });
-        const groupManager = new SourceGroupsManager({ cache: this.client.cache });
         const completedGroups = groupsInProgress.filter((_, idx) => Boolean(results[groupId(idx)]));
         completedGroups.forEach(group => {
-          groupManager.setImportStatus({ group, status: STATUSES.FINISHED });
+          this.groupManager.setImportStatus(group, STATUSES.FINISHED);
         });
       }
+    } catch (e) {
+      createFlash({ message: s__('ImportGroups|Update of import statuses with realtime changes failed')});
     } finally {
-      setTimeout(() => this.checkCurrentImports(), this.interval);
+      this.timeoutId = setTimeout(() => this.checkPendingImports(), this.interval);
     }
   }
 }

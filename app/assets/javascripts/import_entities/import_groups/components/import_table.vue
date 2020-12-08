@@ -45,12 +45,12 @@ export default {
   <div>
     <gl-loading-icon v-if="$apollo.loading" size="md" class="gl-mt-5" />
     <div v-else-if="bulkImportSourceGroups.length">
-      <table class="gl-w-full" style="table-layout: fixed;">
+      <table class="gl-w-full">
         <thead class="gl-border-solid gl-border-gray-200 gl-border-0 gl-border-b-1">
-          <th class="gl-p-4">{{ __('From source group') }}</th>
-          <th class="gl-p-4">{{ __('To new group') }}</th>
-          <th class="gl-p-4">{{ __('Status') }}</th>
-          <th class="gl-p-4 gl-w-12"></th>
+          <th class="gl-py-4 import-jobs-from-col">{{ __('From source group') }}</th>
+          <th class="gl-py-4 import-jobs-to-col">{{ __('To new group') }}</th>
+          <th class="gl-py-4 import-jobs-status-col">{{ __('Status') }}</th>
+          <th class="gl-py-4 import-jobs-cta-col"></th>
         </thead>
         <tbody>
           <template v-for="group in bulkImportSourceGroups">
