@@ -6061,14 +6061,24 @@
               "description": "The trace as HTML.",
               "args": [
                 {
+                  "name": "full",
+                  "description": "Retrieve the full trace. Not allowed when selecting jobs from Pipeline.jobs. (default value: false).",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "false"
+                },
+                {
                   "name": "tail",
-                  "description": "Take only the last N lines.",
+                  "description": "Take only the last N lines. (default value: 10, max 25 when called from Pipeline.jobs.trace).",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Int",
                     "ofType": null
                   },
-                  "defaultValue": null
+                  "defaultValue": "10"
                 }
               ],
               "type": {
@@ -6084,14 +6094,24 @@
               "description": "The trace as plaintext.",
               "args": [
                 {
+                  "name": "full",
+                  "description": "Retrieve the full trace. Not allowed when selecting jobs from Pipeline.jobs. (default value: false).",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "false"
+                },
+                {
                   "name": "tail",
-                  "description": "Take only the last N lines.",
+                  "description": "Take only the last N lines. (default value: 10, max 25 when called from Pipeline.jobs.trace).",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Int",
                     "ofType": null
                   },
-                  "defaultValue": null
+                  "defaultValue": "10"
                 }
               ],
               "type": {

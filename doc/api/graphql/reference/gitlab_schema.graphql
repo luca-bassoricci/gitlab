@@ -2275,9 +2275,14 @@ type BuildTrace {
   """
   html(
     """
-    Take only the last N lines.
+    Retrieve the full trace. Not allowed when selecting jobs from Pipeline.jobs. (default value: false).
     """
-    tail: Int
+    full: Boolean = false
+
+    """
+    Take only the last N lines. (default value: 10, max 25 when called from Pipeline.jobs.trace).
+    """
+    tail: Int = 10
   ): String
 
   """
@@ -2285,9 +2290,14 @@ type BuildTrace {
   """
   raw(
     """
-    Take only the last N lines.
+    Retrieve the full trace. Not allowed when selecting jobs from Pipeline.jobs. (default value: false).
     """
-    tail: Int
+    full: Boolean = false
+
+    """
+    Take only the last N lines. (default value: 10, max 25 when called from Pipeline.jobs.trace).
+    """
+    tail: Int = 10
   ): String
 
   """
