@@ -10,7 +10,7 @@ module Graphql
 
     def to_h
       @hash_value ||= @values.to_h do |k, v|
-        [GraphqlHelpers.fieldnamerize(k), v.is_a?(Hash) ? new(v).to_h : v]
+        [GraphqlHelpers.fieldnamerize(k), v.is_a?(Hash) ? self.class.new(v).to_h : v]
       end
     end
 
@@ -54,7 +54,7 @@ module Graphql
     end
 
     def merge(other)
-      self.class.new(@values.merge(other.to_h))
+      self.class.new(to_h.merge(other.to_h))
     end
 
     def +(other)

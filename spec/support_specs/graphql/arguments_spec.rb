@@ -19,8 +19,9 @@ RSpec.describe Graphql::Arguments do
   it 'supports merge with +' do
     lhs = described_class.new({ a: 1, b: 2 })
     rhs = described_class.new({ b: 3, c: 4 })
+    expected = described_class.new({ a: 1, b: 3, c: 4 })
 
-    expect(lhs + rhs).to eq({ a: 1, b: 3, c: 4 })
+    expect(lhs + rhs).to eq(expected)
   end
 
   it 'supports merge with + and a string' do
@@ -41,7 +42,19 @@ RSpec.describe Graphql::Arguments do
     lhs = described_class.new({ a: 1 })
     rhs = ''
 
-    expect(lhs + rhs).to eq({ a: 1 })
+    expect(lhs + rhs).to eq(lhs)
+  end
+
+  it 'does not mutate either operand' do
+    lhs = described_class.new({ a: 1 })
+    rhs = described_class.new({ b: 2 })
+    exp = described_class.new({ a: 1, b: 2 })
+
+    merged = lhs + rhs
+
+    expect(merged).to eq(exp)
+    expect(merged).not_to eq(lhs)
+    expect(merged).not_to eq(rhs)
   end
 
   it 'serializes all values correctly' do
