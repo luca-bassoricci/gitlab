@@ -264,6 +264,26 @@ FactoryBot.define do
       end
     end
 
+    trait :with_realistic_trace do
+      after(:create) do |build, evaluator|
+        trace = File.binread(
+          File.expand_path(
+            Rails.root.join('spec/fixtures/trace/sample_trace')))
+
+        build.run_after_commit { build.trace.set(trace) }
+      end
+    end
+
+    trait :with_long_trace do
+      after(:create) do |build, evaluator|
+        trace = File.binread(
+          File.expand_path(
+            Rails.root.join('spec/fixtures/trace/trace_with_100_lines')))
+
+        build.trace.set(trace)
+      end
+    end
+
     trait :trace_with_sections do
       after(:create) do |build, evaluator|
         trace = File.binread(

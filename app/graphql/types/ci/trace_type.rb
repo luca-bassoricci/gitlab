@@ -3,6 +3,8 @@
 module Types
   module Ci
     class TraceType < BaseObject
+      include PerQueryLimits
+
       graphql_name 'BuildTrace'
 
       authorize :read_build_trace
@@ -62,8 +64,8 @@ module Types
 
       def tail_argument(parent:, tail: 10, full: false)
         if called_from_pipeline_jobs?(parent)
-          forbid_full_trace_in_jobs!
-          tail = [MAX_TAIL_LENGTH_FOR_JOBS, tail].max
+          forbid_full_trace_in_jobs! if full
+          tail = [MAX_TAIL_LENGTH_FOR_JOBS, tail].min
         end
 
         full ? nil : tail
