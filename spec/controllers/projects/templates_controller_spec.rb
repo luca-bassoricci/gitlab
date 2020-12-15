@@ -163,7 +163,6 @@ RSpec.describe Projects::TemplatesController do
       it 'returns the template names', :aggregate_failures do
         get(:names, params: { namespace_id: project.namespace, template_type: template_type, project_id: project }, format: :json)
 
-        puts "json_response: #{json_response}"
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['Project Templates'].size).to eq(2)
         expect(json_response['Project Templates'].map { |x| { "name" => x['name'] } }).to match(expected_template_names)

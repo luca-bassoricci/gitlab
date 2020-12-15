@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Projects::TemplatesController < Projects::ApplicationController
+  include IssuablesDescriptionTemplatesHelper
+
   before_action :authenticate_user!
   before_action :authorize_can_read_issuable!
   before_action :get_template_class
@@ -24,13 +26,8 @@ class Projects::TemplatesController < Projects::ApplicationController
   end
 
   def names
-    supported_issuable_types = %w[issue merge_request]
-    issuable_type = params[:template_type]
-
-    return [] unless supported_issuable_types.include?(issuable_type)
-
     respond_to do |format|
-      format.json { render json: project.issuable_templates(issuable_type) }
+      format.json { render json: issuable_templates(project, params[:template_type]) }
     end
   end
 

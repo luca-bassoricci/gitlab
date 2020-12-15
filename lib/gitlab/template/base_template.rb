@@ -32,12 +32,20 @@ module Gitlab
         # override with a comment to be placed at the top of the blob.
       end
 
+      def project_id
+        @project&.id
+      end
+
       def project_path
-        @project.path
+        @project&.path
+      end
+
+      def namespace_id
+        @project&.namespace&.id
       end
 
       def namespace_path
-        @project.namespace&.full_path
+        @project&.namespace&.full_path
       end
 
       # Present for compatibility with license templates, which can replace text
@@ -91,11 +99,11 @@ module Gitlab
           raise NotImplementedError
         end
 
-        def by_category(category, project = nil)
+        def by_category(category, project = nil, empty_category_title: nil)
           directory = category_directory(category)
           files = finder(project).list_files_for(directory)
 
-          files.map { |f| new(f, project, category: category.presence || _("Project Templates")) }.sort
+          files.map { |f| new(f, project, category: category.presence || empty_category_title) }.sort
         end
 
         def category_directory(category)
