@@ -9,7 +9,9 @@ module Graphql
     end
 
     def to_h
-      @values
+      @hash_value ||= @values.to_h do |k, v|
+        [GraphqlHelpers.fieldnamerize(k), v.is_a?(Hash) ? new(v).to_h : v]
+      end
     end
 
     def ==(other)

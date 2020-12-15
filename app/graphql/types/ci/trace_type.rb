@@ -7,24 +7,38 @@ module Types
 
       authorize :read_build_trace
 
-      field :raw, GraphQL::STRING_TYPE, null: true, description: 'The trace as plaintext.' do
-        argument :tail, ::GraphQL::INT_TYPE, required: false, description: 'Take only the last N lines.'
+      MAX_TAIL_LENGTH_FOR_JOBS = 25
+
+      def self.trace_field(name, description)
+        field(name, GraphQL::STRING_TYPE, null: true, description: description) do
+          extras [:parent]
+          argument :full, ::GraphQL::BOOLEAN_TYPE,
+            default_value: false,
+            required: false,
+            description: 'Retrieve the full trace. Not allowed when selecting jobs from Pipeline.jobs. (default value: false).'
+
+          argument :tail, ::GraphQL::INT_TYPE,
+            default_value: 10,
+            required: false,
+            description: "Take only the last N lines. (default value: 10, max #{MAX_TAIL_LENGTH_FOR_JOBS} when called from Pipeline.jobs.trace)."
+        end
       end
 
-      field :html, GraphQL::STRING_TYPE, null: true, description: 'The trace as HTML.' do
-        argument :tail, ::GraphQL::INT_TYPE, required: false, description: 'Take only the last N lines.'
-      end
+      trace_field :raw, 'The trace as plaintext.'
+      trace_field :html, 'The trace as HTML.'
 
       field :sections, [::Types::Ci::TraceSectionType], null: true,
         description: 'The sections in the trace.',
         extras: [:lookahead]
 
-      def raw(tail: nil)
-        trace.raw(last_lines: tail)
+      def raw(**args)
+        n = tail_argument(**args)
+        trace.raw(last_lines: n)
       end
 
-      def html(tail: nil)
-        trace.html(last_lines: tail)
+      def html(**args)
+        n = tail_argument(**args)
+        trace.html(last_lines: n)
       end
 
       def sections(lookahead:)
@@ -42,6 +56,34 @@ module Types
         end
 
         sections
+      end
+
+      private
+
+      def tail_argument(parent:, tail: 10, full: false)
+        if called_from_pipeline_jobs?(parent)
+          forbid_full_trace_in_jobs!
+          tail = [MAX_TAIL_LENGTH_FOR_JOBS, tail].max
+        end
+
+        full ? nil : tail
+      end
+
+      def called_from_pipeline_jobs?(parent)
+        return false unless parent
+
+        case parent.path
+        in [*_, 'nodes', Integer, _]
+          true
+        in [*_, 'edges', Integer, 'node', _]
+          true
+        else
+          false
+        end
+      end
+
+      def forbid_full_trace_in_jobs!
+        raise ::Gitlab::Graphql::Errors::ArgumentError, 'Cannot request full trace from Pipeline.jobs'
       end
 
       alias_method :trace, :object

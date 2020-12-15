@@ -147,7 +147,13 @@ module GraphqlHelpers
     instance = described_class.authorized_new(object, context)
     raise UnauthorizedObject unless instance
 
-    field.resolve_field(instance, args, context)
+    arguments = field.to_graphql.arguments_class.new(
+      graphql_args(**args).to_h,
+      context: context,
+      defaults_used: []
+    )
+
+    field.resolve_field(instance, arguments, context)
   end
 
   def simple_resolver(resolved_value = 'Resolved value')
@@ -519,11 +525,18 @@ module GraphqlHelpers
     Class.new(Types::BaseObject) do
       graphql_name 'TestQuery'
 
+      def self.type(name, &block)
+        Class.new(Types::BaseObject) do
+          graphql_name name
+          class_eval(&block)
+        end
+      end
+
       yield(self) if block_given?
     end
   end
 
-  def execute_query(query_type)
+  def execute_query(query_type, gql: query_string, vars: {}, current_user: user)
     schema = Class.new(GraphQL::Schema) do
       use GraphQL::Pagination::Connections
       use Gitlab::Graphql::Authorize
@@ -535,9 +548,9 @@ module GraphqlHelpers
     end
 
     schema.execute(
-      query_string,
-      context: { current_user: user },
-      variables: {}
+      gql,
+      context: { current_user: current_user },
+      variables: vars
     )
   end
 
