@@ -4,11 +4,12 @@ module Gitlab
   class CustomFileTemplates
     include ::Gitlab::Utils::StrongMemoize
 
-    attr_reader :finder, :project
+    attr_reader :finder, :project, :current_user
 
-    def initialize(finder, project)
+    def initialize(finder, project, current_user = nil)
       @finder = finder
       @project = project
+      @current_user = current_user
     end
 
     def enabled?
@@ -70,7 +71,7 @@ module Gitlab
         project
           .ancestors_upto(nil)
           .with_custom_file_templates
-          .select { |namespace| namespace.checked_file_template_project }
+          .select { |namespace| (template_project = namespace.checked_file_template_project) && finder.can_read_template?(current_user, template_project)}
           .map { |namespace| [namespace, namespace.checked_file_template_project] }
           .to_h
       end
@@ -79,18 +80,18 @@ module Gitlab
     def templates_for(project, category)
       return [] unless project
 
-      finder.all(project).map { |template| translate(template, category: category) }
+      finder.all(project).map { |template| translate(template, project, category: category) }
     end
 
     def template_for(project, name, category)
       return unless project
 
-      translate(finder.find(name, project), category: category)
+      translate(finder.find(name, project), project, category: category)
     rescue ::Gitlab::Template::Finders::RepoTemplateFinder::FileNotFoundError
       nil
     end
 
-    def translate(template, category:)
+    def translate(template, project, category:)
       return unless template
 
       template.category = category
@@ -103,6 +104,7 @@ module Gitlab
       LicenseTemplate.new(
         key: template.key,
         name: template.name,
+        project: project,
         nickname: template.name,
         category: template.category,
         content: -> { template.content }

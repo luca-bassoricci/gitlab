@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe LicenseTemplateFinder do
   describe '#execute' do
-    subject(:result) { described_class.new(nil, params).execute }
+    subject(:result) { described_class.new(nil, nil, params).execute }
 
     let(:categories) { categorised_licenses.keys }
     let(:categorised_licenses) { result.group_by(&:category) }

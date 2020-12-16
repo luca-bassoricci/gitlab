@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe 'Projects > Files > Template Undo Button', :js do
   let(:project) { create(:project, :repository) }
-  let(:user) { project.owner }
+  let(:user) { create(:user) }
+  let!(:member) { create(:project_member, :developer, user: user, project: project) }
 
   before do
     sign_in user

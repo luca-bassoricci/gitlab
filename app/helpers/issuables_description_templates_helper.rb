@@ -30,7 +30,7 @@ module IssuablesDescriptionTemplatesHelper
 
       next [] unless supported_issuable_types.include?(issuable_type)
 
-      template_dropdown_names(TemplateFinder.build(issuable_type.pluralize.to_sym, project).execute)
+      template_dropdown_names(TemplateFinder.build(issuable_type.pluralize.to_sym, project, current_user).execute)
     end
   end
 
@@ -57,7 +57,8 @@ module IssuablesDescriptionTemplatesHelper
     categories.each_with_object({}) do |category, hash|
       hash[category] = grouped[category].map do |item|
         {
-          name: item.name, id: item.key,
+          name: item.name,
+          id: item.key,
           project_id: item.try(:project_id),
           project_path: item.try(:project_path),
           namespace_id: item.try(:namespace_id),

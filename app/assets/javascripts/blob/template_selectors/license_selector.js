@@ -30,6 +30,7 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
         const data = {
           project: this.$dropdown.data('project'),
           fullname: this.$dropdown.data('fullname'),
+          project_id: query.project_id,
         };
 
         this.reportSelection({

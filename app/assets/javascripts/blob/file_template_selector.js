@@ -65,7 +65,7 @@ export default class FileTemplateSelector {
 
   reportSelectionName(options) {
     const opts = options;
-    opts.query = options.selectedObj.name;
+    opts.query = options.selectedObj.id;
     opts.data = options.selectedObj;
 
     this.reportSelection(opts);

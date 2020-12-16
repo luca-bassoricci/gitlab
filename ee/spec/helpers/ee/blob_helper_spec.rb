@@ -6,7 +6,9 @@ RSpec.describe BlobHelper do
   include TreeHelper
 
   describe '#licenses_for_select' do
+    let(:user) { create(:user) }
     let(:group) { create(:group) }
+    let!(:group_member) { create(:group_member, user: user, group: group) }
     let(:project) { create(:project, namespace: group) }
 
     let(:group_category) { "Group #{group.full_name}" }
@@ -21,6 +23,7 @@ RSpec.describe BlobHelper do
     before do
       stub_ee_application_setting(file_template_project: project)
       group.update_columns(file_template_project_id: project.id)
+      allow(helper).to receive(:current_user).and_return(user)
     end
 
     it 'returns Group licenses when enabled' do
@@ -34,8 +37,8 @@ RSpec.describe BlobHelper do
       expect(categories).to contain_exactly(:Popular, :Other, group_category)
       expect(by_group).to contain_exactly({
         id: 'name', name: 'Name',
-        namespace_id: nil, project_id: nil,
-        namespace_path: nil, project_path: nil
+        namespace_id: project&.namespace&.id, project_id: project&.id,
+        namespace_path: project&.namespace&.path, project_path: project&.path
       })
       expect(by_popular).to be_present
       expect(by_other).to be_present
@@ -52,8 +55,8 @@ RSpec.describe BlobHelper do
       expect(categories).to contain_exactly(:Popular, :Other, 'Instance')
       expect(by_instance).to contain_exactly({
         id: 'name', name: 'Name',
-        namespace_id: nil, project_id: nil,
-        namespace_path: nil, project_path: nil
+        namespace_id: project&.namespace&.id, project_id: project&.id,
+        namespace_path: project&.namespace&.path, project_path: project&.path
       })
       expect(by_popular).to be_present
       expect(by_other).to be_present

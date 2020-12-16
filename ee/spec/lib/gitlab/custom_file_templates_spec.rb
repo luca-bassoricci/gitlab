@@ -6,11 +6,13 @@ RSpec.describe Gitlab::CustomFileTemplates do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:instance_template_project) { create(:project, :custom_repo, files: template_files('instance')) }
+  let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:group_member) { create(:group_member, user: user, group: group) }
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:group_template_project) { create(:project, :custom_repo, namespace: group, files: template_files('group')) }
 
-  subject(:templates) { described_class.new(template_finder, target_project) }
+  subject(:templates) { described_class.new(template_finder, target_project, user) }
 
   def template_files(prefix)
     {
@@ -44,6 +46,7 @@ RSpec.describe Gitlab::CustomFileTemplates do
 
         stub_ee_application_setting(file_template_project: instance_template_project) if instance_enabled
         group.update_columns(file_template_project_id: group_template_project.id) if namespace_enabled
+        allow(template_finder).to receive(:can_read_template?).and_return(true)
       end
 
       it { is_expected.to eq(expected_result) }

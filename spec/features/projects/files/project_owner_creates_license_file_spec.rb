@@ -3,13 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects > Files > Project owner creates a license file', :js do
-  let(:project) { create(:project, :repository) }
-  let(:project_maintainer) { project.owner }
+  let(:user) { create(:user) }
+  let(:group) { create(:group) }
+  let!(:group_member) { create(:group_member, user: user, group: group) }
+  let(:project) { create(:project, :repository, group: group) }
 
   before do
-    project.repository.delete_file(project_maintainer, 'LICENSE',
-      message: 'Remove LICENSE', branch_name: 'master')
-    sign_in(project_maintainer)
+    project.repository.delete_file(user, 'LICENSE', message: 'Remove LICENSE', branch_name: 'master')
+    sign_in(user)
     visit project_path(project)
   end
 

@@ -77,6 +77,10 @@ module Gitlab
           path.present? ? new(path, project) : nil
         end
 
+        def can_read_template?(user, project)
+          Ability.allowed?(user, :read_project, project)
+        end
+
         # Set categories as sub directories
         # Example: { "category_name_1" => "directory_path_1", "category_name_2" => "directory_name_2" }
         # Default is no category with all files in base dir of each class

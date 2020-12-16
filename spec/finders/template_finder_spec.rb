@@ -18,7 +18,7 @@ RSpec.describe TemplateFinder do
     end
 
     with_them do
-      subject(:finder) { described_class.build(type, project) }
+      subject(:finder) { described_class.build(type, project, nil) }
 
       it { is_expected.to be_a(expected_class) }
       it { expect(finder.project).to eq(project) }
@@ -36,19 +36,19 @@ RSpec.describe TemplateFinder do
 
     with_them do
       it 'returns all vendored templates when no name is specified' do
-        result = described_class.new(type, nil).execute
+        result = described_class.new(type, nil, nil).execute
 
         expect(result).to include(have_attributes(name: vendored_name))
       end
 
       it 'returns only the specified vendored template when a name is specified' do
-        result = described_class.new(type, nil, name: vendored_name).execute
+        result = described_class.new(type, nil, nil, name: vendored_name).execute
 
         expect(result).to have_attributes(name: vendored_name)
       end
 
       it 'returns nil when an unknown name is specified' do
-        result = described_class.new(type, nil, name: 'unknown').execute
+        result = described_class.new(type, nil, nil, name: 'unknown').execute
 
         expect(result).to be_nil
       end

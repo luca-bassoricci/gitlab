@@ -4,15 +4,16 @@ require 'spec_helper'
 
 RSpec.describe 'Project', :js do
   let(:template_text) { 'Custom license template content' }
+  let(:user) { create(:user) }
   let(:group) { create(:group) }
+  let!(:group_member) { create(:group_member, user: user, group: group) }
   let(:template_project) { create(:project, :custom_repo, namespace: group, files: { 'LICENSE/custom.txt' => template_text }) }
   let(:project) { create(:project, :empty_repo, namespace: group) }
-  let(:developer) { create(:user) }
 
   describe 'Custom file templates' do
     before do
-      project.add_developer(developer)
-      gitlab_sign_in(developer)
+      project.add_developer(user)
+      gitlab_sign_in(user)
     end
 
     it 'allows file creation from an instance template' do

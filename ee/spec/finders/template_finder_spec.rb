@@ -13,7 +13,7 @@ RSpec.describe TemplateFinder do
   let(:custom_template) { OpenStruct.new(key: 'foo', name: 'foo', category: nil, content: 'Template') }
   let(:custom_templates) { [custom_template] }
 
-  subject(:finder) { described_class.build(type, project, params) }
+  subject(:finder) { described_class.build(type, project, nil, params) }
 
   describe '#execute' do
     where(:type, :expected_template_finder) do
@@ -30,7 +30,7 @@ RSpec.describe TemplateFinder do
       before do
         expect(Gitlab::CustomFileTemplates)
           .to receive(:new)
-          .with(expected_template_finder, project)
+          .with(expected_template_finder, project, nil)
           .and_return(fake_template_source)
 
         allow(fake_template_source)

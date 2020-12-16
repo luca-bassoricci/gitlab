@@ -19,6 +19,10 @@ module Gitlab
         def by_category(category, project = nil, empty_category_title: nil)
           super(category, project, empty_category_title: _('Project Templates'))
         end
+
+        def can_read_template?(user, project)
+          super && Ability.allowed?(user, :read_merge_request, project)
+        end
       end
     end
   end
