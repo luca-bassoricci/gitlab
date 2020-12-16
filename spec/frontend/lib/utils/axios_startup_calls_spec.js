@@ -1,6 +1,7 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import setupAxiosStartupCalls from '~/lib/utils/axios_startup_calls';
+import { ignoreConsoleWarn } from '../../helpers/fail_on_console';
 
 describe('setupAxiosStartupCalls', () => {
   const AXIOS_RESPONSE = { text: 'AXIOS_RESPONSE' };
@@ -19,13 +20,15 @@ describe('setupAxiosStartupCalls', () => {
     return Promise.resolve(p);
   }
 
-  function mockConsoleWarn() {
-    jest.spyOn(console, 'warn').mockImplementation();
-  }
-
   function expectConsoleWarn(path) {
     // eslint-disable-next-line no-console
     expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(path), expect.any(Error));
+  }
+
+  function ignoreConsoleWarnFromPath(path) {
+    ignoreConsoleWarn(
+      new RegExp(`^\\[gitlab\\] Something went wrong with the startup call for "${path}"`),
+    );
   }
 
   beforeEach(() => {
@@ -69,7 +72,7 @@ describe('setupAxiosStartupCalls', () => {
       expect(axios.interceptors.request.handlers[0]).not.toBeNull();
 
       await axios.get('/startup');
-      mockConsoleWarn();
+      ignoreConsoleWarnFromPath('/startup-failing');
       await axios.get('/startup-failing');
 
       // Axios sets the interceptor to null
@@ -95,7 +98,7 @@ describe('setupAxiosStartupCalls', () => {
     });
 
     it('does not delegate to startup calls if the call is failing', async () => {
-      mockConsoleWarn();
+      ignoreConsoleWarnFromPath('/startup-failing');
       const { data } = await axios.get('/startup-failing');
 
       expect(data).not.toEqual(STARTUP_JS_RESPONSE);

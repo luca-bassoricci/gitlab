@@ -137,9 +137,6 @@ describe('MemoryUsage', () => {
 
     describe('computeGraphData', () => {
       it('should populate sparkline graph', () => {
-        // ignore BoostrapVue warnings
-        jest.spyOn(console, 'warn').mockImplementation();
-
         vm.computeGraphData(metrics, deployment_time);
         const { hasMetrics, memoryMetrics, deploymentTime, memoryFrom, memoryTo } = vm;
 
@@ -195,9 +192,6 @@ describe('MemoryUsage', () => {
     });
 
     it('should show deployment memory usage when metrics are loaded', done => {
-      // ignore BoostrapVue warnings
-      jest.spyOn(console, 'warn').mockImplementation();
-
       vm.loadingMetrics = false;
       vm.hasMetrics = true;
       vm.loadFailed = false;

@@ -220,9 +220,6 @@ describe('Base editor', () => {
     it('is capable of changing the language of the model', () => {
       // ignore warnings and errors Monaco posts during setup
       // (due to being called from Jest/Node.js environment)
-      jest.spyOn(console, 'warn').mockImplementation(() => {});
-      jest.spyOn(console, 'error').mockImplementation(() => {});
-
       const blobRenamedPath = 'test.js';
 
       expect(instance.getModel().getLanguageIdentifier().language).toBe('markdown');
@@ -233,11 +230,9 @@ describe('Base editor', () => {
 
     it('falls back to plaintext if there is no language associated with an extension', () => {
       const blobRenamedPath = 'test.myext';
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       instance.updateModelLanguage(blobRenamedPath);
 
-      expect(spy).not.toHaveBeenCalled();
       expect(instance.getModel().getLanguageIdentifier().language).toBe('plaintext');
     });
   });
@@ -299,10 +294,7 @@ describe('Base editor', () => {
       });
 
       it('does not fail if no extensions supplied', () => {
-        const spy = jest.spyOn(global.console, 'error');
-        instance.use();
-
-        expect(spy).not.toHaveBeenCalled();
+        expect(() => instance.use()).not.toThrow();
       });
 
       it("does not extend instance with extension's constructor", () => {

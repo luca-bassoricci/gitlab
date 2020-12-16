@@ -23,9 +23,6 @@ describe('BadgeList component', () => {
       isLoading: false,
     });
 
-    // Can be removed once GlLoadingIcon no longer throws a warning
-    jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
-
     vm = mountComponentWithStore(Component, {
       el: '#dummy-element',
       store,

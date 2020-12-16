@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { ignoreConsoleWarn } from 'helpers/fail_on_console';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 describe('Local Storage Sync', () => {
@@ -9,6 +10,12 @@ describe('Local Storage Sync', () => {
       propsData: props,
       slots,
     });
+  };
+
+  const ignoreConsoleWarnFailedDeserialize = (storageKey, val) => {
+    ignoreConsoleWarn(
+      `[gitlab] Failed to deserialize value from localStorage (key=${storageKey}) ${val}`,
+    );
   };
 
   afterEach(() => {
@@ -214,7 +221,7 @@ describe('Local Storage Sync', () => {
       const badJSON = '{ badJSON';
 
       beforeEach(() => {
-        jest.spyOn(console, 'warn').mockImplementation();
+        ignoreConsoleWarnFailedDeserialize(storageKey, badJSON);
         localStorage.setItem(storageKey, badJSON);
 
         createComponent({

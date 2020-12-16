@@ -24,9 +24,7 @@ describe('Blob Simple Viewer component', () => {
   });
 
   it('does not fail if content is empty', () => {
-    const spy = jest.spyOn(window.console, 'error');
-    createComponent('');
-    expect(spy).not.toHaveBeenCalled();
+    expect(() => createComponent('')).not.toThrow();
   });
 
   describe('rendering', () => {

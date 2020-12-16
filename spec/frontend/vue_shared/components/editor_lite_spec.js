@@ -66,10 +66,8 @@ describe('Editor Lite component', () => {
 
   describe('functionality', () => {
     it('does not fail without content', () => {
-      const spy = jest.spyOn(global.console, 'error');
       createComponent({ value: undefined });
 
-      expect(spy).not.toHaveBeenCalled();
       expect(wrapper.find('[id^="editor-lite-"]').exists()).toBe(true);
     });
 

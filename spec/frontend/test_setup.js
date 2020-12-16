@@ -7,6 +7,7 @@ import Translate from '~/vue_shared/translate';
 import { initializeTestTimeout } from './helpers/timeout';
 import { failOnConsoleError, failOnConsoleWarn } from './helpers/fail_on_console';
 import { getJSONFixture, loadHTMLFixture, setHTMLFixture } from './helpers/fixtures';
+import { ignoreMonacoInitWarnings } from './helpers/monaco_test_helper';
 import { setupManualMocks } from './mocks/mocks_helper';
 import customMatchers from './matchers';
 
@@ -16,6 +17,10 @@ import '~/commons/bootstrap';
 
 failOnConsoleError();
 failOnConsoleWarn();
+
+beforeEach(() => {
+  ignoreMonacoInitWarnings();
+});
 
 process.on('unhandledRejection', global.promiseRejectionHandler);
 
