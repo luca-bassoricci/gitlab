@@ -33,6 +33,8 @@ module Types
 
       # Not all jobs have traces - bridges do not.
       def trace
+        return unless Feature.enabled?(:graphql_ci_job_trace, object.project, default_enabled: true)
+
         object.try(:trace)
       end
 

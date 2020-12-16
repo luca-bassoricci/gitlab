@@ -48,6 +48,22 @@ RSpec.describe 'Query.project.pipeline.job.trace' do
     )
   end
 
+  describe 'the graphql_ci_job_trace feature flag' do
+    it 'returns nil when disabled' do
+      stub_feature_flags(graphql_ci_job_trace: false)
+      post_graphql(query, current_user: current_user, variables: variables)
+
+      expect(trace_data).to be_nil
+    end
+
+    it 'returns data when enabled for a specific project' do
+      stub_feature_flags(graphql_ci_job_trace: project)
+      post_graphql(query, current_user: current_user, variables: variables)
+
+      expect(trace_data).not_to be_nil
+    end
+  end
+
   context 'we only request the tail' do
     let(:trace_fields) { 'raw(tail: 2) html(tail: 2)' }
 
