@@ -108,10 +108,12 @@ module Gitlab
       end
 
       def get_address_info(uri, dns_rebind_protection)
+        p [:get_address_info_before, Time.now.utc, resolve_timeout] if Rails.env.test? # rubocop:disable Rails/Output
         Addrinfo.getaddrinfo(uri.hostname, get_port(uri), nil, :STREAM, timeout: resolve_timeout).map do |addr|
           addr.ipv6_v4mapped? ? addr.ipv6_to_ipv4 : addr
         end
-      rescue SocketError
+      rescue SocketError => e
+        p [:get_address_info_after, Time.now.utc, e.message] if Rails.env.test? # rubocop:disable Rails/Output
         # If the dns rebinding protection is not enabled or the domain
         # is allowed we avoid the dns rebinding checks
         return if domain_allowed?(uri) || !dns_rebind_protection
@@ -141,6 +143,8 @@ module Gitlab
         allow_localhost:,
         allow_local_network:)
         return if allow_local_network && allow_localhost
+
+        p [:validate_local_request, address_info] # rubocop:disable Rails/Output
 
         unless allow_localhost
           validate_localhost(address_info)
