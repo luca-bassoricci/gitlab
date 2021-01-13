@@ -7,7 +7,7 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
     let(:report) { Gitlab::Ci::Reports::LicenseScanning::Report.new }
 
     context 'when parsing a valid v1 report' do
-      let(:v1_json) { fixture_file('security_reports/master/gl-license-scanning-report.json', dir: 'ee') }
+      let(:v1_json) { fixture_file('security_reports/master/gl-license-scanning-report.json') }
 
       before do
         subject.parse!(v1_json, report)
@@ -42,7 +42,7 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
     end
 
     context 'when parsing a valid v1.1 report' do
-      let(:v1_1_data) { fixture_file('security_reports/gl-license-scanning-report-v1.1.json', dir: 'ee') }
+      let(:v1_1_data) { fixture_file('security_reports/gl-license-scanning-report-v1.1.json') }
 
       before do
         subject.parse!(v1_1_data, report)
@@ -74,7 +74,7 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
     end
 
     context 'when parsing a valid v2 report' do
-      let(:v2_0_data) { fixture_file('security_reports/gl-license-scanning-report-v2.json', dir: 'ee') }
+      let(:v2_0_data) { fixture_file('security_reports/gl-license-scanning-report-v2.json') }
 
       before do
         subject.parse!(v2_0_data, report)
@@ -106,7 +106,7 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
     end
 
     context 'when parsing a valid v2.1 report' do
-      let(:v2_1_data) { fixture_file('security_reports/gl-license-scanning-report-v2.1.json', dir: 'ee') }
+      let(:v2_1_data) { fixture_file('security_reports/gl-license-scanning-report-v2.1.json') }
 
       before do
         subject.parse!(v2_1_data, report)
