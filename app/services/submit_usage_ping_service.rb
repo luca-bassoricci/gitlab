@@ -43,12 +43,16 @@ class SubmitUsagePingService
   private
 
   def save_raw_usage_data(usage_data)
+    return if ::Gitlab.ee? && ::Gitlab::Geo.secondary?
+
     RawUsageData.safe_find_or_create_by(recorded_at: usage_data[:recorded_at]) do |record|
       record.payload = usage_data
     end
   end
 
   def store_metrics(response)
+    return if ::Gitlab.ee? && ::Gitlab::Geo.secondary?
+
     metrics = response['conv_index'] || response['dev_ops_score'] # leaving dev_ops_score here, as the response data comes from the gitlab-version-com
 
     return unless metrics.present?

@@ -7,6 +7,7 @@ module Gitlab
         geo_metrics_update_worker
         geo_verification_cron_worker
         repository_check_worker
+        gitlab_usage_ping_worker
       ].freeze
 
       PRIMARY_JOBS = %w[

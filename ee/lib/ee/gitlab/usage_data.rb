@@ -78,6 +78,19 @@ module EE
           }
         end
 
+        override :system_usage_data_settings
+        def system_usage_data_settings
+          {
+            settings: system_usage_data_settings_ee.merge(super[:settings])
+          }
+        end
+
+        def system_usage_data_settings_ee
+          {
+            geo_secondary: alt_usage_data(fallback: nil) { ::Gitlab::Geo.secondary? }
+          }
+        end
+
         override :license_usage_data
         def license_usage_data
           usage_data = super
