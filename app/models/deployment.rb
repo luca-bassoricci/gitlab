@@ -44,6 +44,27 @@ class Deployment < ApplicationRecord
   scope :active, -> { where(status: %i[created running]) }
   scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
   scope :with_deployable, -> { joins('INNER JOIN ci_builds ON ci_builds.id = deployments.deployable_id').preload(:deployable) }
+  scope :finished_before, ->(date) { where('finished_at < ?', date) }
+  scope :finished_after, ->(date) { where('finished_at >= ?', date) }
+
+  scope :preload_relations, -> do
+    includes(
+      :user,
+      environment: [],
+      deployable: {
+        job_artifacts: [],
+        pipeline: {
+          project: {
+            route: [],
+            namespace: :route
+          }
+        },
+        project: {
+          namespace: :route
+        }
+      }
+    )
+  end
 
   scope :finished_between, -> (start_date, end_date = nil) do
     selected = where('deployments.finished_at >= ?', start_date)

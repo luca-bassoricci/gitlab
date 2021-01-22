@@ -152,7 +152,7 @@ class License < ApplicationRecord
     jira_vulnerabilities_integration
     license_scanning
     personal_access_token_expiration_policy
-    project_activity_analytics
+    cd_dora_analytics
     prometheus_alerts
     pseudonymizer
     quality_management

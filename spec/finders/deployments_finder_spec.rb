@@ -26,6 +26,17 @@ RSpec.describe DeploymentsFinder do
         end
       end
 
+      context 'when finished_at filters are specified' do
+        let(:params) { { finished_before: 1.day.ago, finished_after: 3.days.ago } }
+        let!(:deployment_1) { create(:deployment, :success, project: project, finished_at: 2.days.ago) }
+        let!(:deployment_2) { create(:deployment, :success, project: project, finished_at: 4.days.ago) }
+        let!(:deployment_3) { create(:deployment, :success, project: project, finished_at: 1.hour.ago) }
+
+        it 'returns deployments with matched updated_at' do
+          is_expected.to match_array([deployment_1])
+        end
+      end
+
       context 'when the environment name is specified' do
         let!(:environment1) { create(:environment, project: project) }
         let!(:environment2) { create(:environment, project: project) }
