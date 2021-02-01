@@ -31,7 +31,7 @@ describe('Pipeline editor home wrapper', () => {
   });
 
   describe('renders', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createComponent();
     });
 

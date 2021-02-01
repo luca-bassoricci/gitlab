@@ -131,7 +131,7 @@ describe('Pipeline editor app component', () => {
         expect(findEditorHome().exists()).toBe(true);
       });
 
-      it('no error is shown when data is set', async () => {
+      it('no error is shown when data is set', () => {
         expect(findAlert().exists()).toBe(false);
       });
 
@@ -190,6 +190,8 @@ describe('Pipeline editor app component', () => {
     });
 
     describe('when the user commits', () => {
+      const updateFailureMessage = 'The GitLab CI configuration could not be updated.';
+
       describe('and the commit mutation succeeds', () => {
         beforeEach(() => {
           createComponent();
@@ -197,7 +199,7 @@ describe('Pipeline editor app component', () => {
           findEditorHome().vm.$emit('commit', { type: COMMIT_SUCCESS });
         });
 
-        it('shows a confirmation message', async () => {
+        it('shows a confirmation message', () => {
           expect(findAlert().text()).toBe(wrapper.vm.$options.successTexts[COMMIT_SUCCESS]);
         });
       });
@@ -213,9 +215,9 @@ describe('Pipeline editor app component', () => {
           });
         });
 
-        it('shows an error message', async () => {
+        it('shows an error message', () => {
           expect(findAlert().text()).toMatchInterpolatedText(
-            `The GitLab CI configuration could not be updated. ${commitFailedReasons[0]}`,
+            `${updateFailureMessage} ${commitFailedReasons[0]}`,
           );
         });
       });
@@ -231,9 +233,9 @@ describe('Pipeline editor app component', () => {
           });
         });
 
-        it('shows an error message', async () => {
+        it('shows an error message', () => {
           expect(findAlert().text()).toMatchInterpolatedText(
-            `The GitLab CI configuration could not be updated. ${unknownReasons[0]}`,
+            `${updateFailureMessage} ${unknownReasons[0]}`,
           );
         });
       });

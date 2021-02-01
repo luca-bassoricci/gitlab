@@ -15,7 +15,7 @@ import {
   mockProjectFullPath,
   mockNewMergeRequestPath,
 } from '../../mock_data';
-import { COMMIT_SUCCESS } from '../../../../../app/assets/javascripts/pipeline_editor/constants';
+import { COMMIT_SUCCESS } from '~/pipeline_editor/constants';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
