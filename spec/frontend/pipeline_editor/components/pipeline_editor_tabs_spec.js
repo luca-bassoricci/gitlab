@@ -33,13 +33,13 @@ describe('Pipeline editor tabs component', () => {
     });
   };
 
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findEditorTab = () => wrapper.find('[data-testid="editor-tab"]');
   const findLintTab = () => wrapper.find('[data-testid="lint-tab"]');
   const findVisualizationTab = () => wrapper.find('[data-testid="visualization-tab"]');
-  const findTextEditor = () => wrapper.find(MockTextEditor);
-  const findPipelineGraph = () => wrapper.find(PipelineGraph);
-  const findCiLint = () => wrapper.find(CiLint);
+  const findCiLint = () => wrapper.findComponent(CiLint);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findPipelineGraph = () => wrapper.findComponent(PipelineGraph);
+  const findTextEditor = () => wrapper.findComponent(MockTextEditor);
 
   afterEach(() => {
     wrapper.destroy();

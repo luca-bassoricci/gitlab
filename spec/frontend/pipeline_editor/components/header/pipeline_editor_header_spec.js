@@ -16,7 +16,7 @@ describe('Pipeline editor header', () => {
     });
   };
 
-  const findValidationSegment = () => wrapper.find(ValidationSegment);
+  const findValidationSegment = () => wrapper.findComponent(ValidationSegment);
 
   afterEach(() => {
     wrapper.destroy();

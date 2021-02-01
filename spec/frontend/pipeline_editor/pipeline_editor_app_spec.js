@@ -89,10 +89,10 @@ describe('Pipeline editor app component', () => {
     createComponent({ props, options });
   };
 
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findAlert = () => wrapper.find(GlAlert);
-  const findEditorHome = () => wrapper.find(PipelineEditorHome);
-  const findTextEditor = () => wrapper.find(TextEditor);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findEditorHome = () => wrapper.findComponent(PipelineEditorHome);
+  const findTextEditor = () => wrapper.findComponent(TextEditor);
 
   beforeEach(() => {
     mockBlobContentData = jest.fn();

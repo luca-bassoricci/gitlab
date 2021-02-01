@@ -76,21 +76,21 @@ describe('Commit section', () => {
     });
   };
 
-  const findCommitForm = () => wrapper.find(CommitForm);
-  const findInForm = (selector) => findCommitForm().find(selector);
-  const findCommitBtnLoadingIcon = () => wrapper.find('[type="submit"]').find(GlLoadingIcon);
+  const findCommitForm = () => wrapper.findComponent(CommitForm);
+  const findCommitBtnLoadingIcon = () =>
+    wrapper.find('[type="submit"]').findComponent(GlLoadingIcon);
 
   const submitCommit = async ({
     message = mockCommitMessage,
     branch = mockDefaultBranch,
     openMergeRequest = false,
   } = {}) => {
-    await findInForm(GlFormTextarea).setValue(message);
-    await findInForm(GlFormInput).setValue(branch);
+    await findCommitForm().findComponent(GlFormTextarea).setValue(message);
+    await findCommitForm().findComponent(GlFormInput).setValue(branch);
     if (openMergeRequest) {
-      await findInForm('[data-testid="new-mr-checkbox"]').setChecked(openMergeRequest);
+      await findCommitForm().find('[data-testid="new-mr-checkbox"]').setChecked(openMergeRequest);
     }
-    await findInForm('[type="submit"]').trigger('click');
+    await findCommitForm().find('[type="submit"]').trigger('click');
     // Simulate the write to local cache that occurs after a commit
     await wrapper.setData({ commitSha: mockCommitNextSha });
   };
@@ -196,7 +196,7 @@ describe('Commit section', () => {
 
   describe('when the commit is ocurring', () => {
     it('shows a saving state', async () => {
-      await mockMutate.mockImplementationOnce(() => {
+      mockMutate.mockImplementationOnce(() => {
         expect(findCommitBtnLoadingIcon().exists()).toBe(true);
         return Promise.resolve();
       });

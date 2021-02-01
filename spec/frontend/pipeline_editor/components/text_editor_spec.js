@@ -1,5 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import VueApollo from 'vue-apollo';
+import { shallowMount } from '@vue/test-utils';
 
 import {
   mockCiConfigPath,
@@ -13,9 +12,6 @@ import { EDITOR_READY_EVENT } from '~/editor/constants';
 import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 
 describe('Text editor component', () => {
-  const localVue = createLocalVue();
-  localVue.use(VueApollo);
-
   let wrapper;
 
   let editorReadyListener;
@@ -62,7 +58,7 @@ describe('Text editor component', () => {
     });
   };
 
-  const findEditor = () => wrapper.find(MockEditorLite);
+  const findEditor = () => wrapper.findComponent(MockEditorLite);
 
   afterEach(() => {
     wrapper.destroy();

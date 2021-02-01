@@ -21,9 +21,9 @@ describe('Pipeline editor home wrapper', () => {
     });
   };
 
-  const findPipelineEditorHeader = () => wrapper.find(PipelineEditorTabs);
-  const findPipelineEditorTabs = () => wrapper.find(CommitSection);
-  const findCommitSection = () => wrapper.find(PipelineEditorHeader);
+  const findPipelineEditorHeader = () => wrapper.findComponent(PipelineEditorTabs);
+  const findPipelineEditorTabs = () => wrapper.findComponent(CommitSection);
+  const findCommitSection = () => wrapper.findComponent(PipelineEditorHeader);
 
   afterEach(() => {
     wrapper.destroy();

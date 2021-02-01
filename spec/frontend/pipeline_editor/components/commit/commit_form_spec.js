@@ -21,8 +21,8 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
     });
   };
 
-  const findCommitTextarea = () => wrapper.find(GlFormTextarea);
-  const findBranchInput = () => wrapper.find(GlFormInput);
+  const findCommitTextarea = () => wrapper.findComponent(GlFormTextarea);
+  const findBranchInput = () => wrapper.findComponent(GlFormInput);
   const findNewMrCheckbox = () => wrapper.find('[data-testid="new-mr-checkbox"]');
   const findSubmitBtn = () => wrapper.find('[type="submit"]');
   const findCancelBtn = () => wrapper.find('[type="reset"]');
