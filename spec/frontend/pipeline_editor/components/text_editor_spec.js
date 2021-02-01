@@ -11,7 +11,7 @@ import {
 import { EDITOR_READY_EVENT } from '~/editor/constants';
 import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 
-describe('Text editor component', () => {
+describe('Pipeline Editor | Text editor component', () => {
   let wrapper;
 
   let editorReadyListener;

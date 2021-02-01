@@ -5,7 +5,7 @@ import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 
 import { mockCommitMessage, mockDefaultBranch } from '../../mock_data';
 
-describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
+describe('Pipeline Editor | Commit Form', () => {
   let wrapper;
 
   const createComponent = ({ props = {} } = {}, mountFn = shallowMount) => {

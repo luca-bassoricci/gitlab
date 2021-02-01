@@ -40,7 +40,7 @@ const mockProvide = {
   newMergeRequestPath: mockNewMergeRequestPath,
 };
 
-describe('Commit section', () => {
+describe('Pipeline Editor | Commit section', () => {
   let wrapper;
   let mockMutate;
 
