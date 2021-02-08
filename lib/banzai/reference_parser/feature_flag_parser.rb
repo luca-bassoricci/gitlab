@@ -3,10 +3,16 @@
 module Banzai
   module ReferenceParser
     class FeatureFlagParser < BaseParser
+      extend ::Gitlab::Utils::Override
+
       self.reference_type = :feature_flag
 
-      def references_relation
+      def self.reference_model
         Operations::FeatureFlag
+      end
+
+      def references_relation
+        self.class.reference_model
       end
 
       private

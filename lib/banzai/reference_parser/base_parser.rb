@@ -36,6 +36,14 @@ module Banzai
     class BaseParser
       class << self
         attr_accessor :reference_type, :reference_options
+
+        def object_reference_pattern
+          references_relation.try(:reference_pattern)
+        end
+
+        def references_relation
+          reference_type.to_s.classify.constantize
+        end
       end
 
       # Returns the attribute name containing the value for every object to be
@@ -80,17 +88,10 @@ module Banzai
         ids = unique_attribute_values(nodes, self.class.data_attribute)
 
         if ids.empty?
-          references_relation.none
+          self.class.references_relation.none
         else
-          references_relation.where(id: ids)
+          self.class.references_relation.where(id: ids)
         end
-      end
-
-      # Returns the ActiveRecord::Relation to use for querying references in the
-      # DB.
-      def references_relation
-        raise NotImplementedError,
-          "#{self.class} does not implement #{__method__}"
       end
 
       # Returns a Hash containing attribute values per project ID.
