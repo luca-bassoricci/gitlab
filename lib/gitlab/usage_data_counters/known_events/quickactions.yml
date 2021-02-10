@@ -24,6 +24,11 @@
   redis_slot: quickactions
   aggregation: weekly
   feature_flag: usage_data_track_quickactions
+- name: i_quickactions_rerequest_review
+  category: quickactions
+  redis_slot: quickactions
+  aggregation: weekly
+  feature_flag: usage_data_track_quickactions
 - name: i_quickactions_award
   category: quickactions
   redis_slot: quickactions

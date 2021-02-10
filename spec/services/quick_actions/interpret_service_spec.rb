@@ -685,6 +685,15 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
+    shared_examples 'rerequest_review command' do
+      it 'requests a new review' do
+        _, updates, message = service.execute(content, issuable)
+
+        expect(updates).to eq(re_request_reviewers: [developer])
+        expect(message).to eq("Re-requested a review from #{developer.to_reference}.")
+      end
+    end
+
     it_behaves_like 'reopen command' do
       let(:content) { '/reopen' }
       let(:issuable) { issue }
@@ -996,6 +1005,21 @@ RSpec.describe QuickActions::InterpretService do
         let(:content) { '/unassign_reviewer' }
 
         it_behaves_like 'unassign_reviewer command'
+      end
+    end
+
+    describe 'rerequest_review command' do
+      let(:issuable) { create(:merge_request, reviewers: [developer]) }
+      let(:content) { "/rerequest_review #{developer.to_reference}" }
+
+      context 'with one user' do
+        it_behaves_like 'rerequest_review command'
+      end
+
+      context 'with no user' do
+        it_behaves_like 'empty command', "Failed to re-request a review because no user was found." do
+          let(:content) { "/rerequest_review" }
+        end
       end
     end
 

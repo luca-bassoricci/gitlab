@@ -12234,6 +12234,9 @@ msgstr ""
 msgid "Failed to publish issue on status page."
 msgstr ""
 
+msgid "Failed to re-request a review because no user was found."
+msgstr ""
+
 msgid "Failed to remove a Zoom meeting"
 msgstr ""
 
@@ -24022,6 +24025,12 @@ msgid "Re-authentication required"
 msgstr ""
 
 msgid "Re-request review"
+msgstr ""
+
+msgid "Re-requested a review from %{reviewer_users_sentence}."
+msgstr ""
+
+msgid "Re-requests a review from %{reviewer_users_sentence}."
 msgstr ""
 
 msgid "Re-verification interval"
