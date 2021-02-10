@@ -1,0 +1,5 @@
+---
+title: Avoid parsing blobs to highlight diffs
+merge_request: 53825
+author:
+type: performance

@@ -21,11 +21,15 @@ module Gitlab
     end
 
     def highlight(text, continue: true, plain: false)
-      plain ||= text.length > MAXIMUM_TEXT_HIGHLIGHT_SIZE
+      plain ||= self.class.too_large?(text.length)
 
       highlighted_text = highlight_text(text, continue: continue, plain: plain)
       highlighted_text = link_dependencies(text, highlighted_text) if blob_name
       highlighted_text
+    end
+
+    def self.too_large?(size)
+      size.to_i > MAXIMUM_TEXT_HIGHLIGHT_SIZE
     end
 
     def lexer

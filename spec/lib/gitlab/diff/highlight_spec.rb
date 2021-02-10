@@ -124,5 +124,29 @@ RSpec.describe Gitlab::Diff::Highlight do
         it_behaves_like 'without inline diffs'
       end
     end
+
+    context 'when blob is too large' do
+      let(:subject) { described_class.new(diff_file, repository: project.repository).highlight }
+
+      before do
+        stub_const("Gitlab::Highlight::MAXIMUM_TEXT_HIGHLIGHT_SIZE", 500)
+      end
+
+      it 'the diff is highlighted correctly' do
+        code = %Q{ <span id="LC2" class="line" lang="ruby">  <span class="k">def</span> <span class="nf">popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span></span>\n}
+        expect(subject[2].rich_text).to eq(code)
+      end
+
+      context 'when blobless_diff_highlighting is disabled' do
+        before do
+          stub_feature_flags(blobless_diff_highlighting: false)
+        end
+
+        it 'blobs are highlighted as plain text' do
+          code = %Q{ <span id="LC7" class="line" lang="">  def popen(cmd, path=nil)</span>\n}
+          expect(subject[2].rich_text).to eq(code)
+        end
+      end
+    end
   end
 end
