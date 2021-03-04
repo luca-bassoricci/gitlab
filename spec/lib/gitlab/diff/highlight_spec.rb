@@ -132,9 +132,12 @@ RSpec.describe Gitlab::Diff::Highlight do
         stub_const("Gitlab::Highlight::MAXIMUM_TEXT_HIGHLIGHT_SIZE", 500)
       end
 
-      it 'the diff is highlighted correctly' do
-        code = %Q{ <span id="LC2" class="line" lang="ruby">  <span class="k">def</span> <span class="nf">popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span></span>\n}
+      it 'diffs are highlighted as plain text' do
+        expect(Gitlab::Diff::HighlightedLines).to receive(:new).and_call_original
+
+        code = %Q{<span id=\"LC2\" class=\"line\" lang=\"\">  def popen(cmd, path=nil)</span>\n}
         expect(subject[2].rich_text).to eq(code)
+        expect(subject[2].rich_text).to be_html_safe
       end
 
       context 'when blobless_diff_highlighting is disabled' do
@@ -142,9 +145,10 @@ RSpec.describe Gitlab::Diff::Highlight do
           stub_feature_flags(blobless_diff_highlighting: false)
         end
 
-        it 'blobs are highlighted as plain text' do
-          code = %Q{ <span id="LC7" class="line" lang="">  def popen(cmd, path=nil)</span>\n}
-          expect(subject[2].rich_text).to eq(code)
+        it 'Gitlab::Diff::HighlightedLines are not called' do
+          expect(Gitlab::Diff::HighlightedLines).not_to receive(:new)
+
+          subject
         end
       end
     end

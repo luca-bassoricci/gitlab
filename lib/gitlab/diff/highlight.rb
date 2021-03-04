@@ -26,7 +26,7 @@ module Gitlab
           # ignore highlighting for "match" lines
           next diff_line if diff_line.meta?
 
-          rich_line = highlight_line(diff_line, i) || ERB::Util.html_escape(diff_line.text)
+          rich_line = highlight_line(diff_line) || ERB::Util.html_escape(diff_line.text)
 
           if line_inline_diffs = inline_diffs[i]
             begin
@@ -47,9 +47,9 @@ module Gitlab
 
       private
 
-      def highlight_line(diff_line, index)
+      def highlight_line(diff_line)
         return unless diff_file && diff_file.diff_refs
-        return blobless_diff_highlight(diff_line, index) if blob_too_large?
+        return blobless_diff_highlight(diff_line) if blob_too_large?
 
         rich_line =
           if diff_line.unchanged? || diff_line.added?
@@ -85,14 +85,14 @@ module Gitlab
         blob.present.highlight.lines
       end
 
-      def blobless_diff_highlight(diff_line, index)
+      def blobless_diff_highlight(diff_line)
         @highlighted_lines ||= Gitlab::Diff::HighlightedLines.new(diff_file)
 
-        @highlighted_lines.for(diff_line, index)
+        @highlighted_lines.for(diff_line)
       end
 
       def blob_too_large?
-        return false unless Feature.enabled?(:blobless_diff_highlighting, project, default_enabled: :yaml)
+        return false unless Feature.enabled?(:blobless_diff_highlighting, repository.project, default_enabled: :yaml)
         return true if Gitlab::Highlight.too_large?(diff_file.old_blob&.size)
 
         Gitlab::Highlight.too_large?(diff_file.new_blob&.size)
