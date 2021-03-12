@@ -58,6 +58,36 @@ RSpec.describe Gitlab::Git::Wiki do
     end
   end
 
+  describe '#delete_page' do
+    shared_examples 'delete_page operations' do
+      after do
+        destroy_page('page1')
+      end
+
+      it 'only removes the page with the same path', :aggregated_failures do
+        create_page('page1', 'content')
+        create_page('*', 'content')
+
+        expect(subject.list_pages.count).to eq 2
+
+        subject.delete_page('*', commit_details('whatever'))
+
+        expect(subject.list_pages.count).to eq 1
+        expect(subject.list_pages.first.title).to eq 'page1'
+      end
+    end
+
+    it_behaves_like 'delete_page operations'
+
+    context 'when feature flag :gitaly_replace_wiki_delete_page is disabled' do
+      before do
+        stub_feature_flags(gitaly_replace_wiki_delete_page: false)
+      end
+
+      it_behaves_like 'delete_page operations'
+    end
+  end
+
   describe '#preview_slug' do
     where(:title, :format, :expected_slug) do
       'The Best Thing'       | :markdown  | 'The-Best-Thing'
