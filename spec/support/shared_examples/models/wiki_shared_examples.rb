@@ -405,9 +405,23 @@ RSpec.shared_examples 'wiki model' do
       expect(subject.error_message).to match(/Duplicate page:/)
     end
 
-    it 'cannot create a page with the same title but different format' do
+    it 'cannot create two page with the same title but different format' do
       subject.create_page('test page', 'content', :markdown)
       subject.create_page('test page', 'content', :rdoc)
+
+      expect(subject.error_message).to match(/Duplicate page:/)
+    end
+
+    it 'cannot create two page with the same title but different capitalization' do
+      subject.create_page('test page', 'content')
+      subject.create_page('Test page', 'content')
+
+      expect(subject.error_message).to match(/Duplicate page:/)
+    end
+
+    it 'cannot create two page with the same title, different capitalization, and different format' do
+      subject.create_page('test page', 'content')
+      subject.create_page('Test page', 'content', :rdoc)
 
       expect(subject.error_message).to match(/Duplicate page:/)
     end
