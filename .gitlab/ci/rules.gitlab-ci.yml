@@ -1067,7 +1067,7 @@
       when: manual
       allow_failure: true
 
-.review:rules:mr-only-manual:
+.review:rules:review-qa-all:
   rules:
     - <<: *if-not-ee
       when: never
