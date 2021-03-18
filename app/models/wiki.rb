@@ -317,7 +317,7 @@ class Wiki
     git_user = Gitlab::Git::User.from_gitlab(user)
 
     {
-      branch_name: repository.root_ref,
+      branch_name: repository.root_ref || default_branch,
       message: commit_message,
       author_email: git_user.email,
       author_name: git_user.name
