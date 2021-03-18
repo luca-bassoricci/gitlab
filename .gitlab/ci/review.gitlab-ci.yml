@@ -79,7 +79,6 @@ review-deploy:
     # When the job is manual, review-qa-smoke is also manual and we don't want people
     # to have to manually start the jobs in sequence, so we do it for them.
     - '[ -z $CI_JOB_MANUAL ] || scripts/api/play_job.rb --job-name "review-qa-smoke"'
-    - '[ -z $CI_JOB_MANUAL ] || scripts/api/play_job.rb --job-name "review-qa-all"'
     - '[ -z $CI_JOB_MANUAL ] || scripts/api/play_job.rb --job-name "review-performance"'
   after_script:
     # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
