@@ -12,9 +12,9 @@ RSpec.describe API::Deployments do
 
   describe 'GET /projects/:id/deployments' do
     let(:project) { create(:project, :repository) }
-    let!(:deployment_1) { create(:deployment, :success, project: project, iid: 11, ref: 'master', created_at: Time.now, updated_at: Time.now) }
-    let!(:deployment_2) { create(:deployment, :success, project: project, iid: 12, ref: 'master', created_at: 1.day.ago, updated_at: 2.hours.ago) }
-    let!(:deployment_3) { create(:deployment, :success, project: project, iid: 8, ref: 'master', created_at: 2.days.ago, updated_at: 1.hour.ago) }
+    let!(:deployment_1) { create(:deployment, :success, project: project, environment: create(:environment, project: project), iid: 11, ref: 'master', created_at: Time.now, updated_at: Time.now) }
+    let!(:deployment_2) { create(:deployment, :success, project: project, environment: create(:environment, project: project), iid: 12, ref: 'master', created_at: 1.day.ago, updated_at: 2.hours.ago) }
+    let!(:deployment_3) { create(:deployment, :success, project: project, environment: create(:environment, project: project), iid: 8, ref: 'master', created_at: 2.days.ago, updated_at: 1.hour.ago) }
 
     context 'as member of the project' do
       it 'returns projects deployments sorted by id asc' do

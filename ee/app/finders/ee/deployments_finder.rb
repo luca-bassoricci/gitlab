@@ -10,8 +10,11 @@
 # If project or group is missing, the finder will return empty resultset.
 module EE
   module DeploymentsFinder
+    extend ::Gitlab::Utils::Override
+
     private
 
+    override :init_collection
     def init_collection
       if params[:project].present?
         super
@@ -19,6 +22,17 @@ module EE
         ::Deployment.for_project(::Project.in_namespace(params[:group].self_and_descendants))
       else
         ::Deployment.none
+      end
+    end
+
+    override :by_environment
+    def by_environment(items)
+      if params[:project].present?
+        super
+      elsif params[:group].present? && params[:environment].present?
+        items.for_environment_name(params[:environment])
+      else
+        super
       end
     end
   end

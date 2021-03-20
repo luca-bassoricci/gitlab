@@ -14,7 +14,7 @@
 #     order_by: String (see ALLOWED_SORT_VALUES constant)
 #     sort: String (asc | desc)
 class DeploymentsFinder
-  attr_reader :params
+  attr_reader :params, :project
 
   ALLOWED_SORT_VALUES = %w[id iid created_at updated_at ref finished_at].freeze
   DEFAULT_SORT_VALUE = 'id'
@@ -24,6 +24,7 @@ class DeploymentsFinder
 
   def initialize(params = {})
     @params = params
+    @project = params[:project]
   end
 
   def execute
@@ -41,8 +42,8 @@ class DeploymentsFinder
   private
 
   def init_collection
-    if params[:project]
-      params[:project].deployments
+    if project
+      project.deployments
     else
       Deployment.none
     end
@@ -67,8 +68,9 @@ class DeploymentsFinder
   end
 
   def by_environment(items)
-    if params[:environment].present?
-      items.for_environment_name(params[:environment])
+    if project && params[:environment].present?
+      environment = project.environments.for_name(params[:environment])
+      items.for_environment(environment)
     else
       items
     end

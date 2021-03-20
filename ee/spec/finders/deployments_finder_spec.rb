@@ -8,8 +8,8 @@ RSpec.describe DeploymentsFinder do
   context 'at group scope' do
     let_it_be(:group) { create(:group) }
     let_it_be(:subgroup) { create(:group, parent: group) }
-    let(:group_project_1) { create(:project, :public, :test_repo, group: group) }
-    let(:group_project_2) { create(:project, :public, :test_repo, group: group) }
+    let_it_be(:group_project_1) { create(:project, :public, :test_repo, group: group) }
+    let_it_be(:group_project_2) { create(:project, :public, :test_repo, group: group) }
     let(:subgroup_project_1) { create(:project, :public, :test_repo, group: subgroup) }
     let(:base_params) { { group: group } }
 
@@ -45,6 +45,25 @@ RSpec.describe DeploymentsFinder do
                                                   group_project_2_deployment,
                                                   subgroup_project_1_deployment)
         end
+      end
+    end
+
+    context 'when environment scope is specified' do
+      let_it_be(:environment1) { create(:environment, project: group_project_1) }
+      let_it_be(:environment2) { create(:environment, project: group_project_1) }
+
+      let_it_be(:deployment1) do
+        create(:deployment, project: group_project_1, environment: environment1)
+      end
+
+      let_it_be(:deployment2) do
+        create(:deployment, project: group_project_1, environment: environment2)
+      end
+
+      let(:params) { { **base_params, environment: environment1.name } }
+
+      it 'returns deployments for the given environment' do
+        is_expected.to match_array([deployment1])
       end
     end
 
