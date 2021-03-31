@@ -130,10 +130,6 @@ module Types
             Types::PrometheusAlertType,
             null: true,
             description: 'The alert condition for Prometheus.'
-
-      def notes
-        object.ordered_notes
-      end
     end
   end
 end
