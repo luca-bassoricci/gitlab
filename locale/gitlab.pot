@@ -26089,6 +26089,9 @@ msgstr ""
 msgid "Register device"
 msgstr ""
 
+msgid "Register new runner"
+msgstr ""
+
 msgid "Register now"
 msgstr ""
 
@@ -27292,6 +27295,9 @@ msgstr ""
 msgid "Runners|Runner #%{runner_id}"
 msgstr ""
 
+msgid "Runners|Runner is offline"
+msgstr ""
+
 msgid "Runners|Runner is offline, last contact was %{runner_contact} ago"
 msgstr ""
 
@@ -27344,6 +27350,18 @@ msgid "Runners|You have used %{quotaUsed} out of %{quotaLimit} of your shared Ru
 msgstr ""
 
 msgid "Runners|group"
+msgstr ""
+
+msgid "Runners|last contacted %{timeAgo}"
+msgstr ""
+
+msgid "Runners|locked"
+msgstr ""
+
+msgid "Runners|never contacted"
+msgstr ""
+
+msgid "Runners|paused"
 msgstr ""
 
 msgid "Runners|shared"

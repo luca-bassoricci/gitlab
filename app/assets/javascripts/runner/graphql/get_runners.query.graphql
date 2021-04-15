@@ -1,0 +1,18 @@
+query getRunners {
+  runners @client {
+    id
+    description
+    ipAddress
+    active
+    runnerType
+    name
+    status
+    locked
+    lastContactAt
+    tagList
+    version
+    shortSha
+    jobsCount
+    projectsCount
+  }
+}

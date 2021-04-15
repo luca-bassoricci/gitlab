@@ -14,266 +14,266 @@ RSpec.describe "Admin Runners" do
     gitlab_enable_admin_mode_sign_in(admin)
   end
 
-  describe "Runners page" do
-    let(:pipeline) { create(:ci_pipeline) }
+  # describe "Runners page" do
+  #   let(:pipeline) { create(:ci_pipeline) }
 
-    context "when there are runners" do
-      it 'has all necessary texts' do
-        runner = create(:ci_runner, contacted_at: Time.now)
-        create(:ci_build, pipeline: pipeline, runner_id: runner.id)
-        visit admin_runners_path
+  #   context "when there are runners" do
+  #     it 'has all necessary texts' do
+  #       runner = create(:ci_runner, contacted_at: Time.now)
+  #       create(:ci_build, pipeline: pipeline, runner_id: runner.id)
+  #       visit admin_runners_path
 
-        expect(page).to have_text "Set up a shared runner manually"
-        expect(page).to have_text "Runners currently online: 1"
-      end
+  #       expect(page).to have_text "Set up a shared runner manually"
+  #       expect(page).to have_text "Runners currently online: 1"
+  #     end
 
-      describe 'search', :js do
-        before do
-          create(:ci_runner, description: 'runner-foo')
-          create(:ci_runner, description: 'runner-bar')
+  #     describe 'search', :js do
+  #       before do
+  #         create(:ci_runner, description: 'runner-foo')
+  #         create(:ci_runner, description: 'runner-bar')
 
-          visit admin_runners_path
-        end
+  #         visit admin_runners_path
+  #       end
 
-        it 'shows correct runner when description matches' do
-          input_filtered_search_keys('runner-foo')
+  #       it 'shows correct runner when description matches' do
+  #         input_filtered_search_keys('runner-foo')
 
-          expect(page).to have_content("runner-foo")
-          expect(page).not_to have_content("runner-bar")
-        end
+  #         expect(page).to have_content("runner-foo")
+  #         expect(page).not_to have_content("runner-bar")
+  #       end
 
-        it 'shows no runner when description does not match' do
-          input_filtered_search_keys('runner-baz')
+  #       it 'shows no runner when description does not match' do
+  #         input_filtered_search_keys('runner-baz')
 
-          expect(page).to have_text 'No runners found'
-        end
-      end
+  #         expect(page).to have_text 'No runners found'
+  #       end
+  #     end
 
-      describe 'filter by status', :js do
-        it 'shows correct runner when status matches' do
-          create(:ci_runner, description: 'runner-active', active: true)
-          create(:ci_runner, description: 'runner-paused', active: false)
+  #     describe 'filter by status', :js do
+  #       it 'shows correct runner when status matches' do
+  #         create(:ci_runner, description: 'runner-active', active: true)
+  #         create(:ci_runner, description: 'runner-paused', active: false)
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          expect(page).to have_content 'runner-active'
-          expect(page).to have_content 'runner-paused'
+  #         expect(page).to have_content 'runner-active'
+  #         expect(page).to have_content 'runner-paused'
 
-          input_filtered_search_keys('status:=active')
-          expect(page).to have_content 'runner-active'
-          expect(page).not_to have_content 'runner-paused'
-        end
+  #         input_filtered_search_keys('status:=active')
+  #         expect(page).to have_content 'runner-active'
+  #         expect(page).not_to have_content 'runner-paused'
+  #       end
 
-        it 'shows no runner when status does not match' do
-          create(:ci_runner, :online, description: 'runner-active', active: true)
-          create(:ci_runner, :online, description: 'runner-paused', active: false)
+  #       it 'shows no runner when status does not match' do
+  #         create(:ci_runner, :online, description: 'runner-active', active: true)
+  #         create(:ci_runner, :online, description: 'runner-paused', active: false)
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          input_filtered_search_keys('status:=offline')
+  #         input_filtered_search_keys('status:=offline')
 
-          expect(page).not_to have_content 'runner-active'
-          expect(page).not_to have_content 'runner-paused'
+  #         expect(page).not_to have_content 'runner-active'
+  #         expect(page).not_to have_content 'runner-paused'
 
-          expect(page).to have_text 'No runners found'
-        end
+  #         expect(page).to have_text 'No runners found'
+  #       end
 
-        it 'shows correct runner when status is selected and search term is entered' do
-          create(:ci_runner, description: 'runner-a-1', active: true)
-          create(:ci_runner, description: 'runner-a-2', active: false)
-          create(:ci_runner, description: 'runner-b-1', active: true)
+  #       it 'shows correct runner when status is selected and search term is entered' do
+  #         create(:ci_runner, description: 'runner-a-1', active: true)
+  #         create(:ci_runner, description: 'runner-a-2', active: false)
+  #         create(:ci_runner, description: 'runner-b-1', active: true)
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          input_filtered_search_keys('status:=active')
-          expect(page).to have_content 'runner-a-1'
-          expect(page).to have_content 'runner-b-1'
-          expect(page).not_to have_content 'runner-a-2'
+  #         input_filtered_search_keys('status:=active')
+  #         expect(page).to have_content 'runner-a-1'
+  #         expect(page).to have_content 'runner-b-1'
+  #         expect(page).not_to have_content 'runner-a-2'
 
-          input_filtered_search_keys('status:=active runner-a')
-          expect(page).to have_content 'runner-a-1'
-          expect(page).not_to have_content 'runner-b-1'
-          expect(page).not_to have_content 'runner-a-2'
-        end
-      end
+  #         input_filtered_search_keys('status:=active runner-a')
+  #         expect(page).to have_content 'runner-a-1'
+  #         expect(page).not_to have_content 'runner-b-1'
+  #         expect(page).not_to have_content 'runner-a-2'
+  #       end
+  #     end
 
-      describe 'filter by type', :js do
-        it 'shows correct runner when type matches' do
-          create :ci_runner, :project, description: 'runner-project'
-          create :ci_runner, :group, description: 'runner-group'
+  #     describe 'filter by type', :js do
+  #       it 'shows correct runner when type matches' do
+  #         create :ci_runner, :project, description: 'runner-project'
+  #         create :ci_runner, :group, description: 'runner-group'
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          expect(page).to have_content 'runner-project'
-          expect(page).to have_content 'runner-group'
+  #         expect(page).to have_content 'runner-project'
+  #         expect(page).to have_content 'runner-group'
 
-          input_filtered_search_keys('type:=project_type')
-          expect(page).to have_content 'runner-project'
-          expect(page).not_to have_content 'runner-group'
-        end
+  #         input_filtered_search_keys('type:=project_type')
+  #         expect(page).to have_content 'runner-project'
+  #         expect(page).not_to have_content 'runner-group'
+  #       end
 
-        it 'shows no runner when type does not match' do
-          create :ci_runner, :project, description: 'runner-project'
-          create :ci_runner, :group, description: 'runner-group'
+  #       it 'shows no runner when type does not match' do
+  #         create :ci_runner, :project, description: 'runner-project'
+  #         create :ci_runner, :group, description: 'runner-group'
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          input_filtered_search_keys('type:=instance_type')
+  #         input_filtered_search_keys('type:=instance_type')
 
-          expect(page).not_to have_content 'runner-project'
-          expect(page).not_to have_content 'runner-group'
+  #         expect(page).not_to have_content 'runner-project'
+  #         expect(page).not_to have_content 'runner-group'
 
-          expect(page).to have_text 'No runners found'
-        end
+  #         expect(page).to have_text 'No runners found'
+  #       end
 
-        it 'shows correct runner when type is selected and search term is entered' do
-          create :ci_runner, :project, description: 'runner-a-1'
-          create :ci_runner, :instance, description: 'runner-a-2'
-          create :ci_runner, :project, description: 'runner-b-1'
+  #       it 'shows correct runner when type is selected and search term is entered' do
+  #         create :ci_runner, :project, description: 'runner-a-1'
+  #         create :ci_runner, :instance, description: 'runner-a-2'
+  #         create :ci_runner, :project, description: 'runner-b-1'
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          input_filtered_search_keys('type:=project_type')
-          expect(page).to have_content 'runner-a-1'
-          expect(page).to have_content 'runner-b-1'
-          expect(page).not_to have_content 'runner-a-2'
+  #         input_filtered_search_keys('type:=project_type')
+  #         expect(page).to have_content 'runner-a-1'
+  #         expect(page).to have_content 'runner-b-1'
+  #         expect(page).not_to have_content 'runner-a-2'
 
-          input_filtered_search_keys('type:=project_type runner-a')
-          expect(page).to have_content 'runner-a-1'
-          expect(page).not_to have_content 'runner-b-1'
-          expect(page).not_to have_content 'runner-a-2'
-        end
-      end
+  #         input_filtered_search_keys('type:=project_type runner-a')
+  #         expect(page).to have_content 'runner-a-1'
+  #         expect(page).not_to have_content 'runner-b-1'
+  #         expect(page).not_to have_content 'runner-a-2'
+  #       end
+  #     end
 
-      describe 'filter by tag', :js do
-        it 'shows correct runner when tag matches' do
-          create :ci_runner, description: 'runner-blue', tag_list: ['blue']
-          create :ci_runner, description: 'runner-red', tag_list: ['red']
+  #     describe 'filter by tag', :js do
+  #       it 'shows correct runner when tag matches' do
+  #         create :ci_runner, description: 'runner-blue', tag_list: ['blue']
+  #         create :ci_runner, description: 'runner-red', tag_list: ['red']
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          expect(page).to have_content 'runner-blue'
-          expect(page).to have_content 'runner-red'
+  #         expect(page).to have_content 'runner-blue'
+  #         expect(page).to have_content 'runner-red'
 
-          input_filtered_search_keys('tag:=blue')
+  #         input_filtered_search_keys('tag:=blue')
 
-          expect(page).to have_content 'runner-blue'
-          expect(page).not_to have_content 'runner-red'
-        end
+  #         expect(page).to have_content 'runner-blue'
+  #         expect(page).not_to have_content 'runner-red'
+  #       end
 
-        it 'shows no runner when tag does not match' do
-          create :ci_runner, description: 'runner-blue', tag_list: ['blue']
-          create :ci_runner, description: 'runner-red', tag_list: ['blue']
+  #       it 'shows no runner when tag does not match' do
+  #         create :ci_runner, description: 'runner-blue', tag_list: ['blue']
+  #         create :ci_runner, description: 'runner-red', tag_list: ['blue']
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          input_filtered_search_keys('tag:=red')
+  #         input_filtered_search_keys('tag:=red')
 
-          expect(page).not_to have_content 'runner-blue'
-          expect(page).not_to have_content 'runner-blue'
-          expect(page).to have_text 'No runners found'
-        end
+  #         expect(page).not_to have_content 'runner-blue'
+  #         expect(page).not_to have_content 'runner-blue'
+  #         expect(page).to have_text 'No runners found'
+  #       end
 
-        it 'shows correct runner when tag is selected and search term is entered' do
-          create :ci_runner, description: 'runner-a-1', tag_list: ['blue']
-          create :ci_runner, description: 'runner-a-2', tag_list: ['red']
-          create :ci_runner, description: 'runner-b-1', tag_list: ['blue']
+  #       it 'shows correct runner when tag is selected and search term is entered' do
+  #         create :ci_runner, description: 'runner-a-1', tag_list: ['blue']
+  #         create :ci_runner, description: 'runner-a-2', tag_list: ['red']
+  #         create :ci_runner, description: 'runner-b-1', tag_list: ['blue']
 
-          visit admin_runners_path
+  #         visit admin_runners_path
 
-          input_filtered_search_keys('tag:=blue')
+  #         input_filtered_search_keys('tag:=blue')
 
-          expect(page).to have_content 'runner-a-1'
-          expect(page).to have_content 'runner-b-1'
-          expect(page).not_to have_content 'runner-a-2'
+  #         expect(page).to have_content 'runner-a-1'
+  #         expect(page).to have_content 'runner-b-1'
+  #         expect(page).not_to have_content 'runner-a-2'
 
-          input_filtered_search_keys('tag:=blue runner-a')
+  #         input_filtered_search_keys('tag:=blue runner-a')
 
-          expect(page).to have_content 'runner-a-1'
-          expect(page).not_to have_content 'runner-b-1'
-          expect(page).not_to have_content 'runner-a-2'
-        end
-      end
+  #         expect(page).to have_content 'runner-a-1'
+  #         expect(page).not_to have_content 'runner-b-1'
+  #         expect(page).not_to have_content 'runner-a-2'
+  #       end
+  #     end
 
-      it 'sorts by last contact date', :js do
-        create(:ci_runner, description: 'runner-1', created_at: '2018-07-12 15:37', contacted_at: '2018-07-12 15:37')
-        create(:ci_runner, description: 'runner-2', created_at: '2018-07-12 16:37', contacted_at: '2018-07-12 16:37')
+  #     it 'sorts by last contact date', :js do
+  #       create(:ci_runner, description: 'runner-1', created_at: '2018-07-12 15:37', contacted_at: '2018-07-12 15:37')
+  #       create(:ci_runner, description: 'runner-2', created_at: '2018-07-12 16:37', contacted_at: '2018-07-12 16:37')
 
-        visit admin_runners_path
+  #       visit admin_runners_path
 
-        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(2)' do
-          expect(page).to have_content 'runner-2'
-        end
+  #       within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(2)' do
+  #         expect(page).to have_content 'runner-2'
+  #       end
 
-        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(3)' do
-          expect(page).to have_content 'runner-1'
-        end
+  #       within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(3)' do
+  #         expect(page).to have_content 'runner-1'
+  #       end
 
-        sorting_by 'Last Contact'
+  #       sorting_by 'Last Contact'
 
-        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(2)' do
-          expect(page).to have_content 'runner-1'
-        end
+  #       within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(2)' do
+  #         expect(page).to have_content 'runner-1'
+  #       end
 
-        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(3)' do
-          expect(page).to have_content 'runner-2'
-        end
-      end
-    end
+  #       within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(3)' do
+  #         expect(page).to have_content 'runner-2'
+  #       end
+  #     end
+  #   end
 
-    context "when there are no runners" do
-      before do
-        visit admin_runners_path
-      end
+  #   context "when there are no runners" do
+  #     before do
+  #       visit admin_runners_path
+  #     end
 
-      it 'has all necessary texts including no runner message' do
-        expect(page).to have_text "Set up a shared runner manually"
-        expect(page).to have_text "Runners currently online: 0"
-        expect(page).to have_text 'No runners found'
-      end
-    end
+  #     it 'has all necessary texts including no runner message' do
+  #       expect(page).to have_text "Set up a shared runner manually"
+  #       expect(page).to have_text "Runners currently online: 0"
+  #       expect(page).to have_text 'No runners found'
+  #     end
+  #   end
 
-    context 'group runner' do
-      let(:group) { create(:group) }
-      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
+  #   context 'group runner' do
+  #     let(:group) { create(:group) }
+  #     let!(:runner) { create(:ci_runner, :group, groups: [group]) }
 
-      it 'shows the label and does not show the project count' do
-        visit admin_runners_path
+  #     it 'shows the label and does not show the project count' do
+  #       visit admin_runners_path
 
-        within "#runner_#{runner.id}" do
-          expect(page).to have_selector '.badge', text: 'group'
-          expect(page).to have_text 'n/a'
-        end
-      end
-    end
+  #       within "#runner_#{runner.id}" do
+  #         expect(page).to have_selector '.badge', text: 'group'
+  #         expect(page).to have_text 'n/a'
+  #       end
+  #     end
+  #   end
 
-    context 'shared runner' do
-      it 'shows the label and does not show the project count' do
-        runner = create(:ci_runner, :instance)
+  #   context 'shared runner' do
+  #     it 'shows the label and does not show the project count' do
+  #       runner = create(:ci_runner, :instance)
 
-        visit admin_runners_path
+  #       visit admin_runners_path
 
-        within "#runner_#{runner.id}" do
-          expect(page).to have_selector '.badge', text: 'shared'
-          expect(page).to have_text 'n/a'
-        end
-      end
-    end
+  #       within "#runner_#{runner.id}" do
+  #         expect(page).to have_selector '.badge', text: 'shared'
+  #         expect(page).to have_text 'n/a'
+  #       end
+  #     end
+  #   end
 
-    context 'specific runner' do
-      it 'shows the label and the project count' do
-        project = create(:project)
-        runner = create(:ci_runner, :project, projects: [project])
+  #   context 'specific runner' do
+  #     it 'shows the label and the project count' do
+  #       project = create(:project)
+  #       runner = create(:ci_runner, :project, projects: [project])
 
-        visit admin_runners_path
+  #       visit admin_runners_path
 
-        within "#runner_#{runner.id}" do
-          expect(page).to have_selector '.badge', text: 'specific'
-          expect(page).to have_text '1'
-        end
-      end
-    end
-  end
+  #       within "#runner_#{runner.id}" do
+  #         expect(page).to have_selector '.badge', text: 'specific'
+  #         expect(page).to have_text '1'
+  #       end
+  #     end
+  #   end
+  # end
 
   describe "Runner show page" do
     let(:runner) { create(:ci_runner) }

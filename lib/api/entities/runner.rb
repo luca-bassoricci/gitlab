@@ -4,6 +4,7 @@ module API
   module Entities
     class Runner < Grape::Entity
       expose :id
+      expose :short_sha
       expose :description
       expose :ip_address
       expose :active
