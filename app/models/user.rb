@@ -125,6 +125,7 @@ class User < ApplicationRecord
   has_many :chat_names, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :user_synced_attributes_metadata, autosave: true
   has_one :aws_role, class_name: 'Aws::Role'
+  has_many :saved_replies, class_name: 'Users::SavedReply'
 
   # Followers
   has_many :followed_users, foreign_key: :follower_id, class_name: 'Users::UserFollowUser'

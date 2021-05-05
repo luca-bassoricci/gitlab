@@ -1,10 +1,19 @@
 <script>
-import { GlPopover, GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import {
+  GlPopover,
+  GlButton,
+  GlTooltipDirective,
+  GlIcon,
+  GlDropdown,
+  GlDropdownItem,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
 import $ from 'jquery';
 import { keysFor, BOLD_TEXT, ITALIC_TEXT, LINK_TEXT } from '~/behaviors/shortcuts/keybindings';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import { CopyAsGFM } from '../../../behaviors/markdown/copy_as_gfm';
+import savedRepliesQuery from './queries/saved_replies.query.graphql';
 import ToolbarButton from './toolbar_button.vue';
 
 export default {
@@ -13,9 +22,18 @@ export default {
     GlIcon,
     GlPopover,
     GlButton,
+    GlDropdown,
+    GlDropdownItem,
+    GlSearchBoxByType,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+  },
+  inject: {
+    showSavedReplies: {
+      type: Boolean,
+      default: false,
+    },
   },
   props: {
     previewMarkdown: {
@@ -43,9 +61,20 @@ export default {
       default: 0,
     },
   },
+  apollo: {
+    savedReplies: {
+      query: savedRepliesQuery,
+      update: (data) => data?.currentUser?.savedReplies?.nodes,
+      skip() {
+        return !this.savedRepliesEnabled;
+      },
+    },
+  },
   data() {
     return {
       tag: '> ',
+      savedReplies: [],
+      savedRepliesSearch: '',
     };
   },
   computed: {
@@ -71,6 +100,14 @@ export default {
     },
     modifierKey() {
       return this.isMac ? '⌘' : s__('KeyboardKey|Ctrl+');
+    },
+    filteredSavedReplies() {
+      return this.savedReplies.filter(
+        ({ title }) => title.toLowerCase().indexOf(this.savedRepliesSearch.toLowerCase()) >= 0,
+      );
+    },
+    savedRepliesEnabled() {
+      return this.showSavedReplies && window.gon?.features?.savedReplies;
     },
   },
   mounted() {
@@ -251,6 +288,30 @@ export default {
             icon="table"
           />
         </div>
+        <div v-if="savedRepliesEnabled" class="d-inline-block ml-md-2 ml-0">
+          <gl-dropdown
+            v-gl-tooltip.hover.focus="__('Saved replies')"
+            class="saved-replies-dropdown gl-display-flex!"
+            toggle-class="py-0 px-1 toolbar-btn bg-transparent shadow-none"
+            :header-text="__('Saved replies')"
+            icon="book"
+            right
+          >
+            <gl-search-box-by-type v-model.trim="savedRepliesSearch" />
+            <gl-dropdown-item
+              v-for="reply in filteredSavedReplies"
+              :key="reply.id"
+              :data-md-tag="reply.note"
+              data-md-prepend="true"
+              button-class="js-md"
+            >
+              <span class="gl-text-truncate">{{ reply.title }}</span>
+            </gl-dropdown-item>
+            <div v-if="filteredSavedReplies.length === 0" class="p-2">
+              {{ __('Nothing found') }}
+            </div>
+          </gl-dropdown>
+        </div>
         <div class="d-inline-block ml-md-2 ml-0">
           <button
             v-gl-tooltip
@@ -268,3 +329,9 @@ export default {
     </ul>
   </div>
 </template>
+
+<style scoped>
+.saved-replies-dropdown {
+  top: -2px;
+}
+</style>

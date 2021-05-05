@@ -38,6 +38,10 @@ class ApplicationController < ActionController::Base
   before_action :check_impersonation_availability
   before_action :required_signup_info
 
+  before_action do
+    push_frontend_feature_flag(:saved_replies)
+  end
+
   # Make sure the `auth_user` is memoized so it can be logged, we do this after
   # all other before filters that could have set the user.
   before_action :auth_user

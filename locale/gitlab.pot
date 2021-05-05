@@ -2030,6 +2030,9 @@ msgstr ""
 msgid "Add request manually"
 msgstr ""
 
+msgid "Add saved reply"
+msgstr ""
+
 msgid "Add strikethrough text"
 msgstr ""
 
@@ -11832,6 +11835,9 @@ msgid "Edit iteration cadence"
 msgstr ""
 
 msgid "Edit public deploy key"
+msgstr ""
+
+msgid "Edit saved reply"
 msgstr ""
 
 msgid "Edit sidebar"
@@ -22263,6 +22269,9 @@ msgstr ""
 msgid "Notes|You're only seeing %{boldStart}other activity%{boldEnd} in the feed. To add a comment, switch to one of the following options."
 msgstr ""
 
+msgid "Nothing found"
+msgstr ""
+
 msgid "Nothing found…"
 msgstr ""
 
@@ -24845,6 +24854,9 @@ msgid "Profiles|Publicly visible private SSH keys can compromise your system."
 msgstr ""
 
 msgid "Profiles|Remove avatar"
+msgstr ""
+
+msgid "Profiles|Saved Replies"
 msgstr ""
 
 msgid "Profiles|Set new profile picture"
@@ -28084,6 +28096,15 @@ msgid "Save pipeline schedule"
 msgstr ""
 
 msgid "Save space and find images in the Container Registry. Remove unneeded tags and keep only the ones you want."
+msgstr ""
+
+msgid "Saved replies"
+msgstr ""
+
+msgid "Saved reply title"
+msgstr ""
+
+msgid "Saved reply was successfully deleted."
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
@@ -36435,6 +36456,9 @@ msgid "Write a description or drag your files here…"
 msgstr ""
 
 msgid "Write milestone description..."
+msgstr ""
+
+msgid "Write saved reply..."
 msgstr ""
 
 msgid "Write to \"authorized_keys\" file"

@@ -333,10 +333,9 @@ export function addMarkdownListeners(form) {
       Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
     });
 
-  // eslint-disable-next-line @gitlab/no-global-event-off
-  const $allToolbarBtns = $('.js-md', form)
-    .off('click')
-    .on('click', function () {
+  const $allToolbarBtns = $(document)
+    .off('click', '.js-md')
+    .on('click', '.js-md', function () {
       const $toolbarBtn = $(this);
 
       return updateTextForToolbarBtn($toolbarBtn);

@@ -31,6 +31,13 @@ resource :profile, only: [:show, :update] do
       end
     end
     resource :preferences, only: [:show, :update]
+    constraints(::Constraints::FeatureConstrainer.new(:saved_replies)) do
+      resources :saved_replies, only: [:index, :edit, :update, :create, :destroy] do
+        collection do
+          post :preview_markdown
+        end
+      end
+    end
     resources :keys, only: [:index, :show, :create, :destroy]
     resources :gpg_keys, only: [:index, :create, :destroy] do
       member do
