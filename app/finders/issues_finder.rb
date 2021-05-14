@@ -68,10 +68,9 @@ class IssuesFinder < IssuableFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def with_hidden_check
- 
-
-
-    return Issue.where('issues.author_id = 1') 
+     Issue.where('
+     issues.author_id IN (:banned)',
+     banned: User.banned.ids)
   end
 
   private
