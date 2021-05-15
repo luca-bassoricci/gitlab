@@ -68,9 +68,11 @@ class IssuesFinder < IssuableFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def with_hidden_check
-     Issue.where('
-     issues.author_id IN (:banned)',
-     banned: User.banned.ids)
+    return Issue.all if current_user.can_read_all_resources?
+
+    Issue.where.not('
+    issues.author_id IN (:banned)',
+    banned: User.banned.ids)
   end
 
   private
