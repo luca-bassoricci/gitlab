@@ -1153,6 +1153,100 @@ RSpec.describe IssuesFinder do
     end
   end
 
+  describe '#with_banned_user_check' do
+    let_it_be(:non_admin_user) { create(:user) }
+    let_it_be(:banned_user) { create(:user, :banned) }
+    let_it_be(:admin_user) { create(:user, :admin) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:banned_user_issue) { create(:issue, project: project, author: banned_user) }
+
+    shared_examples 'does not return issue created by a banned user' do
+      it 'does not return issue created by a banned user' do
+        expect(subject).not_to include(banned_user_issue)
+      end
+    end
+
+    context 'when no project filter is given' do
+      let(:params) { {} }
+
+      context 'for an anonymous user' do
+        subject { described_class.new(nil, params).with_banned_user_check }
+
+        it_behaves_like 'does not return issue created by a banned user'
+      end
+
+      context 'for a user without project membership' do
+        subject { described_class.new(user, params).with_banned_user_check }
+
+        it_behaves_like 'does not return issue created by a banned user'
+      end
+
+      context 'for a non-admin user' do
+        subject { described_class.new(non_admin_user, params).with_banned_user_check }
+
+        before do
+          project.add_maintainer(non_admin_user)
+        end
+
+        it_behaves_like 'does not return issue created by a banned user'
+      end
+
+      context 'for an admin' do
+        subject { described_class.new(admin_user, params).with_banned_user_check }
+
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns issue created by banned user' do
+            expect(subject).to include(banned_user_issue)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it_behaves_like 'does not return issue created by a banned user'
+        end
+      end
+    end
+
+    context 'when searching within a specific project' do
+      let(:params) { { project_id: project.id } }
+
+      context 'for an anonymous user' do
+        subject { described_class.new(nil, params).with_banned_user_check }
+
+        it_behaves_like 'does not return issue created by a banned user'
+      end
+
+      context 'for a user without project membership' do
+        subject { described_class.new(user, params).with_banned_user_check }
+
+        it_behaves_like 'does not return issue created by a banned user'
+      end
+
+      context 'for a guest user' do
+        subject { described_class.new(non_admin_user, params).with_banned_user_check }
+
+        before do
+          project.add_maintainer(non_admin_user)
+        end
+
+        it_behaves_like 'does not return issue created by a banned user'
+      end
+
+      context 'for an admin' do
+        subject { described_class.new(admin_user, params).with_banned_user_check }
+
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns all issues' do
+            expect(subject).to include(banned_user_issue)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it_behaves_like 'does not return issue created by a banned user'
+        end
+      end
+    end
+  end
+
   describe '#use_cte_for_search?' do
     let(:finder) { described_class.new(nil, params) }
 

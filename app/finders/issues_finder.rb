@@ -67,13 +67,15 @@ class IssuesFinder < IssuableFinder
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def with_hidden_check
-    return Issue.all if current_user.can_read_all_resources?
+  # rubocop: disable CodeReuse/ActiveRecord
+  def with_banned_user_check
+    return Issue.all if params.user_can_see_banned_user_issues?
 
     Issue.where.not('
-    issues.author_id IN (:banned)',
-    banned: User.banned.ids)
+      issues.author_id IN (:banned)',
+      banned: User.banned.ids)
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   private
 
@@ -81,8 +83,7 @@ class IssuesFinder < IssuableFinder
     if params.public_only?
       Issue.public_only
     else
-      with_hidden_check
-     # with_confidentiality_access_check
+      with_banned_user_check.merge(with_confidentiality_access_check)
     end
   end
 

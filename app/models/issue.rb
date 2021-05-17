@@ -134,7 +134,6 @@ class Issue < ApplicationRecord
 
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
-
   scope :author_banned, -> { where(author: ::User.banned) }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
@@ -479,7 +478,7 @@ class Issue < ApplicationRecord
     issue_assignees.pluck(:user_id)
   end
 
- # private
+  private
 
   # Ensure that the metrics association is safely created and respecting the unique constraint on issue_id
   override :ensure_metrics
@@ -510,7 +509,6 @@ class Issue < ApplicationRecord
       project.team.member?(user, Gitlab::Access::REPORTER)
     elsif author.banned?
       false
-
     else
       project.public? ||
         project.internal? && !user.external? ||

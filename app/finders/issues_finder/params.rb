@@ -42,6 +42,16 @@ class IssuesFinder
 
       current_user.blank?
     end
+
+    def user_can_see_banned_user_issues?
+      strong_memoize(:user_can_see_banned_user_issues) do
+        if Ability.allowed?(current_user, :read_all_resources)
+          true
+        else
+          false
+        end
+      end
+    end
   end
 end
 
