@@ -16,10 +16,13 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
     { test: { stage: 'test', script: 'echo', only: ['merge_requests'] } }
   end
 
+  let(:merge_immediately_dropdown_toggle_css) { '.mr-widget-body .dropdown-toggle' }
+  let(:merge_immediately_button_css) { '.mr-widget-body .accept-merge-request.btn-info' }
+
   before_all do
     project.add_maintainer(user)
     project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
-    merge_request.all_pipelines.first.succeed!
+    merge_request.all_pipelines.first.run!
     merge_request.update_head_pipeline
   end
 
@@ -29,40 +32,66 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
     stub_ci_pipeline_yaml_file(YAML.dump(ci_yaml))
 
     sign_in(user)
-    visit project_merge_request_path(project, merge_request)
-    wait_for_requests
   end
 
   context 'when the merge request is on the merge train' do
     def merge_button
-      find('.mr-widget-body .accept-merge-request.btn-info')
+      find(merge_immediately_button_css)
     end
 
-    def open_warning_dialog
-      find('.mr-widget-body .dropdown-toggle').click
+    def merge_immediately_dropdown_toggle
+      find(merge_immediately_dropdown_toggle_css)
+    end
+
+    def open_merge_immediately_warning_dialog
+      merge_immediately_dropdown_toggle.click
 
       click_button 'Merge immediately'
 
       expect(page).to have_selector('#merge-immediately-confirmation-dialog')
     end
 
-    it 'shows a warning dialog and does nothing if the user selects "Cancel"' do
-      Sidekiq::Testing.fake! do
-        open_warning_dialog
+    context 'when Pipelines must succeed is enabled' do
+      before do
+        project.update!(only_allow_merge_if_pipeline_succeeds: true)
+      end
 
-        find(':focus').send_keys :enter
-
-        expect(merge_button).to have_no_content('Merge in progress')
+      it 'does not show merge immediately' do
+        expect(page).not_to have_css(merge_immediately_button_css)
       end
     end
 
-    it 'shows a warning dialog and merges immediately after the user confirms' do
-      Sidekiq::Testing.fake! do
-        open_warning_dialog
+    context 'when Pipelines must succeed is disabled' do
+      before do
+        project.update!(only_allow_merge_if_pipeline_succeeds: false)
+      end
 
-        click_button 'Merge immediately'
+      it 'shows a warning dialog and does nothing if the user selects "Cancel"' do
+        Sidekiq::Testing.fake! do
+          visit project_merge_request_path(project, merge_request)
 
-        expect(merge_button).to have_content('Merge in progress')
+          wait_for_requests
+
+          open_merge_immediately_warning_dialog
+
+          find(':focus').send_keys :enter
+
+          expect(merge_button).to have_no_content('Merge in progress')
+        end
+      end
+
+      it 'shows a warning dialog and merges immediately after the user confirms' do
+        Sidekiq::Testing.fake! do
+          visit project_merge_request_path(project, merge_request)
+
+          wait_for_requests
+
+          open_merge_immediately_warning_dialog
+
+          click_button 'Merge immediately'
+
+          expect(merge_button).to have_content('Merge in progress')
+        end
       end
     end
   end
