@@ -36,6 +36,7 @@ full list of reference architectures, see
 | NFS server\*\*\*\*                              | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
 
 NOTE:
+
 - Components marked with \* can be optionally run as reputable
 third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. 
 Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
@@ -45,7 +46,7 @@ third party external PaaS Redis solutions. Google Memorystore and AWS Elasticach
 AWS ELB is known to work.
 - Components marked with \*\*\*\* can be optionally run as reputable third party object storage (storage PaaS). 
 Google Cloud Storage and AWS S3 are known to work.
-For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
+- For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 10k
@@ -135,7 +136,7 @@ The Google Cloud Platform (GCP) architectures were built and tested using the
 CPU platform. On different hardware you may find that adjustments, either lower
 or higher, are required for your CPU or node counts. For more information, see
 our [Sysbench](https://github.com/akopytov/sysbench)-based
-[CPU benchmark](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
+[CPU benchmarks](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
 
 Due to better performance and availability, for data objects (such as LFS,
 uploads, or artifacts), using an [object storage service](#configure-the-object-storage)
@@ -1923,7 +1924,12 @@ To configure the Sidekiq nodes, on each one:
    ###      Sidekiq configuration      ###
    #######################################
    sidekiq['listen_address'] = "0.0.0.0"
-   sidekiq['cluster'] = true # no need to set this after GitLab 13.0
+
+   # Set number of Sidekiq queue processes to the same number as available CPUs
+   sidekiq['queue_groups'] = ['*'] * 4
+
+   # Set number of Sidekiq threads per queue process to the recommend number of 10
+   sidekiq['max_concurrency'] = 10
 
    #######################################
    ###     Monitoring configuration    ###
@@ -1968,7 +1974,9 @@ To configure the Sidekiq nodes, on each one:
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 NOTE:
-You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
+If you find that the environment's Sidekiq job processing is slow with long queues,
+more nodes can be added as required. You can also tune your Sidekiq nodes to
+run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -2369,7 +2377,7 @@ considered and customer technical support will be considered out of scope.
 As an alternative approach, you can also run select components of GitLab as Cloud Native
 in Kubernetes via our official [Helm Charts](https://docs.gitlab.com/charts/).
 In this setup, we support running the equivalent of GitLab Rails and Sidekiq nodes
-in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition, 
+in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition,
 the following other supporting services are supported: NGINX, Task Runner, Migrations,
 Prometheus and Grafana.
 
@@ -2402,8 +2410,7 @@ future with further specific cloud provider details.
 
 NOTE:
 \* Nodes configuration is given as it is fixed for performance testing to ensure pod vcpu / memory ratios and avoid scaling during testing.
-In production deployments there is no need to assign pods to nodes - as long as the same aggregated vCPU and Memory are available
-within the cluster and the number of nodes and their location takes into account the desired availability.
+In production deployments there is no need to assign pods to nodes. A minimum of three nodes in three different availability zones is strongly recommended to align with resilient cloud architecture practices.
 
 Next are the backend components that run on static compute VMs via Omnibus (or External PaaS
 services where applicable):
@@ -2416,8 +2423,8 @@ services where applicable):
 | Internal load balancing node***            | 1     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Redis - Cache**                            | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
 | Redis - Queues / Shared State**            | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
-| Redis Sentinel - Cache**                   | 3     | 1 vCPU, 1.7 GB memory   | `g1-small`       |
-| Redis Sentinel - Queues / Shared State**   | 3     | 1 vCPU, 1.7 GB memory   | `g1-small`       |
+| Redis Sentinel - Cache**                   | 3     | 1 vCPU, 3.75 GB memory   | `n1-standard-1`  |
+| Redis Sentinel - Queues / Shared State**   | 3     | 1 vCPU, 3.75 GB memory   | `n1-standard-1`  |
 | Gitaly                                     | 3     | 16 vCPU, 60 GB memory   | `n1-standard-16` |
 | Praefect                                   | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Praefect PostgreSQL*                       | 1+    | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
@@ -2430,6 +2437,7 @@ Components marked with ** can be optionally run as reputable
 third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 Components marked with *** can be optionally run as reputable third party load balancing services (LB PaaS). 
 AWS ELB is known to work.
+For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 10k
