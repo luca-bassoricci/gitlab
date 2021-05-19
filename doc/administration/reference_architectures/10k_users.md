@@ -2424,11 +2424,11 @@ services where applicable):
 | Object storage                             | n/a   | n/a                     | n/a              |
 
 NOTE:
-Components marked with * can be optionally run on reputable
+Components marked with * can be optionally run as reputable
 third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work.
-Components marked with ** can be optionally run on reputable
+Components marked with ** can be optionally run as reputable
 third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
-Components marked with *** can be optionally run on reputable third party load balancing services (LB PaaS). 
+Components marked with *** can be optionally run as reputable third party load balancing services (LB PaaS). 
 AWS ELB is known to work.
 
 ```plantuml

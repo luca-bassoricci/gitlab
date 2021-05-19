@@ -135,7 +135,7 @@ The Google Cloud Platform (GCP) architectures were built and tested using the
 CPU platform. On different hardware you may find that adjustments, either lower
 or higher, are required for your CPU or node counts. For more information, see
 our [Sysbench](https://github.com/akopytov/sysbench)-based
-[CPU benchmarks](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
+[CPU benchmark](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
 
 Due to better performance and availability, for data objects (such as LFS,
 uploads, or artifacts), using an [object storage service](#configure-the-object-storage)
@@ -1932,12 +1932,7 @@ To configure the Sidekiq nodes, on each one:
    ###      Sidekiq configuration      ###
    #######################################
    sidekiq['listen_address'] = "0.0.0.0"
-
-   # Set number of Sidekiq queue processes to the same number as available CPUs
-   sidekiq['queue_groups'] = ['*'] * 4
-
-   # Set number of Sidekiq threads per queue process to the recommend number of 10
-   sidekiq['max_concurrency'] = 10
+   sidekiq['cluster'] = true # no need to set this after GitLab 13.0
 
    #######################################
    ###     Monitoring configuration    ###
@@ -1982,9 +1977,7 @@ To configure the Sidekiq nodes, on each one:
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 NOTE:
-If you find that the environment's Sidekiq job processing is slow with long queues,
-more nodes can be added as required. You can also tune your Sidekiq nodes to
-run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
+You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

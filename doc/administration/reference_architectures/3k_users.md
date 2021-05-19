@@ -142,7 +142,7 @@ The Google Cloud Platform (GCP) architectures were built and tested using the
 CPU platform. On different hardware you may find that adjustments, either lower
 or higher, are required for your CPU or node counts. For more information, see
 our [Sysbench](https://github.com/akopytov/sysbench)-based
-[CPU benchmarks](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
+[CPU benchmark](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
 
 Due to better performance and availability, for data objects (such as LFS,
 uploads, or artifacts), using an [object storage service](#configure-the-object-storage)
@@ -1608,12 +1608,6 @@ To configure the Sidekiq nodes, one each one:
    #######################################
    sidekiq['listen_address'] = "0.0.0.0"
 
-   # Set number of Sidekiq queue processes to the same number as available CPUs
-   sidekiq['queue_groups'] = ['*'] * 2
-
-   # Set number of Sidekiq threads per queue process to the recommend number of 10
-   sidekiq['max_concurrency'] = 10
-
    #######################################
    ###     Monitoring configuration    ###
    #######################################
@@ -1669,9 +1663,7 @@ To configure the Sidekiq nodes, one each one:
    ```
 
 NOTE:
-If you find that the environment's Sidekiq job processing is slow with long queues,
-more nodes can be added as required. You can also tune your Sidekiq nodes to
-run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
+You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -2060,27 +2052,6 @@ From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will n
 considered and customer technical support will be considered out of scope.
 [Read more about Gitaly and NFS](../gitaly/index.md#nfs-deprecation-notice) and
 [the correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
-
-## Supported modifications for lower user counts (HA)
-
-The 3k GitLab reference architecture is the smallest we recommend that achieves High Availability (HA).
-However, for environments that need to serve less users but maintain HA, there's several
-supported modifications you can make to this architecture to reduce complexity and cost.
-
-It should be noted that to achieve HA with GitLab, this architecture's makeup is ultimately what is
-required. Each component has various considerations and rules to follow and this architecture
-meets all of these. Smaller versions of this architecture will be fundamentally the same,
-but with smaller performance requirements, several modifications can be considered as follows:
-
-- Lowering node specs: Depending on your user count, you can lower all suggested node specs as desired. However, it's recommended that you don't go lower than the [general requirements](../../install/requirements.md).
-- Combining select nodes: Some nodes can be combined to reduce complexity at the cost of some performance:
-  - GitLab Rails and Sidekiq: Sidekiq nodes can be removed and the component instead enabled on the GitLab Rails nodes.
-  - PostgreSQL and PgBouncer: PgBouncer nodes can be removed and the component instead enabled on PostgreSQL with the Internal Load Balancer pointing to them instead.
-- Running select components in reputable Cloud PaaS solutions: Select components of the GitLab setup can instead be run on Cloud Provider PaaS solutions. By doing this, additional dependent components can also be removed:
-  - PostgreSQL: Can be run on reputable Cloud PaaS solutions such as Google Cloud SQL or AWS RDS. In this setup, the PgBouncer and Consul nodes are no longer required:
-    - Consul may still be desired if [Prometheus](../monitoring/prometheus/index.md) auto discovery is a requirement, otherwise you would need to [manually add scrape configurations](../monitoring/prometheus/index.md#adding-custom-scrape-configurations) for all nodes.
-      - As Redis Sentinel runs on the same box as Consul in this architecture, it may need to be run on a separate box if Redis is still being run via Omnibus.
-  - Redis: Can be run on reputable Cloud PaaS solutions such as Google Memorystore and AWS Elasticache. In this setup, the Redis Sentinel is no longer required.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
