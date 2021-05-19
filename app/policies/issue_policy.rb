@@ -16,7 +16,7 @@ class IssuePolicy < IssuablePolicy
   condition(:confidential, scope: :subject) { @subject.confidential? }
 
   desc "Issue was created by banned user"
-  condition(:author_banned, scope: :subject) { @subject.author.banned? }
+  condition(:author_banned, scope: :subject) { @subject.author&.banned? }
 
   desc "Current user is an admin"
   condition(:admin) { @user.admin? }
