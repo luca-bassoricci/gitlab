@@ -19,7 +19,7 @@ class IssuePolicy < IssuablePolicy
   condition(:author_banned, scope: :subject) { @subject.author&.banned? }
 
   desc "Current user is an admin"
-  condition(:admin) { @user.admin? }
+  condition(:admin) { @user.can_admin_all_resources? }
 
   rule { author_banned & ~admin }.policy do
     prevent :read_issue

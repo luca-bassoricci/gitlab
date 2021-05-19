@@ -292,7 +292,7 @@ RSpec.describe IssuePolicy do
     end
   end
 
-  context 'with issue created by banned user' do 
+  context 'with issue created by banned user' do
     let(:project) { create(:project, :public) }
     let(:user) { create(:user) }
     let(:admin) { create(:user, :admin)}
