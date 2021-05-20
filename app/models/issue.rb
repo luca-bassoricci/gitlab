@@ -134,7 +134,7 @@ class Issue < ApplicationRecord
 
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
-  scope :author_banned, -> { where(author: ::User.banned) }
+  scope :without_banned_author, -> { preload(:author).where.not(author: ::User.banned) }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
   scope :inc_relations_for_view, -> { includes(author: :status, assignees: :status) }
