@@ -71,7 +71,7 @@ class IssuesFinder < IssuableFinder
   def with_banned_user_check
     return Issue.all if params.user_can_see_banned_user_issues?
 
-    Issue.without_banned_author
+    Issue.joins(:author).where("users.state != 'banned'")
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

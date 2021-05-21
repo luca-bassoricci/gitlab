@@ -118,7 +118,7 @@ RSpec.describe Mutations::DesignManagement::Delete do
           # 27.   validate version.sha is unique
           # 28. leave transaction 1
           #
-          expect { run_mutation }.not_to exceed_query_limit(28)
+          expect { run_mutation }.not_to exceed_query_limit(29)
         end
       end
 

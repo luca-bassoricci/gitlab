@@ -303,7 +303,7 @@ RSpec.describe IssuePolicy do
       expect(permissions(user, issue)).not_to be_allowed(:read_issue)
     end
 
-    it 'allows admin to read the issue' do
+    it 'allows admin to read the issue', :enable_admin_mode do
       expect(permissions(admin, issue)).to be_allowed(:read_issue)
     end
   end
