@@ -16,7 +16,7 @@ module Gitlab
             'base_uri' => "'self'",
             'child_src' => "'none'",
             'connect_src' => "'self'",
-            'font_src' => "'self'",
+            'font_src' => "'self' https: http:",
             'form_action' => "'self' https: http:",
             'frame_ancestors' => "'self'",
             'frame_src' => "'self' https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
@@ -75,6 +75,7 @@ module Gitlab
 
         append_to_directive(settings_hash, 'script_src', cdn_host)
         append_to_directive(settings_hash, 'style_src', cdn_host)
+        append_to_directive(settings_hash, 'font_src', cdn_host)
       end
 
       def self.append_to_directive(settings_hash, directive, text)
