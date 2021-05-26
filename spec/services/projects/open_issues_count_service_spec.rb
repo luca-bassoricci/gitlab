@@ -21,7 +21,7 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
       end
 
       it 'uses public_open_issues_without_banned_count cache key' do
-        expect(described_class.new(project, admin).cache_key_name).to eq('public_open_issues_without_banned_count')
+        expect(described_class.new(project).cache_key_name).to eq('public_open_issues_without_banned_count')
       end
     end
 

@@ -7,8 +7,11 @@ module Projects
     include Gitlab::Utils::StrongMemoize
 
     # Cache keys used to store issues count
-    TOTAL_COUNT_WITHOUT_BANNED_KEY = 'total_open_issues_without_banned_count'
+    # TOTAL_COUNT_KEY includes confidential issues and banned user issues (admin)
+    # TOTAL_COUNT_WITHOUT_BANNED_KEY includes confidential issues but not banned user issues (member)
+    # PUBLIC_COUNT_WITHOUT_BANNED_KEY does not include confidential issues or banned user issues (non-member)
     TOTAL_COUNT_KEY = 'total_open_issues_count'
+    TOTAL_COUNT_WITHOUT_BANNED_KEY = 'total_open_issues_without_banned_count'
     PUBLIC_COUNT_WITHOUT_BANNED_KEY = 'public_open_issues_without_banned_count'
 
     def initialize(project, user = nil)
