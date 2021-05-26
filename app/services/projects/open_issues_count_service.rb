@@ -10,9 +10,9 @@ module Projects
     # TOTAL_COUNT_KEY includes confidential issues and banned user issues (admin)
     # TOTAL_COUNT_WITHOUT_BANNED_KEY includes confidential issues but not banned user issues (member)
     # PUBLIC_COUNT_WITHOUT_BANNED_KEY does not include confidential issues or banned user issues (non-member)
-    TOTAL_COUNT_KEY = 'total_open_issues_count'
-    TOTAL_COUNT_WITHOUT_BANNED_KEY = 'total_open_issues_without_banned_count'
-    PUBLIC_COUNT_WITHOUT_BANNED_KEY = 'public_open_issues_without_banned_count'
+    TOTAL_COUNT_KEY = 'open_issues_including_banned_count'
+    TOTAL_COUNT_WITHOUT_BANNED_KEY = 'open_issues_without_banned_count'
+    PUBLIC_COUNT_WITHOUT_BANNED_KEY = 'open_public_issues_without_banned_count'
 
     def initialize(project, user = nil)
       @user = user
@@ -59,40 +59,41 @@ module Projects
       if block_given?
         super(&block)
       else
-        count_grouped_by_confidential = self.class.query(@project, public_only: false).group(:confidential).count
+        with_banned_issues = self.class.query(@project, include_banned: true)
+        without_banned_issues = self.class.query(@project, include_banned: false)
 
-        total_count_without_banned = count_grouped_by_confidential[false] || 0
-        total_count = total_count_without_banned + (count_grouped_by_confidential[true] || 0)
-        banned_count = Issue.joins(:author).where(project: @project).where("users.state = 'banned'").count
-        public_count_without_banned = total_count_without_banned - banned_count
+        without_banned_count_grouped_by_confidential = without_banned_issues.group(:confidential).count
 
-        update_cache_for_key(total_count_without_banned_cache_key) do
-          total_count_without_banned
-        end
+        total_public_without_banned_count = without_banned_count_grouped_by_confidential[false] || 0
+        total_confidential_without_banned_count = without_banned_count_grouped_by_confidential[true] || 0
 
         update_cache_for_key(total_count_cache_key) do
-          total_count
+          with_banned_issues.count
         end
 
         update_cache_for_key(public_count_without_banned_cache_key) do
-          public_count_without_banned
+          total_public_without_banned_count
+        end
+
+        update_cache_for_key(total_count_without_banned_cache_key) do
+          total_public_without_banned_count + total_confidential_without_banned_count
         end
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    # We only show total issues count for reporters
-    # which are allowed to view confidential issues
+    # We only show total issues count for admins who are allowed to view issues created by banned users.
+    # We also only show issues count including confidential for reporters.
     # This will still show a discrepancy on issues number but should be less than before.
     # Check https://gitlab.com/gitlab-org/gitlab-foss/issues/38418 description.
     # rubocop: disable CodeReuse/ActiveRecord
-    def self.query(projects, public_only: true)
+    def self.query(projects, include_banned: true)
       issues_filtered_by_type = Issue.opened.with_issue_type(Issue::TYPES_FOR_LIST)
 
-      if public_only
-        issues_filtered_by_type.public_only.where(project: projects)
-      else
+      if include_banned
         issues_filtered_by_type.where(project: projects)
+      else
+        issues_filtered_by_type.where(project: projects).joins(:author).where("users.state != 'banned'")
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
