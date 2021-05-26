@@ -48,7 +48,7 @@ RSpec.describe Projects::BatchOpenIssuesCountService do
     service = subject.count_service.new(project)
 
     if public_key
-      service.cache_key(service.class::PUBLIC_COUNT_KEY)
+      service.cache_key(service.class::PUBLIC_COUNT_WITHOUT_BANNED_KEY)
     else
       service.cache_key(service.class::TOTAL_COUNT_KEY)
     end
