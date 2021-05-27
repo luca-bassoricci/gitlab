@@ -21,7 +21,7 @@ module Projects
     end
 
     def cache_key_name
-      if user_is_admin
+      if user_is_admin?
         TOTAL_COUNT_KEY
       else
         public_only? ? PUBLIC_COUNT_WITHOUT_BANNED_KEY : TOTAL_COUNT_WITHOUT_BANNED_KEY
@@ -38,7 +38,7 @@ module Projects
       end
     end
 
-    def user_is_admin
+    def user_is_admin?
       @user&.can_admin_all_resources?
     end
 

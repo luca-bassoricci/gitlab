@@ -6,9 +6,8 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
   let_it_be(:group) { create(:group, :public)}
   let_it_be(:project) { create(:project, :public, namespace: group) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:issue) { create(:issue, :opened, project: project) }
-  let_it_be(:confidential) { create(:issue, :opened, confidential: true, project: project) }
-  let_it_be(:closed) { create(:issue, :closed, project: project) }
+  let_it_be(:banned_user) { create(:user, :banned) }
+  let_it_be(:admin) { create(:user, :admin) }
 
   subject { described_class.new(group, user) }
 
@@ -27,34 +26,65 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
   end
 
   describe '#count' do
-    context 'when user is nil' do
-      it 'does not include confidential issues in the issue count' do
-        expect(described_class.new(group).count).to eq(1)
-      end
-    end
-
-    context 'when user is provided' do
-      context 'when user can read confidential issues' do
-        before do
-          group.add_reporter(user)
-        end
-
-        it 'returns the right count with confidential issues' do
-          expect(subject.count).to eq(2)
-        end
+    context 'returns different issue counts depending on user' do
+      before do
+        create(:issue, :opened, project: project)
+        create(:issue, :opened, confidential: true,  project: project)
+        create(:issue, :opened, author: banned_user, project: project)
+        subject.refresh_cache
       end
 
-      context 'when user cannot read confidential issues' do
-        before do
-          group.add_guest(user)
+      context 'when user is nil' do
+        it 'does not include confidential issues or issues created by banned users in count' do
+          expect(described_class.new(group).count).to eq(1)
         end
 
-        it 'does not include confidential issues' do
-          expect(subject.count).to eq(1)
+        it 'uses group_public_open_issues_without_banned_count cache key' do
+          expect(described_class.new(group).cache_key_name).to eq('group_public_open_issues_without_banned_count')
         end
       end
 
-      it_behaves_like 'a counter caching service with threshold'
+      context 'when user is provided' do
+        let(:user) { create(:user) }
+
+        context 'when user can read confidential issues' do
+          before do
+            group.add_reporter(user)
+          end
+
+          it 'includes confidential issues and does not include issues created by banned users in count' do
+            expect(described_class.new(group, user).count).to eq(2)
+          end
+
+          it 'uses group_total_open_issues_without_banned_count cache key' do
+            expect(described_class.new(group, user).cache_key_name).to eq('group_total_open_issues_without_banned_count')
+          end
+        end
+
+        context 'when user cannot read confidential issues' do
+          before do
+            group.add_guest(user)
+          end
+
+          it 'does not include confidential issues or issues created by banned users in count' do
+            expect(described_class.new(group, user).count).to eq(1)
+          end
+
+          it 'uses group_public_open_issues_without_banned_count cache key' do
+            expect(described_class.new(group, user).cache_key_name).to eq('group_public_open_issues_without_banned_count')
+          end
+        end
+
+        context 'when user is an admin', :enable_admin_mode do
+          it 'includes confidential issues and issues created by banned users in count' do
+            expect(described_class.new(group, admin).count).to eq(3)
+          end
+
+          it 'uses open_issues_including_banned_count cache key' do
+            expect(described_class.new(group, admin).cache_key_name).to eq('group_total_open_issues_count')
+          end
+        end
+      end
     end
   end
 

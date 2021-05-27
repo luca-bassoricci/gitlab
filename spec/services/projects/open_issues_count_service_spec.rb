@@ -14,7 +14,7 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
     context 'returns different issue counts depending on user' do
       before do
         create(:issue, :opened, project: project)
-        create(:issue, :opened, confidential: true,  project: project)
+        create(:issue, :opened, confidential: true, project: project)
         create(:issue, :opened, author: banned_user, project: project)
         subject.refresh_cache
       end
