@@ -13,8 +13,6 @@ module Groups
       end
     end
 
-    private
-
     def cache_key_name
       if user_is_admin?
         TOTAL_COUNT_KEY
@@ -22,6 +20,8 @@ module Groups
         public_only? ? PUBLIC_COUNT_WITHOUT_BANNED_KEY : TOTAL_COUNT_WITHOUT_BANNED_KEY
       end
     end
+
+    private
 
     def public_only?
       !user_is_at_least_reporter?

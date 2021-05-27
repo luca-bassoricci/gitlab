@@ -71,20 +71,14 @@ class IssuesFinder < IssuableFinder
   def with_banned_user_check
     return Issue.all if params.user_can_see_banned_user_issues?
 
-    banned_user_issues = Issue.joins(:author).where("users.state != 'banned'")
-
-    banned_user_issues.empty? ? Issue.all : banned_user_issues
+    Issue.joins(:author).where("users.state != 'banned'")
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   private
 
   def init_collection
-    if params.public_only?
-      Issue.public_only
-    else
-      with_banned_user_check.merge(with_confidentiality_access_check)
-    end
+    with_banned_user_check.merge(with_confidentiality_access_check)
   end
 
   def filter_items(items)
