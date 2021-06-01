@@ -990,37 +990,38 @@ RSpec.describe IssuesFinder do
     end
   end
 
-  describe '#with_confidentiality_access_check' do
-    let(:guest) { create(:user) }
-
+  describe '#with_visibility_check' do
     let_it_be(:authorized_user) { create(:user) }
+    let_it_be(:banned_user) { create(:user, :banned) }
     let_it_be(:project) { create(:project, namespace: authorized_user.namespace) }
     let_it_be(:public_issue) { create(:issue, project: project) }
     let_it_be(:confidential_issue) { create(:issue, project: project, confidential: true) }
+    let_it_be(:hidden_issue) { create(:issue, project: project, author: banned_user) }
+    let_it_be(:guest) { create(:user) }
 
     context 'when no project filter is given' do
       let(:params) { {} }
 
       context 'for an anonymous user' do
-        subject { described_class.new(nil, params).with_confidentiality_access_check }
+        subject { described_class.new(nil, params).with_visibility_check }
 
         it 'returns only public issues' do
           expect(subject).to include(public_issue)
-          expect(subject).not_to include(confidential_issue)
+          expect(subject).not_to include(confidential_issue, hidden_issue)
         end
       end
 
       context 'for a user without project membership' do
-        subject { described_class.new(user, params).with_confidentiality_access_check }
+        subject { described_class.new(user, params).with_visibility_check }
 
         it 'returns only public issues' do
           expect(subject).to include(public_issue)
-          expect(subject).not_to include(confidential_issue)
+          expect(subject).not_to include(confidential_issue, hidden_issue)
         end
       end
 
       context 'for a guest user' do
-        subject { described_class.new(guest, params).with_confidentiality_access_check }
+        subject { described_class.new(guest, params).with_visibility_check }
 
         before do
           project.add_guest(guest)
@@ -1028,33 +1029,34 @@ RSpec.describe IssuesFinder do
 
         it 'returns only public issues' do
           expect(subject).to include(public_issue)
-          expect(subject).not_to include(confidential_issue)
+          expect(subject).not_to include(confidential_issue, hidden_issue)
         end
       end
 
       context 'for a project member with access to view confidential issues' do
-        subject { described_class.new(authorized_user, params).with_confidentiality_access_check }
+        subject { described_class.new(authorized_user, params).with_visibility_check }
 
-        it 'returns all issues' do
+        it 'returns public and confidential issues' do
           expect(subject).to include(public_issue, confidential_issue)
+          expect(subject).not_to include(hidden_issue)
         end
       end
 
       context 'for an admin' do
         let(:admin_user) { create(:user, :admin) }
 
-        subject { described_class.new(admin_user, params).with_confidentiality_access_check }
+        subject { described_class.new(admin_user, params).with_visibility_check }
 
         context 'when admin mode is enabled', :enable_admin_mode do
           it 'returns all issues' do
-            expect(subject).to include(public_issue, confidential_issue)
+            expect(subject).to include(public_issue, confidential_issue, hidden_issue)
           end
         end
 
         context 'when admin mode is disabled' do
           it 'returns only public issues' do
             expect(subject).to include(public_issue)
-            expect(subject).not_to include(confidential_issue)
+            expect(subject).not_to include(confidential_issue, hidden_issue)
           end
         end
       end
@@ -1064,11 +1066,11 @@ RSpec.describe IssuesFinder do
       let(:params) { { project_id: project.id } }
 
       context 'for an anonymous user' do
-        subject { described_class.new(nil, params).with_confidentiality_access_check }
+        subject { described_class.new(nil, params).with_visibility_check }
 
         it 'returns only public issues' do
           expect(subject).to include(public_issue)
-          expect(subject).not_to include(confidential_issue)
+          expect(subject).not_to include(confidential_issue, hidden_issue)
         end
 
         it 'does not filter by confidentiality' do
@@ -1079,11 +1081,11 @@ RSpec.describe IssuesFinder do
       end
 
       context 'for a user without project membership' do
-        subject { described_class.new(user, params).with_confidentiality_access_check }
+        subject { described_class.new(user, params).with_visibility_check }
 
         it 'returns only public issues' do
           expect(subject).to include(public_issue)
-          expect(subject).not_to include(confidential_issue)
+          expect(subject).not_to include(confidential_issue, hidden_issue)
         end
 
         it 'filters by confidentiality' do
@@ -1092,7 +1094,7 @@ RSpec.describe IssuesFinder do
       end
 
       context 'for a guest user' do
-        subject { described_class.new(guest, params).with_confidentiality_access_check }
+        subject { described_class.new(guest, params).with_visibility_check }
 
         before do
           project.add_guest(guest)
@@ -1100,7 +1102,7 @@ RSpec.describe IssuesFinder do
 
         it 'returns only public issues' do
           expect(subject).to include(public_issue)
-          expect(subject).not_to include(confidential_issue)
+          expect(subject).not_to include(confidential_issue, hidden_issue)
         end
 
         it 'filters by confidentiality' do
@@ -1109,10 +1111,11 @@ RSpec.describe IssuesFinder do
       end
 
       context 'for a project member with access to view confidential issues' do
-        subject { described_class.new(authorized_user, params).with_confidentiality_access_check }
+        subject { described_class.new(authorized_user, params).with_visibility_check }
 
-        it 'returns all issues' do
+        it 'returns public and confidential issues' do
           expect(subject).to include(public_issue, confidential_issue)
+          expect(subject).not_to include(hidden_issue)
         end
 
         it 'does not filter by confidentiality' do
@@ -1125,11 +1128,11 @@ RSpec.describe IssuesFinder do
       context 'for an admin' do
         let(:admin_user) { create(:user, :admin) }
 
-        subject { described_class.new(admin_user, params).with_confidentiality_access_check }
+        subject { described_class.new(admin_user, params).with_visibility_check }
 
         context 'when admin mode is enabled', :enable_admin_mode do
           it 'returns all issues' do
-            expect(subject).to include(public_issue, confidential_issue)
+            expect(subject).to include(public_issue, confidential_issue, hidden_issue)
           end
 
           it 'does not filter by confidentiality' do
@@ -1142,106 +1145,12 @@ RSpec.describe IssuesFinder do
         context 'when admin mode is disabled' do
           it 'returns only public issues' do
             expect(subject).to include(public_issue)
-            expect(subject).not_to include(confidential_issue)
+            expect(subject).not_to include(confidential_issue, hidden_issue)
           end
 
           it 'filters by confidentiality' do
             expect(subject.to_sql).to match("issues.confidential")
           end
-        end
-      end
-    end
-  end
-
-  describe '#with_banned_user_check' do
-    let_it_be(:non_admin_user) { create(:user) }
-    let_it_be(:banned_user) { create(:user, :banned) }
-    let_it_be(:admin_user) { create(:user, :admin) }
-    let_it_be(:project) { create(:project) }
-    let_it_be(:banned_user_issue) { create(:issue, project: project, author: banned_user) }
-
-    shared_examples 'does not return issue created by a banned user' do
-      it 'does not return issue created by a banned user' do
-        expect(subject).not_to include(banned_user_issue)
-      end
-    end
-
-    context 'when no project filter is given' do
-      let(:params) { {} }
-
-      context 'for an anonymous user' do
-        subject { described_class.new(nil, params).with_banned_user_check }
-
-        it_behaves_like 'does not return issue created by a banned user'
-      end
-
-      context 'for a user without project membership' do
-        subject { described_class.new(user, params).with_banned_user_check }
-
-        it_behaves_like 'does not return issue created by a banned user'
-      end
-
-      context 'for a non-admin user' do
-        subject { described_class.new(non_admin_user, params).with_banned_user_check }
-
-        before do
-          project.add_maintainer(non_admin_user)
-        end
-
-        it_behaves_like 'does not return issue created by a banned user'
-      end
-
-      context 'for an admin' do
-        subject { described_class.new(admin_user, params).with_banned_user_check }
-
-        context 'when admin mode is enabled', :enable_admin_mode do
-          it 'returns issue created by banned user' do
-            expect(subject).to include(banned_user_issue)
-          end
-        end
-
-        context 'when admin mode is disabled' do
-          it_behaves_like 'does not return issue created by a banned user'
-        end
-      end
-    end
-
-    context 'when searching within a specific project' do
-      let(:params) { { project_id: project.id } }
-
-      context 'for an anonymous user' do
-        subject { described_class.new(nil, params).with_banned_user_check }
-
-        it_behaves_like 'does not return issue created by a banned user'
-      end
-
-      context 'for a user without project membership' do
-        subject { described_class.new(user, params).with_banned_user_check }
-
-        it_behaves_like 'does not return issue created by a banned user'
-      end
-
-      context 'for a guest user' do
-        subject { described_class.new(non_admin_user, params).with_banned_user_check }
-
-        before do
-          project.add_maintainer(non_admin_user)
-        end
-
-        it_behaves_like 'does not return issue created by a banned user'
-      end
-
-      context 'for an admin' do
-        subject { described_class.new(admin_user, params).with_banned_user_check }
-
-        context 'when admin mode is enabled', :enable_admin_mode do
-          it 'returns all issues' do
-            expect(subject).to include(banned_user_issue)
-          end
-        end
-
-        context 'when admin mode is disabled' do
-          it_behaves_like 'does not return issue created by a banned user'
         end
       end
     end

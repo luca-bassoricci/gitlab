@@ -129,12 +129,10 @@ class Issue < ApplicationRecord
   }
   scope :with_issue_type, ->(types) { where(issue_type: types) }
 
-  scope :public_only, -> { where(confidential: false) }
+  scope :public_only, -> { where(confidential: false).where.not(author: ::User.banned) }
   scope :confidential_only, -> { where(confidential: true) }
 
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
-
-  scope :without_banned_author, -> { where.not(author: ::User.banned) }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
   scope :inc_relations_for_view, -> { includes(author: :status, assignees: :status) }

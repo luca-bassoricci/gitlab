@@ -45,40 +45,39 @@ class IssuesFinder < IssuableFinder
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
-  def with_confidentiality_access_check
-    return Issue.all if params.user_can_see_all_confidential_issues?
+  def with_visibility_check
+    return Issue.all if params.user_can_see_all_issues?
+
+    return Issue.public_only if params.user_cannot_see_confidential_issues?
 
     # If already filtering by assignee we can skip confidentiality since a user
     # can always see confidential issues assigned to them. This is just an
     # optimization since a very common usecase of this Finder is to load the
     # count of issues assigned to the user for the header bar.
-    return Issue.all if current_user && params.assignees.include?(current_user)
+    # Also, only admins can see hidden issues,
+    # so we filter out issues authored by banned users.
+    return Issue.joins(:author).where("users.state != 'banned'") if params.user_can_see_all_confidential_issues? || current_user && params.assignees.include?(current_user)
 
-    return Issue.where('issues.confidential IS NOT TRUE') if params.user_cannot_see_confidential_issues?
-
-    Issue.where('
-      issues.confidential IS NOT TRUE
-      OR (issues.confidential = TRUE
-        AND (issues.author_id = :user_id
-          OR EXISTS (SELECT TRUE FROM issue_assignees WHERE user_id = :user_id AND issue_id = issues.id)
-          OR EXISTS (:authorizations)))',
+    Issue.joins(:author).where(
+      "users.state != 'banned'
+        AND issues.confidential IS NOT TRUE
+        OR (issues.confidential = TRUE
+          AND (issues.author_id = :user_id
+            OR EXISTS (SELECT TRUE FROM issue_assignees WHERE user_id = :user_id AND issue_id = issues.id)
+            OR EXISTS (:authorizations)))",
       user_id: current_user.id,
       authorizations: current_user.authorizations_for_projects(min_access_level: CONFIDENTIAL_ACCESS_LEVEL, related_project_column: "issues.project_id"))
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
-
-  # rubocop: disable CodeReuse/ActiveRecord
-  def with_banned_user_check
-    return Issue.all if User.banned.empty? || params.user_can_see_banned_user_issues?
-
-    Issue.joins(:author).where("users.state != 'banned'")
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   private
 
   def init_collection
-    with_banned_user_check.merge(with_confidentiality_access_check)
+    if params.public_only?
+      Issue.public_only
+    else
+      with_visibility_check
+    end
   end
 
   def filter_items(items)

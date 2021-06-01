@@ -2602,7 +2602,7 @@ msgstr ""
 msgid "AdminUsers|Is using seat"
 msgstr ""
 
-msgid "AdminUsers|Issues created by banned user will be hidden from other users"
+msgid "AdminUsers|Issues created by this user will be hidden from other users"
 msgstr ""
 
 msgid "AdminUsers|It's you!"
