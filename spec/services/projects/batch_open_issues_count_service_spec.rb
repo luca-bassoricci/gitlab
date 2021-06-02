@@ -25,19 +25,18 @@ RSpec.describe Projects::BatchOpenIssuesCountService do
     context 'when cache is clean' do
       it 'refreshes cache keys correctly', :aggregate_failures do
         # It does not update total issues cache
-
-        expect(Rails.cache.read(get_cache_key(subject, project_1))).to eq(nil)
-        expect(Rails.cache.read(get_cache_key(subject, project_2))).to eq(nil)
-
         count_service.new(project_1).refresh_cache
         count_service.new(project_2).refresh_cache
 
-        expect(Rails.cache.read(count_service.new(project_1).cache_key(count_service::PUBLIC_COUNT_WITHOUT_BANNED_KEY))).to eq(1)
-        expect(Rails.cache.read(count_service.new(project_1).cache_key(count_service::TOTAL_COUNT_WITHOUT_BANNED_KEY))).to eq(2)
+        expect(Rails.cache.read(count_service.new(project_1))).to eq(nil)
+        expect(Rails.cache.read(count_service.new(project_2))).to eq(nil)
+
+        expect(Rails.cache.read(count_service.new(project_1).cache_key(count_service::PUBLIC_COUNT_WITHOUT_HIDDEN_KEY))).to eq(1)
+        expect(Rails.cache.read(count_service.new(project_1).cache_key(count_service::TOTAL_COUNT_WITHOUT_HIDDEN_KEY))).to eq(2)
         expect(Rails.cache.read(count_service.new(project_1).cache_key(count_service::TOTAL_COUNT_KEY))).to eq(3)
 
-        expect(Rails.cache.read(count_service.new(project_2).cache_key(count_service::PUBLIC_COUNT_WITHOUT_BANNED_KEY))).to eq(1)
-        expect(Rails.cache.read(count_service.new(project_2).cache_key(count_service::TOTAL_COUNT_WITHOUT_BANNED_KEY))).to eq(2)
+        expect(Rails.cache.read(count_service.new(project_2).cache_key(count_service::PUBLIC_COUNT_WITHOUT_HIDDEN_KEY))).to eq(1)
+        expect(Rails.cache.read(count_service.new(project_2).cache_key(count_service::TOTAL_COUNT_WITHOUT_HIDDEN_KEY))).to eq(2)
         expect(Rails.cache.read(count_service.new(project_2).cache_key(count_service::TOTAL_COUNT_KEY))).to eq(3)
       end
     end
@@ -53,16 +52,6 @@ RSpec.describe Projects::BatchOpenIssuesCountService do
 
         subject.refresh_cache
       end
-    end
-  end
-
-  def get_cache_key(subject, project, public_key = false)
-    service = subject.count_service.new(project)
-
-    if public_key
-      service.cache_key(service.class::PUBLIC_COUNT_WITHOUT_BANNED_KEY)
-    else
-      service.cache_key(service.class::TOTAL_COUNT_KEY)
     end
   end
 end

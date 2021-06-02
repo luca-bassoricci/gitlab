@@ -35,12 +35,12 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
       end
 
       context 'when user is nil' do
-        it 'does not include confidential issues or issues created by banned users in count' do
+        it 'does not include confidential or hidden issues in count' do
           expect(described_class.new(group).count).to eq(1)
         end
 
-        it 'uses group_public_open_issues_without_banned_count cache key' do
-          expect(described_class.new(group).cache_key_name).to eq('group_public_open_issues_without_banned_count')
+        it 'uses group_public_open_issues_without_hidden_count cache key' do
+          expect(described_class.new(group).cache_key_name).to eq('group_public_open_issues_without_hidden_count')
         end
       end
 
@@ -52,12 +52,12 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
             group.add_reporter(user)
           end
 
-          it 'includes confidential issues and does not include issues created by banned users in count' do
+          it 'includes confidential issues and does not include hidden issues in count' do
             expect(described_class.new(group, user).count).to eq(2)
           end
 
-          it 'uses group_total_open_issues_without_banned_count cache key' do
-            expect(described_class.new(group, user).cache_key_name).to eq('group_total_open_issues_without_banned_count')
+          it 'uses group_total_open_issues_without_hidden_count cache key' do
+            expect(described_class.new(group, user).cache_key_name).to eq('group_total_open_issues_without_hidden_count')
           end
         end
 
@@ -66,22 +66,22 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
             group.add_guest(user)
           end
 
-          it 'does not include confidential issues or issues created by banned users in count' do
+          it 'does not include confidential or hidden issues in count' do
             expect(described_class.new(group, user).count).to eq(1)
           end
 
-          it 'uses group_public_open_issues_without_banned_count cache key' do
-            expect(described_class.new(group, user).cache_key_name).to eq('group_public_open_issues_without_banned_count')
+          it 'uses group_public_open_issues_without_hidden_count cache key' do
+            expect(described_class.new(group, user).cache_key_name).to eq('group_public_open_issues_without_hidden_count')
           end
         end
 
         context 'when user is an admin', :enable_admin_mode do
-          it 'includes confidential issues and issues created by banned users in count' do
+          it 'includes confidential and hidden issues in count' do
             expect(described_class.new(group, admin).count).to eq(3)
           end
 
-          it 'uses open_issues_including_banned_count cache key' do
-            expect(described_class.new(group, admin).cache_key_name).to eq('group_total_open_issues_count')
+          it 'uses group_total_open_issues_including_hidden_count cache key' do
+            expect(described_class.new(group, admin).cache_key_name).to eq('group_total_open_issues_including_hidden_count')
           end
         end
       end
@@ -91,11 +91,11 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
   describe '#clear_all_cache_keys' do
     it 'calls `Rails.cache.delete` with the correct keys' do
       expect(Rails.cache).to receive(:delete)
-        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::PUBLIC_COUNT_WITHOUT_BANNED_KEY])
+        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::PUBLIC_COUNT_WITHOUT_HIDDEN_KEY])
       expect(Rails.cache).to receive(:delete)
         .with(['groups', 'open_issues_count_service', 1, group.id, described_class::TOTAL_COUNT_KEY])
       expect(Rails.cache).to receive(:delete)
-        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::TOTAL_COUNT_WITHOUT_BANNED_KEY])
+        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::TOTAL_COUNT_WITHOUT_HIDDEN_KEY])
 
       subject.clear_all_cache_keys
     end

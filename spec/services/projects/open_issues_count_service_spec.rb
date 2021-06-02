@@ -20,12 +20,12 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
       end
 
       context 'when user is nil' do
-        it 'does not include confidential issues or issues created by banned users in count' do
+        it 'does not include confidential or hidden issues in count' do
           expect(described_class.new(project).count).to eq(1)
         end
 
-        it 'uses open_public_issues_without_banned_count cache key' do
-          expect(described_class.new(project).cache_key_name).to eq('open_public_issues_without_banned_count')
+        it 'uses open_public_issues_without_hidden_count cache key' do
+          expect(described_class.new(project).cache_key_name).to eq('open_public_issues_without_hidden_count')
         end
       end
 
@@ -37,12 +37,12 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
             project.add_reporter(user)
           end
 
-          it 'includes confidential issues and does not include issues created by banned users in count' do
+          it 'includes confidential issues and does not include hidden issues in count' do
             expect(described_class.new(project, user).count).to eq(2)
           end
 
-          it 'uses open_issues_without_banned_count cache key' do
-            expect(described_class.new(project, user).cache_key_name).to eq('open_issues_without_banned_count')
+          it 'uses open_issues_without_hidden_count cache key' do
+            expect(described_class.new(project, user).cache_key_name).to eq('open_issues_without_hidden_count')
           end
         end
 
@@ -51,24 +51,24 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
             project.add_guest(user)
           end
 
-          it 'does not include confidential issues or issues created by banned users in count' do
+          it 'does not include confidential or hidden issues in count' do
             expect(described_class.new(project, user).count).to eq(1)
           end
 
-          it 'uses open_public_issues_without_banned_count cache key' do
-            expect(described_class.new(project, user).cache_key_name).to eq('open_public_issues_without_banned_count')
+          it 'uses open_public_issues_without_hidden_count cache key' do
+            expect(described_class.new(project, user).cache_key_name).to eq('open_public_issues_without_hidden_count')
           end
         end
 
         context 'when user is an admin', :enable_admin_mode do
           let(:admin) { create(:user, :admin) }
 
-          it 'includes confidential issues and issues created by banned users in count' do
+          it 'includes confidential and hidden issues in count' do
             expect(described_class.new(project, admin).count).to eq(3)
           end
 
-          it 'uses open_issues_including_banned_count cache key' do
-            expect(described_class.new(project, admin).cache_key_name).to eq('open_issues_including_banned_count')
+          it 'uses open_issues_including_hidden_count cache key' do
+            expect(described_class.new(project, admin).cache_key_name).to eq('open_issues_including_hidden_count')
           end
         end
       end
@@ -85,8 +85,8 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
         it 'refreshes cache keys correctly' do
           subject.refresh_cache
 
-          expect(Rails.cache.read(subject.cache_key(described_class::PUBLIC_COUNT_WITHOUT_BANNED_KEY))).to eq(1)
-          expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_WITHOUT_BANNED_KEY))).to eq(2)
+          expect(Rails.cache.read(subject.cache_key(described_class::PUBLIC_COUNT_WITHOUT_HIDDEN_KEY))).to eq(1)
+          expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_WITHOUT_HIDDEN_KEY))).to eq(2)
           expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_KEY))).to eq(3)
         end
       end
@@ -103,8 +103,8 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
 
           subject.refresh_cache
 
-          expect(Rails.cache.read(subject.cache_key(described_class::PUBLIC_COUNT_WITHOUT_BANNED_KEY))).to eq(2)
-          expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_WITHOUT_BANNED_KEY))).to eq(4)
+          expect(Rails.cache.read(subject.cache_key(described_class::PUBLIC_COUNT_WITHOUT_HIDDEN_KEY))).to eq(2)
+          expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_WITHOUT_HIDDEN_KEY))).to eq(4)
           expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_KEY))).to eq(6)
         end
       end

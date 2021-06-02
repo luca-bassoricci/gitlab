@@ -297,14 +297,14 @@ RSpec.describe IssuePolicy do
     let(:user) { create(:user) }
     let(:admin) { create(:user, :admin)}
     let(:banned_user) { create(:user, :banned) }
-    let(:issue) { create(:issue, author: banned_user, project: project) }
+    let(:hidden_issue) { create(:issue, author: banned_user, project: project) }
 
     it 'does not allow non-admin user to read the issue' do
-      expect(permissions(user, issue)).not_to be_allowed(:read_issue)
+      expect(permissions(user, hidden_issue)).not_to be_allowed(:read_issue)
     end
 
     it 'allows admin to read the issue', :enable_admin_mode do
-      expect(permissions(admin, issue)).to be_allowed(:read_issue)
+      expect(permissions(admin, hidden_issue)).to be_allowed(:read_issue)
     end
   end
 end
