@@ -130,7 +130,7 @@ this feature for your GitLab instance.
 
 ### Ban a user
 
-To completely block a user, administrators can choose to ban the user.
+To completely block a user and hide issues they've authored, administrators can choose to ban the user.
 
 Users can be banned using the Admin Area. To do this:
 
@@ -140,7 +140,7 @@ Users can be banned using the Admin Area. To do this:
 
 NOTE:
 This feature is a work in progress. Currently, banning a user
-only blocks them and does not hide their comments or issues.
+only blocks them and hides their issues and does not hide their comments.
 This functionality will be implemented in follow up issues.
 
 ### Unban a user
