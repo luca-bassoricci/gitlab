@@ -48,7 +48,11 @@ class IssuesFinder < IssuableFinder
   def with_visibility_check
     return Issue.all if params.user_can_see_all_issues?
 
-    return Issue.public_only if params.user_cannot_see_confidential_issues?
+    issues = User.banned.empty? ? Issue.all : Issue.joins(:author).where("users.state != 'banned'")
+
+    return issues.all if params.user_can_see_all_confidential_issues?
+
+    return issues.where('issues.confidential IS NOT TRUE') if params.user_cannot_see_confidential_issues?
 
     # If already filtering by assignee we can skip confidentiality since a user
     # can always see confidential issues assigned to them. This is just an
@@ -56,15 +60,14 @@ class IssuesFinder < IssuableFinder
     # count of issues assigned to the user for the header bar.
     # Also, only admins can see hidden issues,
     # so we filter out issues authored by banned users.
-    return Issue.joins(:author).where("users.state != 'banned'") if params.user_can_see_all_confidential_issues? || current_user && params.assignees.include?(current_user)
+    return issues.all if current_user && params.assignees.include?(current_user)
 
-    Issue.joins(:author).where(
-      "users.state != 'banned'
-        AND issues.confidential IS NOT TRUE
-        OR (issues.confidential = TRUE
-          AND (issues.author_id = :user_id
-            OR EXISTS (SELECT TRUE FROM issue_assignees WHERE user_id = :user_id AND issue_id = issues.id)
-            OR EXISTS (:authorizations)))",
+    issues.where('
+      issues.confidential IS NOT TRUE
+      OR (issues.confidential = TRUE
+        AND (issues.author_id = :user_id
+          OR EXISTS (SELECT TRUE FROM issue_assignees WHERE user_id = :user_id AND issue_id = issues.id)
+          OR EXISTS (:authorizations)))',
       user_id: current_user.id,
       authorizations: current_user.authorizations_for_projects(min_access_level: CONFIDENTIAL_ACCESS_LEVEL, related_project_column: "issues.project_id"))
   end
