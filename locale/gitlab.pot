@@ -1375,9 +1375,6 @@ msgstr ""
 msgid "A Let's Encrypt account will be configured for this GitLab installation using your email address. You will receive emails to warn of expiring certificates."
 msgstr ""
 
-msgid "A banned user cannot log in or access git repositories"
-msgstr ""
-
 msgid "A banned user cannot log in or access git repositories."
 msgstr ""
 
