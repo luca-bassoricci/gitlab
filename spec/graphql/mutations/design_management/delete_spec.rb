@@ -92,34 +92,35 @@ RSpec.describe Mutations::DesignManagement::Delete do
           # -------------
           # 01. routing query
           # 02. find project by id
-          # 03. project.project_features
-          # 04. find namespace by id and type
-          # 05,06. project.authorizations for user (same query twice)
-          # 07. find issue by iid
-          # 08. find project by id
-          # 09. find namespace by id
-          # 10. find group namespace by id
-          # 11. project.authorizations for user (same query as 5)
-          # 12. find user by id
-          # 13. project.project_features (same query as 3)
-          # 14. project.authorizations for user (same query as 5)
-          # 15. current designs by filename and issue
-          # 16, 17 project.authorizations for user (same query as 5)
-          # 18. find route by id and source_type
+          # 03. check for banned users
+          # 04. project.project_features
+          # 05. find namespace by id and type
+          # 06,07. project.authorizations for user (same query twice)
+          # 08. find issue by iid
+          # 09. find project by id
+          # 10. find namespace by id
+          # 11. find group namespace by id
+          # 12. project.authorizations for user (same query as 5)
+          # 13. find user by id
+          # 14. project.project_features (same query as 3)
+          # 15. project.authorizations for user (same query as 5)
+          # 16. current designs by filename and issue
+          # 17, 18. project.authorizations for user (same query as 5)
+          # 19. find route by id and source_type
           # ------------- our queries are below:
-          # 19. start transaction 1
-          # 20.   start transaction 2
-          # 21.     find version by sha and issue
-          # 22.     exists version with sha and issue?
-          # 23.   leave transaction 2
-          # 24.   create version with sha and issue
-          # 25.   create design-version links
-          # 26.   validate version.actions.present?
-          # 27.   validate version.issue.present?
-          # 28.   validate version.sha is unique
-          # 29. leave transaction 1
+          # 20. start transaction 1
+          # 21.   start transaction 2
+          # 22.     find version by sha and issue
+          # 23.     exists version with sha and issue?
+          # 24.   leave transaction 2
+          # 25.   create version with sha and issue
+          # 26.   create design-version links
+          # 27.   validate version.actions.present?
+          # 28.   validate version.issue.present?
+          # 29.   validate version.sha is unique
+          # 30. leave transaction 1
           #
-          expect { run_mutation }.not_to exceed_query_limit(29)
+          expect { run_mutation }.not_to exceed_query_limit(30)
         end
       end
 
