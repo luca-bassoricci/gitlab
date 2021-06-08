@@ -153,6 +153,8 @@ function check_kube_domain() {
   fi
 }
 
+# FIXME: trigger CI
+
 function ensure_namespace() {
   local namespace="${1}"
 
