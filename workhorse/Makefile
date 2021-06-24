@@ -1,5 +1,4 @@
 PREFIX=/usr/local
-PKG := gitlab.com/gitlab-org/gitlab-workhorse
 BUILD_DIR ?= $(CURDIR)
 TARGET_DIR ?= $(BUILD_DIR)/_build
 TARGET_SETUP := $(TARGET_DIR)/.ok
@@ -20,7 +19,7 @@ MINIMUM_SUPPORTED_GO_VERSION := 1.11
 export GOBIN := $(TARGET_DIR)/bin
 export PATH := $(GOBIN):$(PATH)
 export GOPROXY ?= https://proxy.golang.org
-export GO111MODULE=on
+export GOFLAGS := -mod=mod $(GOFLAGS)
 
 define message
 	@echo "### $(1)"
@@ -41,22 +40,22 @@ $(TARGET_SETUP):
 .PHONY: gitlab-resize-image
 gitlab-resize-image: $(TARGET_SETUP)
 	$(call message,Building $@)
-	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ $(PKG)/cmd/$@
+	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ ./cmd/$@
 
 .PHONY: gitlab-zip-cat
 gitlab-zip-cat: $(TARGET_SETUP)
 	$(call message,Building $@)
-	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ $(PKG)/cmd/$@
+	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ ./cmd/$@
 
 .PHONY: gitlab-zip-metadata
 gitlab-zip-metadata: $(TARGET_SETUP)
 	$(call message,Building $@)
-	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ $(PKG)/cmd/$@
+	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ ./cmd/$@
 
 .PHONY: gitlab-workhorse
 gitlab-workhorse: $(TARGET_SETUP)
 	$(call message,Building $@)
-	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ $(PKG)
+	$(GOBUILD) -tags "$(BUILD_TAGS)" -o $(BUILD_DIR)/$@ .
 
 .PHONY:	install
 install:	$(EXE_ALL)
