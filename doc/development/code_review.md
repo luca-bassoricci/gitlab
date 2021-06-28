@@ -103,14 +103,7 @@ with [domain expertise](#domain-experts).
 1. If your merge request includes user-facing changes (*3*), it must be
    **approved by a [Product Designer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_reviewers_UX)**,
    based on assignments in the appropriate [DevOps stage group](https://about.gitlab.com/handbook/product/categories/#devops-stages).
-1. If your merge request includes adding a new JavaScript library (*1*)...
-   - If the library significantly increases the
-     [bundle size](https://gitlab.com/gitlab-org/frontend/playground/webpack-memory-metrics/-/blob/master/doc/report.md), it must
-     be **approved by a [frontend foundations member](https://about.gitlab.com/direction/create/ecosystem/frontend-ux-foundations/)**.
-   - If the license used by the new library hasn't been approved for use in
-     GitLab, the license must be **approved by a [legal department member](https://about.gitlab.com/handbook/legal/)**.
-     More information about license compatibility can be found in our
-     [GitLab Licensing and Compatibility documentation](licensing.md).
+1. If your merge request includes a new library (e.g. Gems, JavaScript libraries, Go modules) or updates an existing library, please follow the [library review guidelines](library_review.md).
 1. If your merge request includes a new dependency or a file system change, it must be
    **approved by a [Distribution team member](https://about.gitlab.com/company/team/)**. See how to work with the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/#how-to-work-with-distribution) for more details.
 1. If your merge request includes documentation changes, it must be **approved

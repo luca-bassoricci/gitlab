@@ -29,18 +29,31 @@ When updating the version of an existing library, skip to [vetting a library](#v
 ## Roles and Responsibilities
 
 A merge request's **author** responsibilities are:
-- Before adding a new library, evaluate it as described in [introducing a new library](#adding-a-new-library). Document the result of the evaluation for the MR reviewer.
+- When adding a new library:
+  1. Evaluate it as described in [introducing a new library](#adding-a-new-library). Document the result of the evaluation for the MR reviewer.
+  1. Add a comment in the library manifest (e.g. Gemfile/package.json/go.mod) next to the library that you added to indicate which group owns the library. See [Library Ownership](#library-ownership) for more information.
 - Add labels to the MR. If your MR adds, updates, and/or removes libraries add the label(s) ~"dependency addition", ~"dependency update", ~"dependency removal", respectively.
-- Before assigning to a reviewer, vet the dependency as described in [vetting a library](#vetting-a-library). If the library passes the vetting, add the label ~"dependency-review:awaiting" and continue to assign the MR to the reviewer.
+- Before assigning to a reviewer, vet the dependency as described in [vetting a library](#vetting-a-library). If the library passes the vetting, add the label ~"dependency-review::awaiting" and continue to assign the MR to the reviewer.
 
 A merge request's **reviewers** responsibilities are:
 - In case the MR adds a new library, check that the author evaluated the library as described in [introducing a new library](#adding-a-new-library) and that the evaluation is sound.
 - Vet the dependency as described in [vetting a library](#vetting-a-library). If no issues are identified, proceed with merging the changes.
-- Once the review is completed, add the label "dependency-review:completed".
+- Once the review is completed, add the label "dependency-review::completed".
 
 ## Adding a new library
 
+### General Considerations
+
 Adding a new library is an important decision. Implications and alternatives should be carefully considered. Keep in mind that adding a new library creates additional maintenance effort for keeping the library up-to-date and it will need to be replaced when it reaches its end of life. Also be aware of the security implications: Having another library in our dependency tree is another vector of attack (a library might have unknown vulnerabilities, could get compromised, etc.). Before adding a new library consider alternatives such as implementing the functionality yourself. For example, if you only use a small utility function of a library with a large code base, it might be better to implement the functionality yourself instead of adding a large library.
+
+### Library Ownership
+
+From time to time, we become aware of a vulnerability in a library and the vulnerability needs to be remediated. To ensure that the remediation happens within our [target timeline](https://about.gitlab.com/handbook/engineering/security/#severity-and-priority-labels-on-security-issues), each library is owned by a group that is responsible for upgrading the library to the latest version or otherwise remediate the vulnerability (e.g. remove the library).
+
+When a new library is introduced, the group that owns the library needs to be indicated. This should be done by adding a comment with the group name to the library manifest (e.g. Gemfile/package.json/go.mod) next to the line where the library is defined.
+
+### Choosing the right library for the task
+
 
 If adding a new library cannot be avoided, create a short-list of libraries that implement the desired functionality and evaluate them for:
 
@@ -65,11 +78,10 @@ After selecting a library that satisfies these criteria, move on to [vet library
 Code contained in libraries needs to be vetted for security issues. This process should be followed to vet library code:
 
 1. Inspect the findings of security scanners. The scanners are executed in CI jobs and their findings are available as job artifacts and/or in the MR Security Widget. The findings of the following scanners have to be inspected:
-  - *[GitLab Dependency Scanning](https://docs.gitlab.com/ee/user/application_security/dependency_scanning/).* If Dependency Scanning reports a vulnerability for the added library, or any of its sub-libraries, check if a newer version of the library exists that patches the vulnerabilities. If no such version exists, the library should not be added. (ToDo: do we need an exception process for adding libs with known vulns?)
-  - *[Package Hunter](https://gitlab.com/gitlab-com/gl-security/security-research/package-hunter)*. Package Hunter findings indicate that a library might contain malicious code or other undesired behavior (e.g. a binary is downloaded and executed from a 3rd party server without checking it's integrity first). Any Package Hunter findings should be triaged before the MR is merged. Please involve the Security Engineering and Research team if you are unsure how to proceed with the triage.
+  - *[GitLab Dependency Scanning](https://docs.gitlab.com/ee/user/application_security/dependency_scanning/).* If Dependency Scanning reports a vulnerability for the added library, or any of its sub-libraries, check if a newer version of the library exists that patches the vulnerabilities. If no such version exists, the library should not be added. If a library has known vulnerabilities and absolutely must be included, please contact the Application Security team for review and approval.
+  - *[Package Hunter](https://gitlab.com/gitlab-com/gl-security/security-research/package-hunter)*. Package Hunter findings indicate that a library might contain malicious code or other undesired behavior (e.g. a binary is downloaded and executed from a 3rd party server without checking it's integrity first). Any Package Hunter findings should be triaged before the MR is merged (see the [runbook](https://about.gitlab.com/handbook/engineering/security/security-engineering-and-research/application-security/runbooks/investigating-package-hunter-findings.html) for an example). If you suspect a finding was caused by a malicious dependency, please ping the Security Engineering and Research team `@gitlab-com/gl-security/appsec`. Please also involve the team if you are unsure how to proceed with the triage.
   - *[untamper-my-lockfile](https://gitlab.com/gitlab-org/frontend/untamper-my-lockfile/)*. This tool attempts to identify situations where the `yarn.lock` file was tampered with. If this job is failing, do not merge the MR. Instead, ping the Security Engineering and Research team on the MR.
-2. Inspect Code: All library code should be reviewed for malicious or otherwise problematic code, just as you would do for any other MR with code changes. When inspecting the code, take care to inspect the actual code that is distributed (i.e. the code contained in a Gem or Node.js package). **DO NOT** review the code in the code repository associated with a library. There is no guarantee that the code in the repository matches the distributed code. There are several services which allow to inspect the distributed library code. For example, for Gems there is diffend.io ([example](https://my.diffend.io/gems/aliyun-sdk/0.7.1/0.8.0)) and for Node.js there is app.renovatebot.com ([example](https://app.renovatebot.com/package-diff?name=copy-webpack-plugin&from=5.0.5&to=5.1.2)).
-If the vetted library is vendored (i.e. its code is checked into the repository), the usual tools for reviewing code hosted in a repository should be used.
+2. Inspect Code: All library code should be reviewed for malicious or otherwise problematic code, just as you would do for any other MR with code changes. When inspecting Gems or Node.js modules, take care to inspect the actual code that is distributed in the library. **DO NOT** review the code in the code repository associated with a library. There is no guarantee that the code in the repository matches the distributed code. There are several services which allow to inspect the distributed library code. For example, use diffend.io to inspect Gems ([example](https://my.diffend.io/gems/aliyun-sdk/0.7.1/0.8.0)) and use app.renovatebot.com to inspect Node.js modules ([example](https://app.renovatebot.com/package-diff?name=copy-webpack-plugin&from=5.0.5&to=5.1.2)).
+If the vetted library is vendored, the usual tools for reviewing code hosted in a repository should be used.
 
-If the vetting didn't identify any issues, the MR can be merged.
-
+If the vetting didn't identify any issues, the MR can be merged. If there are any problems preventing you from vetting the library (e.g. the dependency is too large to review manually), please reach out to `@gitlab-com/gl-security/appsec` for assistance.
