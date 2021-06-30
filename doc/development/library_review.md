@@ -130,7 +130,7 @@ should be followed to vet library code:
 1. Inspect the findings of security scanners. The scanners are executed in CI
 jobs and their findings are available as job artifacts and/or in the MR Security
 Widget. The findings of the following scanners have to be inspected:
-  - [GitLab Dependency Scanning](https://docs.gitlab.com/ee/user/application_security/dependency_scanning/).
+  - [GitLab Dependency Scanning](../user/application_security/dependency_scanning/index.md).
 If Dependency Scanning reports a vulnerability for the added library, or any of
 its sub-libraries, check if a newer version of the library exists that patches
 the vulnerabilities. If no such version exists, the library should not be added.
