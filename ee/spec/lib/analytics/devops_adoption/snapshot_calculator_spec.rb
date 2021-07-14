@@ -126,6 +126,18 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     end
 
     it { is_expected.to eq false }
+
+    context 'when query timeouts' do
+      before do
+        allow(Security::Scan).to receive(:joins).and_raise(ActiveRecord::QueryCanceled)
+      end
+
+      it 'tracks error and returns nil', :aggregate_failures do
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(kind_of(ActiveRecord::QueryCanceled))
+
+        expect(subject).to eq nil
+      end
+    end
   end
 
   describe 'total_projects_count' do

@@ -80,6 +80,9 @@ module Analytics
           .created_before(range_end)
           .created_after(range_start)
           .exists?
+      rescue ActiveRecord::QueryCanceled => e
+        Gitlab::ErrorTracking.track_exception(e)
+        nil
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
