@@ -30918,6 +30918,9 @@ msgstr ""
 msgid "Source code (%{fileExtension})"
 msgstr ""
 
+msgid "Source control"
+msgstr ""
+
 msgid "Source is not available"
 msgstr ""
 
