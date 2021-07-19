@@ -76,7 +76,7 @@ By default, GitLab restricts certain formats of branch names for security purpos
 ### Custom Push Rules **(FREE SELF)**
 
 It's possible to create custom push rules rather than the push rules available in
-**Admin Area > Push Rules** by using more advanced server hooks.
+**Admin Area > Source control > Push Rules** by using more advanced server hooks.
 
 See [server hooks](../administration/server_hooks.md) for more information.
 
@@ -88,7 +88,7 @@ at the project level or the [group level](../user/group/index.md#group-push-rule
 To create global push rules:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Push rules**.
+1. In the left sidebar, select **Source control > Push rules**.
 
 To override global push rules in a project's settings:
 
