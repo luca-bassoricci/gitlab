@@ -17,58 +17,46 @@ described, it is possible to adapt these instructions to your needs.
 
 _[diagram source - GitLab employees only](https://docs.google.com/drawings/d/1z0VlizKiLNXVVVaERFwgsIOuEgjcUqDTWPdQYsE7Z4c/edit)_
 
-The topology above assumes the **primary** and **secondary** Geo clusters
+The topology above assumes the **primary** and **secondary** Geo sites
 are located in two separate locations, on their own virtual network
 with private IP addresses. The network is configured such that all machines in
 one geographic location can communicate with each other using their private IP addresses.
 The IP addresses given are examples and may be different depending on the
 network topology of your deployment.
 
-The only external way to access the two Geo deployments is by HTTPS at
+The only external way to access the two Geo sites is by HTTPS at
 `gitlab.us.example.com` and `gitlab.eu.example.com` in the example above.
 
 NOTE:
-The **primary** and **secondary** Geo deployments must be able to communicate to each other over HTTPS.
+* The **primary** and **secondary** Geo sites must be able to communicate to each other over HTTPS.
+* It is possible to use cloud hosted services for PostgreSQL and Redis, but this is beyond the scope of this document.
 
-## Redis and PostgreSQL for multiple nodes
+## Redis for multiple nodes
 
-Geo supports:
-
-- Redis and PostgreSQL on the **primary** node configured for multiple nodes.
-- Redis on **secondary** nodes configured for multiple nodes.
-
-NOTE:
-Support for PostgreSQL on **secondary** nodes in multi-node configuration
-[is planned](https://gitlab.com/groups/gitlab-org/-/epics/2536).
+Geo supports Redis on **primary** and **secondary** sites configured for multiple nodes.
 
 Because of the additional complexity involved in setting up this configuration
-for PostgreSQL and Redis, it is not covered by this Geo multi-node documentation.
+for Redis, it is not covered by this Geo multi-node documentation.
 
-For more information on setting up a multi-node PostgreSQL cluster and Redis cluster using the Omnibus GitLab package, see:
-
-- [PostgreSQL multi-node documentation](../../postgresql/replication_and_failover.md)
-- [Redis multi-node documentation](../../redis/replication_and_failover.md)
-
-NOTE:
-It is possible to use cloud hosted services for PostgreSQL and Redis, but this is beyond the scope of this document.
+For more information on setting up a multi-node Redis cluster using the Omnibus GitLab package, see the [Redis multi-node documentation](../../redis/replication_and_failover.md)
 
 ## Prerequisites: Two working GitLab multi-node clusters
 
-One cluster serves as the **primary** node. Use the
+One cluster serves as the **primary** site. Use the
 [GitLab multi-node documentation](../../reference_architectures/index.md) to set this up. If
 you already have a working GitLab instance that is in-use, it can be used as a
-**primary**.
+**primary** site.
 
-The second cluster serves as the **secondary** node. Again, use the
+The second cluster serves as the **secondary** site. Again, use the
 [GitLab multi-node documentation](../../reference_architectures/index.md) to set this up.
 It's a good idea to log in and test it. However, be aware that its data is
-wiped out as part of the process of replicating from the **primary** node.
+wiped out as part of the process of replicating from the **primary** site.
 
-## Configure the GitLab cluster to be the **primary** node
+## Configure the GitLab cluster to be the **primary** site
 
-The following steps enable a GitLab cluster to serve as the **primary** node.
+The following steps enable a GitLab cluster to serve as the **primary** site.
 
-### Step 1: Configure the **primary** frontend servers
+### Step 1: Configure the **primary** site's frontend servers
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following:
 
@@ -110,7 +98,7 @@ and [Redis](../../redis/replication_and_failover.md#example-configuration-for-th
    roles ['geo_primary_role', 'postgres_role']
    ```
 
-## Configure a **secondary** node
+## Configure a **secondary** site
 
 A **secondary** cluster is similar to any other GitLab multi-node cluster, with two
 major differences:
@@ -128,14 +116,14 @@ verifying that it is a working cluster. And only then should it be modified
 for use as a Geo **secondary**. This helps to separate Geo setup problems from
 unrelated problems.
 
-### Step 1: Configure the Redis and Gitaly services on the **secondary** node
+### Step 1: Configure the Redis and Gitaly services on the **secondary** site
 
 Configure the following services, again using the non-Geo multi-node
 documentation:
 
 - [Configuring Redis for GitLab](../../redis/replication_and_failover.md#example-configuration-for-the-gitlab-application) for multiple nodes.
 - [Gitaly](../../gitaly/index.md), which stores data that is
-  synchronized from the **primary** node.
+  synchronized from the **primary** site.
 
 NOTE:
 [NFS](../../nfs.md) can be used in place of Gitaly but is not
@@ -145,8 +133,8 @@ recommended.
 
 NOTE:
 The following documentation assumes the database runs on
-a single node only. Multi-node PostgreSQL on **secondary** nodes is
-[not currently supported](https://gitlab.com/groups/gitlab-org/-/epics/2536).
+a single node only. For multi-node PostgreSQL on a **secondary** site,
+see [instructions to set up a Patroni standby cluster](../setup/database.md#multi-node-database-replication).
 
 Configure the [**secondary** database](../setup/database.md) as a read-only replica of
 the **primary** database. Use the following as a guide.
@@ -235,6 +223,9 @@ If using an external PostgreSQL instance, refer also to
 NOTE:
 This documentation assumes the tracking database runs on
 only a single machine, rather than as a PostgreSQL cluster.
+To run the tracking database as a PostgreSQL cluster,
+see the [instructions to configure a Patroni cluster for the tracking database](../setup/database.md#migrating-a-single-tracking-database-node-to-patroni) after following
+the steps below.
 
 Configure the tracking database.
 
@@ -301,7 +292,7 @@ After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus
 If using an external PostgreSQL instance, refer also to
 [Geo with external PostgreSQL instances](../setup/external_database.md).
 
-### Step 4: Configure the frontend application servers on the **secondary** node
+### Step 4: Configure the frontend application servers on the **secondary** site
 
 In the architecture overview, there are two machines running the GitLab
 application services. These services are enabled selectively in the
@@ -312,7 +303,7 @@ outlined in the [reference architectures](../../reference_architectures/index.md
 then make the following modifications:
 
 1. Edit `/etc/gitlab/gitlab.rb` on each application server in the **secondary**
-   cluster, and add the following:
+   site, and add the following:
 
    ```ruby
    ##
@@ -391,7 +382,7 @@ On the secondary the following GitLab frontend services are enabled:
 Verify these services by running `sudo gitlab-ctl status` on the frontend
 application servers.
 
-### Step 5: Set up the LoadBalancer for the **secondary** node
+### Step 5: Set up the LoadBalancer for the **secondary** site
 
 In this topology, a load balancer is required at each geographic location to
 route traffic to the application servers.
@@ -399,7 +390,7 @@ route traffic to the application servers.
 See [Load Balancer for GitLab with multiple nodes](../../load_balancer.md) for
 more information.
 
-### Step 6: Configure the backend application servers on the **secondary** node
+### Step 6: Configure the backend application servers on the **secondary** site
 
 The minimal reference architecture diagram above shows all application services
 running together on the same machines. However, for multiple nodes we
@@ -409,7 +400,7 @@ For example, a Sidekiq server could be configured similarly to the frontend
 application servers above, with some changes to run only the `sidekiq` service:
 
 1. Edit `/etc/gitlab/gitlab.rb` on each Sidekiq server in the **secondary**
-   cluster, and add the following:
+   site, and add the following:
 
    ```ruby
    ##
