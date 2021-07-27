@@ -15,6 +15,7 @@ class Admin::ApplicationsController < Admin::ApplicationController
   end
 
   def show
+    @new_application_secret = redis_getdel_secret(current_user.id)
   end
 
   def new
@@ -28,6 +29,8 @@ class Admin::ApplicationsController < Admin::ApplicationController
     @application = Applications::CreateService.new(current_user, application_params).execute(request)
 
     if @application.persisted?
+      redis_store_secret!(current_user.id, @application.secret)
+
       flash[:notice] = I18n.t(:notice, scope: [:doorkeeper, :flash, :applications, :create])
 
       redirect_to admin_application_url(@application)

@@ -24,10 +24,16 @@ class Oauth::ApplicationsController < Doorkeeper::ApplicationsController
     set_index_vars
   end
 
+  def show
+    @new_application_secret = redis_getdel_secret(current_user.id)
+  end
+
   def create
     @application = Applications::CreateService.new(current_user, create_application_params).execute(request)
 
     if @application.persisted?
+      redis_store_secret!(current_user.id, @application.secret)
+
       flash[:notice] = I18n.t(:notice, scope: [:doorkeeper, :flash, :applications, :create])
 
       redirect_to oauth_application_url(@application)

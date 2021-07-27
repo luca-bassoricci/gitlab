@@ -11,15 +11,18 @@
             %input.label.label-monospace.monospace{ id: "application_id", type: "text", autocomplete: 'off', value: @application.uid, readonly: true }
             .input-group-append
               = clipboard_button(target: '#application_id', title: _("Copy ID"), class: "gl-button btn btn-default")
-    %tr
-      %td
-        = _('Secret')
-      %td
-        .clipboard-group
-          .input-group
-            %input.label.label-monospace.monospace{ id: "secret", type: "text", autocomplete: 'off', value: @application.secret, readonly: true }
-            .input-group-append
-              = clipboard_button(target: '#secret', title: _("Copy secret"), class: "gl-button btn btn-default")
+    - if @new_application_secret
+      %tr
+        %td
+          = _('Secret')
+        %td
+          = clipboard_button(clipboard_text: @new_application_secret, button_text: _('Copy'), title: _("Copy secret"), class: "btn btn-default btn-md gl-button", icon_class: 'gl-button-icon gl-icon')
+          %a{ class: 'btn btn-default btn-md gl-button gl-ml-3', href: "data:text/plain;charset=utf-8,#{CGI.escape(@new_application_secret)}", download: "#{@application.name.parameterize}-secret.txt" }
+            = sprite_icon('download', css_class: 'gl-button-icon gl-icon')
+            %span.gl-button-text
+              = _('Download')
+          %p.gl-text-gray-500.gl-mt-3.gl-mb-0
+            = _("Make sure you save it - you won't be able to access it again.")
     %tr
       %td
         = _('Callback URL')

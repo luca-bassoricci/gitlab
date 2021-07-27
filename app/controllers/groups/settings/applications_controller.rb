@@ -16,6 +16,7 @@ module Groups
       end
 
       def show
+        @new_application_secret = redis_getdel_secret(current_user.id)
       end
 
       def edit
@@ -25,6 +26,8 @@ module Groups
         @application = Applications::CreateService.new(current_user, application_params).execute(request)
 
         if @application.persisted?
+          redis_store_secret!(current_user.id, @application.secret)
+
           flash[:notice] = I18n.t(:notice, scope: [:doorkeeper, :flash, :applications, :create])
 
           redirect_to group_settings_application_url(@group, @application)
