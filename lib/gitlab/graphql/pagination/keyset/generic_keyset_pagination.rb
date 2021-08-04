@@ -81,6 +81,8 @@ module Gitlab
             strong_memoize(:generic_keyset_pagination_items) do
               rebuilt_items_with_keyset_order, success = Gitlab::Pagination::Keyset::SimpleOrderBuilder.build(original_items)
 
+              raise "keyset_test/#{success}/#{@context.to_h[:request].params['query']}"
+
               success ? rebuilt_items_with_keyset_order : original_items
             end
           end
