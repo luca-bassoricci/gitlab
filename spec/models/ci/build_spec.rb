@@ -38,31 +38,11 @@ RSpec.describe Ci::Build do
   it { is_expected.to delegate_method(:merge_request_ref?).to(:pipeline) }
   it { is_expected.to delegate_method(:legacy_detached_merge_request_pipeline?).to(:pipeline) }
 
-  shared_examples 'calling proper BuildFinishedWorker' do
-    context 'when ci_build_finished_worker_namespace_changed feature flag enabled' do
-      before do
-        stub_feature_flags(ci_build_finished_worker_namespace_changed: build.project)
-      end
+  shared_examples 'calling Ci::BuildFinishedWorker' do
+    it 'calls Ci::BuildFinishedWorker' do
+      expect(Ci::BuildFinishedWorker).to receive(:perform_async)
 
-      it 'calls Ci::BuildFinishedWorker' do
-        expect(Ci::BuildFinishedWorker).to receive(:perform_async)
-        expect(::BuildFinishedWorker).not_to receive(:perform_async)
-
-        subject
-      end
-    end
-
-    context 'when ci_build_finished_worker_namespace_changed feature flag disabled' do
-      before do
-        stub_feature_flags(ci_build_finished_worker_namespace_changed: false)
-      end
-
-      it 'calls ::BuildFinishedWorker' do
-        expect(::BuildFinishedWorker).to receive(:perform_async)
-        expect(Ci::BuildFinishedWorker).not_to receive(:perform_async)
-
-        subject
-      end
+      subject
     end
   end
 
@@ -1339,7 +1319,7 @@ RSpec.describe Ci::Build do
       end
 
       it_behaves_like 'avoid deadlock'
-      it_behaves_like 'calling proper BuildFinishedWorker'
+      it_behaves_like 'calling Ci::BuildFinishedWorker'
 
       it 'transits deployment status to success' do
         subject
@@ -1352,7 +1332,7 @@ RSpec.describe Ci::Build do
       let(:event) { :drop! }
 
       it_behaves_like 'avoid deadlock'
-      it_behaves_like 'calling proper BuildFinishedWorker'
+      it_behaves_like 'calling Ci::BuildFinishedWorker'
 
       it 'transits deployment status to failed' do
         subject
@@ -1377,7 +1357,7 @@ RSpec.describe Ci::Build do
       let(:event) { :cancel! }
 
       it_behaves_like 'avoid deadlock'
-      it_behaves_like 'calling proper BuildFinishedWorker'
+      it_behaves_like 'calling Ci::BuildFinishedWorker'
 
       it 'transits deployment status to canceled' do
         subject
