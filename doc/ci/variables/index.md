@@ -657,6 +657,9 @@ To make a CI/CD variable available as an environment variable in the running app
 [prefix the variable key](../../topics/autodevops/customize.md#application-secret-variables)
 with `K8S_SECRET_`.
 
+There is also an extensive set of variables for configuring behaviors and debug tracing Auto DevOps
+list in [Customize Auto DevOps CI/CD variables](../../../topics/autodevops/customize.md#cicd-variables)
+
 CI/CD variables with multi-line values are not supported.
 
 ## Debug logging
