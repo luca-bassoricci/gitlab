@@ -295,6 +295,10 @@ export default {
 
     return fetchAndFormatListIssues(state, variables)
       .then(({ listItems, listPageInfo }) => {
+        if (state.listsFlags[listId].isLoading || state.listsFlags[listId].isLoadingMore) {
+          commit(types.RESET_ITEMS_FOR_LIST, listId);
+        }
+
         commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
           listItems,
           listPageInfo,
