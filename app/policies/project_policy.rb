@@ -230,6 +230,7 @@ class ProjectPolicy < BasePolicy
     enable :read_issue_board_list
     enable :read_wiki
     enable :read_issue
+    enable :read_issue_custom_type
     enable :read_label
     enable :read_milestone
     enable :read_snippet

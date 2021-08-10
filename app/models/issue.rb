@@ -131,6 +131,7 @@ class Issue < ApplicationRecord
       project: [:route, { namespace: :route }])
   }
   scope :with_issue_type, ->(types) { where(issue_type: types) }
+  scope :with_issue_custom_type_id, ->(ids) { where(issue_custom_type_id: ids) }
 
   scope :public_only, -> { where(confidential: false) }
   scope :confidential_only, -> { where(confidential: true) }
@@ -544,6 +545,16 @@ class Issue < ApplicationRecord
     self.update_column(:upvotes_count, self.upvotes)
   end
 
+  def issue_type_human
+    return issue_type.capitalize unless issue_custom_type_id.present?
+
+    issue_custom_type.name
+  end
+
+  def issue_type_matches?(to_match)
+    self[:issue_type] == to_match[:issue_type] && self[:issue_custom_type_id] == to_match[:issue_custom_type_id]
+  end
+  
   # Returns `true` if the given User can read the current Issue.
   #
   # This method duplicates the same check of issue_policy.rb

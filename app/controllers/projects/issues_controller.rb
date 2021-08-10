@@ -318,6 +318,7 @@ class Projects::IssuesController < Projects::ApplicationController
       lock_version
       discussion_locked
       issue_type
+      issue_custom_type_id
     ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
   end
 

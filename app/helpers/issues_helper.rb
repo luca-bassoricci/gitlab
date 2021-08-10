@@ -52,6 +52,22 @@ module IssuesHelper
     sprite_icon('eye-slash', css_class: 'gl-vertical-align-text-bottom') if issue.confidential?
   end
 
+  def issue_type_icon(issue_type, issue_custom_type)
+    icon_name = issue_custom_type.icon_name if issue_custom_type&.icon_name
+    icon_name ||= case issue_type
+                  when 'issue'
+                    'issue-type-issue'
+                  when 'incident'
+                    'issue-type-incident'
+                  when 'test_case'
+                    'documents'
+                  else
+                    'issue-type-issue'
+                  end
+
+    sprite_icon(icon_name, css_class: 'gl-icon')
+  end
+
   def award_user_list(awards, current_user, limit: 10)
     names = awards.map do |award|
       award.user == current_user ? 'You' : award.user.name
