@@ -37,10 +37,17 @@ module Security
 
     def create_all_vulnerabilities!
       # Look for existing Findings using UUID
-      finding_uuids = @report.findings.map(&:uuid)
-      vulnerability_findings_by_uuid = project.vulnerability_findings
+      finding_uuids = (@report.findings.map(&:uuid) + @report.findings.map(&:overridden_uuid)).uniq
+
+      vuln_uuid = project.vulnerability_findings
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
+
+      vuln_overridden_uuid = project.vulnerability_findings
+        .where(overridden_uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
+        .to_h { |vf| [vf.uuid, vf] }
+
+      vulnerability_findings_by_uuid = vuln_uuid.merge(vuln_overridden_uuid)
 
       update_vulnerability_scanners!(@report.findings)
 

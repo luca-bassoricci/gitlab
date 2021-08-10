@@ -90,18 +90,20 @@ module Gitlab
             location = create_location(data['location'] || {})
             signatures = create_signatures(tracking_data(data))
 
+            overridden_uuid = calculate_uuid_v5(identifiers.first, location&.fingerprint)
             if @vulnerability_finding_signatures_enabled && !signatures.empty?
               # NOT the signature_sha - the compare key is hashed
               # to create the project_fingerprint
               highest_priority_signature = signatures.max_by(&:priority)
               uuid = calculate_uuid_v5(identifiers.first, highest_priority_signature.signature_hex)
             else
-              uuid = calculate_uuid_v5(identifiers.first, location&.fingerprint)
+              uuid = overridden_uuid
             end
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
                 uuid: uuid,
+                overridden_uuid: overridden_uuid,
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
                 compare_key: data['cve'] || '',
