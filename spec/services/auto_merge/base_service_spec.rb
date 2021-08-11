@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# test
+
 require 'spec_helper'
 
 RSpec.describe AutoMerge::BaseService do
