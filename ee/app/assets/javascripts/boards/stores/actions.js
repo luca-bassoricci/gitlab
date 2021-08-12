@@ -18,6 +18,7 @@ import axios from '~/lib/utils/axios_utils';
 import { historyPushState, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import { cloneDeep } from 'lodash';
 import {
   fullEpicId,
   fullEpicBoardId,
@@ -280,6 +281,8 @@ export default {
       first: 10,
     };
 
+    const f = cloneDeep(filterParams);
+
     if (getters.isEpicBoard) {
       return fetchAndFormatListEpics(state, variables)
         .then(({ listItems, listPageInfo }) => {
@@ -288,22 +291,19 @@ export default {
             listPageInfo,
             listId,
             noEpicIssues,
+            filterParams: f,
           });
         })
         .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));
     }
-
     return fetchAndFormatListIssues(state, variables)
       .then(({ listItems, listPageInfo }) => {
-        if (state.listsFlags[listId].isLoading || state.listsFlags[listId].isLoadingMore) {
-          commit(types.RESET_ITEMS_FOR_LIST, listId);
-        }
-
         commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
           listItems,
           listPageInfo,
           listId,
           noEpicIssues,
+          filterParams: f,
         });
       })
       .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));

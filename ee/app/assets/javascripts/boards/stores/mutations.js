@@ -1,4 +1,4 @@
-import { union, unionBy } from 'lodash';
+import { union, unionBy, isEqual } from 'lodash';
 import Vue from 'vue';
 import { moveItemListHelper } from '~/boards/boards_util';
 import { issuableTypes } from '~/boards/constants';
@@ -19,15 +19,23 @@ export default {
 
   [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (
     state,
-    { listItems, listPageInfo, listId, noEpicIssues },
+    { listItems, listPageInfo, listId, noEpicIssues, filterParams },
   ) => {
     const { listData, boardItems, listItemsCount } = listItems;
+
+    if (!isEqual(filterParams, state.filterParams)) {
+      return;
+    }
     Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
-    Vue.set(
-      state.boardItemsByListId,
-      listId,
-      union(state.boardItemsByListId[listId] || [], listData[listId]),
-    );
+    if (state.listsFlags[listId].isLoadingMore) {
+      Vue.set(
+        state.boardItemsByListId,
+        listId,
+        union(state.boardItemsByListId[listId] || [], listData[listId]),
+      );
+    } else {
+      Vue.set(state.boardItemsByListId, listId, listData[listId]);
+    }
     Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
     Vue.set(state.listsFlags[listId], 'isLoading', false);
     Vue.set(state.listsFlags[listId], 'isLoadingMore', false);
