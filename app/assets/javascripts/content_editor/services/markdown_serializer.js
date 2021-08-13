@@ -19,6 +19,7 @@ import ListItem from '../extensions/list_item';
 import OrderedList from '../extensions/ordered_list';
 import Paragraph from '../extensions/paragraph';
 import Strike from '../extensions/strike';
+import Subscript from '../extensions/subscript';
 import Table from '../extensions/table';
 import TableCell from '../extensions/table_cell';
 import TableHeader from '../extensions/table_header';
@@ -75,6 +76,11 @@ const defaultSerializerConfig = {
     [ListItem.name]: defaultMarkdownSerializer.nodes.list_item,
     [OrderedList.name]: defaultMarkdownSerializer.nodes.ordered_list,
     [Paragraph.name]: defaultMarkdownSerializer.nodes.paragraph,
+    [Subscript.name]: (state, node) => {
+      const { textContent } = node.attrs;
+
+      state.write(`<sub>${textContent}</sub>`);
+    },
     [Table.name]: (state, node) => {
       state.renderContent(node);
     },

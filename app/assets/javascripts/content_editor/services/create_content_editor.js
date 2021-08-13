@@ -23,6 +23,7 @@ import Loading from '../extensions/loading';
 import OrderedList from '../extensions/ordered_list';
 import Paragraph from '../extensions/paragraph';
 import Strike from '../extensions/strike';
+import Subscript from '../extensions/subscript';
 import Table from '../extensions/table';
 import TableCell from '../extensions/table_cell';
 import TableHeader from '../extensions/table_header';
@@ -77,6 +78,7 @@ export const createContentEditor = ({
     OrderedList,
     Paragraph,
     Strike,
+    Subscript,
     TableCell,
     TableHeader,
     TableRow,
