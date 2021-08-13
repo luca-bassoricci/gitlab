@@ -18,8 +18,7 @@ RSpec.describe 'User updates feature flag', :js do
 
   context 'with a new version feature flag' do
     let!(:feature_flag) do
-      create_flag(project, 'test_flag', false, version: Operations::FeatureFlag.versions['new_version_flag'],
-                  description: 'For testing')
+      create_flag(project, 'test_flag', false, description: 'For testing')
     end
 
     let!(:strategy) do
@@ -64,22 +63,6 @@ RSpec.describe 'User updates feature flag', :js do
       within_feature_flag_row(1) do
         expect_status_toggle_button_to_be_checked
       end
-    end
-  end
-
-  context 'with a legacy feature flag' do
-    let!(:feature_flag) do
-      create_flag(project, 'ci_live_trace', true,
-                  description: 'For live trace feature',
-                  version: :legacy_flag)
-    end
-
-    let!(:scope) { create_scope(feature_flag, 'review/*', true) }
-
-    it 'shows not found error' do
-      visit(edit_project_feature_flag_path(project, feature_flag))
-
-      expect(page).to have_text 'Page Not Found'
     end
   end
 end

@@ -48,8 +48,8 @@ RSpec.describe FeatureFlags::CreateService do
         {
           name: 'feature_flag',
           description: 'description',
-          scopes_attributes: [{ environment_scope: '*', active: true },
-                              { environment_scope: 'production', active: false }]
+          strategies_attributes: [{ name: "default", parameters: {}, scopes_attributes: [{ environment_scope: '*' }] },
+                                  { name: "default", parameters: {}, scopes_attributes: [{ environment_scope: 'production' }] }]
         }
       end
 
@@ -70,10 +70,10 @@ RSpec.describe FeatureFlags::CreateService do
       it 'creates audit event' do
         expected_message = 'Created feature flag feature_flag '\
                            'with description "description". '\
-                           'Created rule * and set it as active '\
-                           'with strategies [{"name"=&gt;"default", "parameters"=&gt;{}}]. '\
-                           'Created rule production and set it as inactive '\
-                           'with strategies [{"name"=&gt;"default", "parameters"=&gt;{}}].'
+                           'Created strategy default with scopes '\
+                           '*. '\
+                           'Created strategy default with scopes '\
+                           'production.'
 
         expect { subject }.to change { AuditEvent.count }.by(1)
         expect(AuditEvent.last.details[:custom_message]).to eq(expected_message)

@@ -43,12 +43,6 @@ module API
           requires :name, type: String, desc: 'The name of feature flag'
           optional :description, type: String, desc: 'The description of the feature flag'
           optional :active, type: Boolean, desc: 'Active/inactive value of the flag'
-          optional :version, type: String, desc: 'The version of the feature flag'
-          optional :scopes, type: Array do
-            requires :environment_scope, type: String, desc: 'The environment scope of the scope'
-            requires :active, type: Boolean, desc: 'Active/inactive of the scope'
-            requires :strategies, type: JSON, desc: 'The strategies of the scope'
-          end
           optional :strategies, type: Array do
             requires :name, type: String, desc: 'The strategy name'
             requires :parameters, type: JSON, desc: 'The strategy parameters'
@@ -62,7 +56,6 @@ module API
 
           attrs = declared_params(include_missing: false)
 
-          rename_key(attrs, :scopes, :scopes_attributes)
           rename_key(attrs, :strategies, :strategies_attributes)
           update_value(attrs, :strategies_attributes) do |strategies|
             strategies.map { |s| rename_key(s, :scopes, :scopes_attributes) }
@@ -90,7 +83,6 @@ module API
         end
         get do
           authorize_read_feature_flag!
-          exclude_legacy_flags_check!
 
           present_entity(feature_flag)
         end
@@ -117,8 +109,6 @@ module API
         end
         put do
           authorize_update_feature_flag!
-          exclude_legacy_flags_check!
-          render_api_error!('PUT operations are not supported for legacy feature flags', :unprocessable_entity) if feature_flag.legacy_flag?
 
           attrs = declared_params(include_missing: false)
 
@@ -192,10 +182,6 @@ module API
         @project ||= feature_flag.project
       end
 
-      def new_version_flag_present?
-        user_project.operations_feature_flags.new_version_flag.find_by_name(params[:name]).present?
-      end
-
       def rename_key(hash, old_key, new_key)
         hash[new_key] = hash.delete(old_key) if hash.key?(old_key)
         hash
@@ -204,12 +190,6 @@ module API
       def update_value(hash, key)
         hash[key] = yield(hash[key]) if hash.key?(key)
         hash
-      end
-
-      def exclude_legacy_flags_check!
-        if feature_flag.legacy_flag?
-          not_found!
-        end
       end
     end
   end

@@ -41,7 +41,6 @@ module FeatureFlags
 
     def audit_message(feature_flag)
       changes = changed_attributes_messages(feature_flag)
-      changes += changed_scopes_messages(feature_flag)
 
       return if changes.empty?
 
@@ -54,18 +53,6 @@ module FeatureFlags
         "from \"#{changes.first}\" to "\
         "\"#{changes.second}\"."
       end
-    end
-
-    def changed_scopes_messages(feature_flag)
-      feature_flag.scopes.map do |scope|
-        if scope.new_record?
-          created_scope_message(scope)
-        elsif scope.marked_for_destruction?
-          deleted_scope_message(scope)
-        else
-          updated_scope_message(scope)
-        end
-      end.compact # updated_scope_message can return nil if nothing has been changed
     end
 
     def deleted_scope_message(scope)

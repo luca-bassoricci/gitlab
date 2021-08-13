@@ -27,7 +27,7 @@ RSpec.describe 'Feature flag issue links', :js do
     end
 
     let!(:feature_flag) do
-      create(:operations_feature_flag, :new_version_flag, project: project)
+      create(:operations_feature_flag, project: project)
     end
 
     it 'user can link a feature flag to an issue' do
@@ -80,7 +80,7 @@ RSpec.describe 'Feature flag issue links', :js do
     end
 
     let!(:feature_flag) do
-      create(:operations_feature_flag, :new_version_flag, project: project, issues: [issue])
+      create(:operations_feature_flag, project: project, issues: [issue])
     end
 
     it 'user can unlink a feature flag from an issue' do

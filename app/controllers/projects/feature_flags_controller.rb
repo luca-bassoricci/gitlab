@@ -10,9 +10,6 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
 
   before_action :feature_flag, only: [:edit, :update, :destroy]
 
-  before_action :ensure_flag_writable!, only: [:update]
-  before_action :exclude_legacy_flags_check, only: [:edit]
-
   feature_category :feature_flags
 
   def index
@@ -98,23 +95,9 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
     @feature_flag ||= @noteable = project.operations_feature_flags.find_by_iid!(params[:iid])
   end
 
-  def ensure_flag_writable!
-    if feature_flag.legacy_flag?
-      render_error_json(['Legacy feature flags are read-only'])
-    end
-  end
-
-  def exclude_legacy_flags_check
-    if feature_flag.legacy_flag?
-      not_found
-    end
-  end
-
   def create_params
     params.require(:operations_feature_flag)
-      .permit(:name, :description, :active, :version,
-              scopes_attributes: [:environment_scope, :active,
-                                  strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
+      .permit(:name, :description, :active,
               strategies_attributes: [:name, :user_list_id,
                                       parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness],
                                       scopes_attributes: [:environment_scope]])
@@ -123,8 +106,6 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   def update_params
     params.require(:operations_feature_flag)
           .permit(:name, :description, :active,
-                  scopes_attributes: [:id, :environment_scope, :active, :_destroy,
-                                      strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
                  strategies_attributes: [:id, :name, :user_list_id, :_destroy,
                                          parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness],
                                          scopes_attributes: [:id, :environment_scope, :_destroy]])

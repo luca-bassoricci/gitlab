@@ -15599,8 +15599,7 @@ CREATE TABLE operations_feature_flags (
     updated_at timestamp with time zone NOT NULL,
     name character varying NOT NULL,
     description text,
-    iid integer NOT NULL,
-    version smallint DEFAULT 1 NOT NULL
+    iid integer NOT NULL
 );
 
 CREATE TABLE operations_feature_flags_clients (

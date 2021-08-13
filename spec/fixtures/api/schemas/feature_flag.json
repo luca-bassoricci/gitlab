@@ -1,13 +1,9 @@
 {
   "type": "object",
-  "required" : [
-    "id",
-    "name"
-  ],
-  "properties" : {
+  "required": ["id", "name"],
+  "properties": {
     "id": { "type": "integer" },
     "iid": { "type": ["integer", "null"] },
-    "version": { "type": "string" },
     "created_at": { "type": "string", "format": "date-time" },
     "updated_at": { "type": "string", "format": "date-time" },
     "name": { "type": "string" },
