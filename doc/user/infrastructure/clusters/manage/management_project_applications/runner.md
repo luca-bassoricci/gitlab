@@ -19,7 +19,7 @@ uncomment this line from your `helmfile.yaml`:
 GitLab Runner is installed by default into the `gitlab-managed-apps` namespace of your cluster.
 
 For GitLab Runner to function, you _must_ specify the following in your
-`applications/gitlab-runner/values.yaml.gotmpl` file:
+`applications/gitlab-runner/values.yaml` file:
 
 - `gitlabUrl`: The GitLab server full URL (for example, `https://gitlab.example.com`)
   to register the Runner against.
@@ -31,12 +31,12 @@ These values can be specified using [CI/CD variables](../../../../../ci/variable
 - `GITLAB_RUNNER_GITLAB_URL` is used for `gitlabUrl`.
 - `GITLAB_RUNNER_REGISTRATION_TOKEN` is used for `runnerRegistrationToken`
 
-The methods of specifying these values are mutually exclusive. Either specify variables `GITLAB_RUNNER_REGISTRATION_TOKEN` and `GITLAB_RUNNER_TOKEN` as CI variables (recommended) or provide values for `runnerRegistrationToken:` and `runnerToken:` in `applications/gitlab-runner/values.yaml.gotmpl`.
+The methods of specifying these values are mutually exclusive. Either specify variables `GITLAB_RUNNER_REGISTRATION_TOKEN` and `GITLAB_RUNNER_TOKEN` as CI variables (recommended) or provide values for `runnerRegistrationToken:` and `runnerToken:` in `applications/gitlab-runner/values.yaml`.
 
-The runner registration token allows connection to a project by a runner and therefore should be treated as a secret to prevent malicious use and code exfiltration through a runner. For this reason, we recommend that you specify the runner registration token as a [protected variable](../../../../../ci/variables/index.md#protect-a-cicd-variable) and [masked variable](../../../../../ci/variables/index.md#mask-a-cicd-variable) and do not commit them to the Git repository in the `values.yaml.gotmpl` file.
+The runner registration token allows connection to a project by a runner and therefore should be treated as a secret to prevent malicious use and code exfiltration through a runner. For this reason, we recommend that you specify the runner registration token as a [protected variable](../../../../../ci/variables/index.md#protect-a-cicd-variable) and [masked variable](../../../../../ci/variables/index.md#mask-a-cicd-variable) and do not commit them to the Git repository in the `values.yaml` file.
 
 You can customize the installation of GitLab Runner by defining
-`applications/gitlab-runner/values.yaml.gotmpl` file in your cluster
+`applications/gitlab-runner/values.yaml` file in your cluster
 management project. Refer to the
 [chart](https://gitlab.com/gitlab-org/charts/gitlab-runner) for the
 available configuration options.
