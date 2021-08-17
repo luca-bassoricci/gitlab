@@ -112,6 +112,7 @@ module Gitlab
         # Lifecycle integration methods (called from puma.rb, etc.)
         #
         def do_worker_start
+          puts @worker_start_hooks
           call(:worker_start_hooks, @worker_start_hooks)
         end
 
@@ -142,6 +143,18 @@ module Gitlab
           @puma_options = options
         end
 
+        def in_clustered_environment?
+          # Sidekiq doesn't fork
+          return false if Gitlab::Runtime.sidekiq?
+
+          # Puma sometimes forks
+          return true if in_clustered_puma?
+
+          # Default assumption is that we don't fork
+          false
+        end
+
+
         private
 
         def call(name, hooks)
@@ -156,17 +169,6 @@ module Gitlab
             # we consider lifecycle hooks to be fatal errors
             raise FatalError, e if USE_FATAL_LIFECYCLE_EVENTS
           end
-        end
-
-        def in_clustered_environment?
-          # Sidekiq doesn't fork
-          return false if Gitlab::Runtime.sidekiq?
-
-          # Puma sometimes forks
-          return true if in_clustered_puma?
-
-          # Default assumption is that we don't fork
-          false
         end
 
         def in_clustered_puma?

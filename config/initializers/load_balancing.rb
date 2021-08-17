@@ -19,6 +19,7 @@ if Gitlab::Database::LoadBalancing.enable?
   # This needs to be executed after fork of clustered processes
   Gitlab::Cluster::LifecycleEvents.on_worker_start do
     # For Host-based LB, we need to re-connect as Rails discards connections on fork
+    puts "omg"
     Gitlab::Database::LoadBalancing.configure_proxy
 
     # Service discovery must be started after configuring the proxy, as service
