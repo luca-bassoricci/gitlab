@@ -1901,6 +1901,7 @@ class Project < ApplicationRecord
 
     DetectRepositoryLanguagesWorker.perform_async(id)
     ProjectCacheWorker.perform_async(self.id, [], [:repository_size])
+    AuthorizedProjectUpdate::ProjectRecalculateWorker.perform_async(id)
 
     # The import assigns iid values on its own, e.g. by re-using GitHub ids.
     # Flush existing InternalId records for this project for consistency reasons.
@@ -2039,6 +2040,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_URL', value: web_url)
       .append(key: 'CI_PROJECT_VISIBILITY', value: Gitlab::VisibilityLevel.string_level(visibility_level))
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
+      .append(key: 'CI_PROJECT_CLASSIFICATION_LABEL', value: external_authorization_classification_label)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
       .append(key: 'CI_CONFIG_PATH', value: ci_config_path_or_default)
   end
@@ -2566,14 +2568,14 @@ class Project < ApplicationRecord
     [project&.id, root_group&.id]
   end
 
-  def package_already_taken?(package_name, package_type:)
-    namespace.root_ancestor.all_projects
-      .joins(:packages)
-      .where.not(id: id)
-      .merge(
-        Packages::Package.default_scoped
-          .with_name(package_name)
-          .with_package_type(package_type)
+  def package_already_taken?(package_name, package_version, package_type:)
+    Packages::Package.with_name(package_name)
+      .with_version(package_version)
+      .with_package_type(package_type)
+      .for_projects(
+        root_ancestor.all_projects
+          .id_not_in(id)
+          .select(:id)
       ).exists?
   end
 

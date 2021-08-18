@@ -8,8 +8,6 @@ class Admin::IntegrationsController < Admin::ApplicationController
   feature_category :integrations
 
   def overrides
-    return render_404 unless instance_level_integration_overrides?
-
     respond_to do |format|
       format.json do
         projects = Project.with_active_integration(integration.class).merge(::Integration.with_custom_settings)
@@ -25,9 +23,5 @@ class Admin::IntegrationsController < Admin::ApplicationController
 
   def find_or_initialize_non_project_specific_integration(name)
     Integration.find_or_initialize_non_project_specific_integration(name, instance: true)
-  end
-
-  def instance_level_integration_overrides?
-    Feature.enabled?(:instance_level_integration_overrides, default_enabled: :yaml)
   end
 end

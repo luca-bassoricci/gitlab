@@ -1,5 +1,5 @@
 ---
-data_category: Optional
+data_category: optional
 key_path: usage_activity_by_stage.enablement.counts.geo_node_usage.git_push_event_count_weekly
 description: Number of Git push events from Prometheus on the Geo secondary
 product_section: enablement
@@ -13,7 +13,8 @@ introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63427/
 time_frame: 7d
 data_source: prometheus
 distribution:
-  - ee
+- ee
 tier:
- - premium
- - ultimate
+- premium
+- ultimate
+performance_indicator_type: []

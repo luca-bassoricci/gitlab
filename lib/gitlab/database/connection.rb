@@ -75,6 +75,17 @@ module Gitlab
         adapter_name.casecmp('postgresql') == 0
       end
 
+      def db_config_with_default_pool_size
+        db_config_object = scope.connection_db_config
+        config = db_config_object.configuration_hash.merge(pool: default_pool_size)
+
+        ActiveRecord::DatabaseConfigurations::HashConfig.new(
+          db_config_object.env_name,
+          db_config_object.name,
+          config
+        )
+      end
+
       # Disables prepared statements for the current database connection.
       def disable_prepared_statements
         scope.establish_connection(config.merge(prepared_statements: false))
@@ -150,20 +161,6 @@ module Gitlab
         else
           []
         end
-      end
-
-      # pool_size - The size of the DB pool.
-      # host - An optional host name to use instead of the default one.
-      # port - An optional port to connect to.
-      def create_connection_pool(pool_size, host = nil, port = nil)
-        original_config = config
-        env_config = original_config.merge(pool: pool_size)
-
-        env_config[:host] = host if host
-        env_config[:port] = port if port
-
-        ActiveRecord::ConnectionAdapters::ConnectionHandler
-          .new.establish_connection(env_config)
       end
 
       def cached_column_exists?(table_name, column_name)

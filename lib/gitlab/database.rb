@@ -147,6 +147,11 @@ module Gitlab
       # spec/support/database/prevent_cross_joins.rb
     end
 
+    def self.allow_cross_database_modification_within_transaction(url:)
+      # this method is implemented in:
+      # spec/support/database/cross_database_modification_check.rb
+    end
+
     def self.add_post_migrate_path_to_rails(force: false)
       return if ENV['SKIP_POST_DEPLOYMENT_MIGRATIONS'] && !force
 
@@ -177,17 +182,24 @@ module Gitlab
       'unknown'
     end
 
-    # Monkeypatch rails with upgraded database observability
-    def self.install_monkey_patches
-      ActiveRecord::Base.prepend(ActiveRecordBaseTransactionMetrics)
-    end
-
     def self.read_only?
       false
     end
 
     def self.read_write?
       !read_only?
+    end
+
+    # Monkeypatch rails with upgraded database observability
+    def self.install_transaction_metrics_patches!
+      ActiveRecord::Base.prepend(ActiveRecordBaseTransactionMetrics)
+    end
+
+    def self.install_transaction_context_patches!
+      ActiveRecord::ConnectionAdapters::TransactionManager
+        .prepend(TransactionManagerContext)
+      ActiveRecord::ConnectionAdapters::RealTransaction
+        .prepend(RealTransactionContext)
     end
 
     # MonkeyPatch for ActiveRecord::Base for adding observability
@@ -204,6 +216,32 @@ module Gitlab
         end
       end
     end
+
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    module TransactionManagerContext
+      def transaction_context
+        @stack.first.try(:gitlab_transaction_context)
+      end
+    end
+
+    module RealTransactionContext
+      def gitlab_transaction_context
+        @gitlab_transaction_context ||= ::Gitlab::Database::Transaction::Context.new
+      end
+
+      def commit
+        gitlab_transaction_context.commit
+
+        super
+      end
+
+      def rollback
+        gitlab_transaction_context.rollback
+
+        super
+      end
+    end
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
   end
 end
 

@@ -1,4 +1,3 @@
-
 ---
 key_path: usage_activity_by_stage_monthly.secure.cluster_image_scanning_pipeline
 description: Pipelines containing a Cluster Image Scanning job
@@ -10,8 +9,9 @@ value_type: number
 status: implemented
 time_frame: 28d
 data_source: database
-data_category: Optional
+data_category: optional
 distribution:
 - ee
 tier:
 - ultimate
+performance_indicator_type: []

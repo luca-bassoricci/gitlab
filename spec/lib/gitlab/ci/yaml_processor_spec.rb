@@ -1152,6 +1152,10 @@ module Gitlab
             end
 
             it { is_expected.to be_valid }
+
+            it 'adds the job from the included file' do
+              expect(subject.builds.map { |build| build[:name] }).to contain_exactly('job1', 'rspec')
+            end
           end
 
           context "when the included internal file is not present" do
@@ -2777,7 +2781,7 @@ module Gitlab
             expect(subject.valid?).to eq(false)
             expect(subject.errors).to contain_exactly(
               'jobs:rspec config contains unknown keys: bad_tags',
-              'jobs:rspec rules should be an array of hashes')
+              'jobs:rspec rules should be an array containing hashes and arrays of hashes')
           end
         end
 

@@ -110,7 +110,13 @@ export const FilterFields = {
     'releaseTag',
     'search',
     'types',
+    'weight',
   ],
+};
+
+export const DraggableItemTypes = {
+  card: 'card',
+  list: 'list',
 };
 
 export default {

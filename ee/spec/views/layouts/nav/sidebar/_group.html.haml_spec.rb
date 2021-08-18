@@ -323,137 +323,274 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
     end
   end
 
-  describe 'DevOps adoption link' do
-    let!(:current_user) { create(:user) }
+  describe 'Analytics menu' do
+    let_it_be(:owner) { create(:user) }
+    let_it_be(:guest) { create(:user) }
+
+    let_it_be_with_refind(:group) do
+      create(:group).tap do |g|
+        g.add_maintainer(owner)
+        g.add_guest(guest)
+      end
+    end
 
     before do
-      group.add_maintainer(current_user)
-
-      allow(view).to receive(:current_user).and_return(current_user)
+      allow(view).to receive(:current_user).and_return(owner)
     end
 
-    context 'DevOps adoption feature is available' do
+    describe 'CI/CD analytics' do
+      let(:ci_cd_analytics_enabled) { true }
+
       before do
-        stub_licensed_features(group_level_devops_adoption: true)
+        stub_licensed_features(group_ci_cd_analytics: ci_cd_analytics_enabled)
       end
 
-      it 'is visible' do
+      it 'has a link to the CI/CD analytics page' do
         render
 
-        expect(rendered).to have_text 'DevOps adoption'
+        expect(rendered).to have_link('CI/CD', href: group_analytics_ci_cd_analytics_path(group))
+      end
+
+      describe 'feature is disabled' do
+        let(:ci_cd_analytics_enabled) { false }
+
+        specify do
+          render
+
+          expect(rendered).not_to have_link('CI/CD')
+        end
       end
     end
 
-    context 'DevOps adoption feature is not available' do
-      before do
-        stub_licensed_features(group_level_devops_adoption: false)
-      end
-
-      it 'is not visible' do
-        render
-
-        expect(rendered).not_to have_text 'DevOps adoption'
-      end
-    end
-  end
-
-  describe 'contribution analytics tab' do
-    let!(:current_user) { create(:user) }
-
-    before do
-      group.add_guest(current_user)
-
-      allow(view).to receive(:current_user).and_return(current_user)
-    end
-
-    context 'contribution analytics feature is available' do
-      before do
-        stub_licensed_features(contribution_analytics: true)
-      end
-
-      it 'is visible' do
-        render
-
-        expect(rendered).to have_text 'Contribution'
-      end
-    end
-
-    context 'contribution analytics feature is not available' do
-      before do
-        stub_licensed_features(contribution_analytics: false)
-      end
-
-      context 'we do not show promotions' do
+    describe 'DevOps' do
+      context 'DevOps adoption feature is available' do
         before do
-          allow(LicenseHelper).to receive(:show_promotions?).and_return(false)
+          stub_licensed_features(group_level_devops_adoption: true)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_text 'DevOps adoption'
+        end
+      end
+
+      context 'DevOps adoption feature is not available' do
+        before do
+          stub_licensed_features(group_level_devops_adoption: false)
         end
 
         it 'is not visible' do
           render
 
-          expect(rendered).not_to have_text 'Contribution'
+          expect(rendered).not_to have_text 'DevOps adoption'
         end
       end
     end
 
-    context 'no license installed' do
+    describe 'Repository analytics' do
       before do
-        allow(License).to receive(:current).and_return(nil)
-        stub_application_setting(check_namespace_plan: false)
-
-        allow(view).to receive(:can?) { |*args| Ability.allowed?(*args) }
+        stub_licensed_features(group_coverage_reports: true, group_repository_analytics: true)
       end
 
-      it 'is visible when there is no valid license but we show promotions' do
-        stub_licensed_features(contribution_analytics: false)
+      it 'has a link to the Repository analytics page' do
+        render
+
+        expect(rendered).to have_link('Repository', href: group_analytics_repository_analytics_path(group))
+      end
+
+      describe 'feature is not available' do
+        specify do
+          stub_licensed_features(group_coverage_reports: false)
+
+          render
+
+          expect(rendered).not_to have_link('Repository')
+        end
+      end
+    end
+
+    describe 'contribution analytics tab' do
+      before do
+        allow(view).to receive(:current_user).and_return(guest)
+      end
+
+      context 'contribution analytics feature is available' do
+        before do
+          stub_licensed_features(contribution_analytics: true)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_text 'Contribution'
+        end
+      end
+
+      context 'contribution analytics feature is not available' do
+        before do
+          stub_licensed_features(contribution_analytics: false)
+        end
+
+        context 'we do not show promotions' do
+          before do
+            allow(LicenseHelper).to receive(:show_promotions?).and_return(false)
+          end
+
+          it 'is not visible' do
+            render
+
+            expect(rendered).not_to have_text 'Contribution'
+          end
+        end
+      end
+
+      context 'no license installed' do
+        before do
+          allow(License).to receive(:current).and_return(nil)
+          stub_application_setting(check_namespace_plan: false)
+
+          allow(view).to receive(:can?) { |*args| Ability.allowed?(*args) }
+        end
+
+        it 'is visible when there is no valid license but we show promotions' do
+          stub_licensed_features(contribution_analytics: false)
+
+          render
+
+          expect(rendered).to have_text 'Contribution'
+        end
+      end
+
+      it 'is visible' do
+        stub_licensed_features(contribution_analytics: true)
 
         render
 
         expect(rendered).to have_text 'Contribution'
       end
-    end
 
-    it 'is visible' do
-      stub_licensed_features(contribution_analytics: true)
+      describe 'group issue boards link' do
+        context 'when multiple issue board is disabled' do
+          it 'shows link text in singular' do
+            render
 
-      render
+            expect(rendered).to have_text 'Board'
+          end
+        end
 
-      expect(rendered).to have_text 'Contribution'
-    end
+        context 'when multiple issue board is enabled' do
+          before do
+            stub_licensed_features(multiple_group_issue_boards: true)
+          end
 
-    describe 'group issue boards link' do
-      context 'when multiple issue board is disabled' do
-        it 'shows link text in singular' do
-          render
+          it 'shows link text in plural' do
+            render
 
-          expect(rendered).to have_text 'Board'
+            expect(rendered).to have_text 'Boards'
+          end
         end
       end
+    end
 
-      context 'when multiple issue board is enabled' do
-        before do
-          stub_licensed_features(multiple_group_issue_boards: true)
-        end
+    describe 'Insights analytics' do
+      it 'has a link to the insights analytics page' do
+        allow(group).to receive(:insights_available?).and_return(true)
 
-        it 'shows link text in plural' do
+        render
+
+        expect(rendered).to have_link('Insights', href: group_insights_path(group))
+      end
+
+      describe 'feature is disabled' do
+        specify do
           render
 
-          expect(rendered).to have_text 'Boards'
+          expect(rendered).not_to have_link('Insights')
+        end
+      end
+    end
+
+    describe 'Issue analytics' do
+      let(:issues_analytics_enabled) { true }
+
+      before do
+        stub_licensed_features(issues_analytics: issues_analytics_enabled)
+      end
+
+      it 'has a link to the Issue analytics page' do
+        render
+
+        expect(rendered).to have_link('Issue', href: group_issues_analytics_path(group))
+      end
+
+      describe 'feature is disabled' do
+        let(:issues_analytics_enabled) { false }
+
+        specify do
+          render
+
+          expect(rendered).not_to have_link(exact_text: 'Issue')
+        end
+      end
+    end
+
+    describe 'Productivity analytics' do
+      let(:productivity_analytics_enabled) { true }
+
+      before do
+        stub_licensed_features(productivity_analytics: productivity_analytics_enabled)
+      end
+
+      it 'has a link to the Productivity analytics page' do
+        render
+
+        expect(rendered).to have_link('Productivity', href: group_analytics_productivity_analytics_path(group))
+      end
+
+      describe 'feature is disabled' do
+        let(:productivity_analytics_enabled) { false }
+
+        specify do
+          render
+
+          expect(rendered).not_to have_link('Productivity', href: group_analytics_productivity_analytics_path(group))
+        end
+      end
+    end
+
+    describe 'Cycle analytics' do
+      let(:cycle_analytics_enabled) { true }
+
+      before do
+        stub_licensed_features(cycle_analytics_for_groups: cycle_analytics_enabled)
+      end
+
+      it 'has a link to the Cycle analytics page' do
+        render
+
+        expect(rendered).to have_link('Value stream', href: group_analytics_cycle_analytics_path(group))
+      end
+
+      describe 'feature is disabled' do
+        let(:cycle_analytics_enabled) { false }
+
+        specify do
+          render
+
+          expect(rendered).not_to have_link('Value stream')
         end
       end
     end
   end
 
-  describe 'wiki tab' do
-    let(:can_read_wiki) { true }
-
-    let_it_be(:current_user) { create(:user) }
+  describe 'Wiki Menu' do
+    let(:wiki_enabled) { true }
 
     before do
-      group.add_guest(current_user)
+      stub_licensed_features(group_wikis: wiki_enabled)
 
-      allow(view).to receive(:current_user).and_return(current_user)
-      allow(view).to receive(:can?).with(current_user, :read_wiki, group).and_return(can_read_wiki)
+      allow(view).to receive(:current_user).and_return(user)
     end
 
     describe 'when wiki is available to user' do
@@ -465,13 +602,57 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
     end
 
     describe 'when wiki is unavailable to user' do
-      let(:can_read_wiki) { false }
+      let(:wiki_enabled) { false }
 
       it 'does not show the wiki tab' do
         render
 
         expect(rendered).not_to have_link('Wiki', href: group.wiki.web_url)
       end
+    end
+  end
+
+  describe 'Settings' do
+    let(:administration_nav_enabled) { true }
+
+    before do
+      group.add_owner(user)
+
+      stub_licensed_features(usage_quotas: true)
+      stub_feature_flags(group_administration_nav_item: false)
+
+      allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+      allow(::Gitlab::Auth::Ldap::Config).to receive(:group_sync_enabled?).and_return(true)
+      allow(group).to receive(:saml_group_sync_available?).and_return(true)
+      allow(group).to receive(:feature_available?).and_call_original
+      allow(group).to receive(:feature_available?).with(:group_saml).and_return(true)
+      allow(view).to receive(:current_user).and_return(user)
+
+      render
+    end
+
+    it 'has a link to the LDAP sync settings page' do
+      expect(rendered).to have_link('LDAP Synchronization', href: group_ldap_group_links_path(group))
+    end
+
+    it 'has a link to the SAML SSO settings page' do
+      expect(rendered).to have_link('SAML SSO', href: group_saml_providers_path(group))
+    end
+
+    it 'has a link to the SAML group links settings page' do
+      expect(rendered).to have_link('SAML Group Links', href: group_saml_group_links_path(group))
+    end
+
+    it 'has a link to the Webhooks settings page' do
+      expect(rendered).to have_link('Webhooks', href: group_hooks_path(group))
+    end
+
+    it 'has a link to the Usage Quotas settings page' do
+      expect(rendered).to have_link('Usage Quotas', href: group_usage_quotas_path(group))
+    end
+
+    it 'has a link to the Billing settings page' do
+      expect(rendered).to have_link('Billing', href: group_billings_path(group))
     end
   end
 end

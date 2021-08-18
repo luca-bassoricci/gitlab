@@ -77,6 +77,7 @@ class Issue < ApplicationRecord
   has_one :issuable_severity
   has_one :sentry_issue
   has_one :alert_management_alert, class_name: 'AlertManagement::Alert'
+  has_one :incident_management_issuable_escalation_status, class_name: 'IncidentManagement::IssuableEscalationStatus'
   has_and_belongs_to_many :self_managed_prometheus_alert_events, join_table: :issues_self_managed_prometheus_alert_events # rubocop: disable Rails/HasAndBelongsToMany
   has_and_belongs_to_many :prometheus_alert_events, join_table: :issues_prometheus_alert_events # rubocop: disable Rails/HasAndBelongsToMany
   has_many :prometheus_alerts, through: :prometheus_alert_events
@@ -87,12 +88,7 @@ class Issue < ApplicationRecord
   validates :project, presence: true
   validates :issue_type, presence: true
 
-  enum issue_type: {
-    issue: 0,
-    incident: 1,
-    test_case: 2, ## EE-only
-    requirement: 3 ## EE-only
-  }
+  enum issue_type: WorkItem::Type.base_types
 
   alias_method :issuing_parent, :project
 
@@ -134,6 +130,15 @@ class Issue < ApplicationRecord
 
   scope :public_only, -> { where(confidential: false) }
   scope :confidential_only, -> { where(confidential: true) }
+
+  scope :without_hidden, -> {
+    if Feature.enabled?(:ban_user_feature_flag)
+      where(id: joins('LEFT JOIN banned_users ON banned_users.user_id = issues.author_id WHERE banned_users.user_id IS NULL')
+      .select('issues.id'))
+    else
+      all
+    end
+  }
 
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
@@ -556,11 +561,17 @@ class Issue < ApplicationRecord
       true
     elsif confidential? && !assignee_or_author?(user)
       project.team.member?(user, Gitlab::Access::REPORTER)
+    elsif hidden?
+      false
     else
       project.public? ||
         project.internal? && !user.external? ||
         project.team.member?(user)
     end
+  end
+
+  def hidden?
+    author&.banned?
   end
 
   private
@@ -590,7 +601,7 @@ class Issue < ApplicationRecord
 
   # Returns `true` if this Issue is visible to everybody.
   def publicly_visible?
-    project.public? && !confidential? && !::Gitlab::ExternalAuthorization.enabled?
+    project.public? && !confidential? && !hidden? && !::Gitlab::ExternalAuthorization.enabled?
   end
 
   def expire_etag_cache

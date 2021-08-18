@@ -60,14 +60,9 @@ read-only view to discourage this behavior.
 
 #### Compliance pipeline configuration **(ULTIMATE)**
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3156) in GitLab 13.9.
-> - [Deployed behind a feature flag](../../feature_flags.md).
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3156) in GitLab 13.9, disabled behind `ff_evaluate_group_level_compliance_pipeline` [feature flag](../../../administration/feature_flags.md).
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/300324) in GitLab 13.11.
-> - Enabled on GitLab.com.
-> - Recommended for production use.
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/331231) in GitLab 14.2.
 
 Group owners can use the compliance pipeline configuration to define compliance requirements
 such as scans or tests, and enforce them in individual projects.
@@ -147,6 +142,7 @@ audit trail:
 include: # Execute individual project's configuration
   project: '$CI_PROJECT_PATH'
   file: '$CI_CONFIG_PATH'
+  ref: '$CI_COMMIT_REF_NAME' # Must be defined or MR pipelines always use the use default branch.
 ```
 
 ##### Ensure compliance jobs are always run
@@ -275,7 +271,7 @@ Enable [Service Desk](../service_desk.md) for your project to offer customer sup
 
 ### Export project
 
-Learn how to [export a project](import_export.md#importing-the-project) in GitLab.
+Learn how to [export a project](import_export.md#import-the-project) in GitLab.
 
 ### Advanced settings
 

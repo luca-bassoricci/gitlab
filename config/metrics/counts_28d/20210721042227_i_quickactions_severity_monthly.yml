@@ -11,7 +11,11 @@ milestone: "14.2"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/66422
 time_frame: 28d
 data_source: redis_hll
-data_category: Optional
+instrumentation_class: RedisHLLMetric
+options:
+  events:
+    - i_quickactions_severity
+data_category: optional
 distribution:
 - ce
 - ee

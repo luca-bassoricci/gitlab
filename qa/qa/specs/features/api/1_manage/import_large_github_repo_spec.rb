@@ -24,12 +24,16 @@ module QA
       end
 
       let(:github_repo) { ENV['QA_LARGE_GH_IMPORT_REPO'] || 'rspec/rspec-core' }
+      let(:import_max_duration) { ENV['QA_LARGE_GH_IMPORT_DURATION'] ? ENV['QA_LARGE_GH_IMPORT_DURATION'].to_i : 7200 }
       let(:github_client) do
         Octokit.middleware = Faraday::RackBuilder.new do |builder|
           builder.response(:logger, logger, headers: false, bodies: false)
         end
 
-        Octokit::Client.new(access_token: Runtime::Env.github_access_token, auto_paginate: true)
+        Octokit::Client.new(
+          access_token: ENV['QA_LARGE_GH_IMPORT_GH_TOKEN'] || Runtime::Env.github_access_token,
+          auto_paginate: true
+        )
       end
 
       let(:gh_branches) { github_client.branches(github_repo).map(&:name) }
@@ -96,9 +100,6 @@ module QA
       end
 
       after do |example|
-        # skip saving data if example is skipped or failed before import finished
-        next if example.pending?
-
         user.remove_via_api!
         next unless defined?(@import_time)
 
@@ -140,7 +141,7 @@ module QA
             raise "Import of '#{imported_project.name}' failed!" if status == 'failed'
           end
         end
-        expect(import_status).to eventually_eq('finished').within(duration: 3600, interval: 30)
+        expect(import_status).to eventually_eq('finished').within(max_duration: import_max_duration, sleep_interval: 30)
         @import_time = Time.now - start
 
         aggregate_failures do

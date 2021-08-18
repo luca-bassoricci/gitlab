@@ -3,12 +3,14 @@ import {
   BLOCKING_ISSUES_DESC,
   CREATED_ASC,
   CREATED_DESC,
+  defaultPageSizeParams,
   DUE_DATE_ASC,
   DUE_DATE_DESC,
   DUE_DATE_VALUES,
   filters,
   LABEL_PRIORITY_ASC,
   LABEL_PRIORITY_DESC,
+  largePageSizeParams,
   MILESTONE_DUE_ASC,
   MILESTONE_DUE_DESC,
   NORMAL_FILTER,
@@ -22,6 +24,7 @@ import {
   TOKEN_TYPE_ASSIGNEE,
   TOKEN_TYPE_ITERATION,
   TOKEN_TYPE_MILESTONE,
+  TOKEN_TYPE_TYPE,
   UPDATED_ASC,
   UPDATED_DESC,
   URL_PARAM,
@@ -35,6 +38,9 @@ import {
   FILTERED_SEARCH_TERM,
   OPERATOR_IS_NOT,
 } from '~/vue_shared/components/filtered_search_bar/constants';
+
+export const getInitialPageParams = (sortKey) =>
+  sortKey === RELATIVE_POSITION_ASC ? largePageSizeParams : defaultPageSizeParams;
 
 export const getSortKey = (sort) =>
   Object.keys(urlSortParams).find((key) => urlSortParams[key] === sort);
@@ -187,9 +193,12 @@ const getFilterType = (data, tokenType = '') =>
     ? SPECIAL_FILTER
     : NORMAL_FILTER;
 
-const requiresUpperCaseValue = (tokenType, value) =>
+const isWildcardValue = (tokenType, value) =>
   (tokenType === TOKEN_TYPE_ITERATION || tokenType === TOKEN_TYPE_MILESTONE) &&
   SPECIAL_FILTER_VALUES.includes(value);
+
+const requiresUpperCaseValue = (tokenType, value) =>
+  tokenType === TOKEN_TYPE_TYPE || isWildcardValue(tokenType, value);
 
 const formatData = (token) =>
   requiresUpperCaseValue(token.type, token.value.data)

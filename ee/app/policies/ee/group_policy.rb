@@ -49,6 +49,10 @@ module EE
         @subject.feature_available?(:dora4_analytics)
       end
 
+      condition(:group_membership_export_available) do
+        @subject.feature_available?(:export_user_permissions) && ::Feature.enabled?(:ff_group_membership_export, @subject, default_enabled: :yaml)
+      end
+
       condition(:can_owners_manage_ldap, scope: :global) do
         ::Gitlab::CurrentSettings.allow_group_owners_to_manage_ldap?
       end
@@ -71,6 +75,10 @@ module EE
 
       condition(:needs_new_sso_session) do
         sso_enforcement_prevents_access?
+      end
+
+      condition(:no_active_sso_session) do
+        sso_session_prevents_access?
       end
 
       condition(:ip_enforcement_prevents_access) do
@@ -122,8 +130,7 @@ module EE
       end
 
       condition(:group_level_compliance_pipeline_available) do
-        @subject.feature_available?(:evaluate_group_level_compliance_pipeline) &&
-          ::Feature.enabled?(:ff_evaluate_group_level_compliance_pipeline, @subject, default_enabled: :yaml)
+        @subject.feature_available?(:evaluate_group_level_compliance_pipeline)
       end
 
       rule { public_group | logged_in_viewable }.policy do
@@ -366,13 +373,18 @@ module EE
         prevent :create_subgroup
       end
 
+      rule { can?(:owner_access) & group_membership_export_available }.enable :export_group_memberships
       rule { can?(:owner_access) & compliance_framework_available }.enable :admin_compliance_framework
       rule { can?(:owner_access) & group_level_compliance_pipeline_available }.enable :admin_compliance_pipeline_configuration
     end
 
     override :lookup_access_level!
-    def lookup_access_level!
-      return ::GroupMember::NO_ACCESS if needs_new_sso_session?
+    def lookup_access_level!(for_any_session: false)
+      if for_any_session
+        return ::GroupMember::NO_ACCESS if no_active_sso_session?
+      else
+        return ::GroupMember::NO_ACCESS if needs_new_sso_session?
+      end
 
       super
     end
@@ -390,6 +402,13 @@ module EE
       return false if user&.auditor?
 
       ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject, user: user)
+    end
+
+    def sso_session_prevents_access?
+      return false unless subject.persisted?
+      return false if user&.auditor? || user&.can_read_all_resources?
+
+      ::Gitlab::Auth::GroupSaml::SessionEnforcer.new(user, subject).access_restricted?
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse

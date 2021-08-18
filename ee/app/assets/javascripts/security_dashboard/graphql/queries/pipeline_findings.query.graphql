@@ -9,15 +9,18 @@ query pipelineFindings(
   $severity: [String!]
   $reportType: [String!]
   $scanner: [String!]
+  $state: [VulnerabilityState!]
 ) {
   project(fullPath: $fullPath) {
     pipeline(iid: $pipelineId) {
+      id
       securityReportFindings(
         after: $after
         first: $first
         severity: $severity
         reportType: $reportType
         scanner: $scanner
+        state: $state
       ) {
         nodes {
           uuid
@@ -28,11 +31,13 @@ query pipelineFindings(
             externalType
             name
           }
+          reportType
           scanner {
             vendor
           }
           state
           severity
+          solution
           location {
             ...VulnerabilityLocation
           }

@@ -1,6 +1,6 @@
-query instanceProjects($search: String) {
-  instanceSecurityDashboard {
-    projects(search: $search) {
+query instanceProjects($search: String, $pageSize: Int) {
+  instance: instanceSecurityDashboard {
+    projects(search: $search, first: $pageSize) {
       nodes {
         id
         name

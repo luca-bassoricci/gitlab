@@ -10,17 +10,21 @@ import {
   GlModal,
   GlSkeletonLoader,
   GlTruncate,
+  GlLink,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import download from '~/lib/utils/downloader';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   DAST_SITE_VALIDATION_MODAL_ID,
   DAST_SITE_VALIDATION_HTTP_HEADER_KEY,
   DAST_SITE_VALIDATION_METHOD_HTTP_HEADER,
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
+  DAST_SITE_VALIDATION_METHOD_META_TAG,
   DAST_SITE_VALIDATION_METHODS,
 } from '../constants';
 import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
@@ -41,7 +45,9 @@ export default {
     GlModal,
     GlSkeletonLoader,
     GlTruncate,
+    GlLink,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
     fullPath: {
       type: String,
@@ -60,6 +66,9 @@ export default {
       tokenId: null,
       validationMethod: DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
       validationPath: '',
+      helpUrl: helpPagePath('user/application_security/dast/index', {
+        anchor: 'site-profile-validation',
+      }),
     };
   },
   computed: {
@@ -82,7 +91,11 @@ export default {
       };
     },
     validationMethodOptions() {
-      return Object.values(DAST_SITE_VALIDATION_METHODS);
+      const options = Object.values(DAST_SITE_VALIDATION_METHODS);
+      if (!this.glFeatures.dastMetaTagValidation) {
+        return options.filter(({ value }) => value !== DAST_SITE_VALIDATION_METHOD_META_TAG);
+      }
+      return options;
     },
     urlObject() {
       try {
@@ -103,6 +116,9 @@ export default {
     isHttpHeaderValidation() {
       return this.validationMethod === DAST_SITE_VALIDATION_METHOD_HTTP_HEADER;
     },
+    isMetaTagValidation() {
+      return this.validationMethod === DAST_SITE_VALIDATION_METHOD_META_TAG;
+    },
     textFileName() {
       return `GitLab-DAST-Site-Validation-${this.token}.txt`;
     },
@@ -111,6 +127,9 @@ export default {
     },
     httpHeader() {
       return `${DAST_SITE_VALIDATION_HTTP_HEADER_KEY}: ${this.token}`;
+    },
+    metaTag() {
+      return `<meta name="gitlab-dast-validation" content="${this.token}">`;
     },
   },
   watch: {
@@ -222,6 +241,14 @@ export default {
       {{ s__('DastSiteValidation|Could not create validation token. Please try again.') }}
     </gl-alert>
     <template v-else>
+      <p>
+        {{
+          s__(
+            'DastSiteValidation|To run an active scan, validate your target site. All site profiles that share the same base URL share the same validation status.',
+          )
+        }}
+        <gl-link :href="helpUrl" target="_blank">{{ __('Learn more.') }}</gl-link>
+      </p>
       <gl-form-group :label="s__('DastSiteValidation|Step 1 - Choose site validation method')">
         <gl-form-radio-group v-model="validationMethod" :options="validationMethodOptions" />
       </gl-form-group>
@@ -250,6 +277,17 @@ export default {
         <modal-copy-button
           :text="httpHeader"
           :title="s__('DastSiteValidation|Copy HTTP header to clipboard')"
+          :modal-id="modalProps.id"
+        />
+      </gl-form-group>
+      <gl-form-group
+        v-else-if="isMetaTagValidation"
+        :label="s__('DastSiteValidation|Step 2 - Add following meta tag to your site')"
+      >
+        <code class="gl-p-3 gl-bg-black gl-text-white">{{ metaTag }}</code>
+        <modal-copy-button
+          :text="metaTag"
+          :title="s__('DastSiteValidation|Copy Meta tag to clipboard')"
           :modal-id="modalProps.id"
         />
       </gl-form-group>

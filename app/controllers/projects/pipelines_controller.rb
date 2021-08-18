@@ -12,12 +12,11 @@ class Projects::PipelinesController < Projects::ApplicationController
   before_action :authorize_read_ci_cd_analytics!, only: [:charts]
   before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
-  before_action do
-    push_frontend_feature_flag(:pipeline_graph_layers_view, project, type: :development, default_enabled: :yaml)
-    push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: :yaml)
-    push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
-  end
   before_action :ensure_pipeline, only: [:show, :downloadable_artifacts]
+
+  before_action do
+    push_frontend_feature_flag(:pipeline_source_filter, project, type: :development, default_enabled: :yaml)
+  end
 
   # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
   before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
@@ -32,10 +31,11 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   feature_category :continuous_integration, [
                      :charts, :show, :config_variables, :stage, :cancel, :retry,
-                     :builds, :dag, :failures, :status, :downloadable_artifacts,
+                     :builds, :dag, :failures, :status,
                      :index, :create, :new, :destroy
                    ]
   feature_category :code_testing, [:test_report]
+  feature_category :build_artifacts, [:downloadable_artifacts]
 
   def index
     @pipelines = Ci::PipelinesFinder

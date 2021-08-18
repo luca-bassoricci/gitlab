@@ -19,11 +19,15 @@ RSpec.describe GroupsHelper do
     end
   end
 
-  describe '#group_dependency_proxy_url' do
-    it 'converts uppercase letters to lowercase' do
-      group = build_stubbed(:group, path: 'GroupWithUPPERcaseLetters')
+  describe '#group_dependency_proxy_image_prefix' do
+    let_it_be(:group) { build_stubbed(:group, path: 'GroupWithUPPERcaseLetters') }
 
-      expect(group_dependency_proxy_url(group)).to end_with("/groupwithuppercaseletters#{DependencyProxy::URL_SUFFIX}")
+    it 'converts uppercase letters to lowercase' do
+      expect(group_dependency_proxy_image_prefix(group)).to end_with("/groupwithuppercaseletters#{DependencyProxy::URL_SUFFIX}")
+    end
+
+    it 'removes the protocol' do
+      expect(group_dependency_proxy_image_prefix(group)).not_to include('http')
     end
   end
 
@@ -259,42 +263,6 @@ RSpec.describe GroupsHelper do
         end
 
         include_examples 'correct ancestor order'
-      end
-    end
-  end
-
-  describe '#group_container_registry_nav' do
-    let_it_be(:group) { create(:group, :public) }
-    let_it_be(:user) { create(:user) }
-
-    before do
-      stub_container_registry_config(enabled: true)
-      allow(helper).to receive(:current_user) { user }
-      allow(helper).to receive(:can?).with(user, :read_container_image, group) { true }
-      helper.instance_variable_set(:@group, group)
-    end
-
-    subject { helper.group_container_registry_nav? }
-
-    context 'when container registry is enabled' do
-      it { is_expected.to be_truthy }
-
-      it 'is disabled for guest' do
-        allow(helper).to receive(:can?).with(user, :read_container_image, group) { false }
-        expect(subject).to be false
-      end
-    end
-
-    context 'when container registry is not enabled' do
-      before do
-        stub_container_registry_config(enabled: false)
-      end
-
-      it { is_expected.to be_falsy }
-
-      it 'is disabled for guests' do
-        allow(helper).to receive(:can?).with(user, :read_container_image, group) { false }
-        expect(subject).to be false
       end
     end
   end

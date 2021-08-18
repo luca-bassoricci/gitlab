@@ -8,20 +8,27 @@ import Bold from '../extensions/bold';
 import BulletList from '../extensions/bullet_list';
 import Code from '../extensions/code';
 import CodeBlockHighlight from '../extensions/code_block_highlight';
+import Emoji from '../extensions/emoji';
 import HardBreak from '../extensions/hard_break';
 import Heading from '../extensions/heading';
 import HorizontalRule from '../extensions/horizontal_rule';
 import Image from '../extensions/image';
+import InlineDiff from '../extensions/inline_diff';
 import Italic from '../extensions/italic';
 import Link from '../extensions/link';
 import ListItem from '../extensions/list_item';
 import OrderedList from '../extensions/ordered_list';
 import Paragraph from '../extensions/paragraph';
+import Reference from '../extensions/reference';
 import Strike from '../extensions/strike';
+import Subscript from '../extensions/subscript';
+import Superscript from '../extensions/superscript';
 import Table from '../extensions/table';
 import TableCell from '../extensions/table_cell';
 import TableHeader from '../extensions/table_header';
 import TableRow from '../extensions/table_row';
+import TaskItem from '../extensions/task_item';
+import TaskList from '../extensions/task_list';
 import Text from '../extensions/text';
 
 const defaultSerializerConfig = {
@@ -29,6 +36,17 @@ const defaultSerializerConfig = {
     [Bold.name]: defaultMarkdownSerializer.marks.strong,
     [Code.name]: defaultMarkdownSerializer.marks.code,
     [Italic.name]: { open: '_', close: '_', mixable: true, expelEnclosingWhitespace: true },
+    [Subscript.name]: { open: '<sub>', close: '</sub>', mixable: true },
+    [Superscript.name]: { open: '<sup>', close: '</sup>', mixable: true },
+    [InlineDiff.name]: {
+      mixable: true,
+      open(state, mark) {
+        return mark.attrs.type === 'addition' ? '{+' : '{-';
+      },
+      close(state, mark) {
+        return mark.attrs.type === 'addition' ? '+}' : '-}';
+      },
+    },
     [Link.name]: {
       open() {
         return '[';
@@ -50,7 +68,18 @@ const defaultSerializerConfig = {
   nodes: {
     [Blockquote.name]: defaultMarkdownSerializer.nodes.blockquote,
     [BulletList.name]: defaultMarkdownSerializer.nodes.bullet_list,
-    [CodeBlockHighlight.name]: defaultMarkdownSerializer.nodes.code_block,
+    [CodeBlockHighlight.name]: (state, node) => {
+      state.write(`\`\`\`${node.attrs.language || ''}\n`);
+      state.text(node.textContent, false);
+      state.ensureNewLine();
+      state.write('```');
+      state.closeBlock(node);
+    },
+    [Emoji.name]: (state, node) => {
+      const { name } = node.attrs;
+
+      state.write(`:${name}:`);
+    },
     [HardBreak.name]: defaultMarkdownSerializer.nodes.hard_break,
     [Heading.name]: defaultMarkdownSerializer.nodes.heading,
     [HorizontalRule.name]: defaultMarkdownSerializer.nodes.horizontal_rule,
@@ -63,6 +92,9 @@ const defaultSerializerConfig = {
     [ListItem.name]: defaultMarkdownSerializer.nodes.list_item,
     [OrderedList.name]: defaultMarkdownSerializer.nodes.ordered_list,
     [Paragraph.name]: defaultMarkdownSerializer.nodes.paragraph,
+    [Reference.name]: (state, node) => {
+      state.write(node.attrs.originalText || node.attrs.text);
+    },
     [Table.name]: (state, node) => {
       state.renderContent(node);
     },
@@ -116,6 +148,14 @@ const defaultSerializerConfig = {
       } else {
         renderRow();
       }
+    },
+    [TaskItem.name]: (state, node) => {
+      state.write(`[${node.attrs.checked ? 'x' : ' '}] `);
+      state.renderContent(node);
+    },
+    [TaskList.name]: (state, node) => {
+      if (node.attrs.type === 'ul') defaultMarkdownSerializer.nodes.bullet_list(state, node);
+      else defaultMarkdownSerializer.nodes.ordered_list(state, node);
     },
     [Text.name]: defaultMarkdownSerializer.nodes.text,
   },

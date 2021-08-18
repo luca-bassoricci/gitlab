@@ -2,13 +2,12 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::Migrations::Observers::QueryLog do
-  subject { described_class.new }
+  subject { described_class.new(observation) }
 
   let(:observation) { Gitlab::Database::Migrations::Observation.new(migration_version, migration_name) }
   let(:connection) { ActiveRecord::Base.connection }
   let(:query) { 'select 1' }
   let(:directory_path) { Dir.mktmpdir }
-  let(:log_file) { "#{directory_path}/current.log" }
   let(:migration_version) { 20210422152437 }
   let(:migration_name) { 'test' }
 
@@ -34,6 +33,6 @@ RSpec.describe Gitlab::Database::Migrations::Observers::QueryLog do
     subject.before
     connection.execute(query)
     subject.after
-    subject.record(observation)
+    subject.record
   end
 end

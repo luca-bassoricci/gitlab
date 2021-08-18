@@ -25,7 +25,8 @@ RSpec.describe 'Terraform.latest.gitlab-ci.yml' do
     end
 
     context 'on master branch' do
-      it 'creates init, validate and build jobs' do
+      it 'creates init, validate and build jobs', :aggregate_failures do
+        expect(pipeline.errors).to be_empty
         expect(build_names).to include('init', 'validate', 'build', 'deploy')
       end
     end
@@ -37,7 +38,8 @@ RSpec.describe 'Terraform.latest.gitlab-ci.yml' do
         project.repository.create_branch(pipeline_branch, default_branch)
       end
 
-      it 'does not creates a deploy and a test job' do
+      it 'does not creates a deploy and a test job', :aggregate_failures do
+        expect(pipeline.errors).to be_empty
         expect(build_names).not_to include('deploy')
       end
     end

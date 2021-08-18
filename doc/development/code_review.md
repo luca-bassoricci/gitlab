@@ -403,6 +403,12 @@ your own suggestions to the merge request. Note that:
     has more than one commit, then see the note below about rewriting
     commit history.
 
+As a maintainer, if a merge request that you authored has received all required approvals, it is acceptable to show a [bias for action](https://about.gitlab.com/handbook/values/#bias-for-action) and merge your own MR, if:
+
+- The last maintainer to review intended to start the merge and did not, OR
+- The last maintainer to review started the merge, but some trivial chore caused the pipeline to break. For example, the MR might need a rebase first because of unrelated pipeline issues, or some files might need to be regenerated (like `gitlab.pot`).
+  - "Trivial" is a subjective measure but we expect project maintainers to exercise their judgement carefully and cautiously.
+
 When ready to merge:
 
 WARNING:
@@ -578,11 +584,12 @@ context is fresh in memory, and improves contributors' experience significantly.
 
 To ensure swift feedback to ready-to-review code, we maintain a `Review-response` Service-level Objective (SLO). The SLO is defined as:
 
-> - review-response SLO = (time when first review response is provided) - (time MR is assigned to reviewer) < 2 business days
+> Review-response SLO = (time when first review is provided) - (time MR is assigned to reviewer) < 2 business days
 
 If you don't think you can review a merge request in the `Review-response` SLO
-time frame, let the author know as soon as possible and try to help them find
-another reviewer or maintainer who is able to, so that they can be unblocked
+time frame, let the author know as soon as possible in the comments
+(no later than 36 hours after first receiving the review request)
+and try to help them find another reviewer or maintainer who is able to, so that they can be unblocked
 and get on with their work quickly. Remove yourself as a reviewer.
 
 If you think you are at capacity and are unable to accept any more reviews until

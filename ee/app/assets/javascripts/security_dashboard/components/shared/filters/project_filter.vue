@@ -21,17 +21,6 @@ const SEARCH_TERM_MINIMUM_LENGTH = 3;
 const SELECTED_PROJECTS_MAX_COUNT = 100;
 const PROJECT_ENTITY_NAME = 'Project';
 
-const QUERY_CONFIGS = {
-  [DASHBOARD_TYPES.GROUP]: {
-    query: groupProjectsQuery,
-    property: 'group',
-  },
-  [DASHBOARD_TYPES.INSTANCE]: {
-    query: instanceProjectsQuery,
-    property: 'instanceSecurityDashboard',
-  },
-};
-
 export default {
   components: {
     FilterBody,
@@ -88,20 +77,21 @@ export default {
       const ids = this.querystringIds.includes(this.filter.allOption.id) ? [] : this.querystringIds;
       return ids.filter((id) => !has(this.projectsCache, id));
     },
-    queryConfig() {
-      return QUERY_CONFIGS[this.dashboardType];
+    query() {
+      return this.dashboardType === DASHBOARD_TYPES.GROUP
+        ? groupProjectsQuery
+        : instanceProjectsQuery;
     },
   },
   apollo: {
     // Gets the projects from the project IDs in the querystring and adds them to the cache.
     projectsById: {
       query() {
-        return this.queryConfig.query;
+        return this.query;
       },
       manual: true,
       variables() {
         return {
-          pageSize: 20,
           fullPath: this.groupFullPath,
           // The IDs have to be in the format "gid://gitlab/Project/${projectId}"
           ids: convertToGraphQLIds(PROJECT_ENTITY_NAME, this.uncachedIds),
@@ -114,8 +104,7 @@ export default {
           this.$set(this.projectsCache, id, undefined);
         });
 
-        const property = data[this.queryConfig.property];
-        const projects = mapProjects(property.projects.nodes);
+        const projects = mapProjects(data[this.dashboardType].projects.nodes);
         this.saveProjectsToCache(projects);
         // Now that we have the project for each uncached ID, set the selected options.
         this.selectedOptions = this.querystringOptions;
@@ -131,17 +120,17 @@ export default {
     // Gets the projects for the group with an optional search, to show as dropdown options.
     projects: {
       query() {
-        return this.queryConfig.query;
+        return this.query;
       },
       variables() {
         return {
+          pageSize: 20,
           fullPath: this.groupFullPath,
           search: this.searchTerm,
         };
       },
       update(data) {
-        const property = data[this.queryConfig.property];
-        return mapProjects(property.projects.nodes);
+        return mapProjects(data[this.dashboardType].projects.nodes);
       },
       result() {
         this.saveProjectsToCache(this.projects);

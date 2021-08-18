@@ -16,7 +16,12 @@ import Api from '~/api';
 import ExperimentTracking from '~/experimentation/experiment_tracking';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import { s__, sprintf } from '~/locale';
-import { INVITE_MEMBERS_IN_COMMENT, GROUP_FILTERS, MEMBER_AREAS_OF_FOCUS } from '../constants';
+import {
+  INVITE_MEMBERS_IN_COMMENT,
+  GROUP_FILTERS,
+  USERS_FILTER_ALL,
+  MEMBER_AREAS_OF_FOCUS,
+} from '../constants';
 import eventHub from '../event_hub';
 import {
   responseMessageFromError,
@@ -68,6 +73,16 @@ export default {
       default: GROUP_FILTERS.ALL,
     },
     groupSelectParentId: {
+      type: Number,
+      required: false,
+      default: null,
+    },
+    usersFilter: {
+      type: String,
+      required: false,
+      default: USERS_FILTER_ALL,
+    },
+    filterId: {
       type: Number,
       required: false,
       default: null,
@@ -149,6 +164,13 @@ export default {
 
       return this.selectedAreasOfFocus;
     },
+    errorFieldDescription() {
+      if (this.inviteeType === 'group') {
+        return '';
+      }
+
+      return this.$options.labels[this.inviteeType].placeHolder;
+    },
   },
   mounted() {
     eventHub.$on('openModal', (options) => {
@@ -179,6 +201,7 @@ export default {
       tracking.event(eventName);
     },
     closeModal() {
+      this.resetFields();
       this.$refs.modal.hide();
     },
     sendInvite() {
@@ -349,6 +372,8 @@ export default {
     :title="$options.labels[inviteeType].modalTitle"
     :header-close-label="$options.labels.headerCloseLabel"
     @hidden="resetFields"
+    @close="resetFields"
+    @hide="resetFields"
   >
     <div>
       <p ref="introText">
@@ -360,10 +385,9 @@ export default {
       </p>
 
       <gl-form-group
-        class="gl-mt-2"
         :invalid-feedback="invalidFeedbackMessage"
         :state="validationState"
-        :description="$options.labels[inviteeType].placeHolder"
+        :description="errorFieldDescription"
         data-testid="members-form-group"
       >
         <label :id="$options.membersTokenSelectLabelId" class="col-form-label">{{
@@ -372,8 +396,11 @@ export default {
         <members-token-select
           v-if="!isInviteGroup"
           v-model="newUsersToInvite"
+          class="gl-mb-2"
           :validation-state="validationState"
           :aria-labelledby="$options.membersTokenSelectLabelId"
+          :users-filter="usersFilter"
+          :filter-id="filterId"
           @clear="handleMembersTokenSelectClear"
         />
         <group-select
@@ -381,10 +408,11 @@ export default {
           v-model="groupToBeSharedWith"
           :groups-filter="groupSelectFilter"
           :parent-group-id="groupSelectParentId"
+          @input="handleMembersTokenSelectClear"
         />
       </gl-form-group>
 
-      <label class="gl-mt-3">{{ $options.labels.accessLevel }}</label>
+      <label class="gl-font-weight-bold">{{ $options.labels.accessLevel }}</label>
       <div class="gl-mt-2 gl-w-half gl-xs-w-full">
         <gl-dropdown
           class="gl-shadow-none gl-w-full"

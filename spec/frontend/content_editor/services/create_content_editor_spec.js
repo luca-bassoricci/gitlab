@@ -2,7 +2,9 @@ import { PROVIDE_SERIALIZER_OR_RENDERER_ERROR } from '~/content_editor/constants
 import { createContentEditor } from '~/content_editor/services/create_content_editor';
 import { createTestContentEditorExtension } from '../test_utils';
 
-describe('content_editor/services/create_editor', () => {
+jest.mock('~/emoji');
+
+describe('content_editor/services/create_content_editor', () => {
   let renderMarkdown;
   let editor;
   const uploadsPath = '/uploads';
@@ -52,9 +54,9 @@ describe('content_editor/services/create_editor', () => {
     expect(() => createContentEditor()).toThrow(PROVIDE_SERIALIZER_OR_RENDERER_ERROR);
   });
 
-  it('provides uploadsPath and renderMarkdown function to Image extension', () => {
+  it('provides uploadsPath and renderMarkdown function to Attachment extension', () => {
     expect(
-      editor.tiptapEditor.extensionManager.extensions.find((e) => e.name === 'image').options,
+      editor.tiptapEditor.extensionManager.extensions.find((e) => e.name === 'attachment').options,
     ).toMatchObject({
       uploadsPath,
       renderMarkdown,

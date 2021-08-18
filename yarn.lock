@@ -898,25 +898,25 @@
     stylelint-declaration-strict-value "1.7.7"
     stylelint-scss "3.18.0"
 
-"@gitlab/svgs@1.209.0":
-  version "1.209.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.209.0.tgz#06020b74668df17b9bdaa33b561b4800ca34cc10"
-  integrity sha512-V6NaXDhu899tNCuU4+VepY7Rv2Ge3ViOctrUAS3NQtGcXV1THDhGAg6+OCFpgHr1fhmxYNwpxQ8OTh+HaPvtIA==
+"@gitlab/svgs@1.211.0":
+  version "1.211.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.211.0.tgz#0351fa4cc008c4830f366aede535df0a8e63dda6"
+  integrity sha512-fkHJfmKiy7lDwLFQ6z64sbGL+/hDDLzcMTj8O+VBC1xnlBVAIxe2eIs2DZLJcJwgLWncf4Uovp8+CeEfCY12sw==
 
 "@gitlab/tributejs@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@32.0.0":
-  version "32.0.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-32.0.0.tgz#2bf8995e405f35c5fa9dcc2ad0de24d79dc9c006"
-  integrity sha512-GVQVx8Db9fb/BfYf7Vzdf6MxqLsF5RZta0VanwTm/asGdQxWG7I9fJIPUHqhCK3S9efZ83zXfZBF0M3uHuxveg==
+"@gitlab/ui@32.2.1":
+  version "32.2.1"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-32.2.1.tgz#e019124af981e8ceffd39f30cf08d315c53d4ac8"
+  integrity sha512-19qe30gHtBG7g7wJy36bvS+ji1puJwVzAwqJOFXAh3axSa0Getyjyl9t5gmfwmZ2HehFTWLlThXppclnJVCEGA==
   dependencies:
     "@babel/standalone" "^7.0.0"
     bootstrap-vue "2.18.1"
     copy-to-clipboard "^3.0.8"
-    dompurify "^2.3.0"
+    dompurify "^2.3.1"
     echarts "^4.9.0"
     highlight.js "^10.6.0"
     js-beautify "^1.8.8"
@@ -1474,6 +1474,16 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-strike/-/extension-strike-2.0.0-beta.16.tgz#cccce9713824e05ebde895f84f747b8bbed45f7d"
   integrity sha512-SPSCUVzxFLKZzgMXYfeUZE+xy52CJckswo0dZ/8NcUthl3mkDS/TwzokpQ/wsyEsKaJNYt8vh2S9HpadSrLcug==
 
+"@tiptap/extension-subscript@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-subscript/-/extension-subscript-2.0.0-beta.4.tgz#07907df58695eb02bf6904d2c3635111003b30fd"
+  integrity sha512-eEjUXkgfeIBIgzdg3/GQGdta9Ww0Wwfiovn7ZvalRofRT4dnoiS0/83t1pQL81JT+ENow5jtx8RZHlaw/fMP4g==
+
+"@tiptap/extension-superscript@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-superscript/-/extension-superscript-2.0.0-beta.4.tgz#16906d71dd8f9892101cf792f42005f8cd404516"
+  integrity sha512-rTQCnSnloSf6UN1y3zhu6j41MxrcCVWm5JIPX8VEt60WsOXJLAc/YJHLYi2FWhh/Psq8k78sPrmZbjYUrj3Dkw==
+
 "@tiptap/extension-table-cell@^2.0.0-beta.13":
   version "2.0.0-beta.13"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-table-cell/-/extension-table-cell-2.0.0-beta.13.tgz#c01eada4859d5ea487d61e68cc7fab7ed2e4842a"
@@ -1496,6 +1506,18 @@
   dependencies:
     prosemirror-tables "^1.1.1"
     prosemirror-view "^1.18.8"
+
+"@tiptap/extension-task-item@^2.0.0-beta.17":
+  version "2.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-item/-/extension-task-item-2.0.0-beta.17.tgz#e4e010c321b8f9aa5f49847c48e4e3a0695a47a9"
+  integrity sha512-uV5f9rWo9NAZ+oyt/mkhFEZfcngr92pVL2sn291RiT0qw9NRvdIQ6PLH24il9zu+jjeWmh1cJnBuQos+MQqjyg==
+  dependencies:
+    prosemirror-inputrules "^1.1.3"
+
+"@tiptap/extension-task-list@^2.0.0-beta.17":
+  version "2.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-list/-/extension-task-list-2.0.0-beta.17.tgz#c0f40325abf1b6a23868e72ab32f9724a8b42a7b"
+  integrity sha512-E17VBqW2lXF59hCQ/3/Kg0hYSDGvVC4B3W8miZwCXt5WTOl98Gk6qAiDXl+2mDKZvnsLty/YrgkD88OlZSIEbQ==
 
 "@tiptap/extension-text@^2.0.0-beta.12":
   version "2.0.0-beta.12"
@@ -3665,10 +3687,10 @@ core-js-pure@^3.0.0:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.6.5.tgz#c79e75f5e38dbc85a662d91eea52b8256d53b813"
   integrity sha512-lacdXOimsiD0QyNf9BC/mxivNJ/ybBGJXQFKzRekp1WTHoVUWsUHEn+2T8GJAzzIhyOuXA+gOxCVN3l+5PLPUA==
 
-core-js@^3.1.3, core-js@^3.16.0:
-  version "3.16.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.16.0.tgz#1d46fb33720bc1fa7f90d20431f36a5540858986"
-  integrity sha512-5+5VxRFmSf97nM8Jr2wzOwLqRo6zphH2aX+7KsAUONObyzakDNq2G/bgbhinxB4PoV9L3aXQYhiDKyIKWd2c8g==
+core-js@^3.1.3, core-js@^3.16.2:
+  version "3.16.2"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.16.2.tgz#3f485822889c7fc48ef463e35be5cc2a4a01a1f4"
+  integrity sha512-P0KPukO6OjMpjBtHSceAZEWlDD1M2Cpzpg6dBbrjFqFhBHe/BwhxaP820xKOjRn/lZRQirrCusIpLS/n2sgXLQ==
 
 core-js@~2.3.0:
   version "2.3.0"
@@ -4546,10 +4568,10 @@ domhandler@^4.0.0, domhandler@^4.2.0:
   dependencies:
     domelementtype "^2.2.0"
 
-dompurify@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.3.0.tgz#07bb39515e491588e5756b1d3e8375b5964814e2"
-  integrity sha512-VV5C6Kr53YVHGOBKO/F86OYX6/iLTw2yVSI721gKetxpHCK/V5TaLEf9ODjRgl1KLSWRMY6cUhAbv/c+IUnwQw==
+dompurify@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.3.1.tgz#a47059ca21fd1212d3c8f71fdea6943b8bfbdf6a"
+  integrity sha512-xGWt+NHAQS+4tpgbOAI08yxW0Pr256Gu/FNE2frZVTbgrBUn8M7tz7/ktS/LZ2MHeGqz6topj0/xY+y8R5FBFw==
 
 domutils@^1.5.1:
   version "1.7.0"

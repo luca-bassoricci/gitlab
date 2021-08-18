@@ -147,25 +147,6 @@ RSpec.describe Groups::DependencyProxyForContainersController do
 
     subject { get_manifest }
 
-    shared_examples 'a successful manifest pull' do
-      it 'sends a file' do
-        expect(controller).to receive(:send_file).with(manifest.file.path, type: manifest.content_type)
-
-        subject
-      end
-
-      it 'returns Content-Disposition: attachment', :aggregate_failures do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.headers['Docker-Content-Digest']).to eq(manifest.digest)
-        expect(response.headers['Content-Length']).to eq(manifest.size)
-        expect(response.headers['Docker-Distribution-Api-Version']).to eq(DependencyProxy::DISTRIBUTION_API_VERSION)
-        expect(response.headers['Etag']).to eq("\"#{manifest.digest}\"")
-        expect(response.headers['Content-Disposition']).to match(/^attachment/)
-      end
-    end
-
     context 'feature enabled' do
       before do
         enable_dependency_proxy
@@ -185,7 +166,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
         end
 
         before do
-          group.add_reporter(user)
+          group.add_guest(user)
         end
 
         it 'proxies status from the remote token request', :aggregate_failures do
@@ -206,7 +187,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
         end
 
         before do
-          group.add_reporter(user)
+          group.add_guest(user)
         end
 
         it 'proxies status from the remote manifest request', :aggregate_failures do
@@ -219,7 +200,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
 
       context 'a valid user' do
         before do
-          group.add_reporter(user)
+          group.add_guest(user)
         end
 
         it_behaves_like 'a successful manifest pull'
@@ -272,21 +253,6 @@ RSpec.describe Groups::DependencyProxyForContainersController do
       end
     end
 
-    shared_examples 'a successful blob pull' do
-      it 'sends a file' do
-        expect(controller).to receive(:send_file).with(blob.file.path, {})
-
-        subject
-      end
-
-      it 'returns Content-Disposition: attachment', :aggregate_failures do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.headers['Content-Disposition']).to match(/^attachment/)
-      end
-    end
-
     subject { get_blob }
 
     context 'feature enabled' do
@@ -308,7 +274,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
         end
 
         before do
-          group.add_reporter(user)
+          group.add_guest(user)
         end
 
         it 'proxies status from the remote blob request', :aggregate_failures do
@@ -321,7 +287,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
 
       context 'a valid user' do
         before do
-          group.add_reporter(user)
+          group.add_guest(user)
         end
 
         it_behaves_like 'a successful blob pull'

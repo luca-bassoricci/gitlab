@@ -5,8 +5,8 @@ require 'spec_helper'
 module Ci
   RSpec.describe RegisterJobService do
     let_it_be(:group) { create(:group) }
-    let_it_be(:project, reload: true) { create(:project, group: group, shared_runners_enabled: false, group_runners_enabled: false) }
-    let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
+    let_it_be_with_reload(:project) { create(:project, group: group, shared_runners_enabled: false, group_runners_enabled: false) }
+    let_it_be_with_reload(:pipeline) { create(:ci_pipeline, project: project) }
 
     let!(:shared_runner) { create(:ci_runner, :instance) }
     let!(:specific_runner) { create(:ci_runner, :project, projects: [project]) }
@@ -90,6 +90,9 @@ module Ci
         context 'allow shared runners' do
           before do
             project.update!(shared_runners_enabled: true)
+            pipeline.reload
+            pending_job.reload
+            pending_job.create_queuing_entry!
           end
 
           context 'for multiple builds' do
@@ -464,13 +467,27 @@ module Ci
             context 'when depended job has not been completed yet' do
               let!(:pre_stage_job) { create(:ci_build, :pending, :queued, :manual, pipeline: pipeline, name: 'test', stage_idx: 0) }
 
-              it { expect(subject).to eq(pending_job) }
+              it { is_expected.to eq(pending_job) }
             end
 
             context 'when artifacts of depended job has been expired' do
               let!(:pre_stage_job) { create(:ci_build, :success, :expired, pipeline: pipeline, name: 'test', stage_idx: 0) }
 
-              it_behaves_like 'not pick'
+              context 'when the pipeline is locked' do
+                before do
+                  pipeline.artifacts_locked!
+                end
+
+                it { is_expected.to eq(pending_job) }
+              end
+
+              context 'when the pipeline is unlocked' do
+                before do
+                  pipeline.unlocked!
+                end
+
+                it_behaves_like 'not pick'
+              end
             end
 
             context 'when artifacts of depended job has been erased' do
@@ -487,8 +504,12 @@ module Ci
               let!(:pre_stage_job) { create(:ci_build, :success, :expired, pipeline: pipeline, name: 'test', stage_idx: 0) }
 
               before do
-                allow_any_instance_of(Ci::Build).to receive(:drop!)
-                  .and_raise(ActiveRecord::StaleObjectError.new(pending_job, :drop!))
+                pipeline.unlocked!
+
+                allow_next_instance_of(Ci::Build) do |build|
+                  expect(build).to receive(:drop!)
+                    .and_raise(ActiveRecord::StaleObjectError.new(pending_job, :drop!))
+                end
               end
 
               it 'does not drop nor pick' do
@@ -703,7 +724,21 @@ module Ci
           stub_feature_flags(ci_pending_builds_queue_source: true)
         end
 
-        include_examples 'handles runner assignment'
+        context 'with ci_queueing_denormalize_shared_runners_information enabled' do
+          before do
+            stub_feature_flags(ci_queueing_denormalize_shared_runners_information: true)
+          end
+
+          include_examples 'handles runner assignment'
+        end
+
+        context 'with ci_queueing_denormalize_shared_runners_information disabled' do
+          before do
+            stub_feature_flags(ci_queueing_denormalize_shared_runners_information: false)
+          end
+
+          include_examples 'handles runner assignment'
+        end
       end
 
       context 'when not using pending builds table' do
@@ -777,6 +812,11 @@ module Ci
       end
 
       context 'when shared runner is used' do
+        before do
+          pending_job.reload
+          pending_job.create_queuing_entry!
+        end
+
         let(:runner) { create(:ci_runner, :instance, tag_list: %w(tag1 tag2)) }
         let(:expected_shared_runner) { true }
         let(:expected_shard) { ::Gitlab::Ci::Queue::Metrics::DEFAULT_METRICS_SHARD }

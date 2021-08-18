@@ -32,7 +32,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/rack_multipart_tempfile_factory')
     require_dependency Rails.root.join('lib/gitlab/runtime')
 
-    config.autoloader = :classic
+    config.autoloader = :zeitwerk
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -86,7 +86,11 @@ module Gitlab
     # Rake tasks ignore the eager loading settings, so we need to set the
     # autoload paths explicitly
     config.autoload_paths = config.eager_load_paths.dup
+
+    # These are only used in Rake tasks so we don't need to add these to eager_load_paths
     config.autoload_paths.push("#{config.root}/lib/generators")
+    Gitlab.ee { config.autoload_paths.push("#{config.root}/ee/lib/generators") }
+    Gitlab.jh { config.autoload_paths.push("#{config.root}/jh/lib/generators") }
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -167,6 +171,11 @@ module Gitlab
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
+
+    # Dump all DB schemas even if schema_search_path is defined,
+    # so that we get the same db/structure.sql
+    # regardless if schema_search_path is set, or not.
+    config.active_record.dump_schemas = :all
 
     # Use new connection handling so that we can use Rails 6.1+ multiple
     # database support.
@@ -422,6 +431,21 @@ module Gitlab
     initializer :before_zeitwerk, before: :let_zeitwerk_take_over, after: :prepend_helpers_path do
       Dir[Rails.root.join('config/initializers_before_autoloader/*.rb')].sort.each do |initializer|
         load_config_initializer(initializer)
+      end
+    end
+
+    # Load JH initializers under JH. Load ordering is:
+    # 1. prepend_helpers_path
+    # 2. before_zeitwerk
+    # 3. let_zeitwerk_take_over
+    # 4. move_initializers
+    # 5. load_config_initializers
+    # 6. load_jh_config_initializers
+    Gitlab.jh do
+      initializer :load_jh_config_initializers, after: :load_config_initializers do
+        Dir[Rails.root.join('jh/config/initializers/*.rb')].sort.each do |initializer|
+          load_config_initializer(initializer)
+        end
       end
     end
 

@@ -39,8 +39,6 @@ RSpec.describe Gitlab::UsageData do
 
       create(:jira_integration, project: projects[0], issues_enabled: true, project_key: 'GL')
 
-      create(:operations_feature_flag, project: projects[0])
-
       create(:issue, project: projects[1])
       create(:issue, health_status: :on_track, project: projects[1])
       create(:issue, health_status: :at_risk, project: projects[1])
@@ -97,7 +95,6 @@ RSpec.describe Gitlab::UsageData do
         epics
         epics_deepest_relationship_level
         epic_issues
-        feature_flags
         geo_nodes
         geo_event_log_max_id
         issues_with_health_status
@@ -124,7 +121,6 @@ RSpec.describe Gitlab::UsageData do
         network_policy_drops
       ))
 
-      expect(count_data[:feature_flags]).to eq(1)
       expect(count_data[:status_page_projects]).to eq(1)
       expect(count_data[:status_page_issues]).to eq(1)
       expect(count_data[:issues_with_health_status]).to eq(2)
@@ -748,30 +744,15 @@ RSpec.describe Gitlab::UsageData do
       )
     end
 
-    it 'counts users who have run scans' do
-      for_defined_days_back do
-        create(:ee_ci_build, :api_fuzzing, :success, user: user3)
-        create(:ee_ci_build, :dast, :running, user: user2)
-        create(:ee_ci_build, :dast, :success, user: user3)
-        create(:ee_ci_build, :container_scanning, :success, user: user3)
-        create(:ee_ci_build, :coverage_fuzzing, :success, user: user)
-        create(:ee_ci_build, :dependency_scanning, :success, user: user)
-        create(:ee_ci_build, :dependency_scanning, :failed, user: user2)
-        create(:ee_ci_build, :sast, :success, user: user2)
-        create(:ee_ci_build, :sast, :success, user: user3)
-        create(:ee_ci_build, :secret_detection, :success, user: user)
-        create(:ee_ci_build, :secret_detection, :success, user: user)
-        create(:ee_ci_build, :secret_detection, :failed, user: user2)
-      end
-
+    it 'deprecates count for users who have run scans' do
       expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
-        user_api_fuzzing_scans: be_within(error_rate).percent_of(1),
-        user_container_scanning_scans: be_within(error_rate).percent_of(1),
-        user_coverage_fuzzing_scans: be_within(error_rate).percent_of(1),
-        user_dast_scans: be_within(error_rate).percent_of(1),
-        user_dependency_scanning_scans: be_within(error_rate).percent_of(1),
-        user_sast_scans: be_within(error_rate).percent_of(2),
-        user_secret_detection_scans: be_within(error_rate).percent_of(1)
+        user_api_fuzzing_scans: described_class::DEPRECATED_VALUE,
+        user_container_scanning_scans: described_class::DEPRECATED_VALUE,
+        user_coverage_fuzzing_scans: described_class::DEPRECATED_VALUE,
+        user_dast_scans: described_class::DEPRECATED_VALUE,
+        user_dependency_scanning_scans: described_class::DEPRECATED_VALUE,
+        user_sast_scans: described_class::DEPRECATED_VALUE,
+        user_secret_detection_scans: described_class::DEPRECATED_VALUE
       )
     end
   end

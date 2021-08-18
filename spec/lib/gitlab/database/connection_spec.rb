@@ -127,6 +127,20 @@ RSpec.describe Gitlab::Database::Connection do
     end
   end
 
+  describe '#db_config_with_default_pool_size' do
+    it 'returns db_config with our default pool size' do
+      allow(connection).to receive(:default_pool_size).and_return(9)
+
+      expect(connection.db_config_with_default_pool_size.pool).to eq(9)
+    end
+
+    it 'returns db_config with the correct database name' do
+      db_name = connection.scope.connection.pool.db_config.name
+
+      expect(connection.db_config_with_default_pool_size.name).to eq(db_name)
+    end
+  end
+
   describe '#disable_prepared_statements' do
     around do |example|
       original_config = ::Gitlab::Database.main.config
@@ -374,42 +388,6 @@ RSpec.describe Gitlab::Database::Connection do
 
         connection
           .bulk_insert('test', [{ number: 10 }], on_conflict: :do_nothing)
-      end
-    end
-  end
-
-  describe '#create_connection_pool' do
-    it 'creates a new connection pool with specific pool size' do
-      pool = connection.create_connection_pool(5)
-
-      begin
-        expect(pool)
-          .to be_kind_of(ActiveRecord::ConnectionAdapters::ConnectionPool)
-
-        expect(pool.db_config.pool).to eq(5)
-      ensure
-        pool.disconnect!
-      end
-    end
-
-    it 'allows setting of a custom hostname' do
-      pool = connection.create_connection_pool(5, '127.0.0.1')
-
-      begin
-        expect(pool.db_config.host).to eq('127.0.0.1')
-      ensure
-        pool.disconnect!
-      end
-    end
-
-    it 'allows setting of a custom hostname and port' do
-      pool = connection.create_connection_pool(5, '127.0.0.1', 5432)
-
-      begin
-        expect(pool.db_config.host).to eq('127.0.0.1')
-        expect(pool.db_config.configuration_hash[:port]).to eq(5432)
-      ensure
-        pool.disconnect!
       end
     end
   end

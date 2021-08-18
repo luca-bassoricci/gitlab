@@ -26,67 +26,6 @@ RSpec.describe Gitlab::UsageDataMetrics do
         expect(subject[:counts]).to include(:boards)
       end
 
-      it 'includes i_quickactions_approve monthly and weekly key' do
-        expect(subject[:redis_hll_counters][:quickactions]).to include(:i_quickactions_approve_monthly)
-        expect(subject[:redis_hll_counters][:quickactions]).to include(:i_quickactions_approve_weekly)
-      end
-
-      it 'includes ide_edit monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:ide_edit].keys).to contain_exactly(*[
-          :g_edit_by_web_ide_monthly, :g_edit_by_web_ide_weekly,
-          :g_edit_by_sfe_monthly, :g_edit_by_sfe_weekly,
-          :g_edit_by_sse_monthly, :g_edit_by_sse_weekly,
-          :g_edit_by_snippet_ide_monthly, :g_edit_by_snippet_ide_weekly,
-          :ide_edit_total_unique_counts_monthly, :ide_edit_total_unique_counts_weekly
-        ])
-      end
-
-      it 'includes incident_management_alerts monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:incident_management_alerts].keys).to contain_exactly(*[
-          :incident_management_alert_create_incident_monthly, :incident_management_alert_create_incident_weekly
-      ])
-      end
-
-      it 'includes incident_management monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:incident_management]).to include(
-          :incident_management_incident_created_monthly, :incident_management_incident_created_weekly,
-          :incident_management_incident_reopened_monthly, :incident_management_incident_reopened_weekly,
-          :incident_management_incident_closed_monthly, :incident_management_incident_closed_weekly,
-          :incident_management_incident_assigned_monthly, :incident_management_incident_assigned_weekly,
-          :incident_management_incident_todo_monthly, :incident_management_incident_todo_weekly,
-          :incident_management_incident_comment_monthly, :incident_management_incident_comment_weekly,
-          :incident_management_incident_zoom_meeting_monthly, :incident_management_incident_zoom_meeting_weekly,
-          :incident_management_incident_relate_monthly, :incident_management_incident_relate_weekly,
-          :incident_management_incident_unrelate_monthly, :incident_management_incident_unrelate_weekly,
-          :incident_management_incident_change_confidential_monthly, :incident_management_incident_change_confidential_weekly,
-          :incident_management_alert_status_changed_monthly, :incident_management_alert_status_changed_weekly,
-          :incident_management_alert_assigned_monthly, :incident_management_alert_assigned_weekly,
-          :incident_management_alert_todo_monthly, :incident_management_alert_todo_weekly,
-          :incident_management_total_unique_counts_monthly, :incident_management_total_unique_counts_weekly
-        )
-      end
-
-      it 'includes testing monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:testing]).to include(
-          :i_testing_test_case_parsed_monthly, :i_testing_test_case_parsed_weekly,
-          :users_expanding_testing_code_quality_report_monthly, :users_expanding_testing_code_quality_report_weekly,
-          :users_expanding_testing_accessibility_report_monthly, :users_expanding_testing_accessibility_report_weekly,
-          :i_testing_summary_widget_total_monthly, :i_testing_summary_widget_total_weekly,
-          :testing_total_unique_counts_monthly
-        )
-      end
-
-      it 'includes source_code monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:source_code].keys).to contain_exactly(*[
-          :wiki_action_monthly, :wiki_action_weekly,
-          :design_action_monthly, :design_action_weekly,
-          :project_action_monthly, :project_action_weekly,
-          :git_write_action_monthly, :git_write_action_weekly,
-          :merge_request_action_monthly, :merge_request_action_weekly,
-          :i_source_code_code_intelligence_monthly, :i_source_code_code_intelligence_weekly
-        ])
-      end
-
       it 'includes counts keys' do
         expect(subject[:counts]).to include(:issues)
       end
@@ -101,6 +40,39 @@ RSpec.describe Gitlab::UsageDataMetrics do
 
       it 'includes settings keys' do
         expect(subject[:settings]).to include(:collected_data_categories)
+      end
+
+      describe 'Redis_HLL_counters' do
+        let(:metric_files_key_paths) do
+          Gitlab::Usage::MetricDefinition
+            .definitions
+            .select { |k, v| v.attributes[:data_source] == 'redis_hll' && v.key_path.starts_with?('redis_hll_counters') }
+            .keys
+            .sort
+        end
+
+        # Recursively traverse nested Hash of a generated Service Ping to return an Array of key paths
+        # in the dotted format used in metric definition YAML files, e.g.: 'count.category.metric_name'
+        def parse_service_ping_keys(object, key_path = [])
+          if object.is_a?(Hash)
+            object.each_with_object([]) do |(key, value), result|
+              result.append parse_service_ping_keys(value, key_path + [key])
+            end
+          else
+            key_path.join('.')
+          end
+        end
+
+        let(:service_ping_key_paths) do
+          parse_service_ping_keys(subject)
+            .flatten
+            .select { |k| k.starts_with?('redis_hll_counters') }
+            .sort
+        end
+
+        it 'is included in the Service Ping hash structure' do
+          expect(metric_files_key_paths).to match_array(service_ping_key_paths)
+        end
       end
     end
   end

@@ -26,6 +26,7 @@ class User < ApplicationRecord
   include UpdateHighestRole
   include HasUserType
   include Gitlab::Auth::Otp::Fortinet
+  include RestrictedSignup
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
 
@@ -211,6 +212,8 @@ class User < ApplicationRecord
 
   has_many :in_product_marketing_emails, class_name: '::Users::InProductMarketingEmail'
 
+  has_many :timelogs
+
   #
   # Validations
   #
@@ -221,7 +224,7 @@ class User < ApplicationRecord
   validates :email, confirmation: true
   validates :notification_email, presence: true
   validates :notification_email, devise_email: true, if: ->(user) { user.notification_email != user.email }
-  validates :public_email, presence: true, uniqueness: true, devise_email: true, allow_blank: true
+  validates :public_email, uniqueness: true, devise_email: true, allow_blank: true
   validates :commit_email, devise_email: true, allow_nil: true, if: ->(user) { user.commit_email != user.email }
   validates :projects_limit,
     presence: true,
@@ -232,11 +235,10 @@ class User < ApplicationRecord
   validate :namespace_move_dir_allowed, if: :username_changed?
 
   validate :unique_email, if: :email_changed?
-  validate :owns_notification_email, if: :notification_email_changed?
-  validate :owns_public_email, if: :public_email_changed?
-  validate :owns_commit_email, if: :commit_email_changed?
-  validate :signup_domain_valid?, on: :create, if: ->(user) { !user.created_by_id }
-  validate :check_email_restrictions, on: :create, if: ->(user) { !user.created_by_id }
+  validate :notification_email_verified, if: :notification_email_changed?
+  validate :public_email_verified, if: :public_email_changed?
+  validate :commit_email_verified, if: :commit_email_changed?
+  validate :signup_email_valid?, on: :create, if: ->(user) { !user.created_by_id }
   validate :check_username_format, if: :username_changed?
 
   validates :theme_id, allow_nil: true, inclusion: { in: Gitlab::Themes.valid_ids,
@@ -246,7 +248,6 @@ class User < ApplicationRecord
     message: _("%{placeholder} is not a valid color scheme") % { placeholder: '%{value}' } }
 
   before_validation :sanitize_attrs
-  before_validation :set_notification_email, if: :new_record?
   before_validation :set_public_email, if: :public_email_changed?
   before_validation :set_commit_email, if: :commit_email_changed?
   before_save :default_private_profile_to_false
@@ -271,11 +272,6 @@ class User < ApplicationRecord
 
       update_emails_with_primary_email(previous_confirmed_at, previous_email)
       update_invalid_gpg_signatures
-
-      if previous_email == notification_email
-        self.notification_email = email
-        save
-      end
     end
   end
 
@@ -926,22 +922,22 @@ class User < ApplicationRecord
     end
   end
 
-  def owns_notification_email
-    return if new_record? || temp_oauth_email?
+  def notification_email_verified
+    return if read_attribute(:notification_email).blank? || temp_oauth_email?
 
-    errors.add(:notification_email, _("is not an email you own")) unless verified_emails.include?(notification_email)
+    errors.add(:notification_email, _("must be an email you have verified")) unless verified_emails.include?(notification_email)
   end
 
-  def owns_public_email
+  def public_email_verified
     return if public_email.blank?
 
-    errors.add(:public_email, _("is not an email you own")) unless verified_emails.include?(public_email)
+    errors.add(:public_email, _("must be an email you have verified")) unless verified_emails.include?(public_email)
   end
 
-  def owns_commit_email
+  def commit_email_verified
     return if read_attribute(:commit_email).blank?
 
-    errors.add(:commit_email, _("is not an email you own")) unless verified_emails.include?(commit_email)
+    errors.add(:commit_email, _("must be an email you have verified")) unless verified_emails.include?(commit_email)
   end
 
   # Define commit_email-related attribute methods explicitly instead of relying
@@ -966,6 +962,11 @@ class User < ApplicationRecord
 
   def commit_email_changed?
     has_attribute?(:commit_email) && super
+  end
+
+  def notification_email
+    # The notification email is the same as the primary email if undefined
+    super.presence || self.email
   end
 
   def private_commit_email
@@ -2070,51 +2071,10 @@ class User < ApplicationRecord
     end
   end
 
-  def signup_domain_valid?
-    valid = true
-    error = nil
+  def signup_email_valid?
+    error = validate_admin_signup_restrictions(email)
 
-    if Gitlab::CurrentSettings.domain_denylist_enabled?
-      blocked_domains = Gitlab::CurrentSettings.domain_denylist
-      if domain_matches?(blocked_domains, email)
-        error = 'is not from an allowed domain.'
-        valid = false
-      end
-    end
-
-    allowed_domains = Gitlab::CurrentSettings.domain_allowlist
-    unless allowed_domains.blank?
-      if domain_matches?(allowed_domains, email)
-        valid = true
-      else
-        error = "domain is not authorized for sign-up"
-        valid = false
-      end
-    end
-
-    errors.add(:email, error) unless valid
-
-    valid
-  end
-
-  def domain_matches?(email_domains, email)
-    signup_domain = Mail::Address.new(email).domain
-    email_domains.any? do |domain|
-      escaped = Regexp.escape(domain).gsub('\*', '.*?')
-      regexp = Regexp.new "^#{escaped}$", Regexp::IGNORECASE
-      signup_domain =~ regexp
-    end
-  end
-
-  def check_email_restrictions
-    return unless Gitlab::CurrentSettings.email_restrictions_enabled?
-
-    restrictions = Gitlab::CurrentSettings.email_restrictions
-    return if restrictions.blank?
-
-    if Gitlab::UntrustedRegexp.new(restrictions).match?(email)
-      errors.add(:email, _('is not allowed. Try again with a different email address, or contact your GitLab admin.'))
-    end
+    errors.add(:email, error) if error
   end
 
   def check_username_format

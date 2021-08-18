@@ -7,13 +7,16 @@ query getPackageDetails($id: ID!) {
     createdAt
     updatedAt
     status
-    tags {
+    project {
+      path
+    }
+    tags(first: 10) {
       nodes {
         id
         name
       }
     }
-    pipelines(first: 3) {
+    pipelines(first: 10) {
       nodes {
         ref
         id
@@ -38,6 +41,40 @@ query getPackageDetails($id: ID!) {
         fileSha1
         fileSha256
         size
+        createdAt
+        downloadPath
+      }
+    }
+    versions(first: 100) {
+      nodes {
+        id
+        name
+        createdAt
+        version
+        status
+        tags(first: 1) {
+          nodes {
+            id
+            name
+          }
+        }
+      }
+    }
+    dependencyLinks {
+      nodes {
+        id
+        dependency {
+          id
+          name
+          versionPattern
+        }
+        dependencyType
+        metadata {
+          ... on NugetDependencyLinkMetadata {
+            id
+            targetFramework
+          }
+        }
       }
     }
     metadata {

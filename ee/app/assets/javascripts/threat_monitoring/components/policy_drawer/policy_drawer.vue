@@ -1,13 +1,13 @@
 <script>
 import { GlButton, GlDrawer } from '@gitlab/ui';
-import { getContentWrapperHeight, getPolicyKind } from '../../utils';
-import { POLICY_KINDS } from '../constants';
+import { getContentWrapperHeight } from '../../utils';
+import { POLICIES_LIST_CONTAINER_CLASS, POLICY_TYPE_COMPONENT_OPTIONS } from '../constants';
 import CiliumNetworkPolicy from './cilium_network_policy.vue';
 import ScanExecutionPolicy from './scan_execution_policy.vue';
 
 const policyComponent = {
-  [POLICY_KINDS.ciliumNetwork]: CiliumNetworkPolicy,
-  [POLICY_KINDS.scanExecution]: ScanExecutionPolicy,
+  [POLICY_TYPE_COMPONENT_OPTIONS.container.value]: CiliumNetworkPolicy,
+  [POLICY_TYPE_COMPONENT_OPTIONS.scanExecution.value]: ScanExecutionPolicy,
 };
 
 export default {
@@ -20,10 +20,20 @@ export default {
     ScanExecutionPolicy,
   },
   props: {
+    containerClass: {
+      type: String,
+      required: false,
+      default: POLICIES_LIST_CONTAINER_CLASS,
+    },
     policy: {
       type: Object,
       required: false,
       default: null,
+    },
+    policyType: {
+      type: String,
+      required: false,
+      default: '',
     },
     editPolicyPath: {
       type: String,
@@ -32,16 +42,13 @@ export default {
     },
   },
   computed: {
-    policyKind() {
-      return getPolicyKind(this.policy?.yaml);
-    },
     policyComponent() {
-      return policyComponent[this.policyKind] || null;
+      return policyComponent[this.policyType] || null;
     },
   },
   methods: {
     getDrawerHeaderHeight() {
-      return getContentWrapperHeight('.js-threat-monitoring-container-wrapper');
+      return getContentWrapperHeight(this.containerClass);
     },
   },
   // We set the drawer's z-index to 252 to clear flash messages that might be displayed in the page

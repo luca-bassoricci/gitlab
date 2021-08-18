@@ -22,49 +22,37 @@ RSpec.describe Gitlab::UsageDataMetrics do
         expect(subject).to include(:license_subscription_id)
       end
 
-      it 'includes incident_management_incident_published monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:incident_management]).to include(
-          :incident_management_incident_published_monthly, :incident_management_incident_published_weekly
-        )
-      end
+      describe 'Redis_HLL_counters' do
+        let(:metric_files_key_paths) do
+          Gitlab::Usage::MetricDefinition
+            .definitions
+            .select { |k, v| v.attributes[:data_source] == 'redis_hll' && v.key_path.starts_with?('redis_hll_counters') }
+            .keys
+            .sort
+        end
 
-      it 'includes incident_management_oncall monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:incident_management_oncall].keys).to contain_exactly(*[
-          :i_incident_management_oncall_notification_sent_monthly, :i_incident_management_oncall_notification_sent_weekly
-        ])
-      end
+        # Recursively traverse nested Hash of a generated Service Ping to return an Array of key paths
+        # in the dotted format used in metric definition YAML files, e.g.: 'count.category.metric_name'
+        def parse_service_ping_keys(object, key_path = [])
+          if object.is_a?(Hash)
+            object.each_with_object([]) do |(key, value), result|
+              result.append parse_service_ping_keys(value, key_path + [key])
+            end
+          else
+            key_path.join('.')
+          end
+        end
 
-      it 'includes compliance monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:compliance].keys).to contain_exactly(*[
-          :g_compliance_dashboard_monthly, :g_compliance_dashboard_weekly,
-          :g_compliance_audit_events_monthly, :g_compliance_audit_events_weekly,
-          :i_compliance_audit_events_monthly, :i_compliance_audit_events_weekly,
-          :i_compliance_credential_inventory_monthly, :i_compliance_credential_inventory_weekly,
-          :a_compliance_audit_events_api_monthly, :a_compliance_audit_events_api_weekly,
-          :compliance_total_unique_counts_monthly, :compliance_total_unique_counts_weekly
-        ])
-      end
+        let(:service_ping_key_paths) do
+          parse_service_ping_keys(subject)
+            .flatten
+            .select { |k| k.starts_with?('redis_hll_counters') }
+            .sort
+        end
 
-      it 'includes search monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:search].keys).to contain_exactly(*[
-          :i_search_total_monthly, :i_search_total_weekly,
-          :i_search_advanced_monthly, :i_search_advanced_weekly,
-          :i_search_paid_monthly, :i_search_paid_weekly,
-          :search_total_unique_counts_monthly, :search_total_unique_counts_weekly
-        ])
-      end
-
-      it 'includes testing monthly and weekly keys' do
-        expect(subject[:redis_hll_counters][:testing]).to include(
-          :i_testing_metrics_report_widget_total_monthly, :i_testing_metrics_report_widget_total_weekly,
-          :i_testing_group_code_coverage_visit_total_monthly, :i_testing_group_code_coverage_visit_total_weekly,
-          :i_testing_full_code_quality_report_total_monthly, :i_testing_full_code_quality_report_total_weekly,
-          :i_testing_web_performance_widget_total_monthly, :i_testing_web_performance_widget_total_weekly,
-          :i_testing_group_code_coverage_project_click_total_monthly, :i_testing_group_code_coverage_project_click_total_weekly,
-          :i_testing_load_performance_widget_total_monthly, :i_testing_load_performance_widget_total_weekly,
-          :i_testing_metrics_report_artifact_uploaders_monthly, :i_testing_metrics_report_artifact_uploaders_weekly,
-          :testing_total_unique_counts_weekly
-        )
+        it 'is included in the Usage Ping hash structure' do
+          expect(metric_files_key_paths).to match_array(service_ping_key_paths)
+        end
       end
     end
   end

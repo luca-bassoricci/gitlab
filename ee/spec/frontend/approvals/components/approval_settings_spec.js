@@ -3,12 +3,16 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
-import { APPROVAL_SETTINGS_I18N } from 'ee/approvals/constants';
+import {
+  PROJECT_APPROVAL_SETTINGS_LABELS_I18N,
+  APPROVAL_SETTINGS_I18N,
+} from 'ee/approvals/constants';
 import { groupApprovalsMappers } from 'ee/approvals/mappers';
 import createStore from 'ee/approvals/stores';
 import approvalSettingsModule from 'ee/approvals/stores/modules/approval_settings/';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { createGroupApprovalsPayload } from '../mocks';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -18,6 +22,7 @@ describe('ApprovalSettings', () => {
   let store;
   let actions;
 
+  const groupApprovalsPayload = createGroupApprovalsPayload();
   const approvalSettingsPath = 'groups/22/merge_request_approval_settings';
 
   const setupStore = (data = {}, initialData) => {
@@ -41,6 +46,7 @@ describe('ApprovalSettings', () => {
         store,
         propsData: {
           approvalSettingsPath,
+          settingsLabels: PROJECT_APPROVAL_SETTINGS_LABELS_I18N,
           ...props,
         },
         stubs: { GlButton },
@@ -149,11 +155,11 @@ describe('ApprovalSettings', () => {
 
     describe.each`
       testid                             | action                            | setting                        | labelKey                            | anchor
-      ${'prevent-author-approval'}       | ${'setPreventAuthorApproval'}     | ${'preventAuthorApproval'}     | ${'authorApprovalLabel'}            | ${'prevent-authors-from-approving-their-own-work'}
-      ${'prevent-committers-approval'}   | ${'setPreventCommittersApproval'} | ${'preventCommittersApproval'} | ${'preventCommittersApprovalLabel'} | ${'prevent-committers-from-approving-their-own-work'}
-      ${'prevent-mr-approval-rule-edit'} | ${'setPreventMrApprovalRuleEdit'} | ${'preventMrApprovalRuleEdit'} | ${'preventMrApprovalRuleEditLabel'} | ${'prevent-overrides-of-default-approvals'}
-      ${'require-user-password'}         | ${'setRequireUserPassword'}       | ${'requireUserPassword'}       | ${'requireUserPasswordLabel'}       | ${'require-authentication-for-approvals'}
-      ${'remove-approvals-on-push'}      | ${'setRemoveApprovalsOnPush'}     | ${'removeApprovalsOnPush'}     | ${'removeApprovalsOnPushLabel'}     | ${'reset-approvals-on-push'}
+      ${'prevent-author-approval'}       | ${'setPreventAuthorApproval'}     | ${'preventAuthorApproval'}     | ${'authorApprovalLabel'}            | ${'prevent-approval-by-author'}
+      ${'prevent-committers-approval'}   | ${'setPreventCommittersApproval'} | ${'preventCommittersApproval'} | ${'preventCommittersApprovalLabel'} | ${'prevent-approvals-by-users-who-add-commits'}
+      ${'prevent-mr-approval-rule-edit'} | ${'setPreventMrApprovalRuleEdit'} | ${'preventMrApprovalRuleEdit'} | ${'preventMrApprovalRuleEditLabel'} | ${'prevent-editing-approval-rules-in-merge-requests'}
+      ${'require-user-password'}         | ${'setRequireUserPassword'}       | ${'requireUserPassword'}       | ${'requireUserPasswordLabel'}       | ${'require-user-password-to-approve'}
+      ${'remove-approvals-on-push'}      | ${'setRemoveApprovalsOnPush'}     | ${'removeApprovalsOnPush'}     | ${'removeApprovalsOnPushLabel'}     | ${'remove-all-approvals-when-commits-are-added-to-the-source-branch'}
     `('with the $testid checkbox', ({ testid, action, setting, labelKey, anchor }) => {
       let checkbox = null;
 
@@ -175,7 +181,7 @@ describe('ApprovalSettings', () => {
       it('has the anchor and label props', () => {
         expect(checkbox.props()).toMatchObject({
           anchor,
-          label: APPROVAL_SETTINGS_I18N[labelKey],
+          label: PROJECT_APPROVAL_SETTINGS_LABELS_I18N[labelKey],
         });
       });
 
@@ -215,7 +221,7 @@ describe('ApprovalSettings', () => {
 
           await waitForPromises();
           await findForm().vm.$emit('submit', { preventDefault: () => {} });
-          await store.commit('UPDATE_SETTINGS_SUCCESS', {});
+          await store.commit('UPDATE_SETTINGS_SUCCESS', groupApprovalsPayload);
         });
 
         it('update the settings', () => {

@@ -8,14 +8,6 @@ module EE
       %w[saml_providers#show usage_quotas#index billings#index]
     end
 
-    def group_settings_nav_link_paths
-      if ::Feature.disabled?(:group_administration_nav_item, @group)
-        super + group_nav_link_paths
-      else
-        super
-      end
-    end
-
     def group_administration_nav_link_paths
       group_nav_link_paths
     end
@@ -24,24 +16,6 @@ module EE
       show_lfs = group.lfs_enabled? ? 'including LFS files' : ''
 
       "Max size for repositories within this group #{show_lfs}. Can be overridden inside each project. For no limit, enter 0. To inherit the global value, leave blank."
-    end
-
-    override :group_packages_nav_link_paths
-    def group_packages_nav_link_paths
-      %w[
-        groups/packages#index
-        groups/dependency_proxies#show
-        groups/container_registries#index
-      ]
-    end
-
-    override :group_packages_nav?
-    def group_packages_nav?
-      super || group_dependency_proxy_nav?
-    end
-
-    def group_dependency_proxy_nav?
-      @group.dependency_proxy_feature_available?
     end
 
     def group_path_params(group)

@@ -108,6 +108,7 @@ module Gitlab
             deployments: deployment_count(Deployment),
             successful_deployments: deployment_count(Deployment.success),
             failed_deployments: deployment_count(Deployment.failed),
+            feature_flags: count(Operations::FeatureFlag),
             # rubocop: enable UsageData/LargeTable:
             environments: count(::Environment),
             clusters: count(::Clusters::Cluster),
@@ -255,6 +256,7 @@ module Gitlab
         {
           settings: {
             ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? },
+            smtp_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Email::SmtpConfig.encrypted_secrets.active? },
             operating_system: alt_usage_data(fallback: nil) { operating_system },
             gitaly_apdex: alt_usage_data { gitaly_apdex },
             collected_data_categories: add_metric('CollectedDataCategoriesMetric', time_frame: 'none')

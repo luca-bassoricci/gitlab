@@ -28,6 +28,7 @@ RSpec.describe Ci::Build do
 
   it { is_expected.to have_one(:deployment) }
   it { is_expected.to have_one(:runner_session) }
+  it { is_expected.to have_one(:trace_metadata) }
 
   it { is_expected.to validate_presence_of(:ref) }
 
@@ -2621,6 +2622,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_PROJECT_URL', value: project.web_url, public: true, masked: false },
           { key: 'CI_PROJECT_VISIBILITY', value: 'private', public: true, masked: false },
           { key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: project.repository_languages.map(&:name).join(',').downcase, public: true, masked: false },
+          { key: 'CI_PROJECT_CLASSIFICATION_LABEL', value: project.external_authorization_classification_label, public: true, masked: false },
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
@@ -3743,7 +3745,21 @@ RSpec.describe Ci::Build do
       context 'when artifacts of depended job has been expired' do
         let!(:pre_stage_job) { create(:ci_build, :success, :expired, pipeline: pipeline, name: 'test', stage_idx: 0) }
 
-        it { expect(job).not_to have_valid_build_dependencies }
+        context 'when pipeline is not locked' do
+          before do
+            build.pipeline.unlocked!
+          end
+
+          it { expect(job).not_to have_valid_build_dependencies }
+        end
+
+        context 'when pipeline is locked' do
+          before do
+            build.pipeline.artifacts_locked!
+          end
+
+          it { expect(job).to have_valid_build_dependencies }
+        end
       end
 
       context 'when artifacts of depended job has been erased' do
@@ -4763,8 +4779,24 @@ RSpec.describe Ci::Build do
     let!(:pre_stage_job_invalid) { create(:ci_build, :success, :expired, pipeline: pipeline, name: 'test2', stage_idx: 1) }
     let!(:job) { create(:ci_build, :pending, pipeline: pipeline, stage_idx: 2, options: { dependencies: %w(test1 test2) }) }
 
-    it 'returns invalid dependencies' do
-      expect(job.invalid_dependencies).to eq([pre_stage_job_invalid])
+    context 'when pipeline is locked' do
+      before do
+        build.pipeline.unlocked!
+      end
+
+      it 'returns invalid dependencies when expired' do
+        expect(job.invalid_dependencies).to eq([pre_stage_job_invalid])
+      end
+    end
+
+    context 'when pipeline is not locked' do
+      before do
+        build.pipeline.artifacts_locked!
+      end
+
+      it 'returns no invalid dependencies when expired' do
+        expect(job.invalid_dependencies).to eq([])
+      end
     end
   end
 
@@ -5184,6 +5216,14 @@ RSpec.describe Ci::Build do
 
       it 'is a shared runner build' do
         expect(build).to be_shared_runner_build
+      end
+    end
+  end
+
+  describe '.with_project_and_metadata' do
+    it 'does not join across databases' do
+      with_cross_joins_prevented do
+        ::Ci::Build.with_project_and_metadata.to_a
       end
     end
   end

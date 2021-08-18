@@ -1,39 +1,6 @@
 # frozen_string_literal: true
 
 module GroupsHelper
-  def group_settings_nav_link_paths
-    %w[
-      groups#projects
-      groups#edit
-      badges#index
-      repository#show
-      ci_cd#show
-      integrations#index
-      integrations#edit
-      ldap_group_links#index
-      hooks#index
-      pipeline_quota#index
-      applications#index
-      applications#show
-      applications#edit
-      packages_and_registries#show
-      groups/runners#show
-      groups/runners#edit
-    ]
-  end
-
-  def group_packages_nav_link_paths
-    %w[
-      groups/packages#index
-      groups/container_registries#index
-    ]
-  end
-
-  def group_container_registry_nav?
-    Gitlab.config.registry.enabled &&
-      can?(current_user, :read_container_image, @group)
-  end
-
   def group_sidebar_links
     @group_sidebar_links ||= get_group_sidebar_links
   end
@@ -76,10 +43,13 @@ module GroupsHelper
       .count
   end
 
-  def group_dependency_proxy_url(group)
+  def group_dependency_proxy_image_prefix(group)
     # The namespace path can include uppercase letters, which
     # Docker doesn't allow. The proxy expects it to be downcased.
-    "#{group_url(group).downcase}#{DependencyProxy::URL_SUFFIX}"
+    url = "#{group_url(group).downcase}#{DependencyProxy::URL_SUFFIX}"
+
+    # Docker images do not include the protocol
+    url.partition('//').last
   end
 
   def group_icon_url(group, options = {})
@@ -177,19 +147,6 @@ module GroupsHelper
     end
 
     groups.to_json
-  end
-
-  def group_packages_nav?
-    group_packages_list_nav? ||
-      group_container_registry_nav?
-  end
-
-  def group_dependency_proxy_nav?
-    @group.dependency_proxy_feature_available?
-  end
-
-  def group_packages_list_nav?
-    @group.packages_feature_enabled?
   end
 
   def show_invite_banner?(group)

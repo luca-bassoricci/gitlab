@@ -37,22 +37,21 @@ module Database
 
     # Returns true if a set includes only CI tables, or includes only non-CI tables
     def self.only_ci_or_only_main?(tables)
-      tables.all? { |table| ci_table_name?(table) } ||
-        tables.none? { |table| ci_table_name?(table) }
+      tables.all? { |table| CiTables.include?(table) } ||
+        tables.none? { |table| CiTables.include?(table) }
     end
 
-    def self.ci_table_name?(name)
-      ci_tables.include?(name)
-    end
+    module SpecHelpers
+      def with_cross_joins_prevented
+        subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+          ::Database::PreventCrossJoins.validate_cross_joins!(event.payload[:sql])
+        end
 
-    def self.ci_tables
-      @@ci_tables ||= Set.new.tap do |tables| # rubocop:disable Style/ClassVars
-        tables.merge(Ci::ApplicationRecord.descendants.map(&:table_name).compact)
+        Thread.current[:allow_cross_joins_across_databases] = false
 
-        # It was decided that taggings/tags are best placed with CI
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/333413
-        tables.add('taggings')
-        tables.add('tags')
+        yield
+      ensure
+        ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
       end
     end
 
@@ -69,16 +68,10 @@ Gitlab::Database.singleton_class.prepend(
   Database::PreventCrossJoins::GitlabDatabaseMixin)
 
 RSpec.configure do |config|
+  config.include(::Database::PreventCrossJoins::SpecHelpers)
+
   # TODO: remove `:prevent_cross_joins` to enable the check by default
   config.around(:each, :prevent_cross_joins) do |example|
-    subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
-      ::Database::PreventCrossJoins.validate_cross_joins!(event.payload[:sql])
-    end
-
-    Thread.current[:allow_cross_joins_across_databases] = false
-
-    example.run
-  ensure
-    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+    with_cross_joins_prevented { example.run }
   end
 end

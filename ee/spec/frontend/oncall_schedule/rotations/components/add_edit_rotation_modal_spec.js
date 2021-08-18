@@ -20,6 +20,7 @@ import {
 import mockRotation from '../../mocks/mock_rotation.json';
 
 jest.mock('~/flash');
+jest.mock('~/lib/utils/color_utils');
 
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
@@ -390,7 +391,7 @@ describe('AddEditRotationModal', () => {
       expect(findForm().props('form')).toMatchObject({
         startsAt: {
           date: new Date('2021-01-13T00:00:00.000Z'),
-          time: 1,
+          time: 3,
         },
       });
     });
@@ -399,7 +400,7 @@ describe('AddEditRotationModal', () => {
       expect(findForm().props('form')).toMatchObject({
         endsAt: {
           date: new Date('2021-03-13T00:00:00.000Z'),
-          time: 5,
+          time: 7,
         },
       });
     });

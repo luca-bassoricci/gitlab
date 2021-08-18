@@ -57,6 +57,34 @@ RSpec.describe Security::StoreScanService do
       known_keys.add(finding_key)
     end
 
+    context 'when the `vulnerability_finding_signatures` licensed feature is available' do
+      before do
+        stub_licensed_features(vulnerability_finding_signatures: true)
+
+        allow(Security::OverrideUuidsService).to receive(:execute)
+      end
+
+      it 'calls `Security::OverrideUuidsService` with security report to re-calculate the finding UUIDs' do
+        store_scan
+
+        expect(Security::OverrideUuidsService).to have_received(:execute).with(artifact.security_report)
+      end
+    end
+
+    context 'when the `vulnerability_finding_signatures` licensed feature is not available' do
+      before do
+        stub_licensed_features(vulnerability_finding_signatures: false)
+
+        allow(Security::OverrideUuidsService).to receive(:execute)
+      end
+
+      it 'does not call `Security::OverrideUuidsService`' do
+        store_scan
+
+        expect(Security::OverrideUuidsService).not_to have_received(:execute)
+      end
+    end
+
     context 'when the report has some errors' do
       before do
         artifact.security_report.errors << { 'type' => 'foo', 'message' => 'bar' }

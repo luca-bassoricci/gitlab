@@ -360,7 +360,7 @@ group :development, :test do
   gem 'awesome_print', require: false
 
   gem 'database_cleaner', '~> 1.7.0'
-  gem 'factory_bot_rails', '~> 6.1.0'
+  gem 'factory_bot_rails', '~> 6.2.0'
   gem 'rspec-rails', '~> 5.0.1'
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
@@ -490,7 +490,7 @@ gem 'flipper', '~> 0.21.0'
 gem 'flipper-active_record', '~> 0.21.0'
 gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 3.2.2'
-gem 'gitlab-experiment', '~> 0.6.3'
+gem 'gitlab-experiment', '~> 0.6.4'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

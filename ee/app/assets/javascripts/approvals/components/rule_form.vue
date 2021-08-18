@@ -1,14 +1,8 @@
 <script>
-import {
-  GlFormGroup,
-  GlFormInput,
-  GlDropdown,
-  GlFormCheckbox,
-  GlFormCheckboxGroup,
-} from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlDropdown, GlTruncate, GlDropdownItem } from '@gitlab/ui';
 import { groupBy, isEqual, isNumber, omit } from 'lodash';
 import { mapState, mapActions } from 'vuex';
-import { REPORT_TYPES } from 'ee/security_dashboard/store/constants';
+import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { sprintf } from '~/locale';
 import {
@@ -26,7 +20,7 @@ import ApproversSelect from './approvers_select.vue';
 
 const DEFAULT_NAME = 'Default';
 
-const EXCLUDED_REPORT_TYPE = 'cluster_image_scanning';
+export const EXCLUDED_REPORT_TYPE = 'cluster_image_scanning';
 
 export const READONLY_NAMES = [LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME, COVERAGE_CHECK_NAME];
 
@@ -42,8 +36,8 @@ export default {
     GlFormInput,
     ProtectedBranchesSelector,
     GlDropdown,
-    GlFormCheckbox,
-    GlFormCheckboxGroup,
+    GlTruncate,
+    GlDropdownItem,
   },
   props: {
     initRule: {
@@ -66,6 +60,7 @@ export default {
     return {
       name: this.defaultRuleName,
       approvalsRequired: 1,
+      vulnerabilitiesAllowed: 0,
       minApprovalsRequired: 0,
       approvers: [],
       approversToAdd: [],
@@ -76,6 +71,7 @@ export default {
       containsHiddenGroups: false,
       serverValidationErrors: [],
       scanners: [],
+      severityLevels: [],
       ...this.getInitialData(),
     };
   },
@@ -103,11 +99,11 @@ export default {
     invalidName() {
       if (this.isMultiSubmission) {
         if (this.serverValidationErrors.includes('name has already been taken')) {
-          return this.$options.APPROVAL_DIALOG_I18N.validations.ruleNameTaken;
+          return APPROVAL_DIALOG_I18N.validations.ruleNameTaken;
         }
 
         if (!this.name) {
-          return this.$options.APPROVAL_DIALOG_I18N.validations.ruleNameMissing;
+          return APPROVAL_DIALOG_I18N.validations.ruleNameMissing;
         }
       }
 
@@ -115,15 +111,15 @@ export default {
     },
     invalidApprovalsRequired() {
       if (!isNumber(this.approvalsRequired)) {
-        return this.$options.APPROVAL_DIALOG_I18N.validations.approvalsRequiredNotNumber;
+        return APPROVAL_DIALOG_I18N.validations.approvalsRequiredNotNumber;
       }
 
       if (this.approvalsRequired < 0) {
-        return this.$options.APPROVAL_DIALOG_I18N.validations.approvalsRequiredNegativeNumber;
+        return APPROVAL_DIALOG_I18N.validations.approvalsRequiredNegativeNumber;
       }
 
       if (this.approvalsRequired < this.minApprovalsRequired) {
-        return sprintf(this.$options.APPROVAL_DIALOG_I18N.validations.approvalsRequiredMinimum, {
+        return sprintf(APPROVAL_DIALOG_I18N.validations.approvalsRequiredMinimum, {
           number: this.minApprovalsRequired,
         });
       }
@@ -132,7 +128,7 @@ export default {
     },
     invalidApprovers() {
       if (this.isMultiSubmission && this.approvers.length <= 0) {
-        return this.$options.APPROVAL_DIALOG_I18N.validations.approversRequired;
+        return APPROVAL_DIALOG_I18N.validations.approversRequired;
       }
 
       return '';
@@ -142,14 +138,31 @@ export default {
         !this.isMrEdit &&
         !this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id))
       ) {
-        return this.$options.APPROVAL_DIALOG_I18N.validations.branchesRequired;
+        return APPROVAL_DIALOG_I18N.validations.branchesRequired;
       }
 
       return '';
     },
     invalidScanners() {
       if (this.scanners.length <= 0) {
-        return this.$options.APPROVAL_DIALOG_I18N.validations.scannersRequired;
+        return APPROVAL_DIALOG_I18N.validations.scannersRequired;
+      }
+
+      return '';
+    },
+    invalidVulnerabilitiesAllowedError() {
+      if (!isNumber(this.vulnerabilitiesAllowed)) {
+        return APPROVAL_DIALOG_I18N.validations.approvalsRequiredNotNumber;
+      }
+      if (this.vulnerabilitiesAllowed < 0) {
+        return APPROVAL_DIALOG_I18N.validations.vulnerabilitiesAllowedMinimum;
+      }
+
+      return '';
+    },
+    invalidSeverityLevels() {
+      if (this.severityLevels.length === 0) {
+        return APPROVAL_DIALOG_I18N.validations.severityLevelsRequired;
       }
 
       return '';
@@ -160,7 +173,9 @@ export default {
         this.isValidBranches &&
         this.isValidApprovalsRequired &&
         this.isValidApprovers &&
-        this.areValidScanners
+        this.areValidScanners &&
+        this.isValidVulnerabilitiesAllowed &&
+        this.areValidSeverityLevels
       );
     },
     isValidName() {
@@ -177,6 +192,16 @@ export default {
     },
     areValidScanners() {
       return !this.showValidation || !this.isVulnerabilityCheck || !this.invalidScanners;
+    },
+    isValidVulnerabilitiesAllowed() {
+      return (
+        !this.showValidation ||
+        !this.isVulnerabilityCheck ||
+        !this.invalidVulnerabilitiesAllowedError
+      );
+    },
+    areValidSeverityLevels() {
+      return !this.showValidation || !this.isVulnerabilityCheck || !this.invalidSeverityLevels;
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -208,6 +233,7 @@ export default {
         id: this.initRule && this.initRule.id,
         name: this.settings.lockedApprovalsRuleName || this.name || DEFAULT_NAME,
         approvalsRequired: this.approvalsRequired,
+        vulnerabilitiesAllowed: this.vulnerabilitiesAllowed,
         users: this.userIds,
         groups: this.groupIds,
         userRecords: this.users,
@@ -215,6 +241,7 @@ export default {
         removeHiddenGroups: this.removeHiddenGroups,
         protectedBranchIds: this.branches.map((x) => x.id),
         scanners: this.scanners,
+        severityLevels: this.severityLevels,
       };
     },
     isEditing() {
@@ -229,15 +256,33 @@ export default {
     scannersText() {
       switch (this.scanners.length) {
         case Object.values(this.$options.REPORT_TYPES).length:
-          return this.$options.APPROVAL_DIALOG_I18N.form.allScannersSelectedLabel;
+          return APPROVAL_DIALOG_I18N.form.allScannersSelectedLabel;
         case 0:
-          return this.$options.APPROVAL_DIALOG_I18N.form.scannersSelectLabel;
+          return APPROVAL_DIALOG_I18N.form.scannersSelectLabel;
         case 1:
           return this.$options.REPORT_TYPES[this.scanners[0]];
         default:
-          return sprintf(this.$options.APPROVAL_DIALOG_I18N.form.multipleSelectedScannersLabel, {
-            scanner: this.$options.REPORT_TYPES[this.scanners[0]],
-            additionalScanners: this.scanners.length - 1,
+          return sprintf(APPROVAL_DIALOG_I18N.form.multipleSelectedLabel, {
+            firstLabel: this.$options.REPORT_TYPES[this.scanners[0]],
+            numberOfAdditionalLabels: this.scanners.length - 1,
+          });
+      }
+    },
+    areAllSeverityLevelsSelected() {
+      return this.severityLevels.length === Object.values(this.$options.SEVERITY_LEVELS).length;
+    },
+    severityLevelsText() {
+      switch (this.severityLevels.length) {
+        case Object.keys(this.$options.SEVERITY_LEVELS).length:
+          return APPROVAL_DIALOG_I18N.form.allSeverityLevelsSelectedLabel;
+        case 0:
+          return APPROVAL_DIALOG_I18N.form.severityLevelsSelectLabel;
+        case 1:
+          return this.$options.SEVERITY_LEVELS[this.severityLevels[0]];
+        default:
+          return sprintf(APPROVAL_DIALOG_I18N.form.multipleSelectedLabel, {
+            firstLabel: this.$options.SEVERITY_LEVELS[this.severityLevels[0]],
+            numberOfAdditionalLabels: this.severityLevels.length - 1,
           });
       }
     },
@@ -357,14 +402,44 @@ export default {
           ),
         branches,
         scanners: this.initRule.scanners || [],
+        vulnerabilitiesAllowed: this.initRule.vulnerabilitiesAllowed || 0,
+        severityLevels: this.initRule.severityLevels || [],
       };
     },
     setAllSelectedScanners() {
       this.scanners = this.areAllScannersSelected ? [] : Object.keys(this.$options.REPORT_TYPES);
     },
+    isScannerSelected(scanner) {
+      return this.scanners.includes(scanner);
+    },
+    setScanner(scanner) {
+      const pos = this.scanners.indexOf(scanner);
+      if (pos === -1) {
+        this.scanners.push(scanner);
+      } else {
+        this.scanners.splice(pos, 1);
+      }
+    },
+    setAllSelectedSeverityLevels() {
+      this.severityLevels = this.areAllSeverityLevelsSelected
+        ? []
+        : Object.keys(this.$options.SEVERITY_LEVELS);
+    },
+    isSeveritySelected(severity) {
+      return this.severityLevels.includes(severity);
+    },
+    setSeverity(severity) {
+      const pos = this.severityLevels.indexOf(severity);
+      if (pos === -1) {
+        this.severityLevels.push(severity);
+      } else {
+        this.severityLevels.splice(pos, 1);
+      }
+    },
   },
   APPROVAL_DIALOG_I18N,
   REPORT_TYPES: omit(REPORT_TYPES, EXCLUDED_REPORT_TYPE),
+  SEVERITY_LEVELS,
 };
 </script>
 
@@ -410,18 +485,51 @@ export default {
       data-testid="scanners-group"
     >
       <gl-dropdown :text="scannersText">
-        <gl-form-checkbox
-          :checked="areAllScannersSelected"
-          class="gl-ml-2"
-          @change="setAllSelectedScanners"
+        <gl-dropdown-item
+          key="all"
+          is-check-item
+          :is-checked="areAllScannersSelected"
+          @click.native.capture.stop="setAllSelectedScanners"
         >
-          {{ $options.APPROVAL_DIALOG_I18N.form.selectAllScannersLabel }}
-        </gl-form-checkbox>
-        <gl-form-checkbox-group
-          v-model="scanners"
-          :options="$options.REPORT_TYPES"
-          class="gl-ml-2"
-        />
+          <gl-truncate :text="$options.APPROVAL_DIALOG_I18N.form.selectAllLabel" />
+        </gl-dropdown-item>
+        <gl-dropdown-item
+          v-for="(value, key) in $options.REPORT_TYPES"
+          :key="key"
+          is-check-item
+          :is-checked="isScannerSelected(key)"
+          @click.native.capture.stop="setScanner(key)"
+        >
+          <gl-truncate :text="value" />
+        </gl-dropdown-item>
+      </gl-dropdown>
+    </gl-form-group>
+    <gl-form-group
+      v-if="isVulnerabilityCheck"
+      :label="$options.APPROVAL_DIALOG_I18N.form.severityLevelsLabel"
+      :description="$options.APPROVAL_DIALOG_I18N.form.severityLevelsDescription"
+      :state="areValidSeverityLevels"
+      :invalid-feedback="invalidSeverityLevels"
+      data-testid="severity-levels-group"
+    >
+      <gl-dropdown :text="severityLevelsText">
+        <gl-dropdown-item
+          key="all"
+          is-check-item
+          :is-checked="areAllSeverityLevelsSelected"
+          @click.native.capture.stop="setAllSelectedSeverityLevels"
+        >
+          <gl-truncate :text="$options.APPROVAL_DIALOG_I18N.form.selectAllLabel" />
+        </gl-dropdown-item>
+        <gl-dropdown-item
+          v-for="(value, key) in $options.SEVERITY_LEVELS"
+          :key="key"
+          is-check-item
+          :is-checked="isSeveritySelected(key)"
+          @click.native.capture.stop="setSeverity(key)"
+        >
+          <gl-truncate :text="value" />
+        </gl-dropdown-item>
       </gl-dropdown>
     </gl-form-group>
     <gl-form-group
@@ -438,6 +546,23 @@ export default {
         type="number"
         data-testid="approvals-required"
         data-qa-selector="approvals_required_field"
+      />
+    </gl-form-group>
+    <gl-form-group
+      v-if="isVulnerabilityCheck"
+      :label="$options.APPROVAL_DIALOG_I18N.form.vulnerabilitiesAllowedLabel"
+      :description="$options.APPROVAL_DIALOG_I18N.form.vulnerabilitiesAllowedDescription"
+      :state="isValidVulnerabilitiesAllowed"
+      :invalid-feedback="invalidVulnerabilitiesAllowedError"
+      data-testid="vulnerability-amount-group"
+    >
+      <gl-form-input
+        v-model.number="vulnerabilitiesAllowed"
+        :state="isValidVulnerabilitiesAllowed"
+        min="0"
+        class="mw-6em"
+        type="number"
+        data-testid="vulnerability-amount"
       />
     </gl-form-group>
     <gl-form-group

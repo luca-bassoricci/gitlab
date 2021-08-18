@@ -466,7 +466,7 @@ sudo gitlab-rake cache:clear
 
 ### Export a repository
 
-It's typically recommended to export a project through [the web interface](../../user/project/settings/import_export.md#exporting-a-project-and-its-data) or through [the API](../../api/project_import_export.md). In situations where this is not working as expected, it may be preferable to export a project directly via the Rails console:
+It's typically recommended to export a project through [the web interface](../../user/project/settings/import_export.md#export-a-project-and-its-data) or through [the API](../../api/project_import_export.md). In situations where this is not working as expected, it may be preferable to export a project directly via the Rails console:
 
 ```ruby
 user = User.find_by_username('USERNAME')
@@ -554,11 +554,26 @@ end
 
 ## Users
 
+### Create new user
+
+```ruby
+u = User.new(username: 'test_user', email: 'test@example.com', name: 'Test User', password: 'password', password_confirmation: 'password')
+u.skip_confirmation! # Use it only if you wish user to be automatically confirmed. If skipped, user will recieve confirmation e-mail
+u.save!
+```
+
 ### Skip reconfirmation
 
 ```ruby
-user = User.find_by_username '<username>'
+user = User.find_by_username('<username>')
 user.skip_reconfirmation!
+```
+
+### Disable 2fa for single user
+
+```ruby
+user = User.find_by_username('<username>')
+user.disable_two_factor!
 ```
 
 ### Active users & Historical users

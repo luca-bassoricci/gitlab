@@ -11,6 +11,8 @@ export const participants = [
     avatar: '',
     avatarUrl: '',
     webUrl: '',
+    colorWeight: '500',
+    colorPalette: 'blue',
   },
   {
     id: '2',
@@ -19,6 +21,8 @@ export const participants = [
     avatar: '',
     avatarUrl: '',
     webUrl: '',
+    colorWeight: '300',
+    colorPalette: 'orange',
   },
 ];
 
@@ -34,7 +38,7 @@ export const getOncallSchedulesQueryResponse = {
             iid: '37',
             name: 'Test schedule from query',
             description: 'Description 1 lives here',
-            timezone: 'Pacific/Honolulu',
+            timezone: 'America/Los_Angeles',
             rotations: { nodes: mockRotations },
           },
         ],

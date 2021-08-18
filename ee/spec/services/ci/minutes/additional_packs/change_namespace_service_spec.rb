@@ -40,6 +40,18 @@ RSpec.describe Ci::Minutes::AdditionalPacks::ChangeNamespaceService do
           expect(change_namespace[:status]).to eq :success
         end
 
+        it 'kicks off refresh ci minutes service for namespace and target' do
+          expect_next_instance_of(::Ci::Minutes::RefreshCachedDataService, namespace) do |instance|
+            expect(instance).to receive(:execute)
+          end
+
+          expect_next_instance_of(::Ci::Minutes::RefreshCachedDataService, target) do |instance|
+            expect(instance).to receive(:execute)
+          end
+
+          change_namespace
+        end
+
         context 'when updating packs fails' do
           before do
             allow_next_instance_of(described_class) do |instance|
@@ -109,6 +121,15 @@ RSpec.describe Ci::Minutes::AdditionalPacks::ChangeNamespaceService do
         it 'returns an error' do
           expect(change_namespace[:status]).to eq :error
           expect(change_namespace[:message]).to eq 'Both namespaces must share the same owner'
+        end
+      end
+
+      context 'when the namespace is the same as the target' do
+        let(:target) { namespace }
+
+        it 'returns an error' do
+          expect(change_namespace[:status]).to eq :error
+          expect(change_namespace[:message]).to eq 'Namespace and target must be different'
         end
       end
     end

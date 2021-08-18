@@ -14,9 +14,11 @@ import {
 } from '~/behaviors/shortcuts/keybindings';
 import createFlash from '~/flash';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { updateHistory } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
+import MrWidgetHowToMergeModal from '~/vue_merge_request_widget/components/mr_widget_how_to_merge_modal.vue';
 import PanelResizer from '~/vue_shared/components/panel_resizer.vue';
 
 import notesEventHub from '../../notes/event_hub';
@@ -46,12 +48,12 @@ import diffsEventHub from '../event_hub';
 import { reviewStatuses } from '../utils/file_reviews';
 import { diffsApp } from '../utils/performance';
 import { fileByFile } from '../utils/preferences';
+import { queueRedisHllEvents } from '../utils/queue_events';
 import CollapsedFilesWarning from './collapsed_files_warning.vue';
 import CommitWidget from './commit_widget.vue';
 import CompareVersions from './compare_versions.vue';
 import DiffFile from './diff_file.vue';
 import HiddenFilesWarning from './hidden_files_warning.vue';
-import MergeConflictWarning from './merge_conflict_warning.vue';
 import NoChanges from './no_changes.vue';
 import PreRenderer from './pre_renderer.vue';
 import TreeList from './tree_list.vue';
@@ -64,7 +66,6 @@ export default {
     DiffFile,
     NoChanges,
     HiddenFilesWarning,
-    MergeConflictWarning,
     CollapsedFilesWarning,
     CommitWidget,
     TreeList,
@@ -76,6 +77,7 @@ export default {
     DynamicScrollerItem,
     PreRenderer,
     VirtualScrollerScrollSync,
+    MrWidgetHowToMergeModal,
   },
   alerts: {
     ALERT_OVERFLOW_HIDDEN,
@@ -163,6 +165,21 @@ export default {
       required: false,
       default: () => ({}),
     },
+    sourceProjectDefaultUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    sourceProjectFullPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    isForked: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     const treeWidth =
@@ -202,6 +219,8 @@ export default {
       'mrReviews',
       'renderTreeList',
       'showWhitespace',
+      'targetBranchName',
+      'branchName',
     ]),
     ...mapGetters('diffs', [
       'whichCollapsedTypes',
@@ -336,29 +355,33 @@ export default {
     }
 
     if (window.gon?.features?.diffSettingsUsageData) {
+      const events = [];
+
       if (this.renderTreeList) {
-        api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_TREE);
+        events.push(TRACKING_FILE_BROWSER_TREE);
       } else {
-        api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_LIST);
+        events.push(TRACKING_FILE_BROWSER_LIST);
       }
 
       if (this.diffViewType === INLINE_DIFF_VIEW_TYPE) {
-        api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_INLINE);
+        events.push(TRACKING_DIFF_VIEW_INLINE);
       } else {
-        api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_PARALLEL);
+        events.push(TRACKING_DIFF_VIEW_PARALLEL);
       }
 
       if (this.showWhitespace) {
-        api.trackRedisHllUserEvent(TRACKING_WHITESPACE_SHOW);
+        events.push(TRACKING_WHITESPACE_SHOW);
       } else {
-        api.trackRedisHllUserEvent(TRACKING_WHITESPACE_HIDE);
+        events.push(TRACKING_WHITESPACE_HIDE);
       }
 
       if (this.viewDiffsFileByFile) {
-        api.trackRedisHllUserEvent(TRACKING_SINGLE_FILE_MODE);
+        events.push(TRACKING_SINGLE_FILE_MODE);
       } else {
-        api.trackRedisHllUserEvent(TRACKING_MULTIPLE_FILES_MODE);
+        events.push(TRACKING_MULTIPLE_FILES_MODE);
       }
+
+      queueRedisHllEvents(events);
     }
   },
   beforeCreate() {
@@ -591,6 +614,9 @@ export default {
   },
   minTreeWidth: MIN_TREE_WIDTH,
   maxTreeWidth: MAX_TREE_WIDTH,
+  howToMergeDocsPath: helpPagePath('user/project/merge_requests/reviews/index.md', {
+    anchor: 'checkout-merge-requests-locally-through-the-head-ref',
+  }),
 };
 </script>
 
@@ -609,12 +635,6 @@ export default {
         :total="numTotalFiles"
         :plain-diff-path="plainDiffPath"
         :email-patch-path="emailPatchPath"
-      />
-      <merge-conflict-warning
-        v-if="visibleWarning == $options.alerts.ALERT_MERGE_CONFLICT"
-        :limited="isLimitedContainer"
-        :resolution-path="conflictResolutionPath"
-        :mergeable="canMerge"
       />
       <collapsed-files-warning
         v-if="visibleWarning == $options.alerts.ALERT_COLLAPSED_FILES"
@@ -728,6 +748,15 @@ export default {
           <no-changes v-else :changes-empty-state-illustration="changesEmptyStateIllustration" />
         </div>
       </div>
+      <mr-widget-how-to-merge-modal
+        :is-fork="isForked"
+        :can-merge="canMerge"
+        :source-branch="branchName"
+        :source-project-path="sourceProjectFullPath"
+        :target-branch="targetBranchName"
+        :source-project-default-url="sourceProjectDefaultUrl"
+        :reviewing-docs-path="$options.howToMergeDocsPath"
+      />
     </div>
   </div>
 </template>

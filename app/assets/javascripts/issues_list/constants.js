@@ -109,8 +109,12 @@ export const PARAM_DUE_DATE = 'due_date';
 export const PARAM_SORT = 'sort';
 export const PARAM_STATE = 'state';
 
-export const initialPageParams = {
+export const defaultPageSizeParams = {
   firstPageSize: PAGE_SIZE,
+};
+
+export const largePageSizeParams = {
+  firstPageSize: PAGE_SIZE_MANUAL,
 };
 
 export const DUE_DATE_NONE = '0';
@@ -200,6 +204,7 @@ export const TOKEN_TYPE_AUTHOR = 'author_username';
 export const TOKEN_TYPE_ASSIGNEE = 'assignee_username';
 export const TOKEN_TYPE_MILESTONE = 'milestone';
 export const TOKEN_TYPE_LABEL = 'labels';
+export const TOKEN_TYPE_TYPE = 'type';
 export const TOKEN_TYPE_MY_REACTION = 'my_reaction_emoji';
 export const TOKEN_TYPE_CONFIDENTIAL = 'confidential';
 export const TOKEN_TYPE_ITERATION = 'iteration';
@@ -263,6 +268,18 @@ export const filters = {
       },
       [OPERATOR_IS_NOT]: {
         [NORMAL_FILTER]: 'not[label_name][]',
+      },
+    },
+  },
+  [TOKEN_TYPE_TYPE]: {
+    [API_PARAM]: {
+      [NORMAL_FILTER]: 'types',
+      [SPECIAL_FILTER]: 'types',
+    },
+    [URL_PARAM]: {
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'type[]',
+        [SPECIAL_FILTER]: 'type[]',
       },
     },
   },

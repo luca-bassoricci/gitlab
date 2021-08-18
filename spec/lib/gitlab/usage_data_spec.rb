@@ -622,6 +622,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:deployments]).to eq(4)
       expect(count_data[:successful_deployments]).to eq(2)
       expect(count_data[:failed_deployments]).to eq(2)
+      expect(count_data[:feature_flags]).to eq(1)
       expect(count_data[:snippets]).to eq(6)
       expect(count_data[:personal_snippets]).to eq(2)
       expect(count_data[:project_snippets]).to eq(4)
@@ -1066,8 +1067,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       subject { described_class.system_usage_data_settings }
 
-      it 'gathers settings usage data', :aggregate_failures do
+      it 'gathers encrypted secrets usage data', :aggregate_failures do
         expect(subject[:settings][:ldap_encrypted_secrets_enabled]).to eq(Gitlab::Auth::Ldap::Config.encrypted_secrets.active?)
+        expect(subject[:settings][:smtp_encrypted_secrets_enabled]).to eq(Gitlab::Email::SmtpConfig.encrypted_secrets.active?)
       end
 
       it 'populates operating system information' do
@@ -1079,7 +1081,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       end
 
       it 'reports collected data categories' do
-        expected_value = %w[Standard Subscription Operational Optional]
+        expected_value = %w[standard subscription operational optional]
 
         allow_next_instance_of(ServicePing::PermitDataCategoriesService) do |instance|
           expect(instance).to receive(:execute).and_return(expected_value)

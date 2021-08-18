@@ -108,4 +108,80 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       expect(rendered).to have_link('Kubernetes', href: group_clusters_path(group))
     end
   end
+
+  describe 'Packages & Registries' do
+    it 'has a link to the package registry page' do
+      stub_config(packages: { enabled: true })
+
+      render
+
+      expect(rendered).to have_link('Package Registry', href: group_packages_path(group))
+    end
+
+    it 'has a link to the container registry page' do
+      stub_container_registry_config(enabled: true)
+
+      render
+
+      expect(rendered).to have_link('Container Registry', href: group_container_registries_path(group))
+    end
+
+    it 'has a link to the dependency proxy page' do
+      stub_config(dependency_proxy: { enabled: true })
+
+      render
+
+      expect(rendered).to have_link('Dependency Proxy', href: group_dependency_proxy_path(group))
+    end
+  end
+
+  describe 'Settings' do
+    it 'default link points to edit group page' do
+      render
+
+      expect(rendered).to have_link('Settings', href: edit_group_path(group))
+    end
+
+    it 'has a link to the General settings page' do
+      render
+
+      expect(rendered).to have_link('General', href: edit_group_path(group))
+    end
+
+    it 'has a link to the Integrations settings page' do
+      render
+
+      expect(rendered).to have_link('Integrations', href: group_settings_integrations_path(group))
+    end
+
+    it 'has a link to the group Projects settings page' do
+      render
+
+      expect(rendered).to have_link('Projects', href: projects_group_path(group))
+    end
+
+    it 'has a link to the Repository settings page' do
+      render
+
+      expect(rendered).to have_link('Repository', href: group_settings_repository_path(group))
+    end
+
+    it 'has a link to the CI/CD settings page' do
+      render
+
+      expect(rendered).to have_link('CI/CD', href: group_settings_ci_cd_path(group))
+    end
+
+    it 'has a link to the Applications settings page' do
+      render
+
+      expect(rendered).to have_link('Applications', href: group_settings_applications_path(group))
+    end
+
+    it 'has a link to the Package & Registries settings page' do
+      render
+
+      expect(rendered).to have_link('Packages & Registries', href: group_settings_packages_and_registries_path(group))
+    end
+  end
 end

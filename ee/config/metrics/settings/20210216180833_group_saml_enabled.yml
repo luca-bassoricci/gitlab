@@ -1,5 +1,5 @@
 ---
-data_category: Optional
+data_category: optional
 key_path: usage_activity_by_stage_monthly.manage.group_saml_enabled
 description: Whether group SAML is enabled
 product_section: dev
@@ -12,6 +12,7 @@ time_frame: none
 data_source: system
 distribution:
 - ee
-tier: 
+tier:
 - premium
 - ultimate
+performance_indicator_type: []

@@ -24,15 +24,10 @@ RSpec.describe Groups::SeatUsageController do
       end
 
       context 'when html format' do
-        before do
-          stub_feature_flags(seat_usage_export: false)
-        end
-
-        it 'renders show with 200 status code' do
+        it 'redirects to /groups/%{group_id}/-/seat_usage' do
           get_show
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to render_template(:show)
+          expect(response).to redirect_to(group_usage_quotas_path(group, anchor: 'seats-quota-tab'))
         end
 
         it 'responds with 404 Not Found if the group is not top-level group' do
@@ -54,21 +49,8 @@ RSpec.describe Groups::SeatUsageController do
           expect(response).to have_gitlab_http_status(:not_found)
         end
 
-        context 'when seat_usage_export feature flag is disabled' do
+        context 'when the group is a top-level group' do
           before do
-            stub_feature_flags(seat_usage_export: false)
-          end
-
-          it 'responds with 404 status code' do
-            get_show(format: :csv)
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
-        end
-
-        context 'when seat_usage_export feature flag is enabled' do
-          before do
-            stub_feature_flags(seat_usage_export: true)
             expect(Groups::SeatUsageExportService).to receive(:execute).with(group, user).and_return(result)
           end
 
@@ -98,7 +80,7 @@ RSpec.describe Groups::SeatUsageController do
               get_show(format: :csv)
 
               expect(flash[:alert]).to eq 'Failed to generate export, please try again later.'
-              expect(response).to redirect_to(group_seat_usage_path(group))
+              expect(response).to redirect_to(group_usage_quotas_path(group, anchor: 'seats-quota-tab'))
             end
           end
         end

@@ -26,9 +26,10 @@ class Admin::UsersController < Admin::ApplicationController
   def show
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def projects
-    @personal_projects = user.personal_projects
-    @joined_projects = user.projects.joined(@user)
+    @personal_projects = user.personal_projects.includes(:topics)
+    @joined_projects = user.projects.joined(@user).includes(:topics)
   end
 
   def keys
@@ -147,7 +148,7 @@ class Admin::UsersController < Admin::ApplicationController
 
   def unlock
     if update_user { |user| user.unlock_access! }
-      redirect_back_or_admin_user(alert: _("Successfully unlocked"))
+      redirect_back_or_admin_user(notice: _("Successfully unlocked"))
     else
       redirect_back_or_admin_user(alert: _("Error occurred. User was not unlocked"))
     end

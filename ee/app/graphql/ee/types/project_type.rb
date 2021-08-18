@@ -25,7 +25,7 @@ module EE
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,
               null: true,
-              description: 'Number of vulnerabilities per day for the project.',
+              description: 'The historical number of vulnerabilities per day for the project.',
               resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
 
         field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,
@@ -59,6 +59,12 @@ module EE
         field :iteration_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
               description: 'Find iteration cadences.',
               resolver: ::Resolvers::Iterations::CadencesResolver
+
+        field :dast_profile,
+              ::Types::Dast::ProfileType,
+              null: true,
+              resolver: ::Resolvers::AppSec::Dast::ProfileResolver.single,
+              description: 'DAST Profile associated with the project.'
 
         field :dast_profiles,
               ::Types::Dast::ProfileType.connection_type,

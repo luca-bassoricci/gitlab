@@ -33,10 +33,10 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan'
 
         has_one :dast_site_profiles_build, class_name: 'Dast::SiteProfilesBuild', foreign_key: :ci_build_id
-        has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_build
+        has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_build, disable_joins: -> { ::Feature.enabled?(:dast_site_profile_disable_joins, default_enabled: :yaml) }
 
         has_one :dast_scanner_profiles_build, class_name: 'Dast::ScannerProfilesBuild', foreign_key: :ci_build_id
-        has_one :dast_scanner_profile, class_name: 'DastScannerProfile', through: :dast_scanner_profiles_build
+        has_one :dast_scanner_profile, class_name: 'DastScannerProfile', through: :dast_scanner_profiles_build, disable_joins: -> { ::Feature.enabled?(:dast_scanner_profile_disable_joins, default_enabled: :yaml) }
 
         after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
@@ -212,8 +212,6 @@ module EE
       override :kubernetes_variables
       def kubernetes_variables
         ::Gitlab::Ci::Variables::Collection.new.tap do |collection|
-          break collection unless ::Feature.enabled?(:agent_kubeconfig_ci_variable, project, default_enabled: :yaml)
-
           # A cluster deployemnt may also define a KUBECONFIG variable, so to keep existing
           # configurations working we shouldn't overwrite it here.
           # This check will be removed when Cluster and Agent configurations are
@@ -235,7 +233,7 @@ module EE
       end
 
       def parse_raw_security_artifact_blob(security_report, blob)
-        signatures_enabled = ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        signatures_enabled = project.licensed_feature_available?(:vulnerability_finding_signatures)
         ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, security_report, signatures_enabled).parse!
       end
 

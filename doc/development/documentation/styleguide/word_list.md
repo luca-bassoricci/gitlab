@@ -17,6 +17,12 @@ For guidance not on this page, we defer to these style guides:
 <!-- vale off -->
 <!-- markdownlint-disable -->
 
+## @mention
+
+Try to avoid. Say "mention" instead, and consider linking to the
+[mentions topic](../../../user/project/issues/issue_data_and_actions.md#mentions).
+Don't use `code formatting`.
+
 ## above
 
 Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **previously** instead.
@@ -35,6 +41,13 @@ Try to avoid, unless you are talking about security-related features. For exampl
 This phrasing is more active and is from the user perspective, rather than the person who implemented the feature.
 [View details in the Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/a/allow-allows).
 
+## Alpha
+
+Uppercase. For example: **The XYZ feature is in Alpha.** or **This Alpha release is ready to test.**
+
+You might also want to link to [this section](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga)
+in the handbook when writing about Alpha features.
+
 ## and/or
 
 Instead of **and/or**, use or or rewrite the sentence to spell out both options.
@@ -43,9 +56,24 @@ Instead of **and/or**, use or or rewrite the sentence to spell out both options.
 
 Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **following** instead.
 
+## Beta
+
+Uppercase. For example: **The XYZ feature is in Beta.** or **This Beta release is ready to test.**
+
+You might also want to link to [this section](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga)
+in the handbook when writing about Beta features.
+
 ## blacklist
 
 Do not use. Another option is **denylist**. ([Vale](../testing.md#vale) rule: [`InclusionCultural.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionCultural.yml))
+
+## board
+
+Use lowercase for **boards**, **issue boards**, and **epic boards**.
+
+## checkbox
+
+One word, **checkbox**. Do not use **check box**.
 
 ## CI/CD
 
@@ -60,6 +88,7 @@ Do not use when talking about the product or its features. The documentation des
 When writing about the Developer role:
 
 - Use a capital **D**.
+- Do not use bold.
 - Do not use the phrase, **if you are a developer** to mean someone who is assigned the Developer
   role. Instead, write it out. For example, **if you are assigned the Developer role**.
 - To describe a situation where the Developer role is the minimum required:
@@ -101,6 +130,10 @@ Use **active** or **on** instead. ([Vale](../testing.md#vale) rule: [`InclusionA
 
 Lowercase.
 
+## epic board
+
+Lowercase.
+
 ## etc.
 
 Try to avoid. Be as specific as you can. Do not use **and so on** as a replacement.
@@ -122,7 +155,7 @@ Title case.
 
 ## GitLab
 
-Do not make possessive (GitLab's). This guidance follows [GitLab Brand Guidelines](https://about.gitlab.com/handbook/marketing/corporate-marketing/brand-activation/brand-guidelines/#trademark).
+Do not make possessive (GitLab's). This guidance follows [GitLab Trademark Guidelines](https://about.gitlab.com/handbook/marketing/corporate-marketing/brand-activation/trademark-guidelines/).
 
 ## GitLab.com
 
@@ -146,6 +179,7 @@ Refers to the product license for GitLab instances managed by customers themselv
 When writing about the Guest role:
 
 - Use a capital **G**.
+- Do not use bold.
 - Do not use the phrase, **if you are a guest** to mean someone who is assigned the Guest
   role. Instead, write it out. For example, **if you are assigned the Guest role**.
 - To describe a situation where the Guest role is the minimum required:
@@ -185,6 +219,10 @@ Do not use. Use **to** instead. ([Vale](../testing.md#vale) rule: [`Wordy.yml`](
 
 Lowercase.
 
+## issue board
+
+Lowercase.
+
 ## issue weights
 
 Lowercase.
@@ -218,6 +256,7 @@ Do not use when talking about version numbers.
 When writing about the Maintainer role:
 
 - Use a capital **M**.
+- Do not use bold.
 - Do not use the phrase, **if you are a maintainer** to mean someone who is assigned the Maintainer
   role. Instead, write it out. For example, **if you are assigned the Maintainer role**.
 - To describe a situation where the Maintainer role is the minimum required:
@@ -254,6 +293,21 @@ Lowercase. If you use **MR** as the acronym, spell it out on first use.
 
 Lowercase.
 
+## need to, should
+
+Try to avoid. If something is required, use **must**.
+
+- Avoid: You need to set the variable.
+- Use instead: You must set the variable. Or: Set the variable.
+
+**Should** is acceptable for recommended actions or items, or in cases where an event may not
+happen. For example:
+
+- Although you can configure the installation manually, you should use the express configuration to
+  avoid complications.
+- You should see a success message in the console. Contact support if an error message appears
+  instead.
+
 ## note that
 
 Do not use.
@@ -266,6 +320,7 @@ Do not use.
 When writing about the Owner role:
 
 - Use a capital **O**.
+- Do not use bold.
 - Do not use the phrase, **if you are an owner** to mean someone who is assigned the Owner
   role. Instead, write it out. For example, **if you are assigned the Owner role**.
 
@@ -288,6 +343,7 @@ Do not use. Doing so may negatively affect other users and contributors, which i
 When writing about the Reporter role:
 
 - Use a capital **R**.
+- Do not use bold.
 - Do not use the phrase, **if you are a reporter** to mean someone who is assigned the Reporter
   role. Instead, write it out. For example, **if you are assigned the Reporter role**.
 - To describe a situation where the Reporter role is the minimum required:
@@ -353,6 +409,13 @@ Do not use when describing a noun. For example:
 - Use instead: The file you save...
 
 See also [this, these, that, those](#this-these-that-those).
+
+## terminal
+
+Lowercase. For example:
+
+- Open a terminal.
+- From a terminal, run the `docker login` command.
 
 ## there is, there are
 

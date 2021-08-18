@@ -53,6 +53,7 @@ module Ci
     end
 
     has_one :runner_session, class_name: 'Ci::BuildRunnerSession', validate: true, inverse_of: :build
+    has_one :trace_metadata, class_name: 'Ci::BuildTraceMetadata', inverse_of: :build
 
     accepts_nested_attributes_for :runner_session, update_only: true
     accepts_nested_attributes_for :job_variables
@@ -151,7 +152,7 @@ module Ci
 
     scope :with_project_and_metadata, -> do
       if Feature.enabled?(:non_public_artifacts, type: :development)
-        joins(:metadata).includes(:project, :metadata)
+        joins(:metadata).includes(:metadata).preload(:project)
       end
     end
 
@@ -891,7 +892,7 @@ module Ci
     end
 
     def valid_dependency?
-      return false if artifacts_expired?
+      return false if artifacts_expired? && !pipeline.artifacts_locked?
       return false if erased?
 
       true

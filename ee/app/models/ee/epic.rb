@@ -112,13 +112,8 @@ module EE
         reorder(keyset_order)
       end
 
-      scope :order_title_asc, -> do
-        reorder(title: :asc)
-      end
-
-      scope :order_title_desc, -> do
-        reorder(title: :desc)
-      end
+      scope :order_title_asc, -> { reorder(Arel::Nodes::Ascending.new(arel_table[:title].lower)) }
+      scope :order_title_desc, -> { reorder(Arel::Nodes::Descending.new(arel_table[:title].lower)) }
 
       scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
 
@@ -155,6 +150,8 @@ module EE
       scope :not_confidential_or_in_groups, -> (groups) do
         public_only.or(where(confidential: true, group_id: groups))
       end
+
+      scope :with_group_route, -> { preload([group: :route]) }
 
       MAX_HIERARCHY_DEPTH = 7
 

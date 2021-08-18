@@ -215,6 +215,35 @@ RSpec.describe GroupPolicy do
     it { is_expected.not_to be_allowed(:read_dora4_analytics) }
   end
 
+  context 'export group memberships' do
+    let(:current_user) { owner }
+
+    context 'when exporting user permissions is not available' do
+      before do
+        stub_licensed_features(export_user_permissions: false)
+      end
+
+      it { is_expected.not_to be_allowed(:export_group_memberships) }
+    end
+
+    context 'when exporting user permissions is available' do
+      before do
+        stub_licensed_features(export_user_permissions: true)
+        stub_feature_flags(ff_group_membership_export: true)
+      end
+
+      it { is_expected.to be_allowed(:export_group_memberships) }
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(ff_group_membership_export: false)
+      end
+
+      it { is_expected.not_to be_allowed(:export_group_memberships) }
+    end
+  end
+
   context 'when group activity analytics is available' do
     let(:current_user) { developer }
 
@@ -1583,16 +1612,15 @@ RSpec.describe GroupPolicy do
     shared_examples 'compliance framework permissions' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:role, :licensed, :feature_flag, :admin_mode, :allowed) do
-        :owner      | true  | true  | nil   | true
-        :owner      | false | true  | nil   | false
-        :owner      | false | false | nil   | false
-        :admin      | true  | true  | true  | true
-        :admin      | true  | true  | false | false
-        :maintainer | true  | true  | nil   | false
-        :developer  | true  | true  | nil   | false
-        :reporter   | true  | true  | nil   | false
-        :guest      | true  | true  | nil   | false
+      where(:role, :licensed, :admin_mode, :allowed) do
+        :owner      | true  | nil   | true
+        :owner      | false | nil   | false
+        :admin      | true  | true  | true
+        :admin      | true  | false | false
+        :maintainer | true  | nil   | false
+        :developer  | true  | nil   | false
+        :reporter   | true  | nil   | false
+        :guest      | true  | nil   | false
       end
 
       with_them do
@@ -1600,7 +1628,6 @@ RSpec.describe GroupPolicy do
 
         before do
           stub_licensed_features(licensed_feature => licensed)
-          stub_feature_flags(feature_flag_name => feature_flag) if feature_flag_name
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1619,7 +1646,6 @@ RSpec.describe GroupPolicy do
     context ':admin_compliance_pipeline_configuration' do
       let(:policy) { :admin_compliance_pipeline_configuration }
       let(:licensed_feature) { :evaluate_group_level_compliance_pipeline }
-      let(:feature_flag_name) { :ff_evaluate_group_level_compliance_pipeline }
 
       include_examples 'compliance framework permissions'
     end

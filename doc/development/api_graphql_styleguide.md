@@ -11,9 +11,12 @@ This document outlines the style guide for the GitLab [GraphQL API](../api/graph
 ## How GitLab implements GraphQL
 
 <!-- vale gitlab.Spelling = NO -->
+
 We use the [GraphQL Ruby gem](https://graphql-ruby.org/) written by [Robert Mosolgo](https://github.com/rmosolgo/).
+In addition, we have a subscription to [GraphQL Pro](https://graphql.pro/). For
+details see [GraphQL Pro subscription](graphql_guide/graphql_pro.md).
+
 <!-- vale gitlab.Spelling = YES -->
-In addition, we have a subscription to [GraphQL Pro](https://graphql.pro/). For details see [GraphQL Pro subscription](graphql_guide/graphql_pro.md).
 
 All GraphQL queries are directed to a single endpoint
 ([`app/controllers/graphql_controller.rb#execute`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app%2Fcontrollers%2Fgraphql_controller.rb)),
@@ -149,7 +152,7 @@ The `iid`, `title` and `description` are _scalar_ GraphQL types.
 `title` and `description` are regular `GraphQL::Types::String` types.
 
 Note that the old scalar types `GraphQL:ID`, `GraphQL::INT_TYPE`, `GraphQL::STRING_TYPE`,
-and `GraphQL:BOOLEAN_TYPE` are no longer allowed. Please use `GraphQL::Types::ID`, 
+and `GraphQL:BOOLEAN_TYPE` are no longer allowed. Please use `GraphQL::Types::ID`,
 `GraphQL::Types::Int`, `GraphQL::Types::String`, and `GraphQL::Types::Boolean`.
 
 When exposing a model through the GraphQL API, we do so by creating a
@@ -837,7 +840,7 @@ descriptions:
 - Mention the name of the resource in the description. Example:
   `'Labels of the issue'` (issue being the resource).
 - Use `"{x} of the {y}"` where possible. Example: `'Title of the issue'`.
-  Do not start descriptions with `The`.
+  Do not start descriptions with `The` or `A`, for consistency and conciseness.
 - Descriptions of `GraphQL::Types::Boolean` fields should answer the question: "What does
   this field do?". Example: `'Indicates project has a Git repository'`.
 - Always include the word `"timestamp"` when describing an argument or

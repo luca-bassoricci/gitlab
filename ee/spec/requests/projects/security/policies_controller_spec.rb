@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::Security::PoliciesController, type: :request do
   let_it_be(:owner) { create(:user) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:project) { create(:project, namespace: owner.namespace) }
+  let_it_be(:project) { create(:project, :repository, namespace: owner.namespace) }
   let_it_be(:policy_management_project) { create(:project, :repository, namespace: owner.namespace) }
   let_it_be(:policy_configuration) { create(:security_orchestration_policy_configuration, security_policy_management_project: policy_management_project, project: project) }
   let_it_be(:policy) do
@@ -21,8 +21,9 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
   end
 
   let_it_be(:type) { 'scan_execution_policy' }
-  let_it_be(:show) { project_security_policy_url(project) }
+  let_it_be(:index) { project_security_policies_url(project) }
   let_it_be(:edit) { edit_project_security_policy_url(project, id: policy[:name], type: type) }
+  let_it_be(:new) { new_project_security_policy_url(project) }
 
   let_it_be(:feature_enabled) { true }
 
@@ -51,13 +52,70 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
           expect(app.attributes['data-policy-type'].value).to eq(type)
         end
 
+        context 'when type is container_runtime' do
+          let_it_be(:type) { 'container_policy' }
+          let_it_be(:environment) { create(:environment, :with_review_app, project: project) }
+
+          let(:environment_id) { environment.id }
+          let(:kind) { 'CiliumNetworkPolicy' }
+          let(:policy_name) { 'policy' }
+          let(:network_policy) do
+            Gitlab::Kubernetes::CiliumNetworkPolicy.new(
+              name: policy_name,
+              namespace: 'another',
+              selector: { matchLabels: { role: 'db' } },
+              ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
+            )
+          end
+
+          let(:service) { instance_double('NetworkPolicies::FindResourceService', execute: ServiceResponse.success(payload: network_policy)) }
+
+          let(:edit) do
+            edit_project_security_policy_url(
+              project,
+              id: policy_name,
+              type: type,
+              environment_id: environment_id,
+              kind: kind
+            )
+          end
+
+          before do
+            allow(NetworkPolicies::FindResourceService).to(
+              receive(:new)
+                .with(resource_name: policy_name, environment: environment, kind: Gitlab::Kubernetes::CiliumNetworkPolicy::KIND)
+                .and_return(service)
+            )
+          end
+
+          it 'renders edit page with network policy' do
+            get edit
+
+            app = Nokogiri::HTML.parse(response.body).at_css('div#js-policy-builder-app')
+
+            expect(app.attributes['data-policy'].value).to eq(network_policy.to_json)
+            expect(app.attributes['data-policy-type'].value).to eq(type)
+            expect(app.attributes['data-environment-id'].value).to eq(environment_id.to_s)
+          end
+        end
+
         context 'when type is missing' do
           let_it_be(:edit) { edit_project_security_policy_url(project, id: policy[:name]) }
 
-          it 'returns 404' do
+          it 'redirects to #index' do
             get edit
 
-            expect(response).to have_gitlab_http_status(:not_found)
+            expect(response).to redirect_to(project_security_policies_path(project))
+          end
+        end
+
+        context 'when type is invalid' do
+          let_it_be(:edit) { edit_project_security_policy_url(project, id: policy[:name], type: 'invalid') }
+
+          it 'redirects to #index' do
+            get edit
+
+            expect(response).to redirect_to(project_security_policies_path(project))
           end
         end
 
@@ -76,10 +134,10 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
           let_it_be(:policy_configuration) { nil }
           let_it_be(:edit) { edit_project_security_policy_url(project, id: policy[:name], type: type) }
 
-          it 'redirects to policy configuration page' do
+          it 'redirects to #index' do
             get edit
 
-            expect(response).to redirect_to(project_security_policy_path(project))
+            expect(response).to redirect_to(project_security_policies_path(project))
           end
         end
 
@@ -155,7 +213,7 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
     end
   end
 
-  describe 'GET #show' do
+  describe 'GET #new' do
     using RSpec::Parameterized::TableSyntax
 
     where(:feature_flag, :license, :status) do
@@ -165,7 +223,33 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
       true | false | :not_found
     end
 
-    subject(:request) { get show, params: { namespace_id: project.namespace, project_id: project } }
+    subject(:request) { get new, params: { namespace_id: project.namespace, project_id: project } }
+
+    with_them do
+      before do
+        stub_feature_flags(security_orchestration_policies_configuration: feature_flag)
+        stub_licensed_features(security_orchestration_policies: license)
+      end
+
+      specify do
+        subject
+
+        expect(response).to have_gitlab_http_status(status)
+      end
+    end
+  end
+
+  describe 'GET #index' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:feature_flag, :license, :status) do
+      true | true | :ok
+      false | false | :not_found
+      false | true | :not_found
+      true | false | :not_found
+    end
+
+    subject(:request) { get index, params: { namespace_id: project.namespace, project_id: project } }
 
     with_them do
       before do
