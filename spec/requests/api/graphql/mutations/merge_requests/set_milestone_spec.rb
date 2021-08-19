@@ -63,4 +63,18 @@ RSpec.describe 'Setting milestone of a merge request' do
       expect(mutation_response['mergeRequest']['milestone']).to be_nil
     end
   end
+
+  context 'when milestone_id input is not present' do
+    let(:input) do
+      {}
+    end
+
+    it 'does not update' do
+      merge_request.update!(milestone: milestone)
+
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(graphql_errors).to include(a_hash_including('message' => /Arguments must be provided: milestoneId/))
+    end
+  end
 end

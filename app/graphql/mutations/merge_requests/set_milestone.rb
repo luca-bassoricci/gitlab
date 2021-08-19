@@ -7,13 +7,13 @@ module Mutations
 
       argument :milestone_id,
                ::Types::GlobalIDType[::Milestone],
-               required: false,
+               required: :nullable,
                loads: Types::MilestoneType,
                description: <<~DESC
-                 Milestone to assign to the merge request.
+                 Milestone to assign to the merge request. Milestone is removed if null.
                DESC
 
-      def resolve(project_path:, iid:, milestone: nil)
+      def resolve(project_path:, iid:, milestone:)
         merge_request = authorized_find!(project_path: project_path, iid: iid)
         project = merge_request.project
 

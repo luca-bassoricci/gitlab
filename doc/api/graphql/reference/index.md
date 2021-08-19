@@ -3133,7 +3133,7 @@ Input type: `MergeRequestSetMilestoneInput`
 | ---- | ---- | ----------- |
 | <a id="mutationmergerequestsetmilestoneclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationmergerequestsetmilestoneiid"></a>`iid` | [`String!`](#string) | IID of the merge request to mutate. |
-| <a id="mutationmergerequestsetmilestonemilestoneid"></a>`milestoneId` | [`MilestoneID`](#milestoneid) | Milestone to assign to the merge request. |
+| <a id="mutationmergerequestsetmilestonemilestoneid"></a>`milestoneId` | [`MilestoneID`](#milestoneid) | Milestone to assign to the merge request. Milestone is removed if null. |
 | <a id="mutationmergerequestsetmilestoneprojectpath"></a>`projectPath` | [`ID!`](#id) | Project the merge request to mutate is in. |
 
 #### Fields
