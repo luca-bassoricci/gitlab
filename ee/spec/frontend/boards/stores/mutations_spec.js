@@ -1,6 +1,6 @@
 import mutations from 'ee/boards/stores/mutations';
 import { mockEpics, mockEpic, mockLists, mockIssue, mockIssue2 } from '../mock_data';
-
+//
 const initialBoardListsState = {
   'gid://gitlab/List/1': mockLists[0],
   'gid://gitlab/List/2': mockLists[1],
@@ -166,6 +166,26 @@ describe('RECEIVE_BOARD_LISTS_SUCCESS', () => {
     mutations.RECEIVE_BOARD_LISTS_SUCCESS(state, initialBoardListsState);
 
     expect(state.boardLists).toEqual(initialBoardListsState);
+  });
+});
+
+describe('RECEIVE_ITEMS_FOR_LIST_SUCCESS', () => {
+  describe('when filterParams and state.filterParams are not equal', () => {
+    it('doesnt update state.boardItems', () => {
+      state = {
+        ...state,
+        filterParams: {},
+        boardLists: {},
+        pageInfoByListId: '2',
+      };
+
+      mutations.RECEIVE_ITEMS_FOR_LIST_SUCCESS(state, {
+        filterParams: { labels: [] },
+        listItems: { boardItems: { 1: [] }, listData: {}, listItemsCount: 0 },
+      });
+
+      expect(state.boardLists).toEqual({});
+    });
   });
 });
 

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/browser';
-import { sortBy } from 'lodash';
+import { cloneDeep, sortBy } from 'lodash';
 import {
   BoardType,
   ListType,
@@ -390,6 +390,7 @@ export default {
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { fullPath, fullBoardId, boardType, filterParams } = state;
+    const f = cloneDeep(filterParams);
 
     const variables = {
       fullPath,
@@ -414,7 +415,13 @@ export default {
         const { lists } = data[boardType]?.board;
         const listItems = formatListIssues(lists);
         const listPageInfo = formatListsPageInfo(lists);
-        commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, { listItems, listPageInfo, listId });
+
+        commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
+          listItems,
+          listPageInfo,
+          listId,
+          filterParams: f,
+        });
       })
       .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));
   },

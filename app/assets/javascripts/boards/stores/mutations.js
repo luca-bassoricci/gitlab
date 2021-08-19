@@ -1,4 +1,4 @@
-import { cloneDeep, pull, union } from 'lodash';
+import { cloneDeep, pull, union, isEqual } from 'lodash';
 import Vue from 'vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
@@ -147,8 +147,17 @@ export default {
     state.error = __('Failed to load milestones.');
   },
 
-  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (state, { listItems, listPageInfo, listId }) => {
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (
+    state,
+    { listItems, listPageInfo, listId, filterParams },
+  ) => {
+    //
     const { listData, boardItems } = listItems;
+    console.log(filterParams, state.filterParams);
+    if (!isEqual(filterParams, state.filterParams)) {
+      return;
+    }
+
     Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
     Vue.set(
       state.boardItemsByListId,

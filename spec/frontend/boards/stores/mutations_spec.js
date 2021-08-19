@@ -310,38 +310,64 @@ describe('Board Store Mutations', () => {
   });
 
   describe('RECEIVE_ITEMS_FOR_LIST_SUCCESS', () => {
-    it('updates boardItemsByListId and issues on state', () => {
-      const listIssues = {
-        'gid://gitlab/List/1': [mockIssue.id],
-      };
-      const issues = {
-        1: mockIssue,
-      };
+    const listIssues = {
+      'gid://gitlab/List/1': [mockIssue.id],
+    };
+    const issues = {
+      1: mockIssue,
+    };
+    const listPageInfo = {
+      'gid://gitlab/List/1': {
+        endCursor: '',
+        hasNextPage: false,
+      },
+    };
 
-      state = {
-        ...state,
-        boardItemsByListId: {
-          'gid://gitlab/List/1': [],
-        },
-        boardItems: {},
-        boardLists: initialBoardListsState,
-      };
+    describe('when filterParams is not equal to state.filterParams', () => {
+      it('does not update boardItems', () => {
+        state = {
+          ...state,
+          boardItemsByListId: {
+            'gid://gitlab/List/1': [],
+          },
+          boardItems: {},
+          boardLists: initialBoardListsState,
+          filterParams: {},
+        };
 
-      const listPageInfo = {
-        'gid://gitlab/List/1': {
-          endCursor: '',
-          hasNextPage: false,
-        },
-      };
+        mutations.RECEIVE_ITEMS_FOR_LIST_SUCCESS(state, {
+          listItems: { listData: listIssues, boardItems: issues },
+          listPageInfo,
+          listId: 'gid://gitlab/List/1',
+          filterParams: { labels: [] },
+        });
 
-      mutations.RECEIVE_ITEMS_FOR_LIST_SUCCESS(state, {
-        listItems: { listData: listIssues, boardItems: issues },
-        listPageInfo,
-        listId: 'gid://gitlab/List/1',
+        expect(state.boardItems).toEqual({});
       });
+    });
 
-      expect(state.boardItemsByListId).toEqual(listIssues);
-      expect(state.boardItems).toEqual(issues);
+    describe('when filterParams is equal to state.filterParams', () => {
+      it('updates boardItemsByListId and issues on state', () => {
+        state = {
+          ...state,
+          boardItemsByListId: {
+            'gid://gitlab/List/1': [],
+          },
+          boardItems: {},
+          boardLists: initialBoardListsState,
+          filterParams: {},
+        };
+
+        mutations.RECEIVE_ITEMS_FOR_LIST_SUCCESS(state, {
+          listItems: { listData: listIssues, boardItems: issues },
+          listPageInfo,
+          listId: 'gid://gitlab/List/1',
+          filterParams: {},
+        });
+
+        expect(state.boardItemsByListId).toEqual(listIssues);
+        expect(state.boardItems).toEqual(issues);
+      });
     });
   });
 
