@@ -888,7 +888,7 @@ describe('fetchItemsForList', () => {
         },
         {
           type: types.RECEIVE_ITEMS_FOR_LIST_SUCCESS,
-          payload: { listItems: formattedIssues, listPageInfo, listId },
+          payload: { listItems: formattedIssues, listPageInfo, listId, filterParams: {} },
         },
       ],
       [],

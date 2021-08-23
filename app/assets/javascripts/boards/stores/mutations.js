@@ -151,9 +151,7 @@ export default {
     state,
     { listItems, listPageInfo, listId, filterParams },
   ) => {
-    //
     const { listData, boardItems } = listItems;
-    console.log(filterParams, state.filterParams);
     if (!isEqual(filterParams, state.filterParams)) {
       return;
     }

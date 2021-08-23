@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import {
   formatListIssues,
   formatListsPageInfo,
@@ -18,7 +19,6 @@ import axios from '~/lib/utils/axios_utils';
 import { historyPushState, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import { cloneDeep } from 'lodash';
 import {
   fullEpicId,
   fullEpicBoardId,
