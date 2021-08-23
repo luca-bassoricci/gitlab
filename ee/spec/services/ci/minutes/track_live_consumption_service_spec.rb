@@ -69,15 +69,24 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
     context 'when runner is not of instance type' do
       let(:runner) { create(:ci_runner, :project) }
 
-      it_behaves_like 'returns early', 'CI minutes limit not enabled for build'
+      it_behaves_like 'returns early', 'Cost factor not enabled for build'
     end
 
-    context 'when shared runners limit is not enabled for build' do
+    context 'when cost factor is not enabled for build' do
       before do
-        allow(build).to receive(:shared_runners_minutes_limit_enabled?).and_return(false)
+        allow(build).to receive(:cost_factor_enabled?).and_return(false)
       end
 
-      it_behaves_like 'returns early', 'CI minutes limit not enabled for build'
+      it_behaves_like 'returns early', 'Cost factor not enabled for build'
+    end
+
+    context 'when namespace has unlimited minutes' do
+      before do
+        quota = double('quota', enabled?: false)
+        allow(project).to receive(:ci_minutes_quota).and_return(quota)
+      end
+
+      it_behaves_like 'returns early', 'Cost factor not enabled for build'
     end
 
     context 'when build has not been tracked recently' do

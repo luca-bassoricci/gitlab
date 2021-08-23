@@ -1539,10 +1539,10 @@ msgstr ""
 msgid "API?"
 msgstr ""
 
-msgid "APIFuzzing|$VariableWithPassword"
+msgid "APIFuzzing|$VARIABLE_WITH_PASSWORD"
 msgstr ""
 
-msgid "APIFuzzing|$VariableWithUsername"
+msgid "APIFuzzing|$VARIABLE_WITH_USERNAME"
 msgstr ""
 
 msgid "APIFuzzing|API Fuzzing Configuration"
@@ -1569,10 +1569,10 @@ msgstr ""
 msgid "APIFuzzing|Enable authentication"
 msgstr ""
 
-msgid "APIFuzzing|Enter the name of the variable containing the password. For example, $VariableWithPassword."
+msgid "APIFuzzing|Enter the name of the CI variable containing the password. For example, $VARIABLE_WITH_PASSWORD."
 msgstr ""
 
-msgid "APIFuzzing|Enter the name of the variable containing the username. For example, $VariableWithUsername."
+msgid "APIFuzzing|Enter the name of the CI variable containing the username. For example, $VARIABLE_WITH_USERNAME."
 msgstr ""
 
 msgid "APIFuzzing|File path or URL to APIs to be tested. For example, folder/example_fuzz.har. HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository."
@@ -3698,6 +3698,12 @@ msgstr ""
 msgid "An error occurred while loading merge requests."
 msgstr ""
 
+msgid "An error occurred while loading the Needs tab."
+msgstr ""
+
+msgid "An error occurred while loading the Test Reports tab."
+msgstr ""
+
 msgid "An error occurred while loading the access tokens form, please try again."
 msgstr ""
 
@@ -4531,9 +4537,6 @@ msgstr ""
 msgid "Artifacts"
 msgstr ""
 
-msgid "Artifacts maximum size"
-msgstr ""
-
 msgid "As we continue to build more features for SAST, we'd love your feedback on the SAST configuration feature in %{linkStart}this issue%{linkEnd}."
 msgstr ""
 
@@ -4648,9 +4651,6 @@ msgid "Assignee has no permissions"
 msgstr ""
 
 msgid "Assignee lists not available with your current license"
-msgstr ""
-
-msgid "Assignee lists show all issues assigned to the selected user."
 msgstr ""
 
 msgid "Assignee(s)"
@@ -5139,9 +5139,6 @@ msgid "Before this can be merged, a Jira issue must be linked in the title or de
 msgstr ""
 
 msgid "Begin with the selected commit"
-msgstr ""
-
-msgid "Below are the current settings regarding"
 msgstr ""
 
 msgid "Below are the fingerprints for the current instance SSH host keys."
@@ -10663,9 +10660,6 @@ msgstr ""
 msgid "Decrease"
 msgstr ""
 
-msgid "Default"
-msgstr ""
-
 msgid "Default CI/CD configuration file"
 msgstr ""
 
@@ -10735,6 +10729,9 @@ msgstr ""
 msgid "Define environments in the deploy stage(s) in %{code_open}.gitlab-ci.yml%{code_close} to track deployments here."
 msgstr ""
 
+msgid "Define how approval rules are applied as a merge request moves toward completion."
+msgstr ""
+
 msgid "Definition"
 msgstr ""
 
@@ -10783,6 +10780,9 @@ msgstr ""
 msgid "Delete badge"
 msgstr ""
 
+msgid "Delete column"
+msgstr ""
+
 msgid "Delete comment"
 msgstr ""
 
@@ -10813,6 +10813,9 @@ msgstr ""
 msgid "Delete project. Are you ABSOLUTELY SURE?"
 msgstr ""
 
+msgid "Delete row"
+msgstr ""
+
 msgid "Delete self monitoring project"
 msgstr ""
 
@@ -10829,6 +10832,9 @@ msgid "Delete source branch"
 msgstr ""
 
 msgid "Delete subscription"
+msgstr ""
+
+msgid "Delete table"
 msgstr ""
 
 msgid "Delete this attachment"
@@ -12129,6 +12135,9 @@ msgid "Edit public deploy key"
 msgstr ""
 
 msgid "Edit sidebar"
+msgstr ""
+
+msgid "Edit table"
 msgstr ""
 
 msgid "Edit this file only."
@@ -15224,9 +15233,6 @@ msgstr ""
 msgid "GitLab Billing Team."
 msgstr ""
 
-msgid "GitLab CI"
-msgstr ""
-
 msgid "GitLab Import"
 msgstr ""
 
@@ -15908,6 +15914,12 @@ msgstr ""
 msgid "GroupRoadmap|The roadmap shows the progress of your epics along a timeline"
 msgstr ""
 
+msgid "GroupRoadmap|This quarter"
+msgstr ""
+
+msgid "GroupRoadmap|This year"
+msgstr ""
+
 msgid "GroupRoadmap|To make your epics appear in the roadmap, add start or due dates to them."
 msgstr ""
 
@@ -15918,6 +15930,9 @@ msgid "GroupRoadmap|To view the roadmap, add a start or due date to one of your 
 msgstr ""
 
 msgid "GroupRoadmap|To widen your search, change or remove filters; from %{startDate} to %{endDate}."
+msgstr ""
+
+msgid "GroupRoadmap|Within 3 years"
 msgstr ""
 
 msgid "GroupSAML|%{strongOpen}Warning%{strongClose} - Enabling %{linkStart}SSO enforcement%{linkEnd} can reduce security risks."
@@ -17805,6 +17820,12 @@ msgstr ""
 msgid "Insert code"
 msgstr ""
 
+msgid "Insert column after"
+msgstr ""
+
+msgid "Insert column before"
+msgstr ""
+
 msgid "Insert image"
 msgstr ""
 
@@ -17812,6 +17833,12 @@ msgid "Insert inline code"
 msgstr ""
 
 msgid "Insert link"
+msgstr ""
+
+msgid "Insert row after"
+msgstr ""
+
+msgid "Insert row before"
 msgstr ""
 
 msgid "Insert suggestion"
@@ -19448,9 +19475,6 @@ msgstr ""
 msgid "Label actions dropdown"
 msgstr ""
 
-msgid "Label lists show all issues with the selected label."
-msgstr ""
-
 msgid "Label priority"
 msgstr ""
 
@@ -19573,9 +19597,6 @@ msgstr ""
 msgid "Last repository check (%{last_check_timestamp}) failed. See the 'repocheck.log' file for error messages."
 msgstr ""
 
-msgid "Last repository check run"
-msgstr ""
-
 msgid "Last seen"
 msgstr ""
 
@@ -19592,6 +19613,9 @@ msgid "Last successful sync"
 msgstr ""
 
 msgid "Last successful update"
+msgstr ""
+
+msgid "Last time checked"
 msgstr ""
 
 msgid "Last time verified"
@@ -20595,6 +20619,9 @@ msgstr ""
 msgid "Maximum artifacts size (MB)"
 msgstr ""
 
+msgid "Maximum attachment size"
+msgstr ""
+
 msgid "Maximum attachment size (MB)"
 msgstr ""
 
@@ -20611,6 +20638,9 @@ msgid "Maximum concurrency of Elasticsearch bulk requests per indexing operation
 msgstr ""
 
 msgid "Maximum delay (Minutes)"
+msgstr ""
+
+msgid "Maximum diff patch size"
 msgstr ""
 
 msgid "Maximum diff patch size (Bytes)"
@@ -20640,7 +20670,13 @@ msgstr ""
 msgid "Maximum files in a diff"
 msgstr ""
 
+msgid "Maximum import size"
+msgstr ""
+
 msgid "Maximum import size (MB)"
+msgstr ""
+
+msgid "Maximum job artifact size"
 msgstr ""
 
 msgid "Maximum job timeout"
@@ -20676,6 +20712,12 @@ msgstr ""
 msgid "Maximum page reached"
 msgstr ""
 
+msgid "Maximum page size"
+msgstr ""
+
+msgid "Maximum push size"
+msgstr ""
+
 msgid "Maximum push size (MB)"
 msgstr ""
 
@@ -20698,6 +20740,9 @@ msgid "Maximum size of individual attachments in comments."
 msgstr ""
 
 msgid "Maximum size of pages (MB)"
+msgstr ""
+
+msgid "Maximum snippet size"
 msgstr ""
 
 msgid "Maximum time between updates that a mirror can have when scheduled to synchronize."
@@ -21524,9 +21569,6 @@ msgid "Milestone due date"
 msgstr ""
 
 msgid "Milestone lists not available with your current license"
-msgstr ""
-
-msgid "Milestone lists show all issues from the selected milestone."
 msgstr ""
 
 msgid "MilestoneCombobox|An error occurred while searching for milestones"
@@ -27623,6 +27665,9 @@ msgstr ""
 msgid "Related merge requests"
 msgstr ""
 
+msgid "Related to #%{issue_id}."
+msgstr ""
+
 msgid "Relates to"
 msgstr ""
 
@@ -28859,6 +28904,9 @@ msgstr ""
 msgid "Runners|Runners"
 msgstr ""
 
+msgid "Runners|Runners in this group: %{groupRunnersCount}"
+msgstr ""
+
 msgid "Runners|Shared runners are available to every project in a GitLab instance. If you want a runner to build only specific projects, restrict the project in the table below. After you restrict a runner to a project, you cannot change it back to a shared runner."
 msgstr ""
 
@@ -29439,7 +29487,7 @@ msgstr ""
 msgid "Security report is out of date. Run %{newPipelineLinkStart}a new pipeline%{newPipelineLinkEnd} for the target branch (%{targetBranchName})"
 msgstr ""
 
-msgid "SecurityApprovals|A merge request approval is required when a security report contains a new vulnerability of high, critical, or unknown severity."
+msgid "SecurityApprovals|A merge request approval is required when a security report contains a new vulnerability."
 msgstr ""
 
 msgid "SecurityApprovals|A merge request approval is required when test coverage declines."
@@ -29475,7 +29523,7 @@ msgstr ""
 msgid "SecurityApprovals|Requires approval for decreases in test coverage. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
-msgid "SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}"
+msgid "SecurityApprovals|Requires approval for vulnerabilities. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "SecurityApprovals|Test coverage must be enabled. %{linkStart}Learn more%{linkEnd}."
@@ -30923,6 +30971,9 @@ msgid "Site profile not found for given parameters"
 msgstr ""
 
 msgid "Size"
+msgstr ""
+
+msgid "Size Limits"
 msgstr ""
 
 msgid "Size limit per repository (MB)"
@@ -33313,9 +33364,6 @@ msgstr ""
 msgid "The maximum number of tags that a single worker accepts for cleanup. If the number of tags goes above this limit, the list of tags to delete is truncated to this number. To remove this limit, set it to 0."
 msgstr ""
 
-msgid "The maximum size of your Pages site is regulated by the artifacts maximum size which is part of %{link_to_gitlab_ci}."
-msgstr ""
-
 msgid "The merge conflicts for this merge request cannot be resolved through GitLab. Please try to resolve them locally."
 msgstr ""
 
@@ -33611,6 +33659,9 @@ msgid "There are several file size limits in place for the Package Registry."
 msgstr ""
 
 msgid "There are several rate limits in place to protect the system."
+msgstr ""
+
+msgid "There are several size limits in place."
 msgstr ""
 
 msgid "There is a halted Elasticsearch migration"
@@ -35180,13 +35231,19 @@ msgstr ""
 msgid "TransferProject|Project cannot be transferred, because tags are present in its container registry"
 msgstr ""
 
+msgid "TransferProject|Project is already in this namespace."
+msgstr ""
+
 msgid "TransferProject|Project with same name or path in target namespace already exists"
 msgstr ""
 
 msgid "TransferProject|Root namespace can't be updated if project has NPM packages"
 msgstr ""
 
-msgid "TransferProject|Transfer failed, please contact an admin."
+msgid "TransferProject|You don't have permission to transfer projects into that namespace."
+msgstr ""
+
+msgid "TransferProject|You don't have permission to transfer this project."
 msgstr ""
 
 msgid "Tree view"
@@ -36044,6 +36101,9 @@ msgid "UsageQuota|Usage Quotas"
 msgstr ""
 
 msgid "UsageQuota|Usage of group resources across the projects in the %{strong_start}%{group_name}%{strong_end} group"
+msgstr ""
+
+msgid "UsageQuota|Usage of project resources across the %{strong_start}%{project_name}%{strong_end} project"
 msgstr ""
 
 msgid "UsageQuota|Usage of resources across your projects"
@@ -37142,9 +37202,6 @@ msgstr ""
 msgid "Vulnerability|Request/Response"
 msgstr ""
 
-msgid "Vulnerability|Scanner"
-msgstr ""
-
 msgid "Vulnerability|Scanner Provider"
 msgstr ""
 
@@ -37155,6 +37212,9 @@ msgid "Vulnerability|Status"
 msgstr ""
 
 msgid "Vulnerability|The unmodified response is the original response that had no mutations done to the request"
+msgstr ""
+
+msgid "Vulnerability|Tool"
 msgstr ""
 
 msgid "Vulnerability|Unmodified Response"
@@ -39960,6 +40020,9 @@ msgid "must be greater than start date"
 msgstr ""
 
 msgid "must be inside the fork network"
+msgstr ""
+
+msgid "must be less than the limit of %{tag_limit} tags"
 msgstr ""
 
 msgid "must be unique by status and elapsed time within a policy"

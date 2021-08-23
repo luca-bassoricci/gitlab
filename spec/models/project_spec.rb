@@ -6,6 +6,7 @@ RSpec.describe Project, factory_default: :keep do
   include ProjectForksHelper
   include GitHelpers
   include ExternalAuthorizationServiceHelpers
+  include ReloadHelpers
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:namespace) { create_default(:namespace).freeze }
@@ -1256,19 +1257,19 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'returns an active external wiki' do
-      create(:service, project: project, type: 'ExternalWikiService', active: true)
+      create(:external_wiki_integration, project: project, active: true)
 
       is_expected.to be_kind_of(Integrations::ExternalWiki)
     end
 
     it 'does not return an inactive external wiki' do
-      create(:service, project: project, type: 'ExternalWikiService', active: false)
+      create(:external_wiki_integration, project: project, active: false)
 
       is_expected.to eq(nil)
     end
 
     it 'sets Project#has_external_wiki when it is nil' do
-      create(:service, project: project, type: 'ExternalWikiService', active: true)
+      create(:external_wiki_integration, project: project, active: true)
       project.update_column(:has_external_wiki, nil)
 
       expect { subject }.to change { project.has_external_wiki }.from(nil).to(true)
@@ -1278,36 +1279,40 @@ RSpec.describe Project, factory_default: :keep do
   describe '#has_external_wiki' do
     let_it_be(:project) { create(:project) }
 
-    def subject
+    def has_external_wiki
       project.reload.has_external_wiki
     end
 
-    specify { is_expected.to eq(false) }
+    specify { expect(has_external_wiki).to eq(false) }
 
-    context 'when there is an active external wiki service' do
-      let!(:service) do
-        create(:service, project: project, type: 'ExternalWikiService', active: true)
+    context 'when there is an active external wiki integration' do
+      let(:active) { true }
+
+      let!(:integration) do
+        create(:external_wiki_integration, project: project, active: active)
       end
 
-      specify { is_expected.to eq(true) }
+      specify { expect(has_external_wiki).to eq(true) }
 
       it 'becomes false if the external wiki service is destroyed' do
         expect do
-          Integration.find(service.id).delete
-        end.to change { subject }.to(false)
+          Integration.find(integration.id).delete
+        end.to change { has_external_wiki }.to(false)
       end
 
       it 'becomes false if the external wiki service becomes inactive' do
         expect do
-          service.update_column(:active, false)
-        end.to change { subject }.to(false)
+          integration.update_column(:active, false)
+        end.to change { has_external_wiki }.to(false)
       end
-    end
 
-    it 'is false when external wiki service is not active' do
-      create(:service, project: project, type: 'ExternalWikiService', active: false)
+      context 'when created as inactive' do
+        let(:active) { false }
 
-      is_expected.to eq(false)
+        it 'is false' do
+          expect(has_external_wiki).to eq(false)
+        end
+      end
     end
   end
 
@@ -3021,28 +3026,105 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  shared_context 'project with group ancestry' do
+    let(:parent) { create(:group) }
+    let(:child) { create(:group, parent: parent) }
+    let(:child2) { create(:group, parent: child) }
+    let(:project) { create(:project, namespace: child2) }
+
+    before do
+      reload_models(parent, child, child2)
+    end
+  end
+
+  shared_context 'project with namespace ancestry' do
+    let(:namespace) { create :namespace }
+    let(:project) { create :project, namespace: namespace }
+  end
+
+  shared_examples 'project with group ancestors' do
+    it 'returns all ancestors' do
+      is_expected.to contain_exactly(child2, child, parent)
+    end
+  end
+
+  shared_examples 'project with ordered group ancestors' do
+    let(:hierarchy_order) { :desc }
+
+    it 'returns ancestors ordered by descending hierarchy' do
+      is_expected.to eq([parent, child, child2])
+    end
+  end
+
+  shared_examples '#ancestors' do
+    context 'group ancestory' do
+      include_context 'project with group ancestry'
+
+      it_behaves_like 'project with group ancestors' do
+        subject { project.ancestors }
+      end
+
+      it_behaves_like 'project with ordered group ancestors' do
+        subject { project.ancestors(hierarchy_order: hierarchy_order) }
+      end
+    end
+
+    context 'namespace ancestry' do
+      include_context 'project with namespace ancestry'
+
+      subject { project.ancestors }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
+  describe '#ancestors' do
+    context 'with linear_project_ancestors feature flag enabled' do
+      before do
+        stub_feature_flags(linear_project_ancestors: true)
+      end
+
+      include_examples '#ancestors'
+    end
+
+    context 'with linear_project_ancestors feature flag disabled' do
+      before do
+        stub_feature_flags(linear_project_ancestors: false)
+      end
+
+      include_examples '#ancestors'
+    end
+  end
+
   describe '#ancestors_upto' do
-    let_it_be(:parent) { create(:group) }
-    let_it_be(:child) { create(:group, parent: parent) }
-    let_it_be(:child2) { create(:group, parent: child) }
-    let_it_be(:project) { create(:project, namespace: child2) }
+    context 'group ancestry' do
+      include_context 'project with group ancestry'
 
-    it 'returns all ancestors when no namespace is given' do
-      expect(project.ancestors_upto).to contain_exactly(child2, child, parent)
-    end
-
-    it 'includes ancestors upto but excluding the given ancestor' do
-      expect(project.ancestors_upto(parent)).to contain_exactly(child2, child)
-    end
-
-    describe 'with hierarchy_order' do
-      it 'returns ancestors ordered by descending hierarchy' do
-        expect(project.ancestors_upto(hierarchy_order: :desc)).to eq([parent, child, child2])
+      it_behaves_like 'project with group ancestors' do
+        subject { project.ancestors_upto }
       end
 
-      it 'can be used with upto option' do
-        expect(project.ancestors_upto(parent, hierarchy_order: :desc)).to eq([child, child2])
+      it_behaves_like 'project with ordered group ancestors' do
+        subject { project.ancestors_upto(hierarchy_order: hierarchy_order) }
       end
+
+      it 'includes ancestors upto but excluding the given ancestor' do
+        expect(project.ancestors_upto(parent)).to contain_exactly(child2, child)
+      end
+
+      describe 'with hierarchy_order' do
+        it 'can be used with upto option' do
+          expect(project.ancestors_upto(parent, hierarchy_order: :desc)).to eq([child, child2])
+        end
+      end
+    end
+
+    context 'namespace ancestry' do
+      include_context 'project with namespace ancestry'
+
+      subject { project.ancestors_upto }
+
+      it { is_expected.to be_empty }
     end
   end
 

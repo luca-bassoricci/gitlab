@@ -13,6 +13,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   include DiffHelper
   include Gitlab::Cache::Helpers
 
+  prepend_before_action(only: [:index]) { authenticate_sessionless_user!(:rss) }
   skip_before_action :merge_request, only: [:index, :bulk_update, :export_csv]
   before_action :apply_diff_view_cookie!, only: [:show]
   before_action :disable_query_limiting, only: [:assign_related_issues, :update]
@@ -47,7 +48,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:diff_searching_usage_data, @project, default_enabled: :yaml)
 
     experiment(:invite_members_in_comment, namespace: @project.root_ancestor) do |experiment_instance|
-      experiment_instance.exclude! unless helpers.can_import_members?
+      experiment_instance.exclude! unless helpers.can_admin_project_member?(@project)
 
       experiment_instance.use {}
       experiment_instance.try(:invite_member_link) {}
@@ -85,6 +86,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
     respond_to do |format|
       format.html
+      format.atom { render layout: 'xml.atom' }
       format.json do
         render json: {
           html: view_to_html_string("projects/merge_requests/_merge_requests")

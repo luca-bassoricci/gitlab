@@ -1,14 +1,14 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 
-import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
+import SidebarAncestorsWidget from 'ee_component/sidebar/components/ancestors_tree/sidebar_ancestors_widget.vue';
 
 import { TYPE_EPIC } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { IssuableType } from '~/issue_show/constants';
 import notesEventHub from '~/notes/event_hub';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
-import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
+import SidebarParticipantsWidget from '~/sidebar/components/participants/sidebar_participants_widget.vue';
 import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import SidebarTodoWidget from '~/sidebar/components/todo_toggle/sidebar_todo_widget.vue';
@@ -28,8 +28,8 @@ export default {
     SidebarDatePicker,
     SidebarDatePickerCollapsed,
     SidebarLabels,
-    AncestorsTree,
-    SidebarParticipants,
+    SidebarAncestorsWidget,
+    SidebarParticipantsWidget,
     SidebarConfidentialityWidget,
     SidebarSubscriptionsWidget,
     SidebarReferenceWidget,
@@ -46,7 +46,6 @@ export default {
       'canUpdate',
       'allowSubEpics',
       'sidebarCollapsed',
-      'participants',
       'startDateSourcingMilestoneTitle',
       'startDateSourcingMilestoneDates',
       'startDateIsFixed',
@@ -73,7 +72,6 @@ export default {
       'dueDateTimeFromMilestones',
       'dueDateTime',
       'dueDateForCollapsedSidebar',
-      'ancestors',
     ]),
     issuableType() {
       return IssuableType.Epic;
@@ -246,15 +244,18 @@ export default {
         @expandSidebar="handleSidebarToggle"
         @confidentialityUpdated="updateConfidentialityOnIssuable($event)"
       />
-      <div v-if="allowSubEpics" class="block ancestors">
-        <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
-      </div>
-      <div class="block participants">
-        <sidebar-participants
-          :participants="participants"
-          @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
-        />
-      </div>
+      <sidebar-ancestors-widget
+        v-if="allowSubEpics"
+        :iid="String(iid)"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+      />
+      <sidebar-participants-widget
+        :iid="String(iid)"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        @toggleSidebar="handleSidebarToggle"
+      />
       <sidebar-subscriptions-widget
         :iid="String(iid)"
         :full-path="fullPath"

@@ -4,27 +4,22 @@
   redis_slot: compliance
   category: compliance
   aggregation: weekly
-  feature_flag: track_unique_visits
 - name: g_compliance_audit_events
   category: compliance
   redis_slot: compliance
   aggregation: weekly
-  feature_flag: track_unique_visits
 - name: i_compliance_audit_events
   category: compliance
   redis_slot: compliance
   aggregation: weekly
-  feature_flag: track_unique_visits
 - name: i_compliance_credential_inventory
   category: compliance
   redis_slot: compliance
   aggregation: weekly
-  feature_flag: track_unique_visits
 - name: a_compliance_audit_events_api
   category: compliance
   redis_slot: compliance
   aggregation: weekly
-  feature_flag: track_unique_visits
 - name: g_edit_by_web_ide
   category: ide_edit
   redis_slot: edit
@@ -67,7 +62,6 @@
 - name: design_action
   category: source_code
   aggregation: daily
-  feature_flag: usage_data_design_action
 - name: project_action
   category: source_code
   aggregation: daily

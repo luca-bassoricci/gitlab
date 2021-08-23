@@ -361,21 +361,16 @@ you visualize the entire pipeline, including all cross-project inter-dependencie
 ### View job dependencies in the pipeline graph
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/298973) in GitLab 13.12.
-> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/328538) in GitLab 13.12.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/328538) in GitLab 14.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/328538) in GitLab 14.2.
-
-This in-development feature might not be available for your use. There can be
-[risks when enabling features still in development](../../administration/feature_flags.md#risks-when-enabling-features-still-in-development).
-Refer to this feature's version history for more details.
 
 You can arrange jobs in the pipeline graph based on their [`needs`](../yaml/index.md#needs)
 dependencies.
 
 Jobs in the leftmost column run first, and jobs that depend on them are grouped in the next columns.
 
-For example, `build-job2` depends only on jobs in the first column, so it displays
-in the second column from the left. `deploy-job2` depends on jobs in both the first
+For example, `test-job1` depends only on jobs in the first column, so it displays
+in the second column from the left. `deploy-job1` depends on jobs in both the first
 and second column and displays in the third column:
 
 ![jobs grouped by needs dependency](img/pipelines_graph_dependency_view_v13_12.png)

@@ -465,24 +465,19 @@ RSpec.describe User do
         user.commit_email = confirmed.email
 
         expect(user).to be_valid
-        expect(user.commit_email).to eq(confirmed.email)
       end
 
       it 'can not be set to an unconfirmed email' do
         unconfirmed = create(:email, user: user)
         user.commit_email = unconfirmed.email
 
-        # This should set the commit_email attribute to the primary email
-        expect(user).to be_valid
-        expect(user.commit_email).to eq(user.email)
+        expect(user).not_to be_valid
       end
 
       it 'can not be set to a non-existent email' do
         user.commit_email = 'non-existent-email@nonexistent.nonexistent'
 
-        # This should set the commit_email attribute to the primary email
-        expect(user).to be_valid
-        expect(user.commit_email).to eq(user.email)
+        expect(user).not_to be_valid
       end
 
       it 'can not be set to an invalid email, even if confirmed' do
@@ -691,75 +686,6 @@ RSpec.describe User do
           end
         end
       end
-
-      context 'owns_notification_email' do
-        it 'accepts temp_oauth_email emails' do
-          user = build(:user, email: "temp-email-for-oauth@example.com")
-          expect(user).to be_valid
-        end
-
-        it 'does not accept not verified emails' do
-          email = create(:email)
-          user = email.user
-          user.notification_email = email.email
-
-          expect(user).to be_invalid
-          expect(user.errors[:notification_email]).to include(_('must be an email you have verified'))
-        end
-      end
-
-      context 'owns_public_email' do
-        it 'accepts verified emails' do
-          email = create(:email, :confirmed, email: 'test@test.com')
-          user = email.user
-          user.notification_email = email.email
-
-          expect(user).to be_valid
-        end
-
-        it 'does not accept not verified emails' do
-          email = create(:email)
-          user = email.user
-          user.public_email = email.email
-
-          expect(user).to be_invalid
-          expect(user.errors[:public_email]).to include(_('must be an email you have verified'))
-        end
-      end
-
-      context 'set_commit_email' do
-        it 'keeps commit email when private commit email is being used' do
-          user = create(:user, commit_email: Gitlab::PrivateCommitEmail::TOKEN)
-
-          expect(user.read_attribute(:commit_email)).to eq(Gitlab::PrivateCommitEmail::TOKEN)
-        end
-
-        it 'keeps the commit email when nil' do
-          user = create(:user, commit_email: nil)
-
-          expect(user.read_attribute(:commit_email)).to be_nil
-        end
-
-        it 'reverts to nil when email is not verified' do
-          user = create(:user, commit_email: "foo@bar.com")
-
-          expect(user.read_attribute(:commit_email)).to be_nil
-        end
-      end
-
-      context 'owns_commit_email' do
-        it 'accepts private commit email' do
-          user = build(:user, commit_email: Gitlab::PrivateCommitEmail::TOKEN)
-
-          expect(user).to be_valid
-        end
-
-        it 'accepts nil commit email' do
-          user = build(:user, commit_email: nil)
-
-          expect(user).to be_valid
-        end
-      end
     end
   end
 
@@ -931,12 +857,8 @@ RSpec.describe User do
       end
 
       context 'maximum value' do
-        before do
-          allow(Devise.password_length).to receive(:max).and_return(201)
-        end
-
         it 'is determined by the current value of `Devise.password_length.max`' do
-          expect(password_length.max).to eq(201)
+          expect(password_length.max).to eq(Devise.password_length.max)
         end
       end
     end
@@ -6022,6 +5944,32 @@ RSpec.describe User do
 
       expect(Identity).to receive(:with_extern_uid).and_call_original
       expect(described_class.by_provider_and_extern_uid(:github, 'my_github_id')).to match_array([expected_user])
+    end
+  end
+
+  describe '#unset_secondary_emails_matching_deleted_email!' do
+    let(:deleted_email) { 'kermit@muppets.com' }
+
+    subject { build(:user, commit_email: commit_email) }
+
+    context 'when no secondary email matches the deleted email' do
+      let(:commit_email) { 'fozzie@muppets.com' }
+
+      it 'does nothing' do
+        expect(subject).not_to receive(:save)
+        subject.unset_secondary_emails_matching_deleted_email!(deleted_email)
+        expect(subject.read_attribute(:commit_email)).to eq commit_email
+      end
+    end
+
+    context 'when a secondary email matches the deleted_email' do
+      let(:commit_email) { deleted_email }
+
+      it 'un-sets the secondary email' do
+        expect(subject).to receive(:save)
+        subject.unset_secondary_emails_matching_deleted_email!(deleted_email)
+        expect(subject.read_attribute(:commit_email)).to be nil
+      end
     end
   end
 end

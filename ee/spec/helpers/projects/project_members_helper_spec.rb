@@ -18,6 +18,7 @@ RSpec.describe Projects::ProjectMembersHelper do
     before do
       project.add_developer(user)
       create_schedule_with_user(project, user)
+      allow(helper).to receive(:can_admin_project_member?).and_return(true)
     end
 
     it 'does not execute N+1' do
@@ -33,7 +34,7 @@ RSpec.describe Projects::ProjectMembersHelper do
 
       expect(project.members.count).to eq(3)
 
-      expect { call_project_members_app_data_json }.not_to exceed_query_limit(control_count).with_threshold(6) # existing n+1
+      expect { call_project_members_app_data_json }.not_to exceed_query_limit(control_count).with_threshold(7) # existing n+1
     end
   end
 

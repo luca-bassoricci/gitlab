@@ -66,11 +66,21 @@
 - name: thematic_break
   markdown: |-
     ---
-- name: bullet_list
+- name: bullet_list_style_1
   markdown: |-
     * list item 1
     * list item 2
       * embedded list item 3
+- name: bullet_list_style_2
+  markdown: |-
+    - list item 1
+    - list item 2
+      * embedded list item 3
+- name: bullet_list_style_3
+  markdown: |-
+    + list item 1
+    + list item 2
+      - embedded list item 3
 - name: ordered_list
   markdown: |-
     1. list item 1
@@ -102,14 +112,10 @@
   markdown: |-
     | header | header |
     |--------|--------|
-    | cell | cell |
-    | cell | cell |
-- name: table_with_alignment
-  markdown: |-
-    | header | : header : | header : |
-    |--------|------------|----------|
-    | cell | cell | cell |
-    | cell | cell | cell |
+    | `code` | cell with **bold** |
+    | ~~strike~~ | cell with _italic_ |
+
+    # content after table
 - name: emoji
   markdown: ':sparkles: :heart: :100:'
 - name: reference

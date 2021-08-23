@@ -5,6 +5,8 @@
 # A note of this type is never resolvable.
 class Note < ApplicationRecord
   extend ActiveModel::Naming
+  extend Gitlab::Utils::Override
+
   include Gitlab::Utils::StrongMemoize
   include Participable
   include Mentionable
@@ -45,6 +47,9 @@ class Note < ApplicationRecord
 
   # Attribute used to store the attributes that have been changed by quick actions.
   attr_accessor :commands_changes
+
+  # Attribute used to determine whether keep_around_commits will be skipped for diff notes.
+  attr_accessor :skip_keep_around_commits
 
   default_value_for :system, false
 
@@ -581,6 +586,22 @@ class Note < ApplicationRecord
     cache_key_items << Digest::SHA1.hexdigest(redacted_note_html) if redacted_note_html.present?
 
     cache_key_items.join(':')
+  end
+
+  override :user_mention_class
+  def user_mention_class
+    return if noteable.blank?
+
+    noteable.user_mention_class
+  end
+
+  override :user_mention_identifier
+  def user_mention_identifier
+    return if noteable.blank?
+
+    noteable.user_mention_identifier.merge({
+      note_id: id
+    })
   end
 
   private

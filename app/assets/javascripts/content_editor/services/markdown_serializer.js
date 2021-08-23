@@ -30,6 +30,12 @@ import TableRow from '../extensions/table_row';
 import TaskItem from '../extensions/task_item';
 import TaskList from '../extensions/task_list';
 import Text from '../extensions/text';
+import {
+  renderHardBreak,
+  renderTable,
+  renderTableCell,
+  renderTableRow,
+} from './serialization_helpers';
 
 const defaultSerializerConfig = {
   marks: {
@@ -65,6 +71,7 @@ const defaultSerializerConfig = {
       expelEnclosingWhitespace: true,
     },
   },
+
   nodes: {
     [Blockquote.name]: defaultMarkdownSerializer.nodes.blockquote,
     [BulletList.name]: defaultMarkdownSerializer.nodes.bullet_list,
@@ -80,7 +87,7 @@ const defaultSerializerConfig = {
 
       state.write(`:${name}:`);
     },
-    [HardBreak.name]: defaultMarkdownSerializer.nodes.hard_break,
+    [HardBreak.name]: renderHardBreak,
     [Heading.name]: defaultMarkdownSerializer.nodes.heading,
     [HorizontalRule.name]: defaultMarkdownSerializer.nodes.horizontal_rule,
     [Image.name]: (state, node) => {
@@ -95,60 +102,10 @@ const defaultSerializerConfig = {
     [Reference.name]: (state, node) => {
       state.write(node.attrs.originalText || node.attrs.text);
     },
-    [Table.name]: (state, node) => {
-      state.renderContent(node);
-    },
-    [TableCell.name]: (state, node) => {
-      state.renderInline(node);
-    },
-    [TableHeader.name]: (state, node) => {
-      state.renderInline(node);
-    },
-    [TableRow.name]: (state, node) => {
-      const isHeaderRow = node.child(0).type.name === 'tableHeader';
-
-      const renderRow = () => {
-        const cellWidths = [];
-
-        state.flushClose(1);
-
-        state.write('| ');
-        node.forEach((cell, _, i) => {
-          if (i) state.write(' | ');
-
-          const { length } = state.out;
-          state.render(cell, node, i);
-          cellWidths.push(state.out.length - length);
-        });
-        state.write(' |');
-
-        state.closeBlock(node);
-
-        return cellWidths;
-      };
-
-      const renderHeaderRow = (cellWidths) => {
-        state.flushClose(1);
-
-        state.write('|');
-        node.forEach((cell, _, i) => {
-          if (i) state.write('|');
-
-          state.write(cell.attrs.align === 'center' ? ':' : '-');
-          state.write(state.repeat('-', cellWidths[i]));
-          state.write(cell.attrs.align === 'center' || cell.attrs.align === 'right' ? ':' : '-');
-        });
-        state.write('|');
-
-        state.closeBlock(node);
-      };
-
-      if (isHeaderRow) {
-        renderHeaderRow(renderRow());
-      } else {
-        renderRow();
-      }
-    },
+    [Table.name]: renderTable,
+    [TableCell.name]: renderTableCell,
+    [TableHeader.name]: renderTableCell,
+    [TableRow.name]: renderTableRow,
     [TaskItem.name]: (state, node) => {
       state.write(`[${node.attrs.checked ? 'x' : ' '}] `);
       state.renderContent(node);
@@ -160,8 +117,6 @@ const defaultSerializerConfig = {
     [Text.name]: defaultMarkdownSerializer.nodes.text,
   },
 };
-
-const wrapHtmlPayload = (payload) => `<div>${payload}</div>`;
 
 /**
  * A markdown serializer converts arbitrary Markdown content
@@ -175,7 +130,7 @@ const wrapHtmlPayload = (payload) => `<div>${payload}</div>`;
  * that parses the Markdown and converts it into HTML.
  * @returns a markdown serializer
  */
-export default ({ render = () => null, serializerConfig }) => ({
+export default ({ render = () => null, serializerConfig = {} } = {}) => ({
   /**
    * Converts a Markdown string into a ProseMirror JSONDocument based
    * on a ProseMirror schema.
@@ -187,15 +142,15 @@ export default ({ render = () => null, serializerConfig }) => ({
   deserialize: async ({ schema, content }) => {
     const html = await render(content);
 
-    if (!html) {
-      return null;
-    }
+    if (!html) return null;
 
     const parser = new DOMParser();
-    const {
-      body: { firstElementChild },
-    } = parser.parseFromString(wrapHtmlPayload(html), 'text/html');
-    const state = ProseMirrorDOMParser.fromSchema(schema).parse(firstElementChild);
+    const { body } = parser.parseFromString(html, 'text/html');
+
+    // append original source as a comment that nodes can access
+    body.append(document.createComment(content));
+
+    const state = ProseMirrorDOMParser.fromSchema(schema).parse(body);
 
     return state.toJSON();
   },
