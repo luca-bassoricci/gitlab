@@ -118,7 +118,7 @@ module API
     def find_project(id)
       projects = Project.without_deleted
 
-      if id.is_a?(Integer) || id =~ /^\d+$/
+      if input_is_digits?(id)
         projects.find_by(id: id)
       elsif id.include?("/")
         projects.find_by_full_path(id)
@@ -147,11 +147,11 @@ module API
 
     # rubocop: disable CodeReuse/ActiveRecord
     def find_group(id)
-      if id.to_s =~ /^\d+$/
-        Group.find_by(id: id)
-      else
-        Group.find_by_full_path(id)
+      if input_is_digits?(id) && group = Group.find_by(id: id)
+        return group
       end
+
+      Group.find_by_full_path(id.to_s)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -172,11 +172,11 @@ module API
 
     # rubocop: disable CodeReuse/ActiveRecord
     def find_namespace(id)
-      if id.to_s =~ /^\d+$/
-        Namespace.find_by(id: id)
-      else
-        Namespace.find_by_full_path(id)
+      if input_is_digits?(id) && namespace = Namespace.find_by(id: id)
+        return namespace
       end
+
+      Namespace.find_by_full_path(id.to_s)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -718,6 +718,10 @@ module API
 
     def sanitize_id_param(id)
       id.present? ? id.to_i : nil
+    end
+
+    def input_is_digits?(input)
+      input.to_s =~ /^\d+$/
     end
   end
 end

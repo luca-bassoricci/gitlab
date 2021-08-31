@@ -74,6 +74,16 @@ RSpec.describe UserFinder do
       end
     end
 
+    context 'when the user exists (numeric username)' do
+      let_it_be(:user) { create(:user, username: '42') }
+
+      it 'returns the user' do
+        found = described_class.new(user.username).find_by_id_or_username
+
+        expect(found).to eq(user)
+      end
+    end
+
     context 'when the user does not exist (username)' do
       it 'returns nil' do
         found = described_class.new("non_existent_username").find_by_id_or_username

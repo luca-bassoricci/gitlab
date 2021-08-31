@@ -67,6 +67,54 @@ RSpec.describe API::Helpers do
     end
   end
 
+  describe '#find_group' do
+    let(:group) { create(:group) }
+
+    shared_examples 'group finder' do
+      context 'when group exists' do
+        it 'returns requested group' do
+          expect(subject.find_group(existing_id)).to eq(group)
+        end
+
+        it 'returns nil' do
+          expect(subject.find_group(non_existing_id)).to be_nil
+        end
+      end
+    end
+
+    context 'when ID is used as an argument' do
+      let(:existing_id) { group.id }
+      let(:non_existing_id) { non_existing_record_id }
+
+      it_behaves_like 'group finder'
+    end
+
+    context 'when PATH is used as an argument' do
+      let(:existing_id) { group.full_path }
+      let(:non_existing_id) { 'something/else' }
+
+      it_behaves_like 'group finder'
+
+      context 'with an invalid PATH' do
+        let(:non_existing_id) { 'undefined' } # path without slash
+
+        it_behaves_like 'group finder'
+      end
+
+      context 'but it looks like an ID' do
+        let(:group) { create(:group, name: '42') }
+
+        it_behaves_like 'group finder'
+
+        it 'attempts ID lookup but falls back to PATH lookup' do
+          expect(Group).to receive(:find_by).and_call_original
+          expect(Group).to receive(:find_by_full_path).and_call_original
+          expect(subject.find_group(group.full_path)).to eq(group)
+        end
+      end
+    end
+  end
+
   describe '#find_project' do
     let(:project) { create(:project) }
 
@@ -101,7 +149,7 @@ RSpec.describe API::Helpers do
         it_behaves_like 'project finder'
 
         it 'does not hit the database' do
-          expect(Project).not_to receive(:find_by_full_path)
+          expect_any_instance_of(ActiveRecord::Relation).not_to receive(:find_by_full_path)
 
           subject.find_project(non_existing_id)
         end
@@ -243,6 +291,18 @@ RSpec.describe API::Helpers do
       let(:non_existing_id) { 'non-existing-path' }
 
       it_behaves_like 'namespace finder'
+
+      context 'but it looks like an ID' do
+        let(:namespace) { create(:namespace, name: '42') }
+
+        it_behaves_like 'namespace finder'
+
+        it 'attempts ID lookup but falls back to PATH lookup' do
+          expect(Namespace).to receive(:find_by).and_call_original
+          expect(Namespace).to receive(:find_by_full_path).and_call_original
+          expect(subject.find_group(namespace.path)).to eq(namespace)
+        end
+      end
     end
   end
 

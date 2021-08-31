@@ -35,8 +35,8 @@ class UserFinder
 
   # Tries to find a User by username or id, returning nil if none could be found.
   def find_by_id_or_username
-    if input_is_id?
-      find_by_id
+    if input_is_digits? && user = find_by_id
+      user
     else
       find_by_username
     end
@@ -45,14 +45,14 @@ class UserFinder
   # Tries to find a User by username or id, raising a `ActiveRecord::RecordNotFound` if it could
   # not be found.
   def find_by_id_or_username!
-    if input_is_id?
-      find_by_id!
+    if input_is_digits? && user = find_by_id
+      user
     else
       find_by_username!
     end
   end
 
-  def input_is_id?
+  def input_is_digits?
     @username_or_id.is_a?(Numeric) || @username_or_id =~ /^\d+$/
   end
 end
