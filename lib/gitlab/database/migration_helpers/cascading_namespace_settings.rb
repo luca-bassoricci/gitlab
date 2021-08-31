@@ -4,8 +4,6 @@ module Gitlab
   module Database
     module MigrationHelpers
       module CascadingNamespaceSettings
-        include Gitlab::Database::MigrationHelpers
-
         # Creates the four required columns that constitutes a single cascading
         # namespace settings attribute. This helper is only appropriate if the
         # setting is not already present as a non-cascading attribute.
@@ -31,10 +29,8 @@ module Gitlab
 
           namespace_options = options.merge(null: true, default: nil)
 
-          with_lock_retries do
-            add_column(:namespace_settings, setting_name, type, namespace_options)
-            add_column(:namespace_settings, lock_column_name, :boolean, default: false, null: false)
-          end
+          add_column(:namespace_settings, setting_name, type, namespace_options)
+          add_column(:namespace_settings, lock_column_name, :boolean, default: false, null: false)
 
           add_column(:application_settings, setting_name, type, options)
           add_column(:application_settings, lock_column_name, :boolean, default: false, null: false)
@@ -43,10 +39,8 @@ module Gitlab
         def remove_cascading_namespace_setting(setting_name)
           lock_column_name = "lock_#{setting_name}".to_sym
 
-          with_lock_retries do
-            remove_column(:namespace_settings, setting_name) if column_exists?(:namespace_settings, setting_name)
-            remove_column(:namespace_settings, lock_column_name) if column_exists?(:namespace_settings, lock_column_name)
-          end
+          remove_column(:namespace_settings, setting_name) if column_exists?(:namespace_settings, setting_name)
+          remove_column(:namespace_settings, lock_column_name) if column_exists?(:namespace_settings, lock_column_name)
 
           remove_column(:application_settings, setting_name) if column_exists?(:application_settings, setting_name)
           remove_column(:application_settings, lock_column_name) if column_exists?(:application_settings, lock_column_name)

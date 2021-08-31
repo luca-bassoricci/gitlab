@@ -14,6 +14,10 @@ RSpec.describe Gitlab::Database::Migration do
       it 'includes migration helpers version 2' do
         expect(subject.included_modules).to include(Gitlab::Database::MigrationHelpers::V2)
       end
+
+      it 'includes migration helpers for cascading namespace settings' do
+        expect(subject.included_modules).to include(Gitlab::Database::MigrationHelpers::CascadingNamespaceSettings)
+      end
     end
 
     context 'unknown version' do

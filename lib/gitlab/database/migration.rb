@@ -20,6 +20,7 @@ module Gitlab
       MIGRATION_CLASSES = {
         1.0 => Class.new(ActiveRecord::Migration[6.1]) do
           include Gitlab::Database::MigrationHelpers::V2
+          include Gitlab::Database::MigrationHelpers::CascadingNamespaceSettings
         end
       }.freeze
 
