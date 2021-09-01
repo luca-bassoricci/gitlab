@@ -81,7 +81,7 @@ staging:
 # This job stops the staging deployment
 
 stop_staging:
-  extends: ".auto-deploy"
+  extends: .auto-deploy
   stage: cleanup
   variables:
     GIT_STRATEGY: none
