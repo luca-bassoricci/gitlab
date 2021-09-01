@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class IssuablePolicy < BasePolicy
-  delegate { @subject.project }
+  extend Gitlab::Cache::RequestCache
+
+  delegate { project }
 
   condition(:locked, scope: :subject, score: 0) { @subject.discussion_locked? }
-  condition(:is_project_member) { @user && @subject.project && @subject.project.team.member?(@user) }
+  condition(:is_project_member) { @user && project && project.team.member?(@user) }
 
   desc "User is the assignee or author"
   condition(:assignee_or_author) do
@@ -26,6 +28,11 @@ class IssuablePolicy < BasePolicy
     prevent :resolve_note
     prevent :award_emoji
   end
+
+  def project
+    @subject.project
+  end
+  request_cache(:project) { @subject.project_id }
 end
 
 IssuablePolicy.prepend_mod_with('IssuablePolicy')

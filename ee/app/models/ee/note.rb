@@ -32,11 +32,7 @@ module EE
     end
 
     def for_epic?
-      noteable.is_a?(Epic)
-    end
-
-    def for_vulnerability?
-      noteable.is_a?(Vulnerability)
+      noteable_type == "Epic"
     end
 
     override :for_project_noteable?

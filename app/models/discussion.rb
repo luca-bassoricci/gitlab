@@ -15,6 +15,7 @@ class Discussion
   delegate  :created_at,
             :project,
             :author,
+            :author_id,
             :noteable,
             :commit_id,
             :confidential?,
@@ -27,6 +28,7 @@ class Discussion
             :resolved_by_id,
             :system_note_with_references_visible_for?,
             :resource_parent,
+            :resource_parent_id,
             :save,
             to: :first_note
 

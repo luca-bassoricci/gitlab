@@ -561,6 +561,10 @@ class Note < ApplicationRecord
     project
   end
 
+  def resource_parent_id
+    project_id
+  end
+
   def user_mentions
     return Note.none unless noteable.present?
 

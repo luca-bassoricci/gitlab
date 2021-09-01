@@ -2,17 +2,18 @@
 
 class NotePolicy < BasePolicy
   include Gitlab::Utils::StrongMemoize
+  extend Gitlab::Cache::RequestCache
 
-  delegate { @subject.resource_parent }
-  delegate { @subject.noteable if DeclarativePolicy.has_policy?(@subject.noteable) }
+  delegate { resource_parent }
+  delegate { noteable if DeclarativePolicy.has_policy?(noteable) }
 
-  condition(:is_author) { @user && @subject.author == @user }
-  condition(:is_noteable_author) { @user && @subject.noteable.try(:author_id) == @user.id }
+  condition(:is_author) { @user && @subject.author_id == @user.id }
+  condition(:is_noteable_author) { @user && noteable.try(:author_id) == @user.id }
 
   condition(:editable, scope: :subject) { @subject.editable? }
 
   condition(:can_read_noteable) { can?(:"read_#{@subject.noteable_ability_name}") }
-  condition(:commit_is_deleted) { @subject.for_commit? && @subject.noteable.blank? }
+  condition(:commit_is_deleted) { @subject.for_commit? && noteable.blank? }
 
   condition(:for_design) { @subject.for_design? }
 
@@ -98,4 +99,14 @@ class NotePolicy < BasePolicy
       parent_namespace.max_member_access_for_user(@user)
     end
   end
+
+  def resource_parent
+    @subject.resource_parent
+  end
+  request_cache(:resource_parent) { @subject.resource_parent_id }
+
+  def noteable
+    @subject.noteable
+  end
+  request_cache(:noteable) { @subject.noteable_id }
 end
