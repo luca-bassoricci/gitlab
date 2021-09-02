@@ -177,10 +177,6 @@ production:
   rules:
     - if: '$CI_KUBERNETES_ACTIVE == null || $CI_KUBERNETES_ACTIVE == ""'
       when: never
-    - if: '$STAGING_ENABLED'
-      when: never
-    - if: '$CANARY_ENABLED'
-      when: never
     - if: '$INCREMENTAL_ROLLOUT_ENABLED'
       when: never
     - if: '$INCREMENTAL_ROLLOUT_MODE'
@@ -194,20 +190,6 @@ stop_production:
 production_manual:
   <<: *production_template
   allow_failure: false
-  rules:
-    - if: '$CI_KUBERNETES_ACTIVE == null || $CI_KUBERNETES_ACTIVE == ""'
-      when: never
-    - if: '$INCREMENTAL_ROLLOUT_ENABLED'
-      when: never
-    - if: '$INCREMENTAL_ROLLOUT_MODE'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $STAGING_ENABLED'
-      when: manual
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CANARY_ENABLED'
-      when: manual
-
-stop_production_manual:
-  <<: *stop_production_template
   rules:
     - if: '$CI_KUBERNETES_ACTIVE == null || $CI_KUBERNETES_ACTIVE == ""'
       when: never
