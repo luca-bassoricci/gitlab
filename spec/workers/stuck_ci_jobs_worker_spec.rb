@@ -84,7 +84,7 @@ RSpec.describe StuckCiJobsWorker do
         end
 
         context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
+          let(:created_at) { Ci::StuckBuilds::DropService::BUILD_LOOKBACK - 1.day }
 
           it_behaves_like 'job is unchanged'
         end
@@ -106,7 +106,7 @@ RSpec.describe StuckCiJobsWorker do
         end
 
         context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
+          let(:created_at) { Ci::StuckBuilds::DropService::BUILD_LOOKBACK - 1.day }
 
           it_behaves_like 'job is unchanged'
         end
@@ -128,7 +128,7 @@ RSpec.describe StuckCiJobsWorker do
         end
 
         context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
+          let(:created_at) { Ci::StuckBuilds::DropService::BUILD_LOOKBACK - 1.day }
 
           it_behaves_like 'job is unchanged'
         end
@@ -156,7 +156,7 @@ RSpec.describe StuckCiJobsWorker do
         end
 
         context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
+          let(:created_at) { Ci::StuckBuilds::DropService::BUILD_LOOKBACK - 1.day }
 
           it_behaves_like 'job is unchanged'
         end
@@ -178,7 +178,7 @@ RSpec.describe StuckCiJobsWorker do
         end
 
         context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
+          let(:created_at) { Ci::StuckBuilds::DropService::BUILD_LOOKBACK - 1.day }
 
           it_behaves_like 'job is unchanged'
         end
@@ -220,7 +220,7 @@ RSpec.describe StuckCiJobsWorker do
       end
 
       context 'when created_at is outside lookback window' do
-        let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
+        let(:created_at) { Ci::StuckBuilds::DropService::BUILD_LOOKBACK - 1.day }
 
         it_behaves_like 'job is unchanged'
       end
@@ -288,8 +288,8 @@ RSpec.describe StuckCiJobsWorker do
     let(:worker2) { described_class.new }
 
     it 'is guard by exclusive lease when executed concurrently' do
-      expect(worker).to receive(:drop).at_least(:once).and_call_original
-      expect(worker2).not_to receive(:drop)
+      expect(worker).to receive(:remove_lease).exactly(:once).and_call_original
+      expect(worker2).not_to receive(:remove_lease)
 
       worker.perform
 
@@ -299,8 +299,8 @@ RSpec.describe StuckCiJobsWorker do
     end
 
     it 'can be executed in sequence' do
-      expect(worker).to receive(:drop).at_least(:once).and_call_original
-      expect(worker2).to receive(:drop).at_least(:once).and_call_original
+      expect(worker).to receive(:remove_lease).at_least(:once).and_call_original
+      expect(worker2).to receive(:remove_lease).at_least(:once).and_call_original
 
       worker.perform
       worker2.perform
