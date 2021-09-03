@@ -3,7 +3,6 @@
  * This component is an iterative step towards refactoring and simplifying `vue_shared/components/file_row.vue`
  * https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23720
  */
-import ChangedFileIcon from '~/vue_shared/components/changed_file_icon.vue';
 import FileRow from '~/vue_shared/components/file_row.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import FileRowStats from './file_row_stats.vue';
@@ -13,7 +12,6 @@ export default {
   components: {
     FileRow,
     FileRowStats,
-    ChangedFileIcon,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -62,7 +60,6 @@ export default {
     :file-classes="fileClasses"
     v-on="$listeners"
   >
-    <file-row-stats v-if="showFileRowStats" :file="file" class="mr-1" />
-    <changed-file-icon :file="file" :size="16" :show-tooltip="true" />
+    <file-row-stats v-if="showFileRowStats" :file="file" />
   </file-row>
 </template>

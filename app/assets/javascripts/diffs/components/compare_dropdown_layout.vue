@@ -24,7 +24,7 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="selectedVersionName" data-qa-selector="dropdown_content">
+  <gl-dropdown :text="selectedVersionName" data-qa-selector="dropdown_content" size="small">
     <template v-for="version in versions">
       <gl-dropdown-divider v-if="version.addDivider" :key="version.id" />
       <gl-dropdown-item

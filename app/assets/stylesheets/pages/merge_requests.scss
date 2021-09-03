@@ -700,7 +700,7 @@ $tabs-holder-z-index: 250;
   }
 
   .content-block {
-    padding: $gl-padding;
+    padding: $gl-padding-8 $gl-padding;
     border-bottom: 0;
   }
 
@@ -711,12 +711,6 @@ $tabs-holder-z-index: 250;
 
   .dropdown-title {
     color: $gl-text-color;
-  }
-
-  // Shortening button height by 1px to make compare-versions
-  // header 56px and fit into our 8px design grid
-  .btn {
-    height: 34px;
   }
 
   @include media-breakpoint-up(md) {

@@ -225,7 +225,7 @@ export default {
   <div class="content js-line-expansion-content">
     <a
       v-if="canExpandDown"
-      class="gl-mx-2 gl-cursor-pointer js-unfold-down gl-display-inline-block gl-py-4"
+      class="gl-mx-2 gl-cursor-pointer js-unfold-down gl-display-inline-block gl-py-2"
       @click="handleExpandLines(EXPAND_DOWN)"
     >
       <gl-icon :size="12" name="expand-down" />
@@ -237,7 +237,7 @@ export default {
     </a>
     <a
       v-if="canExpandUp"
-      class="gl-mx-2 gl-cursor-pointer js-unfold gl-display-inline-block gl-py-4"
+      class="gl-mx-2 gl-cursor-pointer js-unfold gl-display-inline-block gl-py-2"
       @click="handleExpandLines(EXPAND_UP)"
     >
       <gl-icon :size="12" name="expand-up" />

@@ -98,13 +98,15 @@ export default {
         v-if="hasChanges"
         v-gl-tooltip.hover
         variant="default"
-        icon="file-tree"
-        class="gl-mr-3 js-toggle-tree-list btn-icon"
+        size="small"
+        class="gl-mr-3 js-toggle-tree-list"
         :title="toggleFileBrowserTitle"
         :aria-label="toggleFileBrowserTitle"
         :selected="showTreeList"
         @click="setShowTreeList({ showTreeList: !showTreeList })"
-      />
+      >
+        {{ __('File browser') }}
+      </gl-button>
       <div v-if="commit">
         {{ __('Viewing commit') }}
         <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
@@ -164,6 +166,7 @@ export default {
         v-if="commit || startVersion"
         :href="latestVersionPath"
         variant="default"
+        size="small"
         class="js-latest-version"
         :class="{ 'gl-ml-3': commit && !hasNeighborCommits }"
       >
@@ -178,6 +181,7 @@ export default {
         <gl-button
           v-show="whichCollapsedTypes.any"
           variant="default"
+          size="small"
           class="gl-mr-3"
           @click="expandAllFiles"
         >

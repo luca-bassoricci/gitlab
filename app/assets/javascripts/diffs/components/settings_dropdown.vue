@@ -46,6 +46,7 @@ export default {
   <gl-dropdown
     v-gl-tooltip
     icon="settings"
+    size="small"
     :title="$options.i18n.preferences"
     :text="$options.i18n.preferences"
     :text-sr-only="true"
