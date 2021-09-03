@@ -19,6 +19,9 @@ RSpec.describe Ci::StuckBuilds::DropService do
 
   shared_examples 'job is dropped' do
     it 'changes status' do
+      expect(service).to receive(:drop).exactly(3).times.and_call_original
+      expect(service).to receive(:drop_stuck).exactly(:once).and_call_original
+
       service.execute
       job.reload
 
@@ -46,6 +49,9 @@ RSpec.describe Ci::StuckBuilds::DropService do
 
   shared_examples 'job is unchanged' do
     it 'does not change status' do
+      expect(service).to receive(:drop).exactly(3).times.and_call_original
+      expect(service).to receive(:drop_stuck).exactly(:once).and_call_original
+
       service.execute
       job.reload
 
