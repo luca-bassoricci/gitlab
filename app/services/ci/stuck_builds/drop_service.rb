@@ -10,23 +10,31 @@ module Ci
       BUILD_SCHEDULED_OUTDATED_TIMEOUT = 1.hour
       BUILD_PENDING_STUCK_TIMEOUT = 1.hour
       BUILD_LOOKBACK = 5.days
+      DROPPABLE_BUILD_TYPES = [
+        'running_timed_out',
+        'pending_outdated',
+        'pending_stuck',
+        'scheduled_timed_out'
+      ].freeze
 
-      def execute
+      def execute(types: DROPPABLE_BUILD_TYPES)
         Gitlab::AppLogger.info "#{self.class}: Cleaning stuck builds"
 
-        drop(running_timed_out_builds, failure_reason: :stuck_or_timeout_failure)
+        if types.include?('running_timed_out')
+          drop(running_timed_out_builds)
+        end
 
-        drop(
-          pending_builds(BUILD_PENDING_OUTDATED_TIMEOUT.ago),
-          failure_reason: :stuck_or_timeout_failure
-        )
+        if types.include?('pending_outdated')
+          drop(pending_builds(BUILD_PENDING_OUTDATED_TIMEOUT.ago))
+        end
 
-        drop(scheduled_timed_out_builds, failure_reason: :stale_schedule)
+        if types.include?('scheduled_timed_out')
+          drop(scheduled_timed_out_builds, failure_reason: :stale_schedule)
+        end
 
-        drop_stuck(
-          pending_builds(BUILD_PENDING_STUCK_TIMEOUT.ago),
-          failure_reason: :stuck_or_timeout_failure
-        )
+        if types.include?('pending_stuck')
+          drop_stuck(pending_builds(BUILD_PENDING_STUCK_TIMEOUT.ago))
+        end
       end
 
       private

@@ -59,6 +59,50 @@ RSpec.describe Ci::StuckBuilds::DropService do
     end
   end
 
+  describe '#execute' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:status, :stuck,  :created_at, :updated_at, :scheduled_at, :behavior) do
+      'pending'  | false | (1.5).days.ago                          | (1.5).days.ago | nil | :dropped
+      'pending'  | false | 3.days.ago                              | (1.5).days.ago | nil | :dropped
+      'pending'  | false | described_class::BUILD_LOOKBACK - 1.day | (1.5).days.ago | nil | :unchanged
+      'pending'  | false | 6.hours.ago                             | 6.hours.ago    | nil | :unchanged
+      'pending'  | false | 3.days.ago                              | 6.hours.ago    | nil | :unchanged
+      'pending'  | false | described_class::BUILD_LOOKBACK - 1.day | 6.hours.ago    | nil | :unchanged
+      'pending'  | false | 2.hours.ago                             | 2.hours.ago    | nil | :unchanged
+      'pending'  | false | 3.days.ago                              | 2.hours.ago    | nil | :unchanged
+      'pending'  | false | described_class::BUILD_LOOKBACK - 1.day | 2.hours.ago    | nil | :unchanged
+      'pending'  | true  | (1.5).days.ago                          | (1.5).days.ago | nil | :dropped
+      'pending'  | true  | 3.days.ago                              | (1.5).days.ago | nil | :dropped
+      'pending'  | true  | described_class::BUILD_LOOKBACK - 1.day | (1.5).days.ago | nil | :unchanged
+      'pending'  | true  | 30.minutes.ago                          | 30.minutes.ago | nil | :unchanged
+      'pending'  | true  | 2.days.ago                              | 30.minutes.ago | nil | :unchanged
+      'pending'  | true  | described_class::BUILD_LOOKBACK - 1.day | 30.minutes.ago | nil | :unchanged
+      'running'  | false | nil                                     | 2.hours.ago    | nil | :dropped
+      'running'  | false | nil                                     | 30.minutes.ago | nil | :dropped
+      'success'  | false | 2.days.ago                              | 2.days.ago     | nil | :unchanged
+      'success'  | false | 3.days.ago                              | 2.days.ago     | nil | :unchanged
+      'success'  | false | described_class::BUILD_LOOKBACK - 1.day | 2.days.ago     | nil | :unchanged
+      'skipped'  | false | 2.days.ago                              | 2.days.ago     | nil | :unchanged
+      'skipped'  | false | 3.days.ago                              | 2.days.ago     | nil | :unchanged
+      'skipped'  | false | described_class::BUILD_LOOKBACK - 1.day | 2.days.ago     | nil | :unchanged
+      'failed'   | false | 2.days.ago                              | 2.days.ago     | nil | :unchanged
+      'failed'   | false | 3.days.ago                              | 2.days.ago     | nil | :unchanged
+      'failed'   | false | described_class::BUILD_LOOKBACK - 1.day | 2.days.ago     | nil | :unchanged
+      'canceled' | false | 2.days.ago                              | 2.days.ago     | nil | :unchanged
+      'canceled' | false | 3.days.ago                              | 2.days.ago     | nil | :unchanged
+      'canceled' | false | described_class::BUILD_LOOKBACK - 1.day | 2.days.ago     | nil | :unchanged
+    end
+
+    with_them do
+      before do
+        allow_any_instance_of(Ci::Build).to receive(:stuck?).and_return(stuck)
+      end
+
+      it_behaves_like "job is #{behavior}"
+    end
+  end
+
   context 'when job is pending' do
     let(:status) { 'pending' }
 
