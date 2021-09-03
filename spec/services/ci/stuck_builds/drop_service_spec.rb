@@ -64,7 +64,9 @@ RSpec.describe Ci::StuckBuilds::DropService do
 
     context 'when job is not stuck' do
       before do
-        allow_any_instance_of(Ci::Build).to receive(:stuck?).and_return(false)
+        allow_next_found_instance_of(Ci::Build) do |build|
+          allow(build).to receive(:stuck?).and_return(false)
+        end
       end
 
       context 'when job was updated_at more than 1 day ago' do
@@ -136,7 +138,9 @@ RSpec.describe Ci::StuckBuilds::DropService do
 
     context 'when job is stuck' do
       before do
-        allow_any_instance_of(Ci::Build).to receive(:stuck?).and_return(true)
+        allow_next_found_instance_of(Ci::Build) do |build|
+          allow(build).to receive(:stuck?).and_return(true)
+        end
       end
 
       context 'when job was updated_at more than 1 hour ago' do
@@ -234,9 +238,15 @@ RSpec.describe Ci::StuckBuilds::DropService do
       job.project.update!(pending_delete: true)
     end
 
-    it 'does drop job' do
-      expect_any_instance_of(Ci::Build).to receive(:drop).and_call_original
+    it 'drops the job' do
+      # expect_next_found_instance_of(Ci::Build) do |build|
+      #   expect(build).to receive(:drop).times.and_call_original
+      # end
+
       service.execute
+      job.reload
+
+      expect(job).to be_failed
     end
   end
 
