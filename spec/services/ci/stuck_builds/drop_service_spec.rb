@@ -238,16 +238,7 @@ RSpec.describe Ci::StuckBuilds::DropService do
       job.project.update!(pending_delete: true)
     end
 
-    it 'drops the job' do
-      # expect_next_found_instance_of(Ci::Build) do |build|
-      #   expect(build).to receive(:drop).times.and_call_original
-      # end
-
-      service.execute
-      job.reload
-
-      expect(job).to be_failed
-    end
+    it_behaves_like 'job is dropped'
   end
 
   describe 'drop stale scheduled builds' do
