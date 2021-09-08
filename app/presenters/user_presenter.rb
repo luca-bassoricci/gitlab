@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UserPresenter < Gitlab::View::Presenter::Delegated
-  presents :user
+  presents :user, ::User
 
   def group_memberships
     should_be_private? ? GroupMember.none : user.group_members

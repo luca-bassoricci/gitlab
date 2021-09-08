@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class WebHookLogPresenter < Gitlab::View::Presenter::Delegated
-  presents :web_hook_log
+  presents :web_hook_log, ::WebHookLog
 
   def details_path
     web_hook.present.logs_details_path(self)

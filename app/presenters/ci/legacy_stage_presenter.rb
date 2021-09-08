@@ -2,7 +2,7 @@
 
 module Ci
   class LegacyStagePresenter < Gitlab::View::Presenter::Delegated
-    presents :legacy_stage
+    presents :legacy_stage, ::Ci::LegacyStage
 
     def latest_ordered_statuses
       preload_statuses(legacy_stage.statuses.latest_ordered)

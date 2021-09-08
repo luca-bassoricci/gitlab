@@ -2,5 +2,6 @@
 
 module Ci
   class ProcessablePresenter < CommitStatusPresenter
+    delegator_target ::Ci::Processable
   end
 end

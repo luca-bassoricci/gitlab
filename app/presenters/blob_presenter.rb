@@ -7,7 +7,7 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
   include TreeHelper
   include ChecksCollaboration
 
-  presents :blob
+  presents :blob, ::Blob
 
   def highlight(to: nil, plain: nil)
     load_all_blob_data

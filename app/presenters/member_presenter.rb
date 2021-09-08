@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MemberPresenter < Gitlab::View::Presenter::Delegated
-  presents :member
+  presents :member, ::Member
 
   def access_level_roles
     member.class.access_level_roles

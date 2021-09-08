@@ -183,6 +183,41 @@ queries they produce.
 Everything in `app/presenters`, used for exposing complex data to a Rails view,
 without having to create many instance variables.
 
+#### Validate Accidental Overrides
+
+We use presenters in many places, such as Controller, Haml, GraphQL/Rest API,
+it's very handy to extend the core/backend logic of [Active Record models](#active-record),
+however, there is a risk that it accidentally overrides an important logic.
+
+For example, [this production incident](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/5498)
+was caused by [including `ActionView::Helpers::UrlHelper` in a presenter](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/69537/diffs#4b581cff00ef3cc9780efd23682af383de302e7d_3_3).
+The `tag` accesor in `Ci::Build` was accidentally overridden by `ActionView::Helpers::TagHelper#tag`,
+and as a conseuqence, a wrong `tag` value was persited into database.
+
+Starting from GitLab 14.3, we validate the presenters (all of the subclasses of `Gitlab::View::Presenter::Delegated`)
+that they do not accidentally override core/backend logic. In such case, a pipeline in merge requests fails with an error message,
+here is an example:
+
+```plaintext
+We've detected that a presetner is overriding a specific method(s) on a subject model.
+There is a risk that it accidentally modifies the backend/core logic that leads to production incident.
+Please follow https://docs.gitlab.com/ee/development/reusing_abstractions.html#validate-accidental-overrides
+to resolve this error with caution.
+
+Here are the conflict details.
+
+- Ci::PipelinePresenter#tag is overriding Ci::Pipeline#tag. delegator_location: /devkitkat/services/rails/cache/ruby/2.7.0/gems/actionview-6.1.3.2/lib/action_view/helpers/tag_helper.rb:271 original_location: /devkitkat/services/rails/cache/ruby/2.7.0/gems/activemodel-6.1.3.2/lib/active_model/attribute_methods.rb:254
+```
+
+You can select one of the solutions below:
+
+- If the conflict happens on an instance method in the presenter
+  - If you're intended to override the core/backend logic, define `delegator_override <method-name>` on top of the conflicted method.
+    This explicitly whitelist the method as it's safe to be deployed.
+  - If you're NOT intended to override the core/backend logic, rename the method name in the presenter.
+- If the conflict happens on an included module in the presenter
+  - Remove the module from a presenter and find a workaround.
+
 ### Serializers
 
 Everything in `app/serializers`, used for presenting the response to a request,

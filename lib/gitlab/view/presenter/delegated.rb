@@ -4,6 +4,7 @@ module Gitlab
   module View
     module Presenter
       class Delegated < SimpleDelegator
+        extend ::Gitlab::Utils::DelegatorOverride
         include Gitlab::View::Presenter::Base
 
         def initialize(subject, **attributes)

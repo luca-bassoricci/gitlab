@@ -2,7 +2,7 @@
 
 module Vulnerabilities
   class FindingPresenter < Gitlab::View::Presenter::Delegated
-    presents :finding
+    presents :finding, ::Vulnerabilities::Finding
 
     def title
       name

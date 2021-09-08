@@ -7,6 +7,7 @@ module Subscriptions
       gold: 'Ultimate (Formerly Gold)'
     }.freeze
 
+    delegator_override :title
     def title
       NEW_PLAN_TITLES.fetch(plan_key, super)
     end

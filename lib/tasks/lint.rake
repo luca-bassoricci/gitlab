@@ -11,7 +11,8 @@ unless Rails.env.production?
       lint:static_verification_env
       dev:load
     ] do
-      Gitlab::Utils::Override.verify!
+      # Gitlab::Utils::Override.verify!
+      Gitlab::Utils::DelegatorOverride.verify!
     end
 
     desc "GitLab | Lint | Lint JavaScript files using ESLint"

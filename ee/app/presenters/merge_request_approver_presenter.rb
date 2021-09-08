@@ -12,7 +12,7 @@ class MergeRequestApproverPresenter < Gitlab::View::Presenter::Simple
   include ActionView::RecordIdentifier
   include Gitlab::Utils::StrongMemoize
 
-  presents :merge_request
+  presents :merge_request, ::MergeRequest
 
   attr_reader :skip_user
 

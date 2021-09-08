@@ -2,6 +2,8 @@
 
 module Ci
   class BuildPresenter < ProcessablePresenter
+    delegator_target ::Ci::Build
+
     def erased_by_user?
       # Build can be erased through API, therefore it does not have
       # `erased_by` user assigned in that case.

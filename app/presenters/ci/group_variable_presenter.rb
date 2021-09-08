@@ -2,7 +2,7 @@
 
 module Ci
   class GroupVariablePresenter < Gitlab::View::Presenter::Delegated
-    presents :variable
+    presents :variable, ::Ci::GroupVariable
 
     def placeholder
       'GROUP_VARIABLE'

@@ -12,7 +12,11 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   include Gitlab::Utils::StrongMemoize
   include Gitlab::Experiment::Dsl
 
-  presents :project
+  delegator_override_with ActionView::Helpers::UrlHelper # TODO: Remove `ActionView::Helpers::UrlHelper` inclusion as it's duplicate
+  delegator_override_with GitlabRoutingHelper # TODO: Remove `GitlabRoutingHelper` inclusion as it's duplicate
+  delegator_override_with Gitlab::Utils::StrongMemoize # TODO: Remove `Gitlab::Utils::StrongMemoize` inclusion as it's duplicate
+
+  presents :project, ::Project
 
   AnchorData = Struct.new(:is_link, :label, :link, :class_modifier, :icon, :itemprop, :data)
   MAX_TOPICS_TO_SHOW = 3

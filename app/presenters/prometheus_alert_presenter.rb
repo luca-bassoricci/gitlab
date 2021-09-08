@@ -3,7 +3,7 @@
 class PrometheusAlertPresenter < Gitlab::View::Presenter::Delegated
   include ActionView::Helpers::UrlHelper
 
-  presents :prometheus_alert
+  presents :prometheus_alert, ::PrometheusAlert
 
   def humanized_text
     operator_text =

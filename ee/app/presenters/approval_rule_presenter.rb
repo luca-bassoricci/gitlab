@@ -3,16 +3,20 @@
 class ApprovalRulePresenter < Gitlab::View::Presenter::Delegated
   include Gitlab::Utils::StrongMemoize
 
+  delegator_override_with Gitlab::Utils::StrongMemoize # TODO: Remove `Gitlab::Utils::StrongMemoize` inclusion as it's duplicate
+
   # Hide all approvers if any of them might come from a hidden group. This
   # represents an abundance of caution, but we can't tell which approvers come
   # from a hidden group and which don't, from here, so this is the simplest
   # thing we can do
+  delegator_override :approvers
   def approvers
     return [] if contains_hidden_groups?
 
     super
   end
 
+  delegator_override :groups
   def groups
     group_query_service.visible_groups
   end

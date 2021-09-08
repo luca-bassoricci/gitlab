@@ -2,7 +2,7 @@
 
 module Ci
   class VariablePresenter < Gitlab::View::Presenter::Delegated
-    presents :variable
+    presents :variable, ::Ci::Variable
 
     def placeholder
       'PROJECT_VARIABLE'
