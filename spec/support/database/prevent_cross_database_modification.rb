@@ -101,11 +101,11 @@ RSpec.configure do |config|
 
   # Using before and after blocks because the around block causes problems with the let_it_be
   # record creations. It makes an extra savepoint which breaks the transaction count logic.
-  config.before(:each, :prevent_cross_database_modification) do
+  config.before do
     with_cross_database_modification_prevented
   end
 
-  config.after(:each, :prevent_cross_database_modification) do
+  config.after do
     cleanup_with_cross_database_modification_prevented
   end
 end

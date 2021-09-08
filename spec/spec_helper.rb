@@ -220,6 +220,7 @@ RSpec.configure do |config|
     # Enable all features by default for testing
     # Reset any changes in after hook.
     stub_all_feature_flags
+    Plan.default
   end
 
   config.after(:all) do
