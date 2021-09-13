@@ -4,7 +4,6 @@ import { escape } from 'lodash';
 import './behaviors/preview_markdown';
 import { spriteIcon } from '~/lib/utils/common_utils';
 import { getFilename } from '~/lib/utils/file_upload';
-import { truncate } from '~/lib/utils/text_utility';
 import { n__, __ } from '~/locale';
 import PasteMarkdownTable from './behaviors/markdown/paste_markdown_table';
 import axios from './lib/utils/axios_utils';
@@ -190,13 +189,10 @@ export default function dropzoneInput(form, config = { parallelUploads: 2 }) {
 
         if (image) {
           event.preventDefault();
-          const MAX_FILE_NAME_LENGTH = 246;
           const filename = getFilename(pasteEvent) || 'image.png';
-          const truncateFilename = truncate(filename, MAX_FILE_NAME_LENGTH);
-          const text = `{{${truncateFilename}}}`;
+          const text = `{{${filename}}}`;
           pasteText(text);
-
-          return uploadFile(image.getAsFile(), truncateFilename);
+          return uploadFile(image.getAsFile(), filename);
         }
       }
     }
