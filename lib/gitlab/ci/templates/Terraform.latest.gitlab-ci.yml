@@ -15,24 +15,35 @@ stages:
 
 init:
   extends: .terraform:init
+  stage: init
 
 fmt:
   extends: .terraform:fmt
+  stage: validate
 
 validate:
   extends: .terraform:validate
+  stage: validate
 
 build:
   extends: .terraform:build
+  stage: build
 
 deploy:
   extends: .terraform:deploy
+  stage: deploy
   dependencies:
     - build
   environment:
     name: $TF_STATE_NAME
+  when: manual
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 cleanup:
   extends: .terraform:destroy
+  stage: cleanup
   dependencies:
     - deploy
+  when: manual
