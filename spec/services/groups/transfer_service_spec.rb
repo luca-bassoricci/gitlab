@@ -282,6 +282,13 @@ RSpec.describe Groups::TransferService, :sidekiq_inline do
           let(:group_full_path) { "#{new_parent_group.full_path}" }
           let(:projects_with_project_namespace) { [project] }
         end
+
+        it_behaves_like 'project namespace path is in sync with project path' do
+          let!(:project_namespace) { create(:project_namespace, project: project) }
+
+          let(:group_full_path) { 'group1' }
+          let(:the_new_group) { group }
+        end
       end
 
       context 'when the group is allowed to be transferred' do

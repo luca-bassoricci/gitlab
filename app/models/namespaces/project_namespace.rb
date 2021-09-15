@@ -11,5 +11,17 @@ module Namespaces
     def self.polymorphic_name
       'Namespaces::ProjectNamespace'
     end
+
+    private
+
+    # we're just borrowing project route and change the source
+    def prepare_route
+      return unless project
+      return unless full_path_changed? || full_name_changed?
+
+      self.route || build_route(source: self)
+      self.route.path = project.build_full_path
+      self.route.name = project.build_full_name
+    end
   end
 end

@@ -17,7 +17,7 @@ RSpec.describe Route do
 
     it { is_expected.to validate_presence_of(:source) }
     it { is_expected.to validate_presence_of(:path) }
-    it { is_expected.to validate_uniqueness_of(:path).case_insensitive }
+    it { is_expected.to validate }
   end
 
   describe 'callbacks' do

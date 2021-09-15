@@ -9,8 +9,9 @@ class Route < ApplicationRecord
 
   validates :path,
     length: { within: 1..255 },
-    presence: true,
-    uniqueness: { case_sensitive: false }
+    presence: true
+
+  validate :uniq_project_and_namespaces_path
 
   before_validation :delete_conflicting_orphaned_routes
   after_create :delete_conflicting_redirects
@@ -66,6 +67,20 @@ class Route < ApplicationRecord
   end
 
   private
+
+  def uniq_project_and_namespaces_path
+    return unless source_type
+
+    condition = Arel::Nodes::NamedFunction.new("lower", [Route.arel_table[:path]]).eq(path.downcase)
+
+    source_types = if source_type == Namespaces::ProjectNamespace.polymorphic_name
+                     [Namespace.polymorphic_name, Namespaces::ProjectNamespace.polymorphic_name]
+                   else
+                     [Project.polymorphic_name, Namespace.polymorphic_name]
+                   end
+
+    errors.add(:path, 'has already been taken') if Route.where(condition).where.not(id: id).where(source_type: source_types).exists?
+  end
 
   def create_redirect_for_old_path
     create_redirect(path_before_last_save) if saved_change_to_path?

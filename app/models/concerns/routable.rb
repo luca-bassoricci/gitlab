@@ -41,7 +41,7 @@ module Routable
     has_one :route, as: :source, autosave: true, dependent: :destroy, inverse_of: :source # rubocop:disable Cop/ActiveRecordDependent
     has_many :redirect_routes, as: :source, autosave: true, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
-    validates :route, presence: true, unless: -> { is_a?(Namespaces::ProjectNamespace) }
+    validates :route, presence: true
 
     scope :with_route, -> { includes(:route) }
 
@@ -153,20 +153,6 @@ module Routable
     end
   end
 
-  # Group would override this to check from association
-  def owned_by?(user)
-    owner == user
-  end
-
-  private
-
-  def set_path_errors
-    route_path_errors = self.errors.delete(:"route.path")
-    route_path_errors&.each do |msg|
-      self.errors.add(:path, msg)
-    end
-  end
-
   def full_name_changed?
     name_changed? || parent_changed?
   end
@@ -183,9 +169,22 @@ module Routable
     end
   end
 
+  # Group would override this to check from association
+  def owned_by?(user)
+    owner == user
+  end
+
+  private
+
+  def set_path_errors
+    route_path_errors = self.errors.delete(:"route.path")
+    route_path_errors&.each do |msg|
+      self.errors.add(:path, msg)
+    end
+  end
+
   def prepare_route
     return unless full_path_changed? || full_name_changed?
-    return if is_a?(Namespaces::ProjectNamespace)
 
     route || build_route(source: self)
     route.path = build_full_path
