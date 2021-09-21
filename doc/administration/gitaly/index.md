@@ -361,6 +361,11 @@ For more information on configuring Gitaly Cluster, see [Configure Gitaly Cluste
 
 ## Migrate to Gitaly Cluster
 
+WARNING:
+Some [known database inconsistency issues](#known-issues) exist in Gitaly Cluster. We recommend you
+remain on your current service for now. We can adjust the date for
+[NFS support removal](#nfs-deprecation-notice) if this applies to you.
+
 We recommend you migrate to Gitaly Cluster if your [requirements recommend](#recommendations) Gitaly
 Cluster.
 
@@ -373,11 +378,6 @@ or to move from single Gitaly nodes, the basic process involves:
 1. [Move the repositories](../operations/moving_repositories.md#move-repositories). To migrate to
    Gitaly Cluster, existing repositories stored outside Gitaly Cluster must be moved. There is no
    automatic migration but the moves can be scheduled with the GitLab API.
-
-WARNING:
-Some [known database inconsistency issues](#known-issues) exist in Gitaly Cluster. We recommend you
-remain on your current service for now. We can adjust the date for
-[NFS support removal](#nfs-deprecation-notice) if this applies to you.
 
 ## Monitor Gitaly and Gitaly Cluster
 
