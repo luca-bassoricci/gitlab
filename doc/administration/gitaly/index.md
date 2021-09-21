@@ -54,7 +54,7 @@ WARNING: Gitaly Cluster is experiencing some [data inconsistency issues](#known-
 1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. We will ensure that the NFS removal date does not negatively impact you.
 2. If you have not yet migrated to Gitaly Cluster BUT you are using NFS and you want to migrate off of it, consider using a sharded Gitaly instance.
 3. If you have migrated to Gitaly Cluster AND you do not rely on snapshot back-ups, you can remain on Gitaly Cluster.
-4. If you have migrated to Gitaly Cluster AND you rely on snapshot back-ups, migrate back to your previous solution (i.e sharded Gitaly or NFS). We will ensure the NFS removal date does not negatively impact you.
+4. If you have migrated to Gitaly Cluster AND you rely on snapshot back-ups, it is recommended that you migrate to your previous solution (i.e sharded Gitaly or NFS). We will ensure the NFS removal date does not negatively impact you.
 
 ## Configuration and storage options
 
