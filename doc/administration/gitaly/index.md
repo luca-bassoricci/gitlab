@@ -47,7 +47,16 @@ WARNING:
 Engineering support for NFS for Git repositories is deprecated. Read the
 [deprecation notice](#nfs-deprecation-notice).
 
-## Recommendations
+## Guidance regarding Gitaly Cluster
+
+WARNING: Gitaly Cluster is experiencing some [data inconsistency issues](#known-issues) Please use the guidance below to proceed.
+
+1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. We will ensure that the NFS removal date does not negatively impact you.
+2. If you have not yet migrated to Gitaly Cluster BUT you are using NFS and you want to migrate off of it, consider using a sharded Gitaly instance.
+3. If you have migrated to Gitaly Cluster AND you do not rely on snapshot back-ups, you can remain on Gitaly Cluster.
+4. If you have migrated to Gitaly Cluster AND you rely on snapshot back-ups, migrate back to your previous solution (i.e sharded Gitaly or NFS). We will ensure the NFS removal date does not negatively impact you.
+
+## Requirements for your GitLab
 
 The following table provides recommendations based on your requirements. Users means concurrent
 users actively performing simultaneous Git operations.
@@ -67,9 +76,7 @@ Gitaly configuration is recommended at each scale. The Gitaly configuration is n
 architecture diagrams and the table of required resources.
 
 WARNING:
-Some [known database inconsistency issues](#known-issues) exist in Gitaly Cluster. We recommend you
-remain on your current service for now. We can adjust the date for
-[NFS support removal](#nfs-deprecation-notice) if this applies to you.
+Some [known database inconsistency issues](#known-issues) exist in Gitaly Cluster. Please see our recommendations regarding [Gitaly Cluster](#guidance-regarding-gitaly-cluster).
 
 ## Gitaly
 
