@@ -56,7 +56,7 @@ WARNING: Gitaly Cluster is experiencing some [data inconsistency issues](#known-
 3. If you have migrated to Gitaly Cluster AND you do not rely on snapshot back-ups, you can remain on Gitaly Cluster.
 4. If you have migrated to Gitaly Cluster AND you rely on snapshot back-ups, migrate back to your previous solution (i.e sharded Gitaly or NFS). We will ensure the NFS removal date does not negatively impact you.
 
-## Requirements for your GitLab
+## Configuration and storage options
 
 The following table provides recommendations based on your requirements. Users means concurrent
 users actively performing simultaneous Git operations.
