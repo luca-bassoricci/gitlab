@@ -1,4 +1,4 @@
----
+g---
 stage: Create
 group: Gitaly
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
@@ -44,12 +44,11 @@ repository storage is either:
   - Write requests are broadcast to repository replicas.
 
 WARNING:
-Engineering support for NFS for Git repositories is deprecated. Read the
-[deprecation notice](#nfs-deprecation-notice).
+Engineering support for NFS for Git repositories is deprecated. Read the [deprecation notice](#nfs-deprecation-notice).
 
 ## Guidance regarding Gitaly Cluster
 
-WARNING: 
+WARNING:
 Gitaly Cluster is experiencing some [data inconsistency issues](#known-issues) Please use the guidance below to proceed.
 
 1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. We will ensure that the NFS removal date does not negatively impact you.
