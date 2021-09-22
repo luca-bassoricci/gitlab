@@ -49,7 +49,9 @@ Engineering support for NFS for Git repositories is deprecated. Read the [deprec
 ## Guidance regarding Gitaly Cluster
 
 WARNING:
-Gitaly Cluster is experiencing some [data inconsistency issues](#known-issues) Please use the guidance below to proceed.
+Gitaly Cluster has [two known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations). Please review these known issues and limitations prior to deploying Gitaly Cluster. 
+
+Please review [deployment recommendations](#recommendations) prior to deploying Gitaly Cluster as well as refer to the following guidance as well as on when to migrate to Gitaly Cluster.
 
 1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. We will ensure that the NFS removal date does not negatively impact you.
 1. If you have not yet migrated to Gitaly Cluster BUT you are using NFS and you want to migrate off of it, consider using a sharded Gitaly instance.
@@ -76,7 +78,7 @@ Gitaly configuration is recommended at each scale. The Gitaly configuration is n
 architecture diagrams and the table of required resources.
 
 WARNING:
-Some [known database inconsistency issues](#known-issues) exist in Gitaly Cluster. Please see our recommendations regarding [Gitaly Cluster](#guidance-regarding-gitaly-cluster).
+Two [known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations) exist with Gitaly Cluster. Please see our recommendations regarding [Gitaly Cluster](#recommendations).
 
 ## Gitaly
 
@@ -369,9 +371,7 @@ For more information on configuring Gitaly Cluster, see [Configure Gitaly Cluste
 ## Migrate to Gitaly Cluster
 
 WARNING:
-Some [known database inconsistency issues](#known-issues) exist in Gitaly Cluster. We recommend you
-remain on your current service for now. We can adjust the date for
-[NFS support removal](#nfs-deprecation-notice) if this applies to you.
+Two [known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations) exist with Gitaly Cluster. If these impact you, we recommend you remain on your current service until these are addressed. 
 
 We recommend you migrate to Gitaly Cluster if your [requirements recommend](#guidance-regarding-gitaly-cluster) Gitaly
 Cluster.
