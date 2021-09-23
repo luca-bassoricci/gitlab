@@ -1,5 +1,6 @@
 <script>
 import { GlProgressBar, GlSprintf } from '@gitlab/ui';
+import eventHub from '~/invite_members/event_hub';
 import { s__ } from '~/locale';
 import { ACTION_LABELS, ACTION_SECTIONS } from '../constants';
 import LearnGitlabSectionCard from './learn_gitlab_section_card.vue';
@@ -22,6 +23,16 @@ export default {
       required: true,
       type: Object,
     },
+    inviteMembersOpen: {
+      required: false,
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      triggerSource: 'learn_gitlab',
+    };
   },
   maxValue: Object.keys(ACTION_LABELS).length,
   actionSections: Object.keys(ACTION_SECTIONS),
@@ -33,7 +44,15 @@ export default {
       return Math.round((this.progressValue / this.$options.maxValue) * 100);
     },
   },
+  mounted() {
+    if (this.inviteMembersOpen) {
+      this.openInviteMembersModal(true);
+    }
+  },
   methods: {
+    openInviteMembersModal(isCelebration) {
+      eventHub.$emit('openModal', { isCelebration, source: this.triggerSource });
+    },
     actionsFor(section) {
       const actions = Object.fromEntries(
         Object.entries(this.actions).filter(

@@ -1,0 +1,8 @@
+---
+name: confetti_post_signup
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/71018
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/339890
+milestone: '14.4'
+type: experiment
+group: group::expansion
+default_enabled: false

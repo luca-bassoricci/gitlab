@@ -34,6 +34,13 @@ module LearnGitlabHelper
     }
   end
 
+  def learn_gitlab_data(project)
+    {
+      actions: onboarding_actions_data(project).to_json,
+      sections: onboarding_sections_data.to_json
+    }
+  end
+
   def learn_gitlab_onboarding_available?(project)
     OnboardingProgress.onboarding?(project.namespace) &&
       LearnGitlab::Project.new(current_user).available?

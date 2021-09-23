@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import LearnGitlab from '../components/learn_gitlab.vue';
 
@@ -22,4 +23,5 @@ function initLearnGitlab() {
   });
 }
 
+initInviteMembersModal();
 initLearnGitlab();

@@ -2,4 +2,9 @@
 - page_title _("Learn GitLab")
 - add_page_specific_style 'page_bundles/learn_gitlab'
 
-#js-learn-gitlab-app{ data: { actions: onboarding_actions_data(@project).to_json, sections: onboarding_sections_data.to_json } }
+- experiment(:confetti_post_signup, actor: current_user) do |e|
+  - e.control do
+    #js-learn-gitlab-app{ data: learn_gitlab_data(@project) }
+  - e.candidate do
+    = render 'projects/invite_members_modal', project: @project
+    #js-learn-gitlab-app{ data: learn_gitlab_data(@project).merge(invite_members_open: true) }
