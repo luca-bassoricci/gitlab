@@ -19998,7 +19998,8 @@ CREATE TABLE users (
     last_name character varying(255),
     static_object_token character varying(255),
     role smallint,
-    user_type smallint
+    user_type smallint,
+    test integer
 );
 
 CREATE SEQUENCE users_id_seq
