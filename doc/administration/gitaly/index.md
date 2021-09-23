@@ -53,7 +53,7 @@ Gitaly Cluster has [two known issues](#known-issues) and [snapshot limitations](
 
 Please review [deployment recommendations](#recommendations) prior to deploying Gitaly Cluster as well as refer to the following guidance as well as on when to migrate to Gitaly Cluster.
 
-1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. We will ensure that the NFS removal date does not negatively impact you.
+1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. NFS is supported in 14.x release.  
 1. If you have not yet migrated to Gitaly Cluster BUT you are using NFS and you want to migrate off of it, consider using a sharded Gitaly instance.
 1. If you have migrated to Gitaly Cluster AND you do not rely on snapshot back-ups, you can remain on Gitaly Cluster.
 1. If you have migrated to Gitaly Cluster AND you rely on snapshot back-ups, it is recommended that you migrate to your previous solution (i.e sharded Gitaly or NFS). We will ensure the NFS removal date does not negatively impact you.
