@@ -51,11 +51,15 @@ Engineering support for NFS for Git repositories is deprecated. Read the [deprec
 WARNING:
 Gitaly Cluster has [two known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations). Please review these known issues and limitations prior to deploying Gitaly Cluster. 
 
-Please review [deployment recommendations](#recommendations) prior to deploying Gitaly Cluster as well as refer to the following guidance as well as on when to migrate to Gitaly Cluster.
+Review [configuration and storage options](#configuration-and-storage-options) before
+deploying Gitaly Cluster and refer to the following guidance:
 
-1. If you have not yet migrated to Gitaly Cluster, remain on the service you are using. NFS is supported in 14.x release.  
-1. If you have not yet migrated to Gitaly Cluster BUT you are using NFS and you want to migrate off of it, consider using a sharded Gitaly instance.
-1. If you have migrated to Gitaly Cluster AND you do not rely on snapshot back-ups, you can remain on Gitaly Cluster.
+- If you have not yet migrated to Gitaly Cluster and want to continue using NFS, remain on the
+  service you are using. NFS is supported in 14.x releases.  
+- If you have not yet migrated to Gitaly Cluster but want to migrate away from NFS, consider
+  using a sharded Gitaly instance.
+- If you have migrated to Gitaly Cluster and you do not rely on snapshot backups, you can
+  remain on Gitaly Cluster.
 
 ## Configuration and storage options
 
@@ -77,7 +81,7 @@ Gitaly configuration is recommended at each scale. The Gitaly configuration is n
 architecture diagrams and the table of required resources.
 
 WARNING:
-Two [known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations) exist with Gitaly Cluster. Please see our recommendations regarding [Gitaly Cluster](#recommendations).
+Two [known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations) exist with Gitaly Cluster. Please see our [Gitaly Cluster guidance](#guidance-regarding-gitaly-cluster).
 
 ## Gitaly
 
@@ -372,8 +376,8 @@ For more information on configuring Gitaly Cluster, see [Configure Gitaly Cluste
 WARNING:
 Two [known issues](#known-issues) and [snapshot limitations](#snapshot-backup-and-recovery-limitations) exist with Gitaly Cluster. If these impact you, we recommend you remain on your current service until these are addressed. 
 
-We recommend you migrate to Gitaly Cluster if your [requirements recommend](#guidance-regarding-gitaly-cluster) Gitaly
-Cluster.
+We recommend you migrate to Gitaly Cluster if our
+[guidance recommends it](#guidance-regarding-gitaly-cluster).
 
 Whether migrating to Gitaly Cluster because of [NFS support deprecation](index.md#nfs-deprecation-notice)
 or to move from single Gitaly nodes, the basic process involves:
