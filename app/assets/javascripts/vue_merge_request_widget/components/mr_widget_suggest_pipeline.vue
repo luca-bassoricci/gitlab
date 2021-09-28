@@ -81,9 +81,9 @@ export default {
       <div>
         <gl-sprintf
           :message="
-            s__(`mrWidget|%{prefixToLinkStart}No pipeline%{prefixToLinkEnd}
+            s__(`mrWidget|%{prefixToLinkStart}No pipeline - %{prefixToLinkEnd}
           %{addPipelineLinkStart}Add the .gitlab-ci.yml file%{addPipelineLinkEnd}
-          to create one.`)
+          to add one to this project.`)
           "
         >
           <template #prefixToLink="{ content }">

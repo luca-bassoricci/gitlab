@@ -22,7 +22,7 @@ export const SP_SHOW_TRACK_EVENT = 'click_button';
 export const SP_LINK_TRACK_VALUE = 30;
 export const SP_SHOW_TRACK_VALUE = 10;
 export const SP_HELP_CONTENT = s__(
-  `mrWidget|Use %{linkStart}CI pipelines to test your code%{linkEnd} by simply adding a GitLab CI configuration file to your project. It only takes a minute to make your code more secure and robust.`,
+  `mrWidget|Simply add a GitLab CI/CD configuration file to start using %{linkStart}CI/CD pipelines to test your code%{linkEnd}. It only takes a minute to make your code more secure and robust.`,
 );
 export const SP_HELP_URL = 'https://about.gitlab.com/blog/2019/07/12/guide-to-ci-cd-pipelines/';
 export const SP_ICON_NAME = 'status_notfound';
