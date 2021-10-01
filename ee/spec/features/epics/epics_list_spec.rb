@@ -126,6 +126,42 @@ RSpec.describe 'epics list', :js do
       expect(page).to have_button('Last updated')
     end
 
+    it 'sorts by the selected value and stores the selection for roadmap' do
+      visit group_roadmap_path(group)
+
+      page.within('.epics-other-filters') do
+        click_button 'Start date'
+        sort_options = find('ul.dropdown-menu-sort li').all('a').collect(&:text)
+
+        expect(sort_options[0]).to eq('Start date')
+        expect(sort_options[1]).to eq('Due date')
+
+        click_link 'Due date'
+      end
+
+      expect(page).to have_button('Due date')
+
+      page.within('.content-wrapper .content') do
+        page.within('.epics-list-section') do
+          page.within('div.epic-item-container:nth-child(1) div.epics-list-item') do
+            expect(page).to have_content(epic1.title)
+          end
+
+          page.within('div.epic-item-container:nth-child(2) div.epics-list-item') do
+            expect(page).to have_content(epic3.title)
+          end
+
+          page.within('div.epic-item-container:nth-child(3) div.epics-list-item') do
+            expect(page).to have_content(epic2.title)
+          end
+        end
+      end
+
+      visit group_roadmap_path(group)
+
+      expect(page).to have_button('Due date')
+    end
+
     it 'renders the epic detail correctly after clicking the link' do
       page.within('.content-wrapper .content .issuable-list') do
         click_link(epic1.title)
