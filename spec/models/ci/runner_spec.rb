@@ -211,6 +211,12 @@ RSpec.describe Ci::Runner do
       expect(described_class.belonging_to_parent_group_of_project(project.id)).to contain_exactly(runner)
     end
 
+    it 'does not create a cross-database query' do
+      with_cross_joins_prevented do
+        expect(described_class.belonging_to_parent_group_of_project(project.id)).to contain_exactly(runner)
+      end
+    end
+
     context 'with a parent group with a runner' do
       let(:runner) { create(:ci_runner, :group, groups: [parent_group]) }
       let(:project) { create(:project, group: group) }
