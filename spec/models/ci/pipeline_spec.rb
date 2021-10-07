@@ -2767,6 +2767,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     context 'preloading relations' do
       let(:pipeline1) { create(:ci_empty_pipeline, :created) }
       let(:pipeline2) { create(:ci_empty_pipeline, :created) }
+      let(:load_balancer) { Gitlab::Database::LoadBalancing.proxy.load_balancer }
 
       before do
         create(:ci_build, :pending, pipeline: pipeline1)
@@ -2777,6 +2778,8 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         create(:generic_commit_status, :pending, pipeline: pipeline2)
         create(:generic_commit_status, :pending, pipeline: pipeline2)
         create(:generic_commit_status, :pending, pipeline: pipeline2)
+
+        allow(load_balancer).to receive(:primary_only?).and_return(false)
       end
 
       it 'preloads relations for each build to avoid N+1 queries' do

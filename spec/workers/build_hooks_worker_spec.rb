@@ -24,10 +24,28 @@ RSpec.describe BuildHooksWorker do
   end
 
   describe '.perform_async' do
+    let(:load_balancer) { Gitlab::Database::LoadBalancing.proxy.load_balancer }
+
+    before do
+      allow(load_balancer).to receive(:primary_only?).and_return(false)
+    end
+
     it 'delays scheduling a job by calling perform_in with default delay' do
       expect(described_class).to receive(:perform_in).with(ApplicationWorker::DEFAULT_DELAY_INTERVAL.second, 123)
 
       described_class.perform_async(123)
+    end
+
+    context 'when load balancing is using only primary' do
+      before do
+        allow(load_balancer).to receive(:primary_only?).and_return(true)
+      end
+
+      it 'does not schedule a job by calling perform_in' do
+        expect(described_class).not_to receive(:perform_in)
+
+        described_class.perform_async(123)
+      end
     end
   end
 

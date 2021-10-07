@@ -251,6 +251,12 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
     end
 
     describe '#call' do
+      let(:load_balancer) { Gitlab::Database::LoadBalancing.proxy.load_balancer }
+
+      before do
+        allow(load_balancer).to receive(:primary_only?).and_return(false)
+      end
+
       context 'when worker declares data consistency' do
         include_context 'worker declaring data consistency'
 
