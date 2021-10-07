@@ -102,7 +102,7 @@ module WorkerAttributes
 
     # If data_consistency is not set to :always, worker will try to utilize load balancing capabilities and use the replica
     def utilizes_load_balancing_capabilities?
-      get_data_consistency != :always
+      get_data_consistency != :always && load_balancer_uses_replicas?
     end
 
     def get_data_consistency
@@ -192,6 +192,10 @@ module WorkerAttributes
 
     def big_payload?
       class_attributes[:big_payload]
+    end
+
+    def load_balancer_uses_replicas?
+      !::Gitlab::Database::LoadBalancing.proxy.load_balancer.primary_only?
     end
   end
 end
