@@ -248,8 +248,11 @@ RSpec.describe ApplicationWorker do
   end
 
   describe '.perform_async' do
+    let(:load_balancer) { Gitlab::Database::LoadBalancing.proxy.load_balancer }
+
     before do
       stub_const(worker.name, worker)
+      allow(load_balancer).to receive(:primary_only?).and_return(false)
     end
 
     shared_examples_for 'worker utilizes load balancing capabilities' do |data_consistency|
@@ -261,6 +264,18 @@ RSpec.describe ApplicationWorker do
         expect(worker).to receive(:perform_in).with(described_class::DEFAULT_DELAY_INTERVAL.seconds, 123)
 
         worker.perform_async(123)
+      end
+
+      context 'when load balancing is using only primary' do
+        before do
+          allow(load_balancer).to receive(:primary_only?).and_return(true)
+        end
+
+        it 'does not call perform_in' do
+          expect(worker).not_to receive(:perform_in)
+
+          worker.perform_async
+        end
       end
     end
 

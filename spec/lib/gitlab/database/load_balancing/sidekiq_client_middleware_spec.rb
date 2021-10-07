@@ -12,6 +12,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
   before do
     skip_feature_flags_yaml_validation
     skip_default_enabled_yaml_check
+    allow(load_balancer).to receive(:primary_only?).and_return(false)
   end
 
   after do
@@ -73,6 +74,16 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
 
         before do
           stub_feature_flags(load_balancing_for_test_data_consistency_worker: false)
+        end
+
+        include_examples 'does not pass database locations'
+      end
+
+      context 'when load balancing is using only primary' do
+        let(:expected_consistency) { :always }
+
+        before do
+          allow(load_balancer).to receive(:primary_only?).and_return(true)
         end
 
         include_examples 'does not pass database locations'

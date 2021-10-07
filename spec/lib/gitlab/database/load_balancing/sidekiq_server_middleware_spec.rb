@@ -15,6 +15,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
     skip_default_enabled_yaml_check
 
     replication_lag!(false)
+    allow(load_balancer).to receive(:primary_only?).and_return(false)
   end
 
   after do
@@ -82,6 +83,14 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
       context 'when load_balancing_for_test_data_consistency_worker is disabled' do
         before do
           stub_feature_flags(load_balancing_for_test_data_consistency_worker: false)
+        end
+
+        include_examples 'stick to the primary', 'primary'
+      end
+
+      context 'when load balancing is using only primary' do
+        before do
+          allow(load_balancer).to receive(:primary_only?).and_return(true)
         end
 
         include_examples 'stick to the primary', 'primary'
