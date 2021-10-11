@@ -5,16 +5,15 @@ require 'spec_helper'
 RSpec.describe Resolvers::DastSiteValidationResolver do
   include GraphqlHelpers
 
-  let_it_be(:target_url) { generate(:url) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
-  let_it_be(:dast_site_token1) { create(:dast_site_token, project: project, url: target_url) }
+  let_it_be(:dast_site_token1) { create(:dast_site_token, project: project) }
   let_it_be(:dast_site_validation1) { create(:dast_site_validation, dast_site_token: dast_site_token1, state: :pending) }
-  let_it_be(:dast_site_token2) { create(:dast_site_token, project: project, url: generate(:url)) }
+  let_it_be(:dast_site_token2) { create(:dast_site_token, project: project) }
   let_it_be(:dast_site_validation2) { create(:dast_site_validation, dast_site_token: dast_site_token2, state: :inprogress) }
-  let_it_be(:dast_site_token3) { create(:dast_site_token, project: project, url: generate(:url)) }
+  let_it_be(:dast_site_token3) { create(:dast_site_token, project: project) }
   let_it_be(:dast_site_validation3) { create(:dast_site_validation, dast_site_token: dast_site_token3, state: :passed) }
-  let_it_be(:dast_site_token4) { create(:dast_site_token, project: project, url: generate(:url)) }
+  let_it_be(:dast_site_token4) { create(:dast_site_token, project: project) }
   let_it_be(:dast_site_validation4) { create(:dast_site_validation, dast_site_token: dast_site_token4, state: :failed) }
 
   before do

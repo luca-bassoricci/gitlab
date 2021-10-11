@@ -8,7 +8,7 @@ RSpec.describe 'Creating a DAST Site Token' do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:dast_site) { create(:dast_site, project: project) }
-  let_it_be(:dast_site_token) { create(:dast_site_token, project: project, url: dast_site.url) }
+  let_it_be(:dast_site_token) { create(:dast_site_token, project: project, dast_site: dast_site) }
   let_it_be(:validation_path) { SecureRandom.hex }
 
   let(:mutation_name) { :dast_site_validation_create }

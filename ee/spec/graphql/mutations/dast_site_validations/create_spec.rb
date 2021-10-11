@@ -7,7 +7,7 @@ RSpec.describe Mutations::DastSiteValidations::Create do
   let(:user) { create(:user) }
   let(:full_path) { project.full_path }
   let(:dast_site) { create(:dast_site, project: project) }
-  let(:dast_site_token) { create(:dast_site_token, project: dast_site.project, url: dast_site.url) }
+  let(:dast_site_token) { create(:dast_site_token, project: dast_site.project, dast_site: dast_site) }
   let(:dast_site_validation) { DastSiteValidation.find_by!(url_path: validation_path) }
   let(:validation_path) { SecureRandom.hex }
 

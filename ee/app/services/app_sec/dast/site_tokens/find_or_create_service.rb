@@ -31,12 +31,13 @@ module AppSec
         end
 
         def find_or_create_dast_site_token
-          existing_token = DastSiteToken.find_by(project: project, url: params[:target_url]) # rubocop: disable CodeReuse/ActiveRecord
+          dast_site = DastSite.find_by(project: project, url: params[:target_url]) # rubocop: disable CodeReuse/ActiveRecord
+          return error_response('Dast site does not exist') unless dast_site
 
+          existing_token = dast_site.dast_site_token
           return success_response(existing_token, DastSiteValidation::INITIAL_STATE) if existing_token
 
-          new_token = DastSiteToken.create(project: project, token: SecureRandom.uuid, url: params[:target_url])
-
+          new_token = DastSiteToken.create(project: project, token: SecureRandom.uuid, dast_site: dast_site)
           return error_response(new_token.errors.full_messages) unless new_token.valid?
 
           success_response(new_token, DastSiteValidation::INITIAL_STATE)

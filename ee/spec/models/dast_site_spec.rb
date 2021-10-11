@@ -11,6 +11,7 @@ RSpec.describe DastSite, type: :model do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:dast_site_validation) }
     it { is_expected.to have_many(:dast_site_profiles) }
+    it { is_expected.to have_one(:dast_site_token).required(false) }
   end
 
   describe 'validations' do
@@ -48,7 +49,7 @@ RSpec.describe DastSite, type: :model do
   describe 'callbacks' do
     context 'when there is a related site token' do
       let_it_be(:dast_site) { create(:dast_site, project: project) }
-      let_it_be(:dast_site_token) { create(:dast_site_token, project: dast_site.project, url: dast_site.url) }
+      let_it_be(:dast_site_token) { create(:dast_site_token, project: dast_site.project, dast_site: dast_site) }
       let_it_be(:dast_site_validations) { create_list(:dast_site_validation, 5, dast_site_token: dast_site_token) }
 
       it 'ensures it and associated site validations cleaned up on destroy' do

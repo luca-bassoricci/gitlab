@@ -7,7 +7,8 @@ RSpec.describe AppSec::Dast::SiteValidations::RevokeService do
   let_it_be(:dast_site_token) { create(:dast_site_token, project: project) }
   let_it_be(:common_url_base) { DastSiteValidation.get_normalized_url_base(dast_site_token.url) }
 
-  let_it_be(:dast_site_validation_other_project) { create(:dast_site_validation, dast_site_token: create(:dast_site_token, url: common_url_base)) }
+  let_it_be(:dast_site) { create(:dast_site, project: project, url: common_url_base)}
+  let_it_be(:dast_site_validation_other_project) { create(:dast_site_validation, dast_site_token: create(:dast_site_token, dast_site: dast_site)) }
   let_it_be(:dast_site_validation_other_url) { create(:dast_site_validation, dast_site_token: create(:dast_site_token, project: project)) }
 
   let_it_be(:external_dast_site_validations) do

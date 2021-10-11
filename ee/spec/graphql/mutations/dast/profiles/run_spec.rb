@@ -91,7 +91,7 @@ RSpec.describe Mutations::Dast::Profiles::Run do
 
           context 'when target is validated' do
             it 'has no errors' do
-              create(:dast_site_validation, state: :passed, dast_site_token: create(:dast_site_token, project: project, url: dast_profile.dast_site_profile.dast_site.url))
+              create(:dast_site_validation, state: :passed, dast_site_token: create(:dast_site_token, project: project, dast_site: dast_profile.dast_site_profile.dast_site))
 
               expect(subject[:errors]).to be_empty
             end

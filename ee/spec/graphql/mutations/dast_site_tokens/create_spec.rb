@@ -7,7 +7,7 @@ RSpec.describe Mutations::DastSiteTokens::Create do
   let(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
   let(:full_path) { project.full_path }
-  let(:target_url) { generate(:url) }
+  let!(:dast_site) { create(:dast_site, project: project) }
   let(:dast_site_token) { DastSiteToken.find_by!(project: project, token: uuid) }
   let(:uuid) { '0000-0000-0000-0000' }
 
@@ -24,7 +24,7 @@ RSpec.describe Mutations::DastSiteTokens::Create do
     subject do
       mutation.resolve(
         full_path: full_path,
-        target_url: target_url
+        target_url: dast_site.url
       )
     end
 
@@ -60,7 +60,7 @@ RSpec.describe Mutations::DastSiteTokens::Create do
 
             result = mutation.resolve(
               full_path: full_path,
-              target_url: target_url
+              target_url: dast_site.url
             )
 
             expect(result[:status]).to eq('failed')

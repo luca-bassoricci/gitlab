@@ -3,7 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe DastSiteValidation, type: :model do
-  let_it_be(:dast_site_token) { create(:dast_site_token) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:dast_site) { create(:dast_site, project: project) }
+  let_it_be(:dast_site_token) { create(:dast_site_token, project: project, dast_site: dast_site) }
 
   subject { create(:dast_site_validation, dast_site_token: dast_site_token) }
 
@@ -21,11 +23,10 @@ RSpec.describe DastSiteValidation, type: :model do
 
   describe 'before_create' do
     describe '#set_normalized_url_base' do
-      let_it_be(:dast_site_token) do
-        create(
-          :dast_site_token,
-          url: generate(:url) + '/' + SecureRandom.hex + '?' + { param: SecureRandom.hex }.to_query
-        )
+      let_it_be(:dast_site) do
+        url = generate(:url) + '/' + SecureRandom.hex + '?' + { param: SecureRandom.hex }.to_query
+
+        create(:dast_site, project: project, url: url)
       end
 
       it 'normalizes the dast_site_token url' do

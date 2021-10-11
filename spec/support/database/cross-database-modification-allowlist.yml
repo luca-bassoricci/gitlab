@@ -1341,3 +1341,4 @@
 - "./spec/workers/stuck_merge_jobs_worker_spec.rb"
 - "./ee/spec/requests/api/graphql/project/pipelines/dast_profile_spec.rb"
 - "./spec/services/projects/overwrite_project_service_spec.rb"
+- "./spec/migrations/clean_up_orphaned_dast_site_tokens_spec.rb"

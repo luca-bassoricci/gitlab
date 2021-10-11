@@ -36,9 +36,9 @@ class Gitlab::Seeder::DastProfiles
   end
 
   def create_token(profile)
-    url = profile.dast_site_profile.dast_site.url
+    dast_site = profile.dast_site_profile.dast_site
 
-    FactoryBot.create(:dast_site_token, project: project, url: url)
+    FactoryBot.create(:dast_site_token, project: project, dast_site: dast_site)
   end
 
   def create_validation(token)

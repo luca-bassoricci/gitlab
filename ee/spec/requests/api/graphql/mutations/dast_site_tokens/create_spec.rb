@@ -6,6 +6,7 @@ RSpec.describe 'Creating a DAST Site Token' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
+  let_it_be(:dast_site) { create(:dast_site, project: project) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:uuid) { '0000-0000-0000-0000' }
 
@@ -15,7 +16,7 @@ RSpec.describe 'Creating a DAST Site Token' do
     graphql_mutation(
       mutation_name,
       full_path: full_path,
-      target_url: generate(:url)
+      target_url: dast_site.url
     )
   end
 

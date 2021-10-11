@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe AppSec::Dast::SiteTokens::FindOrCreateService do
   let_it_be(:project) { create(:project) }
-  let_it_be(:target_url) { generate(:url) }
+  let_it_be(:dast_site) { create(:dast_site, project: project) }
+  let_it_be(:target_url) { dast_site.url }
 
   subject do
     described_class.new(
@@ -36,7 +37,7 @@ RSpec.describe AppSec::Dast::SiteTokens::FindOrCreateService do
       end
 
       context 'when the token already exists' do
-        let_it_be(:dast_site_token) { create(:dast_site_token, project: project, url: target_url) }
+        let_it_be(:dast_site_token) { create(:dast_site_token, project: project, dast_site: dast_site) }
 
         it 'does not create a new token' do
           expect { subject }.not_to change { DastSiteToken.count }
@@ -55,11 +56,11 @@ RSpec.describe AppSec::Dast::SiteTokens::FindOrCreateService do
         end
       end
 
-      context 'when an invalid target_url is supplied' do
-        let_it_be(:target_url) { 'http://bogus:broken' }
+      context 'when the dast_site does not exist' do
+        let_it_be(:target_url) { 'http://some-other-url.com' }
 
         it 'communicates failure' do
-          expect(subject).to have_attributes(status: :error, message: 'Invalid target_url')
+          expect(subject).to have_attributes(status: :error, message: 'Dast site does not exist')
         end
 
         it 'does not create a dast_site_validation' do

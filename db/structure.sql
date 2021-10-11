@@ -13041,7 +13041,8 @@ CREATE TABLE dast_site_tokens (
     updated_at timestamp with time zone NOT NULL,
     expired_at timestamp with time zone,
     token text NOT NULL,
-    url text NOT NULL,
+    url text,
+    dast_site_id bigint NOT NULL,
     CONSTRAINT check_02a6bf20a7 CHECK ((char_length(token) <= 255)),
     CONSTRAINT check_69ab8622a6 CHECK ((char_length(url) <= 255))
 );
@@ -24957,6 +24958,8 @@ CREATE UNIQUE INDEX index_dast_site_token_on_project_id_and_url ON dast_site_tok
 
 CREATE UNIQUE INDEX index_dast_site_token_on_token ON dast_site_tokens USING btree (token);
 
+CREATE UNIQUE INDEX index_dast_site_tokens_on_dast_site_id ON dast_site_tokens USING btree (dast_site_id);
+
 CREATE INDEX index_dast_site_tokens_on_project_id ON dast_site_tokens USING btree (project_id);
 
 CREATE INDEX index_dast_site_validations_on_dast_site_token_id ON dast_site_validations USING btree (dast_site_token_id);
@@ -29848,6 +29851,9 @@ ALTER TABLE ONLY alert_management_alert_user_mentions
 
 ALTER TABLE ONLY snippet_statistics
     ADD CONSTRAINT fk_rails_ebc283ccf1 FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_site_tokens
+    ADD CONSTRAINT fk_rails_ec29ac147f FOREIGN KEY (dast_site_id) REFERENCES dast_sites(id) ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY iterations_cadences
     ADD CONSTRAINT fk_rails_ece400c55a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;

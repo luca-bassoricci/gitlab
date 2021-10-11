@@ -4,8 +4,8 @@ FactoryBot.define do
   factory :dast_site_token do
     project
 
-    token { SecureRandom.uuid }
+    dast_site { association :dast_site, project: project }
 
-    url { generate(:url) }
+    token { SecureRandom.uuid }
   end
 end

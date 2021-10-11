@@ -6,7 +6,7 @@ RSpec.describe AppSec::Dast::SiteValidations::FindOrCreateService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:developer) { create(:user, developer_projects: [project]) }
   let_it_be(:dast_site) { create(:dast_site, project: project) }
-  let_it_be(:dast_site_token) { create(:dast_site_token, project: project, url: dast_site.url) }
+  let_it_be(:dast_site_token) { create(:dast_site_token, project: project, dast_site: dast_site) }
 
   let(:params) { { dast_site_token: dast_site_token, url_path: SecureRandom.hex, validation_strategy: :text_file } }
 
@@ -61,23 +61,12 @@ RSpec.describe AppSec::Dast::SiteValidations::FindOrCreateService do
       end
 
       context 'when the dast_site_token.project and container do not match' do
-        let_it_be(:dast_site_token) { create(:dast_site_token, project: create(:project), url: dast_site.url) }
+        let_it_be(:dast_site_token) { create(:dast_site_token, project: create(:project), dast_site: create(:dast_site)) }
 
         it 'communicates failure' do
           aggregate_failures do
             expect(subject.status).to eq(:error)
             expect(subject.message).to eq('Insufficient permissions')
-          end
-        end
-      end
-
-      context 'when the dast_site_token does not have a related dast_site via its url' do
-        let_it_be(:dast_site_token) { create(:dast_site_token, project: project, url: generate(:url)) }
-
-        it 'communicates failure' do
-          aggregate_failures do
-            expect(subject.status).to eq(:error)
-            expect(subject.message).to eq('Site does not exist for profile')
           end
         end
       end
