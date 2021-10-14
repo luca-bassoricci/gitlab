@@ -63,7 +63,7 @@ class ProfilesController < Profiles::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def audit_log
-    @events = AuditEvent.where(entity_type: "User", entity_id: current_user.id)
+    @events = AuditEvent.where(entity_type: "User", entity_id: current_user.id).where("details not like ?", "%Blocked user%")
       .order("created_at DESC")
       .page(params[:page])
 
