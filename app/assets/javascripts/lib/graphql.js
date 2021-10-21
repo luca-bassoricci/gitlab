@@ -132,6 +132,17 @@ export default (resolvers = {}, config = {}) => {
     });
   });
 
+  // NOTE: DO NOT MERGE THIS BLOCK ...!!!!
+  const extraEndpointLink = ApolloLink.split(
+    (operation) => {
+      return operation.getContext().isExtraEndpoint;
+    },
+    new HttpLink({
+      uri: 'http://localhost:4000/',
+    }),
+  );
+  // ... UNTIL HERE!!!!
+
   const hasSubscriptionOperation = ({ query: { definitions } }) => {
     return definitions.some(
       ({ kind, operation }) => kind === 'OperationDefinition' && operation === 'subscription',
@@ -143,6 +154,7 @@ export default (resolvers = {}, config = {}) => {
     new ActionCableLink(),
     ApolloLink.from(
       [
+        extraEndpointLink,
         getSuppressNetworkErrorsDuringNavigationLink(),
         getInstrumentationLink(),
         requestCounterLink,
