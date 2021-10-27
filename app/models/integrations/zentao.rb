@@ -10,7 +10,7 @@ module Integrations
     validates :zentao_product_xid, presence: true, if: :activated?
 
     def self.feature_flag_enabled?(project)
-      Feature.enabled?(:zentao_issues_integration, project)
+      Feature.enabled?(:zentao_integration, project)
     end
 
     # License Level: EEP_FEATURES

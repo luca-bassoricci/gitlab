@@ -1,5 +1,5 @@
 ---
-name: zentao_issues_integration
+name: zentao_integration
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/69602
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/338775
 milestone: '14.4'
