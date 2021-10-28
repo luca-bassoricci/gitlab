@@ -85,8 +85,12 @@ export default {
         value: this.vulnerability.project.fullName,
       };
     },
+    hasMr() {
+      return Boolean(this.vulnerability.mergeRequest);
+    },
     solutionInfo() {
-      const { solution, hasMr, remediations, state } = this.vulnerability;
+      const { solution, remediations, state } = this.vulnerability;
+      const hasMr = this.vulnerability.mergeRequest !== null;
 
       const remediation = remediations?.[0];
       const hasDownload = Boolean(
@@ -200,9 +204,9 @@ export default {
       class="md gl-mt-6"
       :details="vulnerability.details"
     />
-    <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
+    <div v-if="vulnerability.mergeRequest" class="card gl-mt-5">
       <merge-request-note
-        :feedback="vulnerability.mergeRequestFeedback"
+        :feedback="vulnerability.mergeRequest"
         :project="project"
         class="card-body"
       />

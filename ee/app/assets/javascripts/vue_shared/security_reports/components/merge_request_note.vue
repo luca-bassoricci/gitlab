@@ -36,10 +36,10 @@ export default {
 </script>
 
 <template>
-  <event-item :author="feedback.author" :created-at="feedback.created_at" icon-name="merge-request">
+  <event-item :author="feedback.author" :created-at="feedback.createdAt" icon-name="merge-request">
     <gl-sprintf :message="eventText">
       <template #mergeRequestLink>
-        <gl-link :href="feedback.merge_request_path">!{{ feedback.merge_request_iid }}</gl-link>
+        <gl-link :href="feedback.webUrl">!{{ feedback.merge_request_iid }}</gl-link>
       </template>
       <template v-if="hasProjectUrl" #projectLink>
         <gl-link :href="project.url">{{ project.value }}</gl-link>
