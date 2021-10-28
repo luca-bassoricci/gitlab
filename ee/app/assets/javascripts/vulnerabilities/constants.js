@@ -77,5 +77,5 @@ export const REGEXES = {
 
 export const SUPPORTING_MESSAGE_TYPES = {
   // eslint-disable-next-line @gitlab/require-i18n-strings
-  RECORDED: 'Recorded',
+  RECORDED: 'RECORDED',
 };
