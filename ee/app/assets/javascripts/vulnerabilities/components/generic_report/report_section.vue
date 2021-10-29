@@ -28,6 +28,8 @@ export default {
   },
   computed: {
     filteredDetails() {
+      // NOTE: This will need to be refactored, as we are now dealing with an array of report-items, instead of an object
+      // in short: the data-structure will change significantly
       return filterTypesAndLimitListDepth(this.details, {
         maxDepth: NESTED_LISTS_MAX_DEPTH,
       });
