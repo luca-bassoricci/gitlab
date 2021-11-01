@@ -1,4 +1,5 @@
 import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/service_level_agreement.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import IncidentsList from '~/incidents/components/incidents_list.vue';
 import mockIncidents from './mocks/incidents.json';
@@ -52,8 +53,9 @@ describe('Incidents Service Level Agreement', () => {
   });
 
   describe('Incident SLA field', () => {
-    it('displays the column when the feature is available', () => {
+    it('displays the column when the feature is available', async () => {
       mountComponent({ slaFeatureAvailable: true });
+      await waitForPromises();
 
       expect(findIncidentSlaHeader().text()).toContain('Time to SLA');
     });

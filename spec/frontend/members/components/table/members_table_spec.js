@@ -1,6 +1,7 @@
 import { GlBadge, GlPagination, GlTable } from '@gitlab/ui';
 import { createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import CreatedAt from '~/members/components/table/created_at.vue';
@@ -81,7 +82,6 @@ describe('MembersTable', () => {
   };
 
   const url = 'https://localhost/foo-bar/-/project_members?tab=invited';
-
   const findTable = () => wrapper.find(GlTable);
   const findTableCellByMemberId = (tableCellLabel, memberId) =>
     wrapper
@@ -115,12 +115,12 @@ describe('MembersTable', () => {
       ${'requested'}  | ${'Requested'}      | ${accessRequest}   | ${CreatedAt}
       ${'maxRole'}    | ${'Max role'}       | ${memberCanUpdate} | ${RoleDropdown}
       ${'expiration'} | ${'Expiration'}     | ${memberMock}      | ${ExpirationDatepicker}
-    `('renders the $label field', ({ field, label, member, expectedComponent }) => {
+    `('renders the $label field', async ({ field, label, member, expectedComponent }) => {
       createComponent({
         members: [member],
         tableFields: [field],
       });
-
+      await waitForPromises();
       expect(wrapper.findByText(label, { selector: '[role="columnheader"]' }).exists()).toBe(true);
 
       if (expectedComponent) {

@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue/';
 import stubChildren from 'helpers/stub_children';
 import component from '~/packages_and_registries/infrastructure_registry/details/components/package_files.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -10,7 +11,6 @@ import { npmFiles, mavenFiles } from 'jest/packages/mock_data';
 
 describe('Package Files', () => {
   let wrapper;
-
   const findAllRows = () => wrapper.findAll('[data-testid="file-row"');
   const findFirstRow = () => findAllRows().at(0);
   const findSecondRow = () => findAllRows().at(1);
@@ -43,8 +43,9 @@ describe('Package Files', () => {
   });
 
   describe('rows', () => {
-    it('renders a single file for an npm package', () => {
+    it('renders a single file for an npm package', async () => {
       createComponent();
+      await waitForPromises();
 
       expect(findAllRows()).toHaveLength(1);
     });

@@ -2,6 +2,7 @@ import { GlTable, GlAlert, GlLoadingIcon, GlDropdown, GlIcon, GlAvatar } from '@
 import { mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import mockAlerts from 'jest/vue_shared/alert_details/mocks/alerts.json';
@@ -20,7 +21,6 @@ jest.mock('~/lib/utils/url_utility', () => ({
 describe('AlertManagementTable', () => {
   let wrapper;
   let mock;
-
   const findAlertsTable = () => wrapper.findComponent(GlTable);
   const findAlerts = () => wrapper.findAll('table tbody tr');
   const findAlert = () => wrapper.findComponent(GlAlert);
@@ -84,11 +84,12 @@ describe('AlertManagementTable', () => {
   });
 
   describe('Alerts table', () => {
-    it('loading state', () => {
+    it('loading state', async () => {
       mountComponent({
         data: { alerts: {}, alertsCount: null },
         loading: true,
       });
+      await waitForPromises();
       expect(findAlertsTable().exists()).toBe(true);
       expect(findLoader().exists()).toBe(true);
       expect(findAlerts().at(0).classes()).not.toContain('gl-hover-bg-blue-50');

@@ -1,5 +1,6 @@
 import { GlButton, GlTable } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import waitForPromises from 'helpers/wait_for_promises';
 import TriggerBlock from '~/jobs/components/trigger_block.vue';
 
 describe('Trigger block', () => {
@@ -65,6 +66,7 @@ describe('Trigger block', () => {
             variables: [gcsVar, s3Var],
           },
         });
+        await waitForPromises();
 
         expect(findRevealButton().text()).toBe('Reveal values');
 

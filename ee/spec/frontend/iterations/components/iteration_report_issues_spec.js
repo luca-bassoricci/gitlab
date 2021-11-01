@@ -9,6 +9,7 @@ import {
   GlTable,
 } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
+import waitForPromises from 'helpers/wait_for_promises';
 import IterationReportIssues from 'ee/iterations/components/iteration_report_issues.vue';
 import { Namespace } from 'ee/iterations/constants';
 
@@ -67,9 +68,9 @@ describe('Iterations report issues', () => {
     expect(findGlTable().isVisible()).toBe(false);
   });
 
-  it('shows iterations list when not loading', () => {
+  it('shows iterations list when not loading', async () => {
     mountComponent({ loading: false, mountFunction: mount });
-
+    await waitForPromises();
     expect(findGlSkeletonLoader().isVisible()).toBe(false);
     expect(findGlTable().exists()).toBe(true);
     expect(wrapper.text()).toContain('No issues found');

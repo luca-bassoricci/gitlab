@@ -2,6 +2,7 @@ import { GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { getAllByRole } from '@testing-library/dom';
 import { shallowMount, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import CsvViewer from '~/blob/csv/csv_viewer.vue';
 import PapaParseAlert from '~/vue_shared/components/papa_parse_alert.vue';
 
@@ -66,7 +67,7 @@ describe('app/assets/javascripts/blob/csv/csv_viewer.vue', () => {
 
     it('renders the CSV table with the correct content', async () => {
       createComponent({ mountFunction: mount });
-      await nextTick;
+      await waitForPromises();
 
       expect(getAllByRole(wrapper.element, 'row', { name: /One/i })).toHaveLength(1);
       expect(getAllByRole(wrapper.element, 'row', { name: /Two/i })).toHaveLength(1);

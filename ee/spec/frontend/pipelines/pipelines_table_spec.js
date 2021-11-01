@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 import fixture from 'test_fixtures/pipelines/pipelines.json';
+import waitForPromises from 'helpers/wait_for_promises';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import PipelinesTable from '~/pipelines/components/pipelines_list/pipelines_table.vue';
 import { PipelineKeyOptions } from '~/pipelines/constants';
@@ -34,7 +35,6 @@ describe('Pipelines Table', () => {
       }),
     );
   };
-
   const findUpstream = () => wrapper.findByTestId('mini-graph-upstream');
   const findDownstream = () => wrapper.findByTestId('mini-graph-downstream');
 
@@ -55,7 +55,8 @@ describe('Pipelines Table', () => {
         createComponent({ pipelines: [pipeline] });
       });
 
-      it('should render only a upstream pipeline', () => {
+      it('should render only a upstream pipeline', async () => {
+        await waitForPromises();
         expect(findUpstream().exists()).toBe(true);
         expect(findDownstream().exists()).toBe(false);
       });

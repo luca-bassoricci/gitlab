@@ -10,6 +10,7 @@ import {
   trackIncidentCreateNewOptions,
   trackIncidentListViewsOptions,
 } from '~/incidents/constants';
+import waitForPromises from 'helpers/wait_for_promises';
 import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import Tracking from '~/tracking';
@@ -96,10 +97,11 @@ describe('Incidents List', () => {
     }
   });
 
-  it('shows the loading state', () => {
+  it('shows the loading state', async () => {
     mountComponent({
       loading: true,
     });
+    await waitForPromises();
     expect(findLoader().exists()).toBe(true);
   });
 

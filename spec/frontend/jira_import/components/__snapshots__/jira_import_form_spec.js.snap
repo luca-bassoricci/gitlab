@@ -4,7 +4,7 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
 <table
   aria-busy="false"
   aria-colcount="3"
-  class="table b-table gl-table b-table-fixed"
+  class="table b-table b-table-fixed gl-table"
   role="table"
 >
   <!---->

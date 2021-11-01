@@ -1,6 +1,7 @@
 import { GlDropdown, GlButton } from '@gitlab/ui';
 import { nextTick } from 'vue';
 import stubChildren from 'helpers/stub_children';
+import waitForPromises from 'helpers/wait_for_promises';
 import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { packageFiles as packageFilesMock } from 'jest/packages_and_registries/package_registry/mock_data';
 import PackageFiles from '~/packages_and_registries/package_registry/components/details/package_files.vue';
@@ -44,8 +45,9 @@ describe('Package Files', () => {
   });
 
   describe('rows', () => {
-    it('renders a single file for an npm package', () => {
+    it('renders a single file for an npm package', async () => {
       createComponent();
+      await waitForPromises();
 
       expect(findAllRows()).toHaveLength(1);
     });

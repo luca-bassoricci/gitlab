@@ -2,6 +2,7 @@ import { GlTable } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import waitForPromises from 'helpers/wait_for_promises';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
 import TestCoverageTable from 'ee/analytics/repository_analytics/components/test_coverage_table.vue';
 import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
@@ -104,6 +105,7 @@ describe('Test coverage table component', () => {
 
       expect(getProjectsTestCoverageSpy).toHaveBeenCalled();
 
+      await waitForPromises();
       expect(findTable().exists()).toBe(true);
       expect(findProjectNameById(id).text()).toBe(name);
       expect(findProjectAverageById(id).text()).toBe(`${averageCoverage}%`);

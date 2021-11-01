@@ -1,6 +1,7 @@
 import { GlTable, GlButton, GlIcon, GlBadge, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
 import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table_cell_flag.vue';
@@ -57,12 +58,13 @@ describe('DevopsAdoptionTable', () => {
   describe('table headings', () => {
     let headers;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       createComponent();
+      await waitForPromises();
       headers = findTable().findAll(`[data-testid="${TABLE_TEST_IDS_HEADERS}"]`);
     });
 
-    it('displays the correct number of headings', () => {
+    it('displays the correct number of headings', async () => {
       expect(headers).toHaveLength(devopsAdoptionTableHeaders.length);
     });
 

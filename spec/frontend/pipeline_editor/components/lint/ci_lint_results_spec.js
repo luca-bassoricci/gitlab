@@ -1,5 +1,6 @@
 import { GlTable, GlLink } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
+import waitForPromises from 'helpers/wait_for_promises';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import CiLintResults from '~/pipeline_editor/components/lint/ci_lint_results.vue';
 import { mockJobs, mockErrors, mockWarnings } from '../../mock_data';
@@ -23,7 +24,6 @@ describe('CI Lint Results', () => {
       },
     });
   };
-
   const findTable = () => wrapper.find(GlTable);
   const findByTestId = (selector) => () => wrapper.find(`[data-testid="ci-lint-${selector}"]`);
   const findAllByTestId = (selector) => () =>
@@ -50,13 +50,14 @@ describe('CI Lint Results', () => {
       expect(findTable().exists()).toBe(true);
     });
 
-    it('renders when job has no properties defined', () => {
+    it('renders when job has no properties defined', async () => {
       // job with no attributes such as `tagList` or `environment`
       const job = {
         stage: 'Stage Name',
         name: 'test job',
       };
       createComponent({ jobs: [job] }, mount);
+      await waitForPromises();
 
       const param = findLintParameters().at(0);
       const value = findLintValues().at(0);

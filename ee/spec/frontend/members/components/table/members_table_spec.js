@@ -1,6 +1,7 @@
 import { within } from '@testing-library/dom';
 import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
 import { member as memberMock, directMember, members } from 'jest/members/mock_data';
 import MembersTable from '~/members/components/table/members_table.vue';
 import { MEMBER_TYPES } from '~/members/constants';
@@ -53,7 +54,6 @@ describe('MemberList', () => {
       ],
     });
   };
-
   const getByTestId = (id, options) =>
     createWrapper(within(wrapper.element).getByTestId(id, options));
   const findTableCellByMemberId = (tableCellLabel, memberId) =>
@@ -79,11 +79,13 @@ describe('MemberList', () => {
       };
 
       describe('when one of the members has `canOverride` permissions', () => {
-        it('renders the "Actions" field', () => {
+        it('renders the "Actions" field', async () => {
           createComponent({
             members: [memberNoPermissions, memberCanOverride],
             tableFields: ['actions'],
           });
+
+          await waitForPromises();
 
           expect(within(wrapper.element).queryByTestId('col-actions')).not.toBe(null);
 
@@ -97,8 +99,10 @@ describe('MemberList', () => {
       });
 
       describe('when none of the members have `canOverride` permissions', () => {
-        it('does not render the "Actions" field', () => {
+        it('does not render the "Actions" field', async () => {
           createComponent({ members, tableFields: ['actions'] });
+
+          await waitForPromises();
 
           expect(within(wrapper.element).queryByTestId('col-actions')).toBe(null);
         });

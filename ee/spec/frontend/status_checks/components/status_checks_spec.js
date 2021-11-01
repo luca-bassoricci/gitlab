@@ -2,6 +2,7 @@ import { GlTable } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
 import Actions from 'ee/status_checks/components/actions.vue';
 import Branch from 'ee/status_checks/components/branch.vue';
 import ModalCreate from 'ee/status_checks/components/modal_create.vue';
@@ -33,7 +34,6 @@ describe('Status checks', () => {
   afterEach(() => {
     wrapper.destroy();
   });
-
   const findCreateModal = () => wrapper.findComponent(ModalCreate);
   const findDeleteModal = () => wrapper.findComponent(ModalDelete);
   const findUpdateModal = () => wrapper.findComponent(ModalUpdate);
@@ -52,9 +52,9 @@ describe('Status checks', () => {
       expect(findTable().exists()).toBe(true);
     });
 
-    it('renders the empty state when no status checks exist', () => {
+    it('renders the empty state when no status checks exist', async () => {
       createWrapper();
-
+      await waitForPromises();
       expect(findCell(0, 0).text()).toBe(i18n.emptyTableText);
     });
 
