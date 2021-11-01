@@ -1,5 +1,5 @@
 <script>
-import { REPORT_COMPONENTS, getComponentNameForType } from './types/constants';
+import { REPORT_COMPONENTS } from './types/constants';
 
 export default {
   components: {
@@ -11,13 +11,8 @@ export default {
       required: true,
     },
   },
-  computed: {
-    componentName() {
-      return getComponentNameForType(this.item.type);
-    },
-  },
 };
 </script>
 <template>
-  <component :is="componentName" v-bind="item" data-testid="reportComponent" />
+  <component :is="item.type" v-bind="item" data-testid="reportComponent" />
 </template>

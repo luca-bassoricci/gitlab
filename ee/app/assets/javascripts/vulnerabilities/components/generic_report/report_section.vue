@@ -2,9 +2,6 @@
 import { GlCollapse, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ReportItem from './report_item.vue';
-import { filterTypesAndLimitListDepth } from './types/utils';
-
-const NESTED_LISTS_MAX_DEPTH = 4;
 
 export default {
   i18n: {
@@ -17,7 +14,7 @@ export default {
   },
   props: {
     details: {
-      type: Object,
+      type: Array,
       required: true,
     },
   },
@@ -27,18 +24,8 @@ export default {
     };
   },
   computed: {
-    filteredDetails() {
-      // NOTE: This will need to be refactored, as we are now dealing with an array of report-items, instead of an object
-      // in short: the data-structure will change significantly
-      return filterTypesAndLimitListDepth(this.details, {
-        maxDepth: NESTED_LISTS_MAX_DEPTH,
-      });
-    },
-    detailsEntries() {
-      return Object.entries(this.filteredDetails);
-    },
     hasDetails() {
-      return this.detailsEntries.length > 0;
+      return this.details.length > 0;
     },
   },
   methods: {
@@ -61,11 +48,11 @@ export default {
     </header>
     <gl-collapse :visible="showSection">
       <div class="generic-report-container" data-testid="reports">
-        <template v-for="[label, item] in detailsEntries">
-          <div :key="label" class="generic-report-row" :data-testid="`report-row-${label}`">
-            <strong class="generic-report-column">{{ item.name || label }}</strong>
+        <template v-for="item in details">
+          <div :key="item.name" class="generic-report-row" :data-testid="`report-row-${item.name}`">
+            <strong class="generic-report-column">{{ item.name }}</strong>
             <div class="generic-report-column" data-testid="reportContent">
-              <report-item :item="item" :data-testid="`report-item-${label}`" />
+              <report-item :item="item" :data-testid="`report-item-${item.name}`" />
             </div>
           </div>
         </template>
