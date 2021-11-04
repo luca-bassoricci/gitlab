@@ -914,9 +914,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1736672386/artifacts/raw/gitlab-ui.jnnkl-gltable-enhancement.tgz":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1748450657/artifacts/raw/gitlab-ui.jnnkl-gltable-enhancement.tgz":
   version "32.21.0"
-  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1736672386/artifacts/raw/gitlab-ui.jnnkl-gltable-enhancement.tgz#3120eacfb696c595c7d243c2b35599ad866ff10f"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1748450657/artifacts/raw/gitlab-ui.jnnkl-gltable-enhancement.tgz#2af51a528eaa7c3dbf49636ac341c0de3164c3fa"
   dependencies:
     "@babel/standalone" "^7.0.0"
     bootstrap-vue "2.20.1"
