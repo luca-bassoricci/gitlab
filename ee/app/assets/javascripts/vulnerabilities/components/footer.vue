@@ -81,8 +81,8 @@ export default {
   computed: {
     project() {
       return {
-        url: this.vulnerability.project.fullPath,
-        value: this.vulnerability.project.fullName,
+        url: this.vulnerability.project.webUrl,
+        value: this.vulnerability.project.nameWithNamespace,
       };
     },
     hasMr() {
