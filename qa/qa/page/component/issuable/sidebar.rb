@@ -105,8 +105,10 @@ module QA
 
           def select_labels_and_refresh(labels)
             Support::Retrier.retry_until do
-              click_element(:labels_edit_button)
-              has_element?(:labels_dropdown_content, text: labels.first)
+              within_element(:labels_block) do
+                click_element(:edit_link)
+                has_element?(:labels_dropdown_content, text: labels.first)
+              end
             end
 
             labels.each do |label|
@@ -115,7 +117,7 @@ module QA
               end
             end
 
-            click_element(:labels_edit_button)
+            click_element(:labels_block)
 
             labels.each do |label|
               has_element?(:labels_block, text: label, wait: 0)
