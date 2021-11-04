@@ -1,4 +1,4 @@
-import { GlTableLite } from '@gitlab/ui';
+import { GlTable } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import StorageTable from '~/projects/storage_counter/components/storage_table.vue';
@@ -22,7 +22,7 @@ describe('StorageTable', () => {
     );
   };
 
-  const findTable = () => wrapper.findComponent(GlTableLite);
+  const findTable = () => wrapper.findComponent(GlTable);
 
   beforeEach(() => {
     createComponent();

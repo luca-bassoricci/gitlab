@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlIcon, GlTableLite as GlTable, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlIcon, GlTable, GlSprintf } from '@gitlab/ui';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { thWidthClass } from '~/lib/utils/table_utility';
 import { sprintf } from '~/locale';
