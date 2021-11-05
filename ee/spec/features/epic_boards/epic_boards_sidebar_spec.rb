@@ -238,7 +238,7 @@ RSpec.describe 'Epic boards sidebar', :js do
 
       it 'displays a message that notifications have been disabled' do
         page.within('.subscriptions') do
-          expect(page).to have_selector('[data-testid="subscription-toggle"]', class: 'is-disabled')
+          expect(page).to have_selector('[data-testid="subscription-toggle"] .gl-toggle-wrapper', class: 'is-disabled')
           expect(page).to have_content('Disabled by group owner')
         end
       end
