@@ -464,7 +464,7 @@ RSpec.describe OperationsController do
 
           it 'does not return a project for which the operations dashboard feature is unavailable' do
             stub_application_setting(check_namespace_plan: true)
-            namespace = create(:namespace, visibility_level: PRIVATE)
+            namespace = create(:user_namespace, visibility_level: PRIVATE)
             unavailable_project = create(:project, namespace: namespace, visibility_level: PRIVATE)
             unavailable_project.add_developer(user)
             user.update!(ops_dashboard_projects: [unavailable_project])
@@ -479,14 +479,14 @@ RSpec.describe OperationsController do
           it 'returns seven projects when some projects do not have the dashboard feature available' do
             stub_application_setting(check_namespace_plan: true)
 
-            public_namespace = create(:namespace, visibility_level: PUBLIC)
+            public_namespace = create(:user_namespace, visibility_level: PUBLIC)
             public_projects = Array.new(7).map do
               project = create(:project, namespace: public_namespace, visibility_level: PUBLIC)
               project.add_developer(user)
               project
             end
 
-            private_namespace = create(:namespace, visibility_level: PRIVATE)
+            private_namespace = create(:user_namespace, visibility_level: PRIVATE)
             private_project = create(:project, namespace: private_namespace, visibility_level: PRIVATE)
             private_project.add_developer(user)
 

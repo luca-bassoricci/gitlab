@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe NamespacePolicy do
-  let_it_be(:parent) { create(:namespace) }
+  let_it_be(:parent) { create(:user_namespace) }
   let_it_be(:namespace) { create(:project_namespace, parent: parent) }
 
   let(:permissions) do

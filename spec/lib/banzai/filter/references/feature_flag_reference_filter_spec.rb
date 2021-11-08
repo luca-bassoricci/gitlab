@@ -85,7 +85,7 @@ RSpec.describe Banzai::Filter::References::FeatureFlagReferenceFilter do
   end
 
   context 'with cross-project / cross-namespace complete reference' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:feature_flag) { create(:operations_feature_flag, project: project2) }
     let_it_be(:reference) { "[feature_flag:#{project2.full_path}/#{feature_flag.iid}]" }
@@ -116,7 +116,7 @@ RSpec.describe Banzai::Filter::References::FeatureFlagReferenceFilter do
   end
 
   context 'with cross-project / same-namespace complete reference' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:project)   { create(:project, :public, namespace: namespace) }
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:feature_flag) { create(:operations_feature_flag, project: project2) }
@@ -148,7 +148,7 @@ RSpec.describe Banzai::Filter::References::FeatureFlagReferenceFilter do
   end
 
   context 'with cross-project shorthand reference' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:project)   { create(:project, :public, namespace: namespace) }
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:feature_flag) { create(:operations_feature_flag, project: project2) }
@@ -180,7 +180,7 @@ RSpec.describe Banzai::Filter::References::FeatureFlagReferenceFilter do
   end
 
   context 'with cross-project URL reference' do
-    let_it_be(:namespace) { create(:namespace, name: 'cross-reference') }
+    let_it_be(:namespace) { create(:user_namespace, name: 'cross-reference') }
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:feature_flag) { create(:operations_feature_flag, project: project2) }
     let_it_be(:reference) { urls.edit_project_feature_flag_url(project2, feature_flag) }

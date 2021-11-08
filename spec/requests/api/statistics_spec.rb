@@ -50,7 +50,7 @@ RSpec.describe API::Statistics, 'Statistics' do
       end
 
       it 'gives the right statistics' do
-        projects = create_list(:project, 4, namespace: create(:namespace, owner: admin))
+        projects = create_list(:project, 4, namespace: create(:user_namespace, owner: admin))
         issues = create_list(:issue, 2, project: projects.first, updated_by: admin)
 
         create_list(:snippet, 2, :public, author: admin)

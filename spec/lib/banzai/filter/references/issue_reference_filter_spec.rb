@@ -186,7 +186,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
     let(:issue)     { create(:issue, project: project2) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let(:project)   { create(:project, :public, namespace: namespace) }
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
 
     it_behaves_like 'a reference containing an element node'
 
@@ -236,7 +236,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
     let(:issue)     { create(:issue, project: project2) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let(:project)   { create(:project, :public, namespace: namespace) }
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
 
     it_behaves_like 'a reference containing an element node'
 
@@ -285,7 +285,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
     let(:reference) { issue_url + "#note_123" }
     let(:issue)     { create(:issue, project: project2) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
-    let(:namespace) { create(:namespace, name: 'cross-reference') }
+    let(:namespace) { create(:user_namespace, name: 'cross-reference') }
 
     it_behaves_like 'a reference containing an element node'
 
@@ -320,7 +320,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
     let(:reference) { issue.to_reference(project) }
     let(:issue)     { create(:issue, project: project2) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
-    let(:namespace) { create(:namespace, name: 'cross-reference') }
+    let(:namespace) { create(:user_namespace, name: 'cross-reference') }
 
     it_behaves_like 'a reference containing an element node'
 
@@ -349,7 +349,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
     let(:reference) { "#{issue_url + "#note_123"}" }
     let(:issue)     { create(:issue, project: project2) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
-    let(:namespace) { create(:namespace, name: 'cross-reference') }
+    let(:namespace) { create(:user_namespace, name: 'cross-reference') }
 
     it_behaves_like 'a reference containing an element node'
 

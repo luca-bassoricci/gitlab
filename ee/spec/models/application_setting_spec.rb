@@ -479,7 +479,7 @@ RSpec.describe ApplicationSetting do
             end
 
             context 'when project is in a namespace' do
-              let(:namespace) { create(:namespace) }
+              let(:namespace) { create(:user_namespace) }
               let(:project) { create(:project, namespace: namespace) }
 
               before do
@@ -561,7 +561,7 @@ RSpec.describe ApplicationSetting do
       let_it_be(:included_namespace) { included_namespace_container.namespace }
 
       let_it_be(:excluded_project) { create(:project) }
-      let_it_be(:excluded_namespace) { create(:namespace) }
+      let_it_be(:excluded_namespace) { create(:user_namespace) }
 
       let(:only_when_enabled_globally) { indexing && searching && !limiting }
 

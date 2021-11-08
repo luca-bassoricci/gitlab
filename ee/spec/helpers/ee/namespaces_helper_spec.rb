@@ -123,7 +123,7 @@ RSpec.describe EE::NamespacesHelper do
   describe '#temporary_storage_increase_visible?' do
     subject { helper.temporary_storage_increase_visible?(namespace) }
 
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:admin) { create(:user, namespace: namespace) }
     let_it_be(:user) { create(:user) }
 

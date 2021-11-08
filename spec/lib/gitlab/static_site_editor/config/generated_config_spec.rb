@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::StaticSiteEditor::Config::GeneratedConfig do
   subject(:config) { described_class.new(repository, ref, path, return_url) }
 
-  let_it_be(:namespace) { create(:namespace, name: 'namespace') }
+  let_it_be(:namespace) { create(:user_namespace, name: 'namespace') }
   let_it_be(:root_group) { create(:group, name: 'group') }
   let_it_be(:subgroup) { create(:group, name: 'subgroup', parent: root_group) }
   let_it_be(:project) { create(:project, :public, :repository, name: 'project', namespace: namespace) }

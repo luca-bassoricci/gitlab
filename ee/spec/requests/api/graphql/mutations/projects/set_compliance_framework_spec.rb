@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Set project compliance framework' do
   include GraphqlHelpers
 
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
   let_it_be(:project) { create(:project, namespace: namespace) }
   let_it_be(:framework) { create(:compliance_framework, namespace: namespace) }
   let_it_be(:current_user) { project.owner }

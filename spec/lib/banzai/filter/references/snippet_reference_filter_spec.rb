@@ -82,7 +82,7 @@ RSpec.describe Banzai::Filter::References::SnippetReferenceFilter do
   end
 
   context 'cross-project / cross-namespace complete reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let!(:snippet)  { create(:project_snippet, project: project2) }
     let(:reference) { "#{project2.full_path}$#{snippet.id}" }
@@ -114,7 +114,7 @@ RSpec.describe Banzai::Filter::References::SnippetReferenceFilter do
   end
 
   context 'cross-project / same-namespace complete reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project)   { create(:project, :public, namespace: namespace) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let!(:snippet)  { create(:project_snippet, project: project2) }
@@ -147,7 +147,7 @@ RSpec.describe Banzai::Filter::References::SnippetReferenceFilter do
   end
 
   context 'cross-project shorthand reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project)   { create(:project, :public, namespace: namespace) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let!(:snippet)  { create(:project_snippet, project: project2) }
@@ -180,7 +180,7 @@ RSpec.describe Banzai::Filter::References::SnippetReferenceFilter do
   end
 
   context 'cross-project URL reference' do
-    let(:namespace) { create(:namespace, name: 'cross-reference') }
+    let(:namespace) { create(:user_namespace, name: 'cross-reference') }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let(:snippet)   { create(:project_snippet, project: project2) }
     let(:reference) { urls.project_snippet_url(project2, snippet) }
@@ -221,7 +221,7 @@ RSpec.describe Banzai::Filter::References::SnippetReferenceFilter do
   end
 
   context 'checking N+1' do
-    let(:namespace2) { create(:namespace) }
+    let(:namespace2) { create(:user_namespace) }
     let(:project2)   { create(:project, :public, namespace: namespace2) }
     let(:snippet2)   { create(:project_snippet, project: project2) }
     let(:reference2) { "#{project2.full_path}$#{snippet2.id}" }

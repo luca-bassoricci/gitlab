@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::LegacyGithubImport::ReleaseFormatter do
-  let!(:project) { create(:project, namespace: create(:namespace, path: 'octocat')) }
+  let!(:project) { create(:project, namespace: create(:user_namespace, path: 'octocat')) }
   let(:octocat) { double(id: 123456, login: 'octocat') }
   let(:created_at) { DateTime.strptime('2011-01-26T19:01:12Z') }
   let(:published_at) { DateTime.strptime('2011-01-26T20:00:00Z') }

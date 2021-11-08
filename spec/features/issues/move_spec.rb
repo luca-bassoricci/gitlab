@@ -100,7 +100,7 @@ RSpec.describe 'issue move to another project' do
   context 'service desk issue moved to a project with service desk disabled', :js do
     let(:project_title) { 'service desk disabled project' }
     let(:warning_selector) { '.js-alert-moved-from-service-desk-warning' }
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:regular_project) { create(:project, title: project_title, service_desk_enabled: false) }
     let(:service_desk_project) { build(:project, :private, namespace: namespace, service_desk_enabled: true) }
     let(:service_desk_issue) { create(:issue, project: service_desk_project, author: ::User.support_bot) }

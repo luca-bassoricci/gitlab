@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Metrics::Dashboard::Stages::GrafanaFormatter do
   include GrafanaApiHelpers
 
-  let_it_be(:namespace) { create(:namespace, name: 'foo') }
+  let_it_be(:namespace) { create(:user_namespace, name: 'foo') }
   let_it_be(:project) { create(:project, namespace: namespace, name: 'bar') }
 
   describe '#transform!' do

@@ -119,7 +119,7 @@ RSpec.describe EE::Audit::ProjectChangesAuditor do
       end
 
       it 'creates an event when the namespace change' do
-        new_namespace = create(:namespace)
+        new_namespace = create(:user_namespace)
 
         project.update!(namespace: new_namespace)
 

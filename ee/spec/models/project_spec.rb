@@ -1289,7 +1289,7 @@ RSpec.describe Project do
     it { expect(project.any_online_runners?).to be_truthy }
 
     context 'with used pipeline minutes' do
-      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let(:namespace) { create(:user_namespace, :with_used_build_minutes_limit) }
       let(:project) do
         create(:project,
                namespace: namespace,
@@ -1306,7 +1306,7 @@ RSpec.describe Project do
     subject { project.shared_runners_available? }
 
     context 'with used pipeline minutes' do
-      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let(:namespace) { create(:user_namespace, :with_used_build_minutes_limit) }
       let(:project) do
         create(:project,
           namespace: namespace,
@@ -1319,7 +1319,7 @@ RSpec.describe Project do
     end
 
     context 'without used pipeline minutes' do
-      let(:namespace) { create(:namespace, :with_not_used_build_minutes_limit) }
+      let(:namespace) { create(:user_namespace, :with_not_used_build_minutes_limit) }
       let(:project) do
         create(:project,
           namespace: namespace,

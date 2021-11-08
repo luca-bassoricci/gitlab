@@ -623,7 +623,7 @@ RSpec.describe API::Projects do
       end
 
       context 'and with all query parameters' do
-        let!(:project5) { create(:project, :public, path: 'gitlab5', namespace: create(:namespace)) }
+        let!(:project5) { create(:project, :public, path: 'gitlab5', namespace: create(:user_namespace)) }
         let!(:project6) { create(:project, :public, namespace: user.namespace) }
         let!(:project7) { create(:project, :public, path: 'gitlab7', namespace: user.namespace) }
         let!(:project8) { create(:project, path: 'gitlab8', namespace: user.namespace) }

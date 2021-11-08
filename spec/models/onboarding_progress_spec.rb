@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe OnboardingProgress do
-  let(:namespace) { create(:namespace) }
+  let(:namespace) { create(:user_namespace) }
   let(:action) { :subscription_created }
 
   describe 'associations' do

@@ -6,7 +6,7 @@ RSpec.describe Namespaces::UserNamespacePolicy do
   let(:user) { create(:user) }
   let(:owner) { create(:user) }
   let(:admin) { create(:admin) }
-  let(:namespace) { create(:namespace, owner: owner) }
+  let(:namespace) { create(:user_namespace, owner: owner) }
 
   let(:owner_permissions) { [:owner_access, :create_projects, :admin_namespace, :read_namespace, :read_statistics, :transfer_projects, :create_package_settings, :read_package_settings] }
 

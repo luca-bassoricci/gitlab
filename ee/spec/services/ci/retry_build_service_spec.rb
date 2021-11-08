@@ -19,7 +19,7 @@ RSpec.describe Ci::RetryBuildService do
 
   describe '#clone!' do
     context 'when user has ability to execute build' do
-      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:namespace) { create(:user_namespace) }
 
       let(:project) { create(:project, namespace: namespace, creator: user) }
 
@@ -132,7 +132,7 @@ RSpec.describe Ci::RetryBuildService do
     end
 
     context 'when the CI quota is exceeded' do
-      let_it_be(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let_it_be(:namespace) { create(:user_namespace, :with_used_build_minutes_limit) }
       let_it_be(:project) { create(:project, namespace: namespace, creator: user) }
 
       context 'when there are no runners available' do

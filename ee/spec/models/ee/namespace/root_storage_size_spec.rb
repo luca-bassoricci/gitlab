@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe EE::Namespace::RootStorageSize, :saas do
-  let(:namespace) { create(:namespace) }
+  let(:namespace) { create(:user_namespace) }
   let(:current_size) { 50.megabytes }
   let(:model) { described_class.new(namespace) }
   let(:create_statistics) { create(:namespace_root_storage_statistics, namespace: namespace, storage_size: current_size)}

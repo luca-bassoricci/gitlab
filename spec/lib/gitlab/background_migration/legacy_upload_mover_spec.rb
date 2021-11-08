@@ -6,7 +6,7 @@ RSpec.describe Gitlab::BackgroundMigration::LegacyUploadMover, :aggregate_failur
   let(:test_dir) { FileUploader.options['storage_path'] }
   let(:filename) { 'image.png' }
 
-  let!(:namespace) { create(:namespace) }
+  let!(:namespace) { create(:user_namespace) }
   let!(:legacy_project) { create(:project, :legacy_storage, namespace: namespace) }
   let!(:hashed_project) { create(:project, namespace: namespace) }
   # default project

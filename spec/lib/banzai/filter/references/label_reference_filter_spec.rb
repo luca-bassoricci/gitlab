@@ -456,7 +456,7 @@ RSpec.describe Banzai::Filter::References::LabelReferenceFilter do
   end
 
   describe 'cross-project / same-namespace complete reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project)   { create(:project, namespace: namespace) }
     let(:project2)  { create(:project, namespace: namespace) }
     let(:label)     { create(:label, project: project2, color: '#00ff00') }
@@ -488,7 +488,7 @@ RSpec.describe Banzai::Filter::References::LabelReferenceFilter do
   end
 
   describe 'cross-project shorthand reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project)   { create(:project, namespace: namespace) }
     let(:project2)  { create(:project, namespace: namespace) }
     let(:label)     { create(:label, project: project2, color: '#00ff00') }

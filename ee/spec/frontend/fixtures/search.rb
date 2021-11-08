@@ -14,7 +14,7 @@ RSpec.describe SearchController, '(JavaScript fixtures)', type: :controller do
   end
 
   context 'search within a project', :sidekiq_inline do
-    let(:namespace) { create(:namespace, name: 'frontend-fixtures') }
+    let(:namespace) { create(:user_namespace, name: 'frontend-fixtures') }
     let(:project) { create(:project, :public, :repository, namespace: namespace, path: 'search-project') }
     let(:blobs) do
       Kaminari.paginate_array([

@@ -3337,7 +3337,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   end
 
   describe 'notifications when pipeline success or failed' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project) { create(:project, :repository, namespace: namespace) }
 
     let(:pipeline) do

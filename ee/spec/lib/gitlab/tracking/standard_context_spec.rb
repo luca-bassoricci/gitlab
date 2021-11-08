@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Tracking::StandardContext do
   let_it_be(:project) { create(:project) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
   let_it_be(:plan) { :ultimate_plan }
 
   let(:snowplow_context) { subject.to_context }

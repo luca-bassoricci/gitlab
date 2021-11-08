@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::HookData::ProjectBuilder do
   let_it_be(:user) { create(:user, name: 'John', email: 'john@example.com') }
-  let_it_be(:namespace) { create(:namespace, owner: user) }
+  let_it_be(:namespace) { create(:user_namespace, owner: user) }
   let_it_be(:project) { create(:project, :internal, name: 'my_project', namespace: namespace) }
 
   describe '#build' do

@@ -20,7 +20,7 @@ RSpec.describe GitlabSubscription, :saas do
     it { is_expected.to validate_presence_of(:start_date) }
 
     it do
-      subject.namespace = create(:namespace)
+      subject.namespace = create(:user_namespace)
       is_expected.to validate_uniqueness_of(:namespace_id)
     end
   end
@@ -332,7 +332,7 @@ RSpec.describe GitlabSubscription, :saas do
 
   describe 'callbacks' do
     context 'after_commit :index_namespace' do
-      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:namespace) { create(:user_namespace) }
 
       let(:gitlab_subscription) { build(:gitlab_subscription, plan, namespace: namespace) }
       let(:dev_env_or_com) { true }
@@ -434,7 +434,7 @@ RSpec.describe GitlabSubscription, :saas do
 
     context 'before_update' do
       it 'logs previous state to gitlab subscription history' do
-        gitlab_subscription = create(:gitlab_subscription, max_seats_used: 42, seats: 13, namespace: create(:namespace))
+        gitlab_subscription = create(:gitlab_subscription, max_seats_used: 42, seats: 13, namespace: create(:user_namespace))
 
         gitlab_subscription.update! max_seats_used: 32
 

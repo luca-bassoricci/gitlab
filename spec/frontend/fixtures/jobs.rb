@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::JobsController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
-  let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
+  let(:namespace) { create(:user_namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project, :repository, namespace: namespace, path: 'builds-project') }
   let(:user) { project.owner }
   let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: project.commit.id) }

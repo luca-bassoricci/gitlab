@@ -203,7 +203,7 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
   describe '#number_of_hidden_storage_alert_banners' do
     subject { helper.number_of_hidden_storage_alert_banners }
 
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
 
     context 'when a cookie is set' do
       before do

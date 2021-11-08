@@ -744,7 +744,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe 'reference methods' do
     let_it_be(:owner)     { create(:user, name: 'Gitlab') }
-    let_it_be(:namespace) { create(:namespace, name: 'Sample namespace', path: 'sample-namespace', owner: owner) }
+    let_it_be(:namespace) { create(:user_namespace, name: 'Sample namespace', path: 'sample-namespace', owner: owner) }
     let_it_be(:project)   { create(:project, name: 'Sample project', path: 'sample-project', namespace: namespace) }
     let_it_be(:group)     { create(:group, name: 'Group', path: 'sample-group') }
     let_it_be(:another_project) { create(:project, namespace: namespace) }
@@ -804,7 +804,7 @@ RSpec.describe Project, factory_default: :keep do
       end
 
       context 'when different namespace / cross-project argument with same owner' do
-        let(:another_namespace_same_owner) { create(:namespace, path: 'another-namespace', owner: owner) }
+        let(:another_namespace_same_owner) { create(:user_namespace, path: 'another-namespace', owner: owner) }
         let(:another_project_same_owner)   { create(:project, path: 'another-project', namespace: another_namespace_same_owner) }
 
         it 'returns full path to the project' do
@@ -1174,7 +1174,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#default_owner' do
     let_it_be(:owner)     { create(:user) }
-    let_it_be(:namespace) { create(:namespace, owner: owner) }
+    let_it_be(:namespace) { create(:user_namespace, owner: owner) }
 
     context 'the project does not have a group' do
       let(:project) { build(:project, namespace: namespace) }
@@ -1670,7 +1670,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#service_desk_enabled?' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
 
     subject(:project) { build(:project, :private, namespace: namespace, service_desk_enabled: true) }
 
@@ -2054,7 +2054,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#default_branch_protected?' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:project) { create(:project, namespace: namespace) }
 
     subject { project.default_branch_protected? }
@@ -3230,7 +3230,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#emails_disabled?' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
 
     let(:project) { build(:project, namespace: namespace, emails_disabled: false) }
 
@@ -3260,7 +3260,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#lfs_enabled?' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project) { build(:project, namespace: namespace) }
 
     shared_examples 'project overrides group' do
@@ -3910,7 +3910,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it "updates the namespace_id when changed" do
-      namespace = create(:namespace)
+      namespace = create(:user_namespace)
       project.update!(namespace: namespace)
 
       expect(project.statistics.namespace_id).to eq namespace.id
@@ -3918,9 +3918,9 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe 'inside_path' do
-    let!(:project1) { create(:project, namespace: create(:namespace, path: 'name_pace')) }
+    let!(:project1) { create(:project, namespace: create(:user_namespace, path: 'name_pace')) }
     let!(:project2) { create(:project) }
-    let!(:project3) { create(:project, namespace: create(:namespace, path: 'namespace')) }
+    let!(:project3) { create(:project, namespace: create(:user_namespace, path: 'namespace')) }
     let!(:path) { project1.namespace.full_path }
 
     it 'returns correct project' do
@@ -4913,7 +4913,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#dependency_proxy_variables' do
-    let_it_be(:namespace) { create(:namespace, path: 'NameWithUPPERcaseLetters') }
+    let_it_be(:namespace) { create(:user_namespace, path: 'NameWithUPPERcaseLetters') }
     let_it_be(:project) { create(:project, :repository, namespace: namespace) }
 
     subject { project.dependency_proxy_variables.to_runner_variables }
@@ -5357,7 +5357,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     context 'branch protection' do
-      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:namespace) { create(:user_namespace) }
 
       let(:project) { create(:project, :repository, namespace: namespace) }
 
@@ -6559,7 +6559,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#closest_setting' do
     shared_examples_for 'fetching closest setting' do
-      let!(:namespace) { create(:namespace) }
+      let!(:namespace) { create(:user_namespace) }
       let!(:project) { create(:project, namespace: namespace) }
 
       let(:setting_name) { :some_setting }
@@ -6974,7 +6974,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#package_already_taken?' do
-    let_it_be(:namespace) { create(:namespace, path: 'test') }
+    let_it_be(:namespace) { create(:user_namespace, path: 'test') }
     let_it_be(:project) { create(:project, :public, namespace: namespace) }
     let_it_be(:package) { create(:npm_package, project: project, name: "@#{namespace.path}/foo", version: '1.2.3') }
 
@@ -7044,7 +7044,7 @@ RSpec.describe Project, factory_default: :keep do
     let_it_be(:project) { create(:project) }
 
     before do
-      project.namespace = create(:namespace)
+      project.namespace = create(:user_namespace)
 
       project.reload
     end

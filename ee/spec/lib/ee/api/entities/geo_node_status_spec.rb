@@ -124,7 +124,7 @@ RSpec.describe EE::API::Entities::GeoNodeStatus do
     end
 
     it 'returns array of namespace ids and paths for selective sync' do
-      namespace = create(:namespace)
+      namespace = create(:user_namespace)
       geo_node_status.geo_node.namespaces << namespace
 
       expect(subject[:namespaces]).not_to be_empty

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe UpcomingReconciliations::UpdateService do
   let_it_be(:existing_upcoming_reconciliation) { create(:upcoming_reconciliation, :saas) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
 
   let(:record_to_create) do
     {

@@ -15,7 +15,7 @@ RSpec.describe "Admin Runners" do
   describe "Runners page", :js do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:project) { create(:project, namespace: namespace, creator: user) }
 
     context "when there are runners" do

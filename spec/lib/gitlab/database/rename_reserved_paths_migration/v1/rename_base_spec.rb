@@ -82,7 +82,7 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameBase, :
 
   describe '#rename_path_for_routable' do
     context 'for personal namespaces' do
-      let(:namespace) { create(:namespace, path: 'the-path') }
+      let(:namespace) { create(:user_namespace, path: 'the-path') }
 
       it "renames namespaces called the-path" do
         subject.rename_path_for_routable(migration_namespace(namespace))
@@ -112,7 +112,7 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameBase, :
       end
 
       it "doesn't rename routes that start with a similar name" do
-        other_namespace = create(:namespace, path: 'the-path-but-not-really')
+        other_namespace = create(:user_namespace, path: 'the-path-but-not-really')
         project = create(:project, path: 'the-project', namespace: other_namespace)
 
         subject.rename_path_for_routable(migration_namespace(namespace))
@@ -136,7 +136,7 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameBase, :
     end
 
     context 'for projects' do
-      let(:parent) { create(:namespace, path: 'the-parent') }
+      let(:parent) { create(:user_namespace, path: 'the-parent') }
       let(:project) { create(:project, path: 'the-path', namespace: parent) }
 
       it 'renames the project called `the-path`' do
@@ -163,7 +163,7 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameBase, :
   describe '#perform_rename' do
     context 'for personal namespaces' do
       it 'renames the path' do
-        namespace = create(:namespace, path: 'the-path')
+        namespace = create(:user_namespace, path: 'the-path')
 
         subject.perform_rename(migration_namespace(namespace), 'the-path', 'renamed')
 

@@ -28,7 +28,7 @@ RSpec.describe API::Internal::UpcomingReconciliations, :api do
 
     context 'when authenticated as admin' do
       let_it_be(:admin) { create(:admin) }
-      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:namespace) { create(:user_namespace) }
 
       let(:namespace_id) { namespace.id }
       let(:upcoming_reconciliations) do

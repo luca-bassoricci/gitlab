@@ -121,7 +121,7 @@ RSpec.describe Epics::TransferService do
     end
 
     context 'when old_group is not present' do
-      let_it_be(:project) { create(:project, namespace: create(:namespace)) }
+      let_it_be(:project) { create(:project, namespace: create(:user_namespace)) }
       let_it_be(:old_group) { nil }
 
       before do

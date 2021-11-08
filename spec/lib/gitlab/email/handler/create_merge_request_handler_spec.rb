@@ -13,7 +13,7 @@ RSpec.describe Gitlab::Email::Handler::CreateMergeRequestHandler do
   end
 
   let!(:project)  { create(:project, :public, :repository, namespace: namespace, path: 'gitlabhq') }
-  let(:namespace) { create(:namespace, path: 'gitlabhq') }
+  let(:namespace) { create(:user_namespace, path: 'gitlabhq') }
   let(:email_raw) { email_fixture('emails/valid_new_merge_request.eml') }
 
   it_behaves_like :reply_processing_shared_examples

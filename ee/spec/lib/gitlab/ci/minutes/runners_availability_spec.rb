@@ -23,7 +23,7 @@ RSpec.describe Gitlab::Ci::Minutes::RunnersAvailability do
     end
 
     with_them do
-      let!(:namespace) { create(:namespace, minutes_quota) }
+      let!(:namespace) { create(:user_namespace, minutes_quota) }
       let!(:project) { create(:project, namespace: namespace, shared_runners_enabled: shared_runners_enabled) }
       let!(:private_runner) { create(:ci_runner, :project, :online, projects: [project], active: private_runner_available) }
 

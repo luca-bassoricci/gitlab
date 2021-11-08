@@ -901,7 +901,7 @@ RSpec.describe ProjectsController do
 
     let_it_be(:project, reload: true) { create(:project) }
     let_it_be(:admin) { create(:admin) }
-    let_it_be(:new_namespace) { create(:namespace) }
+    let_it_be(:new_namespace) { create(:user_namespace) }
 
     it 'updates namespace' do
       sign_in(admin)

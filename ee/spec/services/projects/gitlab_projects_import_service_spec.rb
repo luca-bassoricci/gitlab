@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Projects::GitlabProjectsImportService do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
 
   let(:path) { 'test-path' }
   let(:custom_template) { create(:project) }

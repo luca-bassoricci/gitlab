@@ -50,7 +50,7 @@ RSpec.describe Ci::Minutes::ResetUsageService do
     end
 
     context 'when project does not have namespace_statistics' do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:user_namespace) }
 
       it 'successfully clears minutes' do
         expect(subject).to be_truthy

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Projects::RunnersController, :saas do
   let_it_be(:user) { create(:user) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
 
   let(:project) { create(:project, namespace: namespace, creator: user) }
   let(:runner) { create(:ci_runner, :project, projects: [project]) }

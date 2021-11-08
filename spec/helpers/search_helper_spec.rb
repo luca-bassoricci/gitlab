@@ -55,12 +55,12 @@ RSpec.describe SearchHelper do
       end
 
       it "includes the user's projects" do
-        project = create(:project, namespace: create(:namespace, owner: user))
+        project = create(:project, namespace: create(:user_namespace, owner: user))
         expect(search_autocomplete_opts(project.name).size).to eq(1)
       end
 
       it "includes the required project attrs" do
-        project = create(:project, namespace: create(:namespace, owner: user))
+        project = create(:project, namespace: create(:user_namespace, owner: user))
         result = search_autocomplete_opts(project.name).first
 
         expect(result.keys).to match_array(%i[category id value label url avatar_url])

@@ -8,7 +8,7 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter do
   let_it_be(:parent_group) { create(:group, :public) }
   let_it_be(:group) { create(:group, :public, parent: parent_group) }
   let_it_be(:project) { create(:project, :public, group: group) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
   let_it_be(:another_project) { create(:project, :public, namespace: namespace) }
 
   it 'requires project context' do

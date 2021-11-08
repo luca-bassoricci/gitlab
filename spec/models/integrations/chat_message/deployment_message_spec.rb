@@ -109,7 +109,7 @@ RSpec.describe Integrations::ChatMessage::DeploymentMessage do
 
     it 'returns attachments with the data returned by the deployment data builder' do
       user = create(:user, name: "John Smith", username: "smith")
-      namespace = create(:namespace, name: "myspace")
+      namespace = create(:user_namespace, name: "myspace")
       project = create(:project, :repository, namespace: namespace, name: "myproject")
       commit = project.commit('HEAD')
       environment = create(:environment, name: "myenvironment", project: project)

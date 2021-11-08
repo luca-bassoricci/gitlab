@@ -77,7 +77,7 @@ RSpec.describe API::Internal::Pages do
       end
 
       context 'serverless domain' do
-        let(:namespace) { create(:namespace, name: 'gitlab-org') }
+        let(:namespace) { create(:user_namespace, name: 'gitlab-org') }
         let(:project) { create(:project, namespace: namespace, name: 'gitlab-ce') }
         let(:environment) { create(:environment, project: project) }
         let(:pages_domain) { create(:pages_domain, domain: 'serverless.gitlab.io') }
@@ -165,7 +165,7 @@ RSpec.describe API::Internal::Pages do
       end
 
       context 'custom domain' do
-        let(:namespace) { create(:namespace, name: 'gitlab-org') }
+        let(:namespace) { create(:user_namespace, name: 'gitlab-org') }
         let(:project) { create(:project, namespace: namespace, name: 'gitlab-ce') }
         let!(:pages_domain) { create(:pages_domain, domain: 'pages.io', project: project) }
 

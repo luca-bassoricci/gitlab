@@ -4,7 +4,7 @@ require 'spec_helper'
 RSpec.describe BuildDetailsEntity do
   let_it_be(:user) { create(:user) }
 
-  let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_used: 800) }
+  let(:namespace) { create(:user_namespace, :with_ci_minutes, ci_minutes_used: 800) }
   let(:project) { create(:project, namespace: namespace) }
   let(:request) { double('request', project: project) }
   let(:build) { create(:ci_build, project: project) }

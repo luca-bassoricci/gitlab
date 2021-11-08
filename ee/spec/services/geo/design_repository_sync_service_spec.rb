@@ -10,7 +10,7 @@ RSpec.describe Geo::DesignRepositorySyncService do
   let_it_be(:secondary) { create(:geo_node) }
 
   let(:user) { create(:user) }
-  let(:project) { create(:project_empty_repo, namespace: create(:namespace, owner: user)) }
+  let(:project) { create(:project_empty_repo, namespace: create(:user_namespace, owner: user)) }
 
   let(:repository) { project.design_repository }
   let(:lease_key) { "geo_sync_service:design:#{project.id}" }

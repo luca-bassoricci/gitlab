@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Projects::GitlabProjectsImportService do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
 
   let(:path) { 'test-path' }
   let(:file) { fixture_file_upload('spec/fixtures/project_export.tar.gz') }

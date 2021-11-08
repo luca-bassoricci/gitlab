@@ -6,7 +6,7 @@ RSpec.describe Ci::Minutes::AdditionalPacks::CreateService do
   include AfterNextHelpers
 
   describe '#execute' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:admin) { build(:user, :admin) }
     let_it_be(:non_admin) { build(:user) }
 

@@ -11,7 +11,7 @@ RSpec.describe Namespace do
   let_it_be(:project_sti_name) { Namespaces::ProjectNamespace.sti_name }
   let_it_be(:user_sti_name) { Namespaces::UserNamespace.sti_name }
 
-  let!(:namespace) { create(:namespace, :with_namespace_settings) }
+  let!(:namespace) { create(:user_namespace, :with_namespace_settings) }
   let(:gitlab_shell) { Gitlab::Shell.new }
   let(:repository_storage) { 'default' }
 
@@ -201,7 +201,7 @@ RSpec.describe Namespace do
       with_them do
         it 'validates namespace path' do
           parent_namespace = parent if namespace_type == Namespaces::ProjectNamespace.sti_name
-          namespace = build(:namespace, type: namespace_type, parent: parent_namespace, path: path)
+          namespace = build(:user_namespace, type: namespace_type, parent: parent_namespace, path: path)
 
           expect(namespace.valid?).to be(valid)
         end
@@ -251,7 +251,7 @@ RSpec.describe Namespace do
   describe 'handling STI', :aggregate_failures do
     let(:namespace_type) { nil }
     let(:parent) { nil }
-    let(:namespace) { Namespace.find(create(:namespace, type: namespace_type, parent: parent).id) }
+    let(:namespace) { Namespace.find(create(:user_namespace, type: namespace_type, parent: parent).id) }
 
     context 'creating a Group' do
       let(:namespace_type) { group_sti_name }
@@ -581,7 +581,7 @@ RSpec.describe Namespace do
   end
 
   describe '.with_statistics' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
 
     let(:project1) do
       create(:project,
@@ -646,8 +646,8 @@ RSpec.describe Namespace do
 
   describe '.find_by_pages_host' do
     it 'finds namespace by GitLab Pages host and is case-insensitive' do
-      namespace = create(:namespace, name: 'topNAMEspace', path: 'topNAMEspace')
-      create(:namespace, name: 'annother_namespace')
+      namespace = create(:user_namespace, name: 'topNAMEspace', path: 'topNAMEspace')
+      create(:user_namespace, name: 'annother_namespace')
       host = "TopNamespace.#{Settings.pages.host.upcase}"
 
       expect(described_class.find_by_pages_host(host)).to eq(namespace)
@@ -674,7 +674,7 @@ RSpec.describe Namespace do
     end
 
     it "returns no result if the provided host is not subdomain of the Pages host" do
-      create(:namespace, name: 'namespace.io')
+      create(:user_namespace, name: 'namespace.io')
       host = "namespace.io"
 
       expect(described_class.find_by_pages_host(host)).to eq(nil)
@@ -682,7 +682,7 @@ RSpec.describe Namespace do
   end
 
   describe '.top_most' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:group) { create(:group) }
     let_it_be(:subgroup) { create(:group, parent: group) }
 
@@ -730,7 +730,7 @@ RSpec.describe Namespace do
     end
 
     context 'legacy storage' do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:user_namespace) }
       let!(:project) { create(:project_empty_repo, :legacy_storage, namespace: namespace) }
 
       it_behaves_like 'namespace restrictions'
@@ -774,7 +774,7 @@ RSpec.describe Namespace do
       end
 
       shared_examples 'move_dir without repository storage feature' do |storage_version|
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:user_namespace) }
         let(:gitlab_shell) { namespace.gitlab_shell }
         let!(:project) { create(:project_empty_repo, namespace: namespace, storage_version: storage_version) }
 
@@ -787,7 +787,7 @@ RSpec.describe Namespace do
       end
 
       shared_examples 'move_dir with repository storage feature' do |storage_version|
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:user_namespace) }
         let(:gitlab_shell) { namespace.gitlab_shell }
         let!(:project) { create(:project_empty_repo, namespace: namespace, storage_version: storage_version) }
 
@@ -991,7 +991,7 @@ RSpec.describe Namespace do
     end
 
     context 'hashed storage' do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:user_namespace) }
       let!(:project) { create(:project_empty_repo, namespace: namespace) }
 
       it_behaves_like 'namespace restrictions'
@@ -1111,7 +1111,7 @@ RSpec.describe Namespace do
 
   describe '.find_by_path_or_name' do
     before do
-      @namespace = create(:namespace, name: 'WoW', path: 'woW')
+      @namespace = create(:user_namespace, name: 'WoW', path: 'woW')
     end
 
     it { expect(described_class.find_by_path_or_name('wow')).to eq(@namespace) }
@@ -1121,7 +1121,7 @@ RSpec.describe Namespace do
 
   describe ".clean_path" do
     let!(:user)       { create(:user, username: "johngitlab-etc") }
-    let!(:namespace)  { create(:namespace, path: "JohnGitLab-etc1") }
+    let!(:namespace)  { create(:user_namespace, path: "JohnGitLab-etc1") }
 
     it "cleans the path and makes sure it's available" do
       expect(described_class.clean_path("-john+gitlab-ETC%.git@gmail.com")).to eq("johngitlab-ETC2")
@@ -1145,7 +1145,7 @@ RSpec.describe Namespace do
   end
 
   describe "#default_branch_protection" do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:default_branch_protection) { nil }
     let(:group) { create(:group, default_branch_protection: default_branch_protection) }
 
@@ -1188,7 +1188,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids?' do
-    let_it_be(:namespace, reload: true) { create(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:user_namespace) }
 
     subject { namespace.use_traversal_ids? }
 
@@ -1212,7 +1212,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids_for_root_ancestor?' do
-    let_it_be(:namespace, reload: true) { create(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:user_namespace) }
 
     subject { namespace.use_traversal_ids_for_root_ancestor? }
 
@@ -1236,7 +1236,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids_for_ancestors?' do
-    let_it_be(:namespace, reload: true) { create(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:user_namespace) }
 
     subject { namespace.use_traversal_ids_for_ancestors? }
 
@@ -1311,7 +1311,7 @@ RSpec.describe Namespace do
 
     context 'when namespace is a user namespace' do
       let_it_be(:user) { create(:user) }
-      let_it_be(:user_namespace) { create(:namespace, owner: user) }
+      let_it_be(:user_namespace) { create(:user_namespace, owner: user) }
       let_it_be(:project) { create(:project, namespace: user_namespace) }
       let_it_be(:other_project) { create(:project_empty_repo) }
 
@@ -1561,7 +1561,7 @@ RSpec.describe Namespace do
     end
 
     it 'knows when there is as fork-of-fork in the namespace' do
-      other_namespace = create(:namespace)
+      other_namespace = create(:user_namespace)
       other_fork = fork_project(forked_project, other_namespace.owner, namespace: other_namespace)
 
       expect(other_namespace.find_fork_of(project)).to eq(other_fork)
@@ -1711,12 +1711,12 @@ RSpec.describe Namespace do
   end
 
   describe '#aggregation_scheduled?' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
 
     subject { namespace.aggregation_scheduled? }
 
     context 'with an aggregation scheduled association' do
-      let(:namespace) { create(:namespace, :with_aggregation_schedule) }
+      let(:namespace) { create(:user_namespace, :with_aggregation_schedule) }
 
       it { is_expected.to be_truthy }
     end
@@ -1975,7 +1975,7 @@ RSpec.describe Namespace do
         end
 
         context 'with shared runners enabled' do
-          let(:namespace) { create(:namespace) }
+          let(:namespace) { create(:user_namespace) }
 
           it 'is invalid' do
             namespace.allow_descendants_override_disabled_shared_runners = true

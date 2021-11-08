@@ -39,9 +39,9 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
   end
 
   describe 'scopes' do
-    let_it_be(:namespace1) { create(:namespace) }
-    let_it_be(:namespace2) { create(:namespace) }
-    let_it_be(:namespace3) { create(:namespace) }
+    let_it_be(:namespace1) { create(:user_namespace) }
+    let_it_be(:namespace2) { create(:user_namespace) }
+    let_it_be(:namespace3) { create(:user_namespace) }
     let_it_be(:upcoming_reconciliation1) { create(:upcoming_reconciliation, :saas, namespace: namespace1) }
     let_it_be(:upcoming_reconciliation2) { create(:upcoming_reconciliation, :saas, namespace: namespace2) }
     let_it_be(:upcoming_reconciliation3) { create(:upcoming_reconciliation, :saas, namespace: namespace3) }

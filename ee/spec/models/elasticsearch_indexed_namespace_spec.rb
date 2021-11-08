@@ -18,7 +18,7 @@ RSpec.describe ElasticsearchIndexedNamespace, :saas do
   end
 
   it_behaves_like 'an elasticsearch indexed container' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
 
     let(:container) { :elasticsearch_indexed_namespace }
     let(:container_attributes) { { namespace: namespace } }

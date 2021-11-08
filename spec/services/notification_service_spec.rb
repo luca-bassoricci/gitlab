@@ -3300,7 +3300,7 @@ RSpec.describe NotificationService, :mailer do
   context 'Auto DevOps notifications', :deliver_mails_inline do
     describe '#autodevops_disabled' do
       let(:owner) { create(:user) }
-      let(:namespace) { create(:namespace, owner: owner) }
+      let(:namespace) { create(:user_namespace, owner: owner) }
       let(:project) { create(:project, :repository, :auto_devops, namespace: namespace) }
       let(:pipeline_user) { create(:user) }
       let(:pipeline) { create(:ci_pipeline, :failed, project: project, user: pipeline_user) }

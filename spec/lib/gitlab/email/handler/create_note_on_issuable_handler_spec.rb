@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Email::Handler::CreateNoteOnIssuableHandler do
   include_context :email_shared_context
 
   let_it_be(:user)      { create(:user, email: 'jake@adventuretime.ooo', incoming_email_token: 'auth_token') }
-  let_it_be(:namespace) { create(:namespace, path: 'gitlabhq') }
+  let_it_be(:namespace) { create(:user_namespace, path: 'gitlabhq') }
   let_it_be(:project)   { create(:project, :public, namespace: namespace, path: 'gitlabhq') }
 
   let!(:noteable) { create(:issue, project: project) }

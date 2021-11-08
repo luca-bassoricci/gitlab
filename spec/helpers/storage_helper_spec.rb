@@ -22,7 +22,7 @@ RSpec.describe StorageHelper do
   end
 
   describe "#storage_counters_details" do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:project) do
       create(:project,
              namespace: namespace,

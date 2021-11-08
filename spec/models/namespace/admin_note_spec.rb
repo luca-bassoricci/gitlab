@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Namespace::AdminNote, type: :model do
-  let!(:namespace) { create(:namespace) }
+  let!(:namespace) { create(:user_namespace) }
 
   describe 'associations' do
     it { is_expected.to belong_to :namespace }

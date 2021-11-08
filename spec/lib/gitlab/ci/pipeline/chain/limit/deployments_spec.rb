@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Deployments do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
   let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
   let_it_be(:plan_limits, reload: true) { create(:plan_limits, :default_plan) }
 

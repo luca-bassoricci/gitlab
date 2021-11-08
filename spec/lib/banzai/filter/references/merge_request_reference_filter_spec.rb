@@ -161,7 +161,7 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter do
   end
 
   context 'cross-project / same-namespace complete reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project)   { create(:project, :public, namespace: namespace) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let!(:merge)    { create(:merge_request, source_project: project2) }
@@ -194,7 +194,7 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter do
   end
 
   context 'cross-project shorthand reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:project)   { create(:project, :public, namespace: namespace) }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let!(:merge)    { create(:merge_request, source_project: project2) }
@@ -270,7 +270,7 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter do
   end
 
   context 'cross-project URL reference' do
-    let(:namespace) { create(:namespace, name: 'cross-reference') }
+    let(:namespace) { create(:user_namespace, name: 'cross-reference') }
     let(:project2)  { create(:project, :public, namespace: namespace) }
     let(:merge)     { create(:merge_request, source_project: project2, target_project: project2) }
     let(:reference) { urls.project_merge_request_url(project2, merge) + '/diffs#note_123' }

@@ -75,7 +75,7 @@ RSpec.describe ClusterUpdateAppWorker do
       end
 
       it 'does not allow same app to be updated concurrently by different project', :aggregate_failures do
-        project1 = create(:project, namespace: create(:namespace, owner: user))
+        project1 = create(:project, namespace: create(:user_namespace, owner: user))
 
         expect(Clusters::Applications::PrometheusUpdateService).not_to receive(:new)
 
@@ -98,7 +98,7 @@ RSpec.describe ClusterUpdateAppWorker do
         application2 = create(:clusters_applications_prometheus, :installed)
         lease_key2 = "#{described_class.name.underscore}-#{application2.id}"
 
-        project2 = create(:project, namespace: create(:namespace, owner: user))
+        project2 = create(:project, namespace: create(:user_namespace, owner: user))
 
         stub_exclusive_lease(lease_key2)
 

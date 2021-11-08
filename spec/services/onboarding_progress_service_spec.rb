@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe OnboardingProgressService do
   describe '.async' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:user_namespace) }
     let_it_be(:action) { :git_pull }
 
     subject(:execute_service) { described_class.async(namespace.id).execute(action: action) }
@@ -45,7 +45,7 @@ RSpec.describe OnboardingProgressService do
   end
 
   describe '#execute' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:user_namespace) }
     let(:action) { :namespace_action }
 
     subject(:execute_service) { described_class.new(namespace).execute(action: :subscription_created) }

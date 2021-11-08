@@ -220,7 +220,7 @@ RSpec.describe Group, 'Routable', :with_clean_rails_cache do
 end
 
 RSpec.describe Project, 'Routable', :with_clean_rails_cache do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:user_namespace) }
   let_it_be(:project) { create(:project, namespace: namespace) }
 
   it_behaves_like '.find_by_full_path' do
