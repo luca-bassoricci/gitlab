@@ -6,5 +6,5 @@
 %h3.page-title
   = @integration.title
 
-= render 'shared/integrations/tabs', integration: @integration, active_tab: 'edit' do
+= render 'shared/integrations/tabs', integration: @integration, overrides_counter: @overrides_counter, active_tab: 'edit' do
   = render 'shared/integrations/form', integration: @integration

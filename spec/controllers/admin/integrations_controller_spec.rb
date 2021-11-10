@@ -138,6 +138,19 @@ RSpec.describe Admin::IntegrationsController do
 
         expect(response).to render_template 'shared/integrations/overrides'
         expect(assigns(:integration)).to eq(instance_integration)
+        expect(assigns(:overrides_counter)).to eq("1")
+      end
+
+      context 'when overrides exceed limit' do
+        before do
+          stub_const("#{described_class}::OVERRIDES_COUNTER_LIMIT", 1)
+        end
+
+        it 'formats count badge correctly' do
+          subject
+
+          expect(assigns(:overrides_counter)).to eq("1+")
+        end
       end
     end
   end

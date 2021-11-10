@@ -15,8 +15,15 @@ RSpec.describe 'User activates the instance-level Mattermost Slash Command integ
 
   include_examples 'user activates the Mattermost Slash Command integration'
 
-  it 'displays navigation tabs' do
-    expect(page).to have_link('Settings', href: edit_path)
-    expect(page).to have_link('Projects using custom settings', href: overrides_path)
+  context 'navigation tabs' do
+    it 'displays the overrides tab' do
+      expect(page).to have_link('Settings', href: edit_path)
+      expect(page).to have_link('Projects using custom settings', href: overrides_admin_application_settings_integration_path(:mattermost_slash_commands))
+    end
+
+    it 'displays the correct counter badge in overrides tab' do
+      tab = page.find_link('Projects using custom settings')
+      expect(tab).to have_content(0)
+    end
   end
 end
