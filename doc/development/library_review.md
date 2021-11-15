@@ -167,3 +167,14 @@ If the vetting didn't identify any issues, the MR can be merged. If there are
 any problems preventing you from vetting the library (e.g. the dependency is too
 large to review manually), please reach out to `@gitlab-com/gl-security/appsec`
 for assistance.
+
+### MR Vetting Template
+
+Add the following to your MR for each dependency:
+
+  - [ ] Vetting `New/Updated` Dependency `dependency name here` [as per the process]()
+    + [ ] Url: `hxxps://package-url-with-version`
+    + [ ] GitLab Dependency Scanning ran and detected no vulnerabilities
+    + [ ] Package Hunter ran and detected no vulnerabilities
+    + [ ] `@reviewername` reviewed the _actual_ code distributed by this library and all its dependencies, for problematic code.
+
