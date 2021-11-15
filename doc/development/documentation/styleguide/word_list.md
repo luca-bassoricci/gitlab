@@ -217,7 +217,7 @@ Do not use **easily**. If the user doesn't find the process to be easy, we lose 
 
 ## e.g.
 
-Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml))
+Do not use Latin abbreviations. Use **for example**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml))
 
 ## email
 
@@ -611,6 +611,13 @@ Do not use **slave**. Another option is **secondary**. ([Vale](../testing.md#val
 ## subgroup
 
 Use **subgroup** (no hyphen) instead of **sub-group**. ([Vale](../testing.md#vale) rule: [`SubstitutionSuggestions.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/SubstitutionSuggestions.yml))
+
+## such as
+
+Do not use **such as** if you can avoid it. Use **like** or **for example** instead.
+
+- Do: Enter the name of an application, like `Twitter` or `Google`.
+- Do not: Enter the name of an application, such as `Twitter` or `Google`.
 
 ## that
 
