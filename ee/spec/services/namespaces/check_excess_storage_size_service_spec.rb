@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
-  let(:namespace) { build(:namespace, additional_purchased_storage_size: additional_purchased_storage_size) }
+  let(:namespace) { build(:namespace, additional_purchased_storage_size: additional_purchased_storage_size) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:user) { build(:user, namespace: namespace) }
   let(:service) { described_class.new(namespace, user) }
   let(:total_repository_size_excess) { 150.megabytes }

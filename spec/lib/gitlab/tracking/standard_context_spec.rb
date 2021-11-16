@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Tracking::StandardContext do
   let_it_be(:project) { create(:project) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:user) { create(:user) }
 
   let(:snowplow_context) { subject.to_context }
@@ -66,7 +66,7 @@ RSpec.describe Gitlab::Tracking::StandardContext do
       end
 
       context 'when namespace is available' do
-        subject { described_class.new(namespace: create(:namespace)) }
+        subject { described_class.new(namespace: create(:namespace)) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         it 'contains plan name' do
           expect(snowplow_context.to_json.dig(:data, :plan)).to eq(Plan::DEFAULT)

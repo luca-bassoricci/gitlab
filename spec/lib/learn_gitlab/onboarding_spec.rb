@@ -6,7 +6,7 @@ RSpec.describe LearnGitlab::Onboarding do
   describe '#completed_percentage' do
     let(:completed_actions) { {} }
     let(:onboarding_progress) { build(:onboarding_progress, namespace: namespace, **completed_actions) }
-    let(:namespace) { build(:namespace) }
+    let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     let_it_be(:tracked_action_columns) do
       tracked_actions = described_class::ACTION_ISSUE_IDS.keys + described_class::ACTION_DOC_URLS.keys

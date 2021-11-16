@@ -18,7 +18,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationEntity do
 
   describe '#has_permissions?' do
     context 'with namespace' do
-      let(:namespace) { build(:namespace, owner: user) }
+      let(:namespace) { build(:namespace, owner: user) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it 'checks if user can admin_namespace' do
         expect(Ability).to receive(:allowed?).with(user, :admin_namespace, namespace).and_return(true)
@@ -52,7 +52,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationEntity do
     end
 
     context 'with namespace' do
-      let(:namespace) { build(:namespace, owner: user) }
+      let(:namespace) { build(:namespace, owner: user) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       before do
         stub_ee_application_setting(should_check_namespace_plan: true)

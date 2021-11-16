@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity, :saas do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
   let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
   let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: ultimate_plan) }

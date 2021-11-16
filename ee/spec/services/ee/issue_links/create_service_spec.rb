@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe IssueLinks::CreateService do
   describe '#execute' do
-    let(:namespace) { create :namespace }
+    let(:namespace) { create :namespace } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { create :project, namespace: namespace }
     let(:issue) { create :issue, project: project }
     let(:user) { create :user }

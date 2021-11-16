@@ -139,8 +139,8 @@ RSpec.describe ApplicationExperiment, :experiment do
         let(:context) { { context_key => context_value } }
 
         where(:context_key, :context_value, :object_type) do
-          :namespace | build(:namespace) | :namespace
-          :group     | build(:namespace) | :namespace
+          :namespace | build(:namespace) | :namespace # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
+          :group     | build(:namespace) | :namespace # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
           :project   | build(:project)   | :project
           :user      | build(:user)      | :user
           :actor     | build(:user)      | :user

@@ -85,7 +85,7 @@ RSpec.describe Banzai::Filter::References::AlertReferenceFilter do
   end
 
   context 'cross-project / cross-namespace complete reference' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:alert)     { create(:alert_management_alert, project: project2) }
     let_it_be(:reference) { "#{project2.full_path}^alert##{alert.iid}" }
@@ -116,7 +116,7 @@ RSpec.describe Banzai::Filter::References::AlertReferenceFilter do
   end
 
   context 'cross-project / same-namespace complete reference' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project)   { create(:project, :public, namespace: namespace) }
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:alert)     { create(:alert_management_alert, project: project2) }
@@ -148,7 +148,7 @@ RSpec.describe Banzai::Filter::References::AlertReferenceFilter do
   end
 
   context 'cross-project shorthand reference' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project)   { create(:project, :public, namespace: namespace) }
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:alert)     { create(:alert_management_alert, project: project2) }
@@ -180,7 +180,7 @@ RSpec.describe Banzai::Filter::References::AlertReferenceFilter do
   end
 
   context 'cross-project URL reference' do
-    let_it_be(:namespace) { create(:namespace, name: 'cross-reference') }
+    let_it_be(:namespace) { create(:namespace, name: 'cross-reference') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project2)  { create(:project, :public, namespace: namespace) }
     let_it_be(:alert)     { create(:alert_management_alert, project: project2) }
     let_it_be(:reference) { alert.details_url }
@@ -222,7 +222,7 @@ RSpec.describe Banzai::Filter::References::AlertReferenceFilter do
   end
 
   context 'checking N+1' do
-    let(:namespace)        { create(:namespace) }
+    let(:namespace)        { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project2)         { create(:project, :public, namespace: namespace) }
     let(:alert2)           { create(:alert_management_alert, project: project2) }
     let(:alert_reference)  { alert.to_reference }

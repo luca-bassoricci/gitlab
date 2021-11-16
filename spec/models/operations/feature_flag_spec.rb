@@ -32,7 +32,7 @@ RSpec.describe Operations::FeatureFlag do
   end
 
   describe '#to_reference' do
-    let(:namespace) { build(:namespace, path: 'sample-namespace') }
+    let(:namespace) { build(:namespace, path: 'sample-namespace') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { build(:project, name: 'sample-project', namespace: namespace) }
     let(:feature_flag) { build(:operations_feature_flag, iid: 1, project: project) }
 

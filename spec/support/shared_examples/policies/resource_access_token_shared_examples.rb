@@ -35,7 +35,7 @@ RSpec.shared_examples 'Self-managed Core resource access tokens' do
       end
 
       context 'with a personal namespace project' do
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         let(:project) { create(:project, namespace: namespace) }
 
         before do

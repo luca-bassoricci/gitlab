@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe NamespacePolicy do
-  let_it_be(:parent) { create(:namespace) }
+  let_it_be(:parent) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project) { create(:project, namespace: parent) }
   let_it_be(:namespace) { project.project_namespace }
 

@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe Packages::TerraformModule::CreatePackageService do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project) { create(:project, namespace: namespace) }
   let_it_be(:user) { create(:user) }
   let_it_be(:sha256) { '440e5e148a25331bbd7991575f7d54933c0ebf6cc735a18ee5066ac1381bb590' }

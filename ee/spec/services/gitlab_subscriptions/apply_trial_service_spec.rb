@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe GitlabSubscriptions::ApplyTrialService do
   subject(:execute) { described_class.new.execute(apply_trial_params) }
 
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
   let(:apply_trial_params) do
     {

@@ -17,7 +17,7 @@ RSpec.describe BlobHelper do
   end
 
   describe "#edit_blob_button" do
-    let(:namespace) { create(:namespace, name: 'gitlab') }
+    let(:namespace) { create(:namespace, name: 'gitlab') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { create(:project, :repository, namespace: namespace) }
 
     subject(:link) { helper.edit_blob_button(project, 'master', 'README.md') }
@@ -325,7 +325,7 @@ RSpec.describe BlobHelper do
   end
 
   describe `#ide_edit_button` do
-    let_it_be(:namespace) { create(:namespace, name: 'gitlab') }
+    let_it_be(:namespace) { create(:namespace, name: 'gitlab') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project) { create(:project, :repository, namespace: namespace) }
     let_it_be(:current_user) { create(:user) }
 

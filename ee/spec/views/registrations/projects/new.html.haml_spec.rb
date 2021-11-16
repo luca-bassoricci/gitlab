@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'registrations/projects/new' do
   let_it_be(:user) { create(:user) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project) { create(:project, namespace: namespace) }
   let_it_be(:trial_onboarding_flow) { false }
   let_it_be(:trial_during_signup_flow) { false }

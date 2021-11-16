@@ -6,10 +6,10 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameProject
   let(:migration) { FakeRenameReservedPathMigrationV1.new }
   let(:subject) { described_class.new(['the-path'], migration) }
   let(:project) do
-    create(:project,
+    create(:project, # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
            :legacy_storage,
            path: 'the-path',
-           namespace: create(:namespace, path: 'known-parent' ))
+           namespace: create(:namespace, path: 'known-parent' )) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   end
 
   before do
@@ -19,7 +19,7 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameProject
 
   describe '#projects_for_paths' do
     it 'searches using nested paths' do
-      namespace = create(:namespace, path: 'hello')
+      namespace = create(:namespace, path: 'hello') # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       project = create(:project, :legacy_storage, path: 'THE-path', namespace: namespace)
 
       result_ids = described_class.new(['Hello/the-path'], migration)
@@ -122,7 +122,7 @@ RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameProject
   end
 
   describe '#move_repository' do
-    let(:known_parent) { create(:namespace, path: 'known-parent') }
+    let(:known_parent) { create(:namespace, path: 'known-parent') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { create(:project, :repository, :legacy_storage, path: 'the-path', namespace: known_parent) }
 
     it 'moves the repository for a project' do

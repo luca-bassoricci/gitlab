@@ -72,7 +72,7 @@ RSpec.describe SearchHelper do
         end
 
         it 'does not include iterations endpoint for projects under a namespace' do
-          @project = create(:project, namespace: create(:namespace))
+          @project = create(:project, namespace: create(:namespace)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           expect(options[:data]['iterations-endpoint']).to be(nil)
         end

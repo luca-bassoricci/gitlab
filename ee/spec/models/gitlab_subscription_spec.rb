@@ -20,7 +20,7 @@ RSpec.describe GitlabSubscription, :saas do
     it { is_expected.to validate_presence_of(:start_date) }
 
     it do
-      subject.namespace = create(:namespace)
+      subject.namespace = create(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       is_expected.to validate_uniqueness_of(:namespace_id)
     end
   end
@@ -332,7 +332,7 @@ RSpec.describe GitlabSubscription, :saas do
 
   describe 'callbacks' do
     context 'after_commit :index_namespace' do
-      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       let(:gitlab_subscription) { build(:gitlab_subscription, plan, namespace: namespace) }
       let(:dev_env_or_com) { true }

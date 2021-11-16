@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::RepositorySizeChecker do
   let(:current_size) { 0 }
   let(:limit) { 50 }
-  let(:namespace) { build(:namespace, additional_purchased_storage_size: additional_purchased_storage) }
+  let(:namespace) { build(:namespace, additional_purchased_storage_size: additional_purchased_storage) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:total_repository_size_excess) { 0 }
   let(:additional_purchased_storage) { 0 }
   let(:enabled) { true }

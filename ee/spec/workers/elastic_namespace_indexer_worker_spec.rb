@@ -33,7 +33,7 @@ RSpec.describe ElasticNamespaceIndexerWorker do
     end
 
     describe 'indexing and deleting' do
-      let_it_be(:namespace) { create :namespace }
+      let_it_be(:namespace) { create :namespace } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       let(:projects) { create_list :project, 3, namespace: namespace }
 

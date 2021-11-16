@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Pipeline', :js do
   let_it_be(:user) { create(:user) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
 
   before do

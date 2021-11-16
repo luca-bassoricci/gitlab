@@ -7,7 +7,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
   include JavaScriptFixturesHelpers
 
   let_it_be(:admin) { create(:admin, username: 'administrator', email: 'admin@example.gitlab.com') }
-  let_it_be(:namespace) { create(:namespace, path: 'releases-namespace') }
+  let_it_be(:namespace) { create(:namespace, path: 'releases-namespace') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project) { create(:project, :repository, namespace: namespace, path: 'releases-project') }
 
   let_it_be(:milestone_12_3) do

@@ -85,7 +85,7 @@ RSpec.describe 'Trial Select Namespace', :js do
       end
 
       context 'enters an existing group name' do
-        let!(:namespace) { create(:namespace, owner_id: user.id, path: 'gitlab') }
+        let!(:namespace) { create(:namespace, owner_id: user.id, path: 'gitlab') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         before do
           expect_any_instance_of(GitlabSubscriptions::ApplyTrialService).to receive(:execute) do

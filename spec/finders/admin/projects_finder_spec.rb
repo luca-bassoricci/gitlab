@@ -47,7 +47,7 @@ RSpec.describe Admin::ProjectsFinder do
     end
 
     context 'filter by namespace_id' do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let!(:project_in_namespace) { create(:project, namespace: namespace) }
       let(:params) { { namespace_id: namespace.id } }
 

@@ -122,7 +122,7 @@ RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   end
 
   context 'cross-project / cross-namespace complete reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project2)  { create(:project, :public, :repository, namespace: namespace) }
     let(:commit)    { project2.commit }
     let(:reference) { "#{project2.full_path}@#{commit.short_id}" }
@@ -147,7 +147,7 @@ RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   end
 
   context 'cross-project / same-namespace complete reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project)   { create(:project, namespace: namespace) }
     let(:project2)  { create(:project, :public, :repository, namespace: namespace) }
     let(:commit)    { project2.commit }
@@ -173,7 +173,7 @@ RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   end
 
   context 'cross-project shorthand reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project)   { create(:project, namespace: namespace) }
     let(:project2)  { create(:project, :public, :repository, namespace: namespace) }
     let(:commit)    { project2.commit }
@@ -199,7 +199,7 @@ RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   end
 
   context 'cross-project URL reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project2)  { create(:project, :public, :repository, namespace: namespace) }
     let(:commit)    { project2.commit }
     let(:reference) { urls.project_commit_url(project2, commit.id) }
@@ -224,7 +224,7 @@ RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   end
 
   context 'URL reference for a commit patch' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project2)  { create(:project, :public, :repository, namespace: namespace) }
     let(:commit)    { project2.commit }
     let(:link)      { urls.project_commit_url(project2, commit.id) }
@@ -271,8 +271,8 @@ RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   end
 
   context 'checking N+1' do
-    let(:namespace2)        { create(:namespace) }
-    let(:namespace3)        { create(:namespace) }
+    let(:namespace2)        { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
+    let(:namespace3)        { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project2)          { create(:project, :public, :repository, namespace: namespace2) }
     let(:project3)          { create(:project, :public, :repository, namespace: namespace3) }
     let(:commit2)           { project2.commit }

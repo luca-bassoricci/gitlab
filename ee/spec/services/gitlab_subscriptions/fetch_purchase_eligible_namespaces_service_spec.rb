@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe GitlabSubscriptions::FetchPurchaseEligibleNamespacesService do
   describe '#execute' do
     let_it_be(:user) { build(:user) }
-    let_it_be(:namespace_1) { create(:namespace) }
-    let_it_be(:namespace_2) { create(:namespace) }
+    let_it_be(:namespace_1) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
+    let_it_be(:namespace_2) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     context 'when no namespaces are supplied' do
       it 'returns an array with an empty hash', :aggregate_failures do

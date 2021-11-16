@@ -38,7 +38,7 @@ RSpec.describe Namespaces::CheckStorageSizeService, '#execute' do
     end
 
     it 'is successful when feature flag is activated for another namespace' do
-      stub_feature_flags(namespace_storage_limit: build(:namespace))
+      stub_feature_flags(namespace_storage_limit: build(:namespace)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       expect(response).to be_success
     end

@@ -110,7 +110,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'allows limiting projects and namespaces to index', :aggregate_failures, :js do
       project = create(:project)
-      namespace = create(:namespace)
+      namespace = create(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       page.within('.as-elasticsearch') do
         expect(page).not_to have_content('Namespaces to index')

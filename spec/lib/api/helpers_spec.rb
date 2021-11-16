@@ -211,7 +211,7 @@ RSpec.describe API::Helpers do
   end
 
   describe '#find_namespace' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     shared_examples 'namespace finder' do
       context 'when namespace exists' do
@@ -273,7 +273,7 @@ RSpec.describe API::Helpers do
     end
 
     context "when namespace is user's personal namespace" do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       context 'when user owns the namespace' do
         before do

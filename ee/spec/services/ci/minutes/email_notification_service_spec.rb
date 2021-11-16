@@ -104,7 +104,7 @@ RSpec.describe Ci::Minutes::EmailNotificationService do
       end
 
       context 'when on personal namespace' do
-        let(:namespace) { create(:namespace, owner: user) }
+        let(:namespace) { create(:namespace, owner: user) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         let(:recipients) { [user.email] }
 
         it_behaves_like 'matches the expectation'

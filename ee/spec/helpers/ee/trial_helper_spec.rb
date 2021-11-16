@@ -159,13 +159,13 @@ RSpec.describe EE::TrialHelper do
     end
 
     context 'when namespace is valid' do
-      let(:namespace) { build(:namespace) }
+      let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it_behaves_like 'shows errors based on trial generation result'
     end
 
     context 'when namespace is invalid' do
-      let(:namespace) { build(:namespace, name: 'admin') }
+      let(:namespace) { build(:namespace, name: 'admin') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       where(:trial_result, :expected_result) do
         nil                | true
@@ -182,7 +182,7 @@ RSpec.describe EE::TrialHelper do
   end
 
   describe '#show_extend_reactivate_trial_button?' do
-    let(:namespace) { build(:namespace) }
+    let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject(:show_extend_reactivate_trial_button) { helper.show_extend_reactivate_trial_button?(namespace) }
 
@@ -215,7 +215,7 @@ RSpec.describe EE::TrialHelper do
   end
 
   describe '#extend_reactivate_trial_button_data' do
-    let(:namespace) { build(:namespace, id: 1) }
+    let(:namespace) { build(:namespace, id: 1) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject(:extend_reactivate_trial_button_data) { helper.extend_reactivate_trial_button_data(namespace) }
 

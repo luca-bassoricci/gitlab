@@ -4,8 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::LegacyGithubImport::WikiFormatter do
   let(:project) do
-    create(:project,
-           namespace: create(:namespace, path: 'gitlabhq'),
+    create(:project, # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
+           namespace: create(:namespace, path: 'gitlabhq'), # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
            import_url: 'https://xxx@github.com/gitlabhq/sample.gitlabhq.git')
   end
 

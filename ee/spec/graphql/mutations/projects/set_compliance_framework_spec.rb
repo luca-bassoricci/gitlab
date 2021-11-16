@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Projects::SetComplianceFramework do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:framework) { create(:compliance_framework, namespace: namespace) }
   let_it_be(:project) { create(:project, :repository, namespace: namespace) }
   let_it_be(:current_user) { create(:user) }

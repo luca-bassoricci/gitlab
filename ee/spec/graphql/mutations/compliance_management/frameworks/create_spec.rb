@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
   let(:params) { valid_params }
   let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }

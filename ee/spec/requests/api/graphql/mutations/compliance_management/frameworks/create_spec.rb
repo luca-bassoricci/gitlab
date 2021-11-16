@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Create a Compliance Framework' do
   include GraphqlHelpers
 
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:current_user) { namespace.owner }
 
   let(:mutation) do

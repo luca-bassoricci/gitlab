@@ -138,7 +138,7 @@ RSpec.describe Gitlab::Ci::Status::Factory do
   context 'behaviour of FactoryBot traits that create associations' do
     context 'creating a namespace with an associated aggregation_schedule record' do
       it 'creates only one Namespace record and one Namespace::AggregationSchedule record' do
-        expect { create(:namespace, :with_aggregation_schedule) }
+        expect { create(:namespace, :with_aggregation_schedule) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
           .to change { Namespace.count }.by(1)
           .and change { Namespace::AggregationSchedule.count }.by(1)
       end

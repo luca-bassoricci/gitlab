@@ -17,7 +17,7 @@ module RuboCop
       #   let(:namespace) { build(:namespace, name: "Mystery namespace") }
       #
       #   # good
-      #   create(:user_namespace, name: "Clearly a user namespace")
+      #   let(:namespace) { create(:user_namespace, name: "Clearly a user namespace") }
       #
       #   # good
       #   let(:group) { build(:group, name: "My wonderful group") }

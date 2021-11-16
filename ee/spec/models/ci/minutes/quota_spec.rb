@@ -80,7 +80,7 @@ RSpec.describe Ci::Minutes::Quota do
     end
 
     with_them do
-      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_limit: monthly_limit, ci_minutes_used: minutes_used) }
+      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_limit: monthly_limit, ci_minutes_used: minutes_used) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       before do
         allow(quota).to receive(:enabled?).and_return(limit_enabled)
@@ -103,7 +103,7 @@ RSpec.describe Ci::Minutes::Quota do
     end
 
     with_them do
-      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_used: minutes_used) }
+      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_used: minutes_used) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it { is_expected.to eq(expected_minutes) }
     end
@@ -122,7 +122,7 @@ RSpec.describe Ci::Minutes::Quota do
     end
 
     with_them do
-      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_used: total_minutes_used, ci_minutes_limit: monthly_minutes) }
+      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_used: total_minutes_used, ci_minutes_limit: monthly_minutes) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       before do
         allow(namespace).to receive(:extra_shared_runners_minutes_limit).and_return(purchased_minutes)
@@ -137,7 +137,7 @@ RSpec.describe Ci::Minutes::Quota do
 
     context 'when quota is enabled' do
       let(:total_minutes) { 1000 }
-      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_limit: total_minutes, ci_minutes_used: total_minutes_used) }
+      let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_limit: total_minutes, ci_minutes_used: total_minutes_used) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       context 'when monthly minutes quota greater than monthly minutes used' do
         let(:total_minutes_used) { total_minutes - 1 }
@@ -193,7 +193,7 @@ RSpec.describe Ci::Minutes::Quota do
         end
 
         with_them do
-          let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_limit: monthly_minutes, ci_minutes_used: total_minutes_used) }
+          let(:namespace) { create(:namespace, :with_ci_minutes, ci_minutes_limit: monthly_minutes, ci_minutes_used: total_minutes_used) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           before do
             allow(namespace).to receive(:extra_shared_runners_minutes_limit).and_return(purchased_minutes)
@@ -221,7 +221,7 @@ RSpec.describe Ci::Minutes::Quota do
     end
 
     let(:namespace) do
-      create(:namespace, :with_ci_minutes)
+      create(:namespace, :with_ci_minutes) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     end
 
     it 'corresponds to the beginning of the current month' do

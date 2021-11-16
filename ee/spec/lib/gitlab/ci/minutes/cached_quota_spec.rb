@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Minutes::CachedQuota do
-  let_it_be(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
+  let_it_be(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
   let(:cached_quota) { described_class.new(namespace) }
 

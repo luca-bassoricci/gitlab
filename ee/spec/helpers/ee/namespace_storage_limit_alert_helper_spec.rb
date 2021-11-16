@@ -74,7 +74,7 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
   describe '#namespace_storage_alert' do
     subject { helper.namespace_storage_alert(namespace) }
 
-    let(:namespace) { build(:namespace) }
+    let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     let(:payload) do
       {
@@ -183,7 +183,7 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
   describe '#purchase_storage_link_enabled?' do
     subject { helper.purchase_storage_link_enabled?(namespace) }
 
-    let_it_be(:namespace) { build(:namespace) }
+    let_it_be(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     where(:additional_repo_storage_by_namespace_enabled, :result) do
       false | false
@@ -203,7 +203,7 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
   describe '#number_of_hidden_storage_alert_banners' do
     subject { helper.number_of_hidden_storage_alert_banners }
 
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     context 'when a cookie is set' do
       before do

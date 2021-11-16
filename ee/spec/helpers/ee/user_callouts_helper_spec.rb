@@ -133,7 +133,7 @@ RSpec.describe EE::UserCalloutsHelper do
   end
 
   describe '#render_dashboard_ultimate_trial', :saas do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:ultimate_plan) { create(:ultimate_plan) }
 
     let(:user) { namespace.owner }

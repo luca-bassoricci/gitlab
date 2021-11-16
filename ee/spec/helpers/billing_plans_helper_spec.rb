@@ -129,7 +129,7 @@ RSpec.describe BillingPlansHelper, :saas do
       subject { helper.subscription_plan_data_attributes(namespace, plan) }
 
       context 'with namespace' do
-        let(:namespace) { build(:namespace) }
+        let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         it 'does not return billable_seats_href' do
           expect(subject).not_to include(billable_seats_href: helper.group_usage_quotas_path(namespace, anchor: 'seats-quota-tab'))
@@ -146,7 +146,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
 
     context 'when the namespace belongs to a user' do
-      let(:namespace) { build(:namespace) }
+      let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       context 'when the namespace is free plan' do
         it 'returns attributes with free_personal_namespace true' do
@@ -391,7 +391,7 @@ RSpec.describe BillingPlansHelper, :saas do
   end
 
   describe "#hand_raise_props" do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:user) { create(:user, username: 'Joe', first_name: 'Joe', last_name: 'Doe', organization: 'ACME') }
 
     before do
@@ -567,7 +567,7 @@ RSpec.describe BillingPlansHelper, :saas do
   describe '#show_start_free_trial_messages?' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:namespace) { build(:namespace) }
+    let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     where(:free_personal, :eligible_for_trial, :expected) do
       false  | true   | true

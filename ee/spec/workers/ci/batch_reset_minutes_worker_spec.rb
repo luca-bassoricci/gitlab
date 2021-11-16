@@ -7,7 +7,7 @@ RSpec.describe Ci::BatchResetMinutesWorker do
 
   describe '#perform' do
     let(:first_namespace) do
-      create(:namespace,
+      create(:namespace, # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         id: 1,
         shared_runners_minutes_limit: 100,
         extra_shared_runners_minutes_limit: 50,
@@ -16,7 +16,7 @@ RSpec.describe Ci::BatchResetMinutesWorker do
     end
 
     let(:last_namespace) do
-      create(:namespace,
+      create(:namespace, # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         id: 10,
         shared_runners_minutes_limit: 100,
         extra_shared_runners_minutes_limit: 50,

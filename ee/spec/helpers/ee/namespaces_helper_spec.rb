@@ -6,7 +6,7 @@ RSpec.describe EE::NamespacesHelper do
   let!(:user_project_creation_level) { nil }
 
   let(:user_group) do
-    create(:namespace, :with_ci_minutes,
+    create(:namespace, :with_ci_minutes, # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
            project_creation_level: user_project_creation_level,
            owner: user,
            ci_minutes_used: ci_minutes_used)
@@ -123,7 +123,7 @@ RSpec.describe EE::NamespacesHelper do
   describe '#temporary_storage_increase_visible?' do
     subject { helper.temporary_storage_increase_visible?(namespace) }
 
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:admin) { create(:user, namespace: namespace) }
     let_it_be(:user) { create(:user) }
 

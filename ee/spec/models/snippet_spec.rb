@@ -14,7 +14,7 @@ RSpec.describe Snippet do
     context 'when snippet belongs to a project' do
       subject { build(:project_snippet, project: project) }
 
-      let(:namespace) { build(:namespace) }
+      let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let(:project) { build(:project, namespace: namespace) }
 
       include_examples 'size checker for snippet'

@@ -16,10 +16,10 @@ RSpec.describe Gitlab::ApplicationContext do
 
       expect(Labkit::Context).to receive(:with_context).with(expected_context)
 
-      described_class.with_context(
+      described_class.with_context( # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         user: user,
         project: project,
-        namespace: build(:namespace)) {}
+        namespace: build(:namespace)) {} # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     end
 
     it 'raises an error when passing invalid options' do

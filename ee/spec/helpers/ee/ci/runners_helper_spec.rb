@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe EE::Ci::RunnersHelper do
   let_it_be(:user, refind: true) { create(:user) }
-  let_it_be(:namespace) { create(:namespace, owner: user) }
+  let_it_be(:namespace) { create(:namespace, owner: user) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:project) { create(:project, namespace: namespace) }
 
   before do
@@ -38,14 +38,14 @@ RSpec.describe EE::Ci::RunnersHelper do
         end
 
         context 'without a persisted namespace passed' do
-          let(:namespace) { build(:namespace) }
+          let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           it { is_expected.to be_truthy }
         end
 
         context 'with neither a project nor a namespace' do
           let(:project) { build(:project) }
-          let(:namespace) { build(:namespace) }
+          let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           it { is_expected.to be_falsey }
 

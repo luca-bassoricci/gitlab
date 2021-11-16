@@ -338,7 +338,7 @@ RSpec.describe Issue do
   end
 
   describe '#to_reference' do
-    let(:namespace) { build(:namespace, path: 'sample-namespace') }
+    let(:namespace) { build(:namespace, path: 'sample-namespace') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project)   { build(:project, name: 'sample-project', namespace: namespace) }
     let(:issue)     { build(:issue, iid: 1, project: project) }
 
@@ -374,7 +374,7 @@ RSpec.describe Issue do
       end
 
       context 'when cross-project in different namespace' do
-        let(:another_namespace) { build(:namespace, id: non_existing_record_id, path: 'another-namespace') }
+        let(:another_namespace) { build(:namespace, id: non_existing_record_id, path: 'another-namespace') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         let(:another_namespace_project) { build(:project, path: 'another-project', namespace: another_namespace) }
 
         it 'returns complete path to the issue' do

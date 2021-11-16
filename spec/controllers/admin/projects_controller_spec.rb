@@ -80,7 +80,7 @@ RSpec.describe Admin::ProjectsController do
 
   describe 'PUT /projects/transfer/:id' do
     let_it_be(:project, reload: true) { create(:project) }
-    let_it_be(:new_namespace) { create(:namespace) }
+    let_it_be(:new_namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     it 'updates namespace' do
       put :transfer, params: { namespace_id: project.namespace.path, new_namespace_id: new_namespace.id, id: project.path }

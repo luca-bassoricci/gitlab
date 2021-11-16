@@ -23,7 +23,7 @@ RSpec.describe AutoDevops::DisableWorker, '#perform' do
 
   context 'when project owner is a user' do
     let(:owner) { create(:user) }
-    let(:namespace) { create(:namespace, owner: owner) }
+    let(:namespace) { create(:namespace, owner: owner) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { create(:project, :repository, :auto_devops, namespace: namespace) }
 
     it 'sends an email to pipeline user and project owner' do

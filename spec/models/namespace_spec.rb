@@ -11,7 +11,7 @@ RSpec.describe Namespace do
   let_it_be(:project_sti_name) { Namespaces::ProjectNamespace.sti_name }
   let_it_be(:user_sti_name) { Namespaces::UserNamespace.sti_name }
 
-  let!(:namespace) { create(:namespace, :with_namespace_settings) }
+  let!(:namespace) { create(:namespace, :with_namespace_settings) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:gitlab_shell) { Gitlab::Shell.new }
   let(:repository_storage) { 'default' }
 
@@ -96,8 +96,8 @@ RSpec.describe Namespace do
 
       with_them do
         it 'validates namespace parent' do
-          parent = build(:namespace, type: parent_type) if parent_type
-          namespace = build(:namespace, type: child_type, parent: parent)
+          parent = build(:namespace, type: parent_type) if parent_type # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
+          namespace = build(:namespace, type: child_type, parent: parent) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           if error
             expect(namespace).not_to be_valid
@@ -115,7 +115,7 @@ RSpec.describe Namespace do
 
         context 'when the namespace has no parent' do
           it 'allows a namespace to have no parent associated with it' do
-            namespace = build(:namespace)
+            namespace = build(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
             expect(namespace).to be_valid
           end
@@ -123,13 +123,13 @@ RSpec.describe Namespace do
 
         context 'when the namespace has a parent' do
           it 'allows a namespace to have a group as its parent' do
-            namespace = build(:namespace, parent: build(:group))
+            namespace = build(:namespace, parent: build(:group)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
             expect(namespace).to be_valid
           end
 
           it 'allows a namespace to have another namespace as its parent' do
-            namespace = build(:namespace, parent: build(:namespace))
+            namespace = build(:namespace, parent: build(:namespace)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
             expect(namespace).to be_valid
           end
@@ -174,7 +174,7 @@ RSpec.describe Namespace do
       end
 
       context 'top-level group' do
-        let(:group) { build(:namespace, path: 'tree') }
+        let(:group) { build(:namespace, path: 'tree') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         it { expect(group).to be_valid }
       end
@@ -183,7 +183,7 @@ RSpec.describe Namespace do
     describe 'path validator' do
       using RSpec::Parameterized::TableSyntax
 
-      let_it_be(:parent) { create(:namespace) }
+      let_it_be(:parent) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
       where(:namespace_type, :path, :valid) do
@@ -202,7 +202,7 @@ RSpec.describe Namespace do
       with_them do
         it 'validates namespace path' do
           parent_namespace = parent if namespace_type == Namespaces::ProjectNamespace.sti_name
-          namespace = build(:namespace, type: namespace_type, parent: parent_namespace, path: path)
+          namespace = build(:namespace, type: namespace_type, parent: parent_namespace, path: path) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           expect(namespace.valid?).to be(valid)
         end
@@ -211,7 +211,7 @@ RSpec.describe Namespace do
 
     describe '1 char path length' do
       context 'with user namespace' do
-        let(:namespace) { build(:namespace) }
+        let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         it 'does not allow to update path to single char' do
           namespace.save!
@@ -254,7 +254,7 @@ RSpec.describe Namespace do
   describe 'handling STI', :aggregate_failures do
     let(:namespace_type) { nil }
     let(:parent) { nil }
-    let(:namespace) { Namespace.find(create(:namespace, type: namespace_type, parent: parent).id) }
+    let(:namespace) { Namespace.find(create(:namespace, type: namespace_type, parent: parent).id) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     context 'creating a Group' do
       let(:namespace_type) { group_sti_name }
@@ -392,7 +392,7 @@ RSpec.describe Namespace do
 
   context 'traversal_ids on create' do
     context 'default traversal_ids' do
-      let(:namespace) { build(:namespace) }
+      let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       before do
         namespace.save!
@@ -454,7 +454,7 @@ RSpec.describe Namespace do
   describe '#owner_required?' do
     specify { expect(build(:project_namespace).owner_required?).to be_falsey }
     specify { expect(build(:group).owner_required?).to be_falsey }
-    specify { expect(build(:namespace).owner_required?).to be_truthy }
+    specify { expect(build(:namespace).owner_required?).to be_truthy } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   end
 
   describe '#visibility_level_field' do
@@ -588,7 +588,7 @@ RSpec.describe Namespace do
   end
 
   describe '.with_statistics' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     let(:project1) do
       create(:project,
@@ -653,8 +653,8 @@ RSpec.describe Namespace do
 
   describe '.find_by_pages_host' do
     it 'finds namespace by GitLab Pages host and is case-insensitive' do
-      namespace = create(:namespace, name: 'topNAMEspace', path: 'topNAMEspace')
-      create(:namespace, name: 'annother_namespace')
+      namespace = create(:namespace, name: 'topNAMEspace', path: 'topNAMEspace') # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
+      create(:namespace, name: 'annother_namespace') # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       host = "TopNamespace.#{Settings.pages.host.upcase}"
 
       expect(described_class.find_by_pages_host(host)).to eq(namespace)
@@ -681,7 +681,7 @@ RSpec.describe Namespace do
     end
 
     it "returns no result if the provided host is not subdomain of the Pages host" do
-      create(:namespace, name: 'namespace.io')
+      create(:namespace, name: 'namespace.io') # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       host = "namespace.io"
 
       expect(described_class.find_by_pages_host(host)).to eq(nil)
@@ -689,7 +689,7 @@ RSpec.describe Namespace do
   end
 
   describe '.top_most' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:group) { create(:group) }
     let_it_be(:subgroup) { create(:group, parent: group) }
 
@@ -737,7 +737,7 @@ RSpec.describe Namespace do
     end
 
     context 'legacy storage' do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let!(:project) { create(:project_empty_repo, :legacy_storage, namespace: namespace) }
 
       it_behaves_like 'namespace restrictions'
@@ -781,7 +781,7 @@ RSpec.describe Namespace do
       end
 
       shared_examples 'move_dir without repository storage feature' do |storage_version|
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         let(:gitlab_shell) { namespace.gitlab_shell }
         let!(:project) { create(:project_empty_repo, namespace: namespace, storage_version: storage_version) }
 
@@ -794,7 +794,7 @@ RSpec.describe Namespace do
       end
 
       shared_examples 'move_dir with repository storage feature' do |storage_version|
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         let(:gitlab_shell) { namespace.gitlab_shell }
         let!(:project) { create(:project_empty_repo, namespace: namespace, storage_version: storage_version) }
 
@@ -998,7 +998,7 @@ RSpec.describe Namespace do
     end
 
     context 'hashed storage' do
-      let(:namespace) { create(:namespace) }
+      let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let!(:project) { create(:project_empty_repo, namespace: namespace) }
 
       it_behaves_like 'namespace restrictions'
@@ -1118,7 +1118,7 @@ RSpec.describe Namespace do
 
   describe '.find_by_path_or_name' do
     before do
-      @namespace = create(:namespace, name: 'WoW', path: 'woW')
+      @namespace = create(:namespace, name: 'WoW', path: 'woW') # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     end
 
     it { expect(described_class.find_by_path_or_name('wow')).to eq(@namespace) }
@@ -1128,7 +1128,7 @@ RSpec.describe Namespace do
 
   describe ".clean_path" do
     let!(:user)       { create(:user, username: "johngitlab-etc") }
-    let!(:namespace)  { create(:namespace, path: "JohnGitLab-etc1") }
+    let!(:namespace)  { create(:namespace, path: "JohnGitLab-etc1") } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     it "cleans the path and makes sure it's available" do
       expect(described_class.clean_path("-john+gitlab-ETC%.git@gmail.com")).to eq("johngitlab-ETC2")
@@ -1152,7 +1152,7 @@ RSpec.describe Namespace do
   end
 
   describe "#default_branch_protection" do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:default_branch_protection) { nil }
     let(:group) { create(:group, default_branch_protection: default_branch_protection) }
 
@@ -1195,7 +1195,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids?' do
-    let_it_be(:namespace, reload: true) { create(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject { namespace.use_traversal_ids? }
 
@@ -1219,7 +1219,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids_for_root_ancestor?' do
-    let_it_be(:namespace, reload: true) { create(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject { namespace.use_traversal_ids_for_root_ancestor? }
 
@@ -1243,7 +1243,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids_for_ancestors?' do
-    let_it_be(:namespace, reload: true) { create(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject { namespace.use_traversal_ids_for_ancestors? }
 
@@ -1318,7 +1318,7 @@ RSpec.describe Namespace do
 
     context 'when namespace is a user namespace' do
       let_it_be(:user) { create(:user) }
-      let_it_be(:user_namespace) { create(:namespace, owner: user) }
+      let_it_be(:user_namespace) { create(:namespace, owner: user) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let_it_be(:project) { create(:project, namespace: user_namespace) }
       let_it_be(:other_project) { create(:project_empty_repo) }
 
@@ -1568,7 +1568,7 @@ RSpec.describe Namespace do
     end
 
     it 'knows when there is as fork-of-fork in the namespace' do
-      other_namespace = create(:namespace)
+      other_namespace = create(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       other_fork = fork_project(forked_project, other_namespace.owner, namespace: other_namespace)
 
       expect(other_namespace.find_fork_of(project)).to eq(other_fork)
@@ -1718,12 +1718,12 @@ RSpec.describe Namespace do
   end
 
   describe '#aggregation_scheduled?' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject { namespace.aggregation_scheduled? }
 
     context 'with an aggregation scheduled association' do
-      let(:namespace) { create(:namespace, :with_aggregation_schedule) }
+      let(:namespace) { create(:namespace, :with_aggregation_schedule) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it { is_expected.to be_truthy }
     end
@@ -1894,7 +1894,7 @@ RSpec.describe Namespace do
     end
 
     with_them do
-      let(:namespace) { build(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override_disabled_shared_runners)}
+      let(:namespace) { build(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override_disabled_shared_runners)} # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it 'returns the result' do
         expect(namespace.shared_runners_setting).to eq(shared_runners_setting)
@@ -1918,7 +1918,7 @@ RSpec.describe Namespace do
     end
 
     with_them do
-      let(:namespace) { build(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override_disabled_shared_runners)}
+      let(:namespace) { build(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override_disabled_shared_runners)} # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it 'returns the result' do
         expect(namespace.shared_runners_setting_higher_than?(other_setting)).to eq(result)
@@ -1928,7 +1928,7 @@ RSpec.describe Namespace do
 
   describe 'validation #changing_shared_runners_enabled_is_allowed' do
     context 'without a parent' do
-      let(:namespace) { build(:namespace, shared_runners_enabled: true) }
+      let(:namespace) { build(:namespace, shared_runners_enabled: true) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it 'is valid' do
         expect(namespace).to be_valid
@@ -1982,7 +1982,7 @@ RSpec.describe Namespace do
         end
 
         context 'with shared runners enabled' do
-          let(:namespace) { create(:namespace) }
+          let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           it 'is invalid' do
             namespace.allow_descendants_override_disabled_shared_runners = true

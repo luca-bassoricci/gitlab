@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe OnboardingProgress do
-  let(:namespace) { create(:namespace) }
+  let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:action) { :subscription_created }
 
   describe 'associations' do

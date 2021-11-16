@@ -20,7 +20,7 @@ RSpec.describe SearchController, '(JavaScript fixtures)', type: :controller do
   end
 
   context 'search within a project' do
-    let(:namespace) { create(:namespace, name: 'frontend-fixtures') }
+    let(:namespace) { create(:namespace, name: 'frontend-fixtures') } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { create(:project, :public, :repository, namespace: namespace, path: 'search-project') }
     let(:blobs) do
       Kaminari.paginate_array([

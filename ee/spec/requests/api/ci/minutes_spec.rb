@@ -12,7 +12,7 @@ RSpec.describe API::Ci::Minutes do
   end
 
   describe 'POST /namespaces/:id/minutes' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:user) { create(:user) }
 
     let(:namespace_id) { namespace.id }

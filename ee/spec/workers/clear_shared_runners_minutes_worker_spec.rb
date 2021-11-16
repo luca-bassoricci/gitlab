@@ -10,7 +10,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
 
     before do
       [2, 3, 4, 5, 7, 8, 10, 14].each do |id|
-        create(:namespace, id: id)
+        create(:namespace, id: id) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       end
     end
 

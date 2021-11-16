@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Namespaces::OnboardingProgressWorker, '#perform' do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:action) { 'git_pull' }
 
   it_behaves_like 'records an onboarding progress action', :git_pull do

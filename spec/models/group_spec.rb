@@ -82,7 +82,7 @@ RSpec.describe Group do
 
       context 'when the group has a parent' do
         it 'does not allow a group to have a namespace as its parent' do
-          group = build(:group, parent: build(:namespace))
+          group = build(:group, parent: build(:namespace)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           expect(group).not_to be_valid
           expect(group.errors[:parent_id].first).to eq('user namespace cannot be the parent of another namespace')
@@ -110,7 +110,7 @@ RSpec.describe Group do
 
         context 'when the group has a parent' do
           it 'allows a group to have a namespace as its parent' do
-            group = build(:group, parent: build(:namespace))
+            group = build(:group, parent: build(:namespace)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
             expect(group).to be_valid
           end

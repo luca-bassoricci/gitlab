@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe Packages::Npm::CreatePackageService do
-  let(:namespace) {create(:namespace)}
+  let(:namespace) {create(:namespace)} # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:project) { create(:project, namespace: namespace) }
   let(:user) { create(:user) }
   let(:version) { '1.0.1' }

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::Pipelines::HookService do
   describe '#execute_hooks' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project) { create(:project, :repository, namespace: namespace) }
     let_it_be(:pipeline) { create(:ci_empty_pipeline, :created, project: project) }
 

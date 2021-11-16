@@ -7,7 +7,7 @@ RSpec.describe Namespace do
 
   include EE::GeoHelpers
 
-  let(:namespace) { create(:namespace) }
+  let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:default_plan) { create(:default_plan) }
   let(:free_plan) { create(:free_plan) }
   let!(:bronze_plan) { create(:bronze_plan) }
@@ -83,7 +83,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_elasticsearch?' do
-    let(:namespace) { create :namespace }
+    let(:namespace) { create :namespace } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     it 'returns false if elasticsearch indexing is disabled' do
       stub_ee_application_setting(elasticsearch_indexing: false)
@@ -109,7 +109,7 @@ RSpec.describe Namespace do
   end
 
   describe '#invalidate_elasticsearch_indexes_cache!' do
-    let(:namespace) { create :namespace }
+    let(:namespace) { create :namespace } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     it 'clears the cache for the namespace' do
       expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:delete_record).with(:namespace, namespace.id)
@@ -119,7 +119,7 @@ RSpec.describe Namespace do
   end
 
   describe '#actual_plan_name' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     before do
       allow(Gitlab).to receive(:com?).and_return(true)
@@ -142,7 +142,7 @@ RSpec.describe Namespace do
     end
 
     context 'when namespace is not persisted' do
-      let(:namespace) { build(:namespace) }
+      let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       it 'returns free plan' do
         is_expected.to eq('free')
@@ -166,7 +166,7 @@ RSpec.describe Namespace do
 
   context 'scopes' do
     describe '.with_feature_available_in_plan', :saas do
-      let!(:namespace) { create(:namespace) }
+      let!(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       context 'plan is nil' do
         it 'returns no namespace' do
@@ -185,7 +185,7 @@ RSpec.describe Namespace do
     end
 
     describe '.join_gitlab_subscription', :saas do
-      let!(:namespace) { create(:namespace) }
+      let!(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       subject { described_class.join_gitlab_subscription.select('gitlab_subscriptions.hosted_plan_id').first.hosted_plan_id }
 
@@ -207,7 +207,7 @@ RSpec.describe Namespace do
     describe '.in_active_trial', :saas do
       let_it_be(:namespaces) do
         [
-          create(:namespace),
+          create(:namespace), # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
           create(:namespace_with_plan),
           create(:namespace_with_plan, trial_ends_on: Date.tomorrow)
         ]
@@ -225,7 +225,7 @@ RSpec.describe Namespace do
     describe '.not_in_active_trial', :saas do
       let_it_be(:namespaces) do
         [
-          create(:namespace),
+          create(:namespace), # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
           create(:namespace_with_plan),
           create(:namespace_with_plan, trial_ends_on: Date.yesterday)
         ]
@@ -262,14 +262,14 @@ RSpec.describe Namespace do
       end
 
       it 'includes namespace with no subscription' do
-        namespace = create(:namespace)
+        namespace = create(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         is_expected.to eq([namespace.id])
       end
     end
 
     describe '.eligible_for_trial', :saas do
-      let_it_be(:namespace) { create :namespace }
+      let_it_be(:namespace) { create :namespace } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       subject { described_class.eligible_for_trial.first }
 
@@ -1506,7 +1506,7 @@ RSpec.describe Namespace do
   end
 
   describe '#total_repository_size_excess' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     before do
       namespace.clear_memoization(:total_repository_size_excess)
@@ -1558,7 +1558,7 @@ RSpec.describe Namespace do
   end
 
   describe '#repository_size_excess_project_count' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     before do
       namespace.clear_memoization(:repository_size_excess_project_count)
@@ -1616,7 +1616,7 @@ RSpec.describe Namespace do
   end
 
   describe '#total_repository_size' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     before do
       create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
@@ -1632,7 +1632,7 @@ RSpec.describe Namespace do
   describe '#contains_locked_projects?' do
     using RSpec::Parameterized::TableSyntax
 
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     before_all do
       create(:namespace_limit, namespace: namespace, additional_purchased_storage_size: 10)
@@ -1656,7 +1656,7 @@ RSpec.describe Namespace do
   end
 
   describe '#actual_size_limit' do
-    let(:namespace) { build(:namespace) }
+    let(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     before do
       allow_any_instance_of(ApplicationSetting).to receive(:repository_size_limit).and_return(50)
@@ -1823,7 +1823,7 @@ RSpec.describe Namespace do
         end
 
         context 'it has no subscription' do
-          let(:namespace) { create(:namespace) }
+          let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
           it { is_expected.to be_nil }
         end
@@ -1860,7 +1860,7 @@ RSpec.describe Namespace do
       let(:parent) { nil }
 
       context 'for personal namespaces' do
-        let(:namespace) { create(:namespace, parent: parent) }
+        let(:namespace) { create(:namespace, parent: parent) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         subject(:namespace_limit) { namespace.namespace_limit }
 
@@ -1903,7 +1903,7 @@ RSpec.describe Namespace do
 
   describe '#enable_temporary_storage_increase!' do
     it 'sets a date' do
-      namespace = build(:namespace)
+      namespace = build(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       freeze_time do
         namespace.enable_temporary_storage_increase!
@@ -1913,7 +1913,7 @@ RSpec.describe Namespace do
     end
 
     it 'is invalid when set twice' do
-      namespace = create(:namespace)
+      namespace = create(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       namespace.enable_temporary_storage_increase!
       namespace.enable_temporary_storage_increase!
@@ -1924,7 +1924,7 @@ RSpec.describe Namespace do
   end
 
   describe '#additional_repo_storage_by_namespace_enabled?' do
-    let_it_be(:namespace) { build(:namespace) }
+    let_it_be(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject { namespace.additional_repo_storage_by_namespace_enabled? }
 
@@ -1946,7 +1946,7 @@ RSpec.describe Namespace do
   end
 
   describe '#root_storage_size' do
-    let_it_be(:namespace) { build(:namespace) }
+    let_it_be(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     subject { namespace.root_storage_size }
 

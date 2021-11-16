@@ -30,7 +30,7 @@ RSpec.describe CiMinutesUsageMailer do
 
     context 'when it is a namespace' do
       it_behaves_like 'mail format' do
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       end
     end
   end
@@ -51,7 +51,7 @@ RSpec.describe CiMinutesUsageMailer do
 
     context 'when it is a namespace' do
       it_behaves_like 'mail format' do
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       end
     end
   end

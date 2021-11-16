@@ -11,7 +11,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
 
   context 'with namespace' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:namespace) { create(:namespace, owner: user) }
+    let_it_be(:namespace) { create(:namespace, owner: user) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:upcoming_reconciliation) { create(:upcoming_reconciliation, :saas, namespace: namespace) }
 
     let(:cookie_key) do

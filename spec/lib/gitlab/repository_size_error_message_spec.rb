@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::RepositorySizeErrorMessage do
-  let_it_be(:namespace) { build(:namespace) }
+  let_it_be(:namespace) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
   let(:checker) do
     Gitlab::RepositorySizeChecker.new(

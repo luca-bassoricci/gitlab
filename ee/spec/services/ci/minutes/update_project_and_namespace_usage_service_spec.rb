@@ -58,7 +58,7 @@ RSpec.describe Ci::Minutes::UpdateProjectAndNamespaceUsageService do
 
       context 'when project deleted' do
         let(:project) { double(id: non_existing_record_id) }
-        let(:namespace) { create(:namespace) }
+        let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         it 'will complete successfully and increment namespace statistics' do
           subject
@@ -141,7 +141,7 @@ RSpec.describe Ci::Minutes::UpdateProjectAndNamespaceUsageService do
     end
 
     context 'when statistics and usage have existing values' do
-      let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
+      let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let(:project) { create(:project, :private, namespace: namespace) }
       let(:existing_usage_in_seconds) { 100 }
       let(:existing_usage_in_minutes) { (100.to_f / 60).round(2) }

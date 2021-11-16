@@ -7,7 +7,7 @@ RSpec.describe Import::GitlabProjectsController do
 
   include_context 'workhorse headers'
 
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:user) { namespace.owner }
 
   before do

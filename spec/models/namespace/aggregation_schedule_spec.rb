@@ -8,7 +8,7 @@ RSpec.describe Namespace::AggregationSchedule, :clean_gitlab_redis_shared_state,
   it { is_expected.to belong_to :namespace }
 
   describe '#schedule_root_storage_statistics' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:aggregation_schedule) { namespace.build_aggregation_schedule }
     let(:lease_key) { "namespace:namespaces_root_statistics:#{namespace.id}" }
 

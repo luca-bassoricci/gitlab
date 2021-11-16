@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Raw files', '(JavaScript fixtures)' do
   include JavaScriptFixturesHelpers
 
-  let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
+  let(:namespace) { create(:namespace, name: 'frontend-fixtures' )} # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let(:project) { create(:project, :repository, namespace: namespace, path: 'raw-project') }
   let(:response) { @blob.data.force_encoding('UTF-8') }
 

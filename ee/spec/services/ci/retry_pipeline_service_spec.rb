@@ -16,7 +16,7 @@ RSpec.describe Ci::RetryPipelineService do
   end
 
   context 'when the namespace is out of CI minutes' do
-    let_it_be(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+    let_it_be(:namespace) { create(:namespace, :with_used_build_minutes_limit) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let_it_be(:project) { create(:project, namespace: namespace) }
     let_it_be(:private_runner) do
       create(:ci_runner, :project, :online, projects: [project],

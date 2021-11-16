@@ -6,7 +6,7 @@ RSpec.describe 'Profiles > Billing', :js do
   include StubRequests
   include SubscriptionPortalHelpers
 
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:user) { create(:user, namespace: namespace) }
   let_it_be(:bronze_plan) { create(:bronze_plan) }
 

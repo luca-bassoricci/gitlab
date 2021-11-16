@@ -161,13 +161,13 @@ RSpec.describe EE::GitlabRoutingHelper do
     end
 
     it 'returns the profile usage quotas path for any other namespace' do
-      namespace = build(:namespace)
+      namespace = build(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       expect(usage_quotas_path(namespace)).to eq('/-/profile/usage_quotas')
     end
 
     it 'returns the path with any args supplied' do
-      namespace = build(:namespace)
+      namespace = build(:namespace) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       expect(usage_quotas_path(namespace, foo: 'bar', anchor: 'quotas-tab')).to eq('/-/profile/usage_quotas?foo=bar#quotas-tab')
     end

@@ -11,7 +11,7 @@ RSpec.describe Ci::Minutes::BatchResetService do
     subject { service.execute!(ids_range: ids_range, batch_size: 3) }
 
     def create_namespace_with_project(seconds_used, monthly_minutes_limit = nil)
-      namespace = create(:namespace,
+      namespace = create(:namespace, # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
         shared_runners_minutes_limit: monthly_minutes_limit, # when `nil` it inherits the global limit
         extra_shared_runners_minutes_limit: 50,
         last_ci_minutes_notification_at: Time.current,

@@ -1511,7 +1511,7 @@ RSpec.describe Projects::IssuesController do
 
     context "when the user is owner" do
       let_it_be(:owner)     { create(:user) }
-      let_it_be(:namespace) { create(:namespace, owner: owner) }
+      let_it_be(:namespace) { create(:namespace, owner: owner) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
       let_it_be(:project)   { create(:project, namespace: namespace) }
 
       before do

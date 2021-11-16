@@ -7,7 +7,7 @@ RSpec.describe Emails::AutoDevops do
 
   describe '#auto_devops_disabled_email' do
     let(:owner) { create(:user) }
-    let(:namespace) { create(:namespace, owner: owner) }
+    let(:namespace) { create(:namespace, owner: owner) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project) { create(:project, :repository, :auto_devops) }
     let(:pipeline) { create(:ci_pipeline, :failed, project: project) }
 

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Ci::Minutes::NamespaceMonthlyUsage do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
   let_it_be_with_refind(:current_usage) do
     create(:ci_namespace_monthly_usage,
@@ -76,7 +76,7 @@ RSpec.describe Ci::Minutes::NamespaceMonthlyUsage do
 
   describe '.for_namespace' do
     it 'returns usages for the namespace' do
-      create(:ci_namespace_monthly_usage, namespace: create(:namespace))
+      create(:ci_namespace_monthly_usage, namespace: create(:namespace)) # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
       usages = described_class.for_namespace(namespace)
 

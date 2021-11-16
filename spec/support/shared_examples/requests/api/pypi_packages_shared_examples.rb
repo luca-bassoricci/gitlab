@@ -346,7 +346,7 @@ RSpec.shared_examples 'a pypi user namespace endpoint' do
   end
 
   with_them do
-    let_it_be_with_reload(:group) { create(:namespace) }
+    let_it_be_with_reload(:group) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:headers) { user_role == :anonymous ? {} : basic_auth_header(user.username, personal_access_token.token) }
 
     before do

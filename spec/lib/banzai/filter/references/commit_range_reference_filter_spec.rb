@@ -135,7 +135,7 @@ RSpec.describe Banzai::Filter::References::CommitRangeReferenceFilter do
   end
 
   context 'cross-project / same-namespace complete reference' do
-    let(:namespace)         { create(:namespace) }
+    let(:namespace)         { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project)           { create(:project, :public, :repository, namespace: namespace) }
     let(:project2)          { create(:project, :public, :repository, path: "same-namespace", namespace: namespace) }
     let(:reference)         { "#{project2.path}@#{commit1.id}...#{commit2.id}" }
@@ -170,7 +170,7 @@ RSpec.describe Banzai::Filter::References::CommitRangeReferenceFilter do
   end
 
   context 'cross-project shorthand reference' do
-    let(:namespace)         { create(:namespace) }
+    let(:namespace)         { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project)           { create(:project, :public, :repository, namespace: namespace) }
     let(:project2)          { create(:project, :public, :repository, path: "same-namespace", namespace: namespace) }
     let(:reference)         { "#{project2.path}@#{commit1.id}...#{commit2.id}" }
@@ -205,7 +205,7 @@ RSpec.describe Banzai::Filter::References::CommitRangeReferenceFilter do
   end
 
   context 'cross-project URL reference' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
     let(:project2)  { create(:project, :public, :repository, namespace: namespace) }
     let(:range) { CommitRange.new("#{commit1.id}...master", project) }
     let(:reference) { urls.project_compare_url(project2, from: commit1.id, to: 'master') }

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Projects::PerformanceMonitoring::DashboardsController do
   let_it_be(:user) { create(:user) }
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
   let!(:project) { create(:project, :repository, name: 'dashboard-project', namespace: namespace) }
   let(:repository) { project.repository }

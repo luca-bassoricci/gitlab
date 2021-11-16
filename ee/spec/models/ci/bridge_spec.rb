@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::Bridge do
   let_it_be(:project) { create(:project) }
-  let_it_be(:target_project) { create(:project, name: 'project', namespace: create(:namespace, name: 'my')) }
+  let_it_be(:target_project) { create(:project, name: 'project', namespace: create(:namespace, name: 'my')) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
 
   let(:bridge) do

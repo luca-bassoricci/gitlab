@@ -279,7 +279,7 @@ RSpec.describe Experiment do
       end
 
       context 'when given a users namespace as subject' do
-        let_it_be(:subject_to_record) { build(:namespace) }
+        let_it_be(:subject_to_record) { build(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
         it 'saves the namespace as the experiment_subject' do
           expect(record_subject_and_variant!.namespace).to eq(subject_to_record)

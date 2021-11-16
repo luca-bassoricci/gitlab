@@ -83,7 +83,7 @@ RSpec.describe Gitlab::Tracking do
   end
 
   describe '.event' do
-    let(:namespace) { create(:namespace) }
+    let(:namespace) { create(:namespace) } # rubocop:disable RSpec/ProhibitNamespaceFactoryUsage
 
     shared_examples 'delegates to destination' do |klass|
       before do
