@@ -4,6 +4,8 @@ module EE
   module Gitlab
     module Search
       module ParsedQuery
+        WILDCARD_PREFIX_REGEX = /\A(\*+)(?=.*)/.freeze
+
         def elasticsearch_filter_context(object)
           {
             filter: including_filters.map { |f| prepare_for_elasticsearch(object, f) },
@@ -19,7 +21,10 @@ module EE
 
           {
             type => {
-              "#{object}.#{field}" => filter[:value]
+              # Remove wildcard prefix from Elasticsearch queries because they
+              # force Elasticsearch to search through every possible location in
+              # the index for a match.
+              "#{object}.#{field}" => filter[:value].gsub(WILDCARD_PREFIX_REGEX, "")
             }
           }
         end
