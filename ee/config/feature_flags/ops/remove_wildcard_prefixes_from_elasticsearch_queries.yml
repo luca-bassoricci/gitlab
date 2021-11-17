@@ -1,0 +1,8 @@
+---
+name: remove_wildcard_prefixes_from_elasticsearch_queries
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/74663/
+rollout_issue_url: 
+milestone: '14.5'
+type: ops
+group: group::global_search
+default_enabled: false

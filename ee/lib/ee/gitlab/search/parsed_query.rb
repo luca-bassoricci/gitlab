@@ -18,13 +18,18 @@ module EE
         def prepare_for_elasticsearch(object, filter)
           type = filter[:type] || :wildcard
           field = filter[:field] || filter[:name]
+          value = filter[:value]
+
+          if Feature.enabled?(:remove_wildcard_prefixes_from_elasticsearch_queries)
+            # Remove wildcard prefix from Elasticsearch queries because they
+            # force Elasticsearch to search through every possible location in
+            # the index for a match.
+            value.gsub!(WILDCARD_PREFIX_REGEX, "")
+          end
 
           {
             type => {
-              # Remove wildcard prefix from Elasticsearch queries because they
-              # force Elasticsearch to search through every possible location in
-              # the index for a match.
-              "#{object}.#{field}" => filter[:value].gsub(WILDCARD_PREFIX_REGEX, "")
+              "#{object}.#{field}" => value
             }
           }
         end
