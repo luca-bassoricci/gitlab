@@ -20,11 +20,11 @@ module EE
           field = filter[:field] || filter[:name]
           value = filter[:value]
 
-          if ::Feature.enabled?(:remove_wildcard_prefixes_from_elasticsearch_queries)
+          if ::Feature.enabled?(:remove_wildcard_prefixes_from_elasticsearch_queries, type: :ops)
             # Remove wildcard prefix from Elasticsearch queries because they
             # force Elasticsearch to search through every possible location in
             # the index for a match.
-            value.gsub!(WILDCARD_PREFIX_REGEX, "")
+            value = value.gsub(WILDCARD_PREFIX_REGEX, "")
           end
 
           {
