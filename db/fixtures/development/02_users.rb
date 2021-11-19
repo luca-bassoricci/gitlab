@@ -105,6 +105,31 @@ class Gitlab::Seeder::Users
       SQL
 
       ActiveRecord::Base.connection.execute <<~SQL
+        WITH RECURSIVE cte(source_id, namespace_id, parent_id) AS (
+                  (
+                    SELECT ARRAY[batch.id], batch.id, batch.parent_id
+                    FROM
+                      "namespaces" as batch
+                    WHERE
+                      "batch"."type" = 'Group' AND "batch"."parent_id" is null
+                  )
+                UNION
+                  (
+                    SELECT array_append(cte.source_id, n.id), n.id, n.parent_id
+                    FROM
+                      "namespaces" as n,
+                      "cte"
+                    WHERE
+                      "n"."type" = 'Group'
+                      AND "n"."parent_id" = "cte"."namespace_id"
+                  )
+                )
+        update namespaces
+        set traversal_ids = computed.source_id from (SELECT namespace_id, source_id FROM cte) as computed
+        where computed.namespace_id = namespaces.id AND namespaces.path like 'mass_insert_%'
+      SQL
+
+      ActiveRecord::Base.connection.execute <<~SQL
         INSERT INTO namespace_settings(namespace_id, created_at, updated_at)
         SELECT id, now(), now() FROM namespaces
         ON CONFLICT DO NOTHING;
