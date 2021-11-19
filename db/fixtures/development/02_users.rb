@@ -4,7 +4,7 @@ class Gitlab::Seeder::Users
   include ActionView::Helpers::NumberHelper
 
   RANDOM_USERS_COUNT = 20
-  MASS_USERS_COUNT = ENV['CI'] ? 10 : 1_000_000
+  MASS_USERS_COUNT = 1000
 
   attr_reader :opts
 
@@ -13,10 +13,8 @@ class Gitlab::Seeder::Users
   end
 
   def seed!
-    Sidekiq::Testing.inline! do
-      create_mass_users!
-      create_random_users!
-    end
+    create_mass_users!
+    create_mass_namespaces!
   end
 
   private
@@ -55,21 +53,56 @@ class Gitlab::Seeder::Users
     puts '==========================================================='
   end
 
-  def create_random_users!
-    RANDOM_USERS_COUNT.times do |i|
-      begin
-        User.create!(
-          username: FFaker::Internet.user_name,
-          name: FFaker::Name.name,
-          email: FFaker::Internet.email,
-          confirmed_at: DateTime.now,
-          password: random_password
-        )
+  def create_mass_namespaces!
+    Gitlab::Seeder.with_mass_insert(MASS_USERS_COUNT, Namespace) do
+      ActiveRecord::Base.connection.execute <<~SQL
+        INSERT INTO namespaces (name, path, type)
+        SELECT
+          'mass insert group level 0 - ' || seq,
+          'mass_insert_group_0_' || seq,
+          'Group'
+        FROM generate_series(1, #{MASS_USERS_COUNT}) AS seq
+      SQL
 
-        print '.'
-      rescue ActiveRecord::RecordInvalid
-        print 'F'
+      (1..9).each do |idx|
+        puts "creating subgroups level #{idx}"
+        ActiveRecord::Base.connection.execute <<~SQL
+          INSERT INTO namespaces (name, path, type, parent_id)
+          SELECT
+            'mass insert group level #{idx} - ' || seq,
+            'mass_insert_group_#{idx}_' || seq,
+            'Group',
+            namespaces.id
+          FROM namespaces
+          CROSS JOIN generate_series(1, 2) AS seq
+          WHERE namespaces.type='Group' AND namespaces.path like 'mass_insert_group_#{idx-1}_%'
+        SQL
       end
+
+      ActiveRecord::Base.connection.execute <<~SQL
+        WITH RECURSIVE cte(source_id, namespace_id, parent_id, path, height) AS (
+          (
+            SELECT ARRAY[batch.id], batch.id, batch.parent_id, batch.path, 1
+            FROM
+              "namespaces" as batch
+            WHERE
+              "batch"."type" = 'Group' AND "batch"."parent_id" is null
+          )
+        UNION
+          (
+            SELECT array_append(cte.source_id, n.id), n.id, n.parent_id, cte.path || '/' || n.path, cte.height+1
+            FROM
+              "namespaces" as n,
+              "cte"
+            WHERE
+              "n"."type" = 'Group'
+              AND "n"."parent_id" = "cte"."namespace_id"
+          )
+        )
+        INSERT INTO routes (source_id, source_type, path)
+          SELECT cte.namespace_id, 'Namespace', cte.path FROM cte
+          ON CONFLICT (source_type, source_id) DO NOTHING;
+      SQL
     end
   end
 
