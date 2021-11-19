@@ -4,7 +4,7 @@ class Gitlab::Seeder::Users
   include ActionView::Helpers::NumberHelper
 
   RANDOM_USERS_COUNT = 20
-  MASS_USERS_COUNT = 10
+  MASS_USERS_COUNT = 1000
 
   attr_reader :opts
 
