@@ -103,6 +103,12 @@ class Gitlab::Seeder::Users
           SELECT cte.namespace_id, 'Namespace', cte.path FROM cte
           ON CONFLICT (source_type, source_id) DO NOTHING;
       SQL
+
+      ActiveRecord::Base.connection.execute <<~SQL
+        INSERT INTO namespace_settings(namespace_id, created_at, updated_at)
+        SELECT id, now(), now() FROM namespaces
+        ON CONFLICT DO NOTHING;
+      SQL
     end
   end
 
