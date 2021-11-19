@@ -1,5 +1,3 @@
-require './spec/support/sidekiq_middleware'
-
 class Gitlab::Seeder::Projects
   include ActionView::Helpers::NumberHelper
 
