@@ -68,7 +68,7 @@ class Gitlab::Seeder::Projects
     visibility_level_per_user = visibility_level_per_user.join(',')
 
     Gitlab::Seeder.with_mass_insert(User.count * projects_per_user_count, "Projects and relations") do
-      puts "creating personal projects"
+      puts "#{Time.now} creating personal projects"
       ActiveRecord::Base.connection.execute <<~SQL
         INSERT INTO projects (name, path, creator_id, namespace_id, visibility_level, created_at, updated_at)
         SELECT
@@ -85,7 +85,7 @@ class Gitlab::Seeder::Projects
         WHERE u.username like 'mass_%'
       SQL
 
-      puts "creating group projects"
+      puts "#{Time.now} creating group projects"
       ActiveRecord::Base.connection.execute <<~SQL
         INSERT INTO projects (name, path, creator_id, namespace_id, visibility_level, created_at, updated_at)
         SELECT
@@ -101,7 +101,7 @@ class Gitlab::Seeder::Projects
         WHERE type='Group' and path like 'mass_%'
       SQL
 
-      puts "creating project features"
+      puts "#{Time.now} creating project features"
       ActiveRecord::Base.connection.execute <<~SQL
         INSERT INTO project_features (project_id, merge_requests_access_level, issues_access_level, wiki_access_level,
                                       pages_access_level)
@@ -114,7 +114,7 @@ class Gitlab::Seeder::Projects
         FROM projects ON CONFLICT (project_id) DO NOTHING;
       SQL
 
-      puts "creating project routes"
+      puts "#{Time.now} creating project routes"
       ActiveRecord::Base.connection.execute <<~SQL
         INSERT INTO routes (source_id, source_type, name, path)
         SELECT

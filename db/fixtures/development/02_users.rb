@@ -4,7 +4,7 @@ class Gitlab::Seeder::Users
   include ActionView::Helpers::NumberHelper
 
   RANDOM_USERS_COUNT = 20
-  MASS_USERS_COUNT = 1000
+  MASS_USERS_COUNT = 10
 
   attr_reader :opts
 
@@ -65,7 +65,7 @@ class Gitlab::Seeder::Users
       SQL
 
       (1..9).each do |idx|
-        puts "creating subgroups level #{idx}"
+        puts "#{Time.now} creating subgroups level #{idx}"
         ActiveRecord::Base.connection.execute <<~SQL
           INSERT INTO namespaces (name, path, type, parent_id)
           SELECT
@@ -79,7 +79,7 @@ class Gitlab::Seeder::Users
         SQL
       end
 
-      puts "creating routes"
+      puts "#{Time.now} creating routes"
       ActiveRecord::Base.connection.execute <<~SQL
         WITH RECURSIVE cte(source_id, namespace_id, parent_id, path, height) AS (
           (
@@ -105,7 +105,7 @@ class Gitlab::Seeder::Users
           ON CONFLICT (source_type, source_id) DO NOTHING;
       SQL
 
-      puts "filling traversal ids"
+      puts "#{Time.now} filling traversal ids"
       ActiveRecord::Base.connection.execute <<~SQL
         WITH RECURSIVE cte(source_id, namespace_id, parent_id) AS (
                   (
@@ -131,7 +131,7 @@ class Gitlab::Seeder::Users
         where computed.namespace_id = namespaces.id AND namespaces.path like 'mass_insert_%'
       SQL
 
-      puts "creating namespace settings"
+      puts "#{Time.now} creating namespace settings"
       ActiveRecord::Base.connection.execute <<~SQL
         INSERT INTO namespace_settings(namespace_id, created_at, updated_at)
         SELECT id, now(), now() FROM namespaces
