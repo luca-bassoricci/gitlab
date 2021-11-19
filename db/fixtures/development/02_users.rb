@@ -99,8 +99,8 @@ class Gitlab::Seeder::Users
               AND "n"."parent_id" = "cte"."namespace_id"
           )
         )
-        INSERT INTO routes (source_id, source_type, path)
-          SELECT cte.namespace_id, 'Namespace', cte.path FROM cte
+        INSERT INTO routes (source_id, source_type, path, name)
+          SELECT cte.namespace_id, 'Namespace', cte.path, cte.path FROM cte
           ON CONFLICT (source_type, source_id) DO NOTHING;
       SQL
 
