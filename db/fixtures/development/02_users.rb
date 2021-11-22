@@ -39,12 +39,23 @@ class Gitlab::Seeder::Users
     relation = User.where(admin: false)
     Gitlab::Seeder.with_mass_insert(relation.count, Namespace) do
       ActiveRecord::Base.connection.execute <<~SQL
-        INSERT INTO namespaces (name, path, owner_id)
+        INSERT INTO namespaces (name, path, owner_id, type)
         SELECT
           username,
           username,
-          id
+          id,
+          'User'
         FROM users WHERE NOT admin
+        ON CONFLICT DO NOTHING
+      SQL
+    end
+
+    Gitlab::Seeder.with_mass_insert(relation.count, "User namespaces routes") do
+      ActiveRecord::Base.connection.execute <<~SQL
+        INSERT INTO routes (source_id, source_type, path, name)
+        SELECT id, 'Namespace', path, name
+          FROM namespaces WHERE type IS NULL OR type = 'User'
+          ON CONFLICT (source_type, source_id) DO NOTHING;
       SQL
     end
 
