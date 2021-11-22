@@ -51,6 +51,8 @@ class Gitlab::Seeder::Projects
     public: 1 # 1m projects = 5m total
   }
 
+  BATCH_SIZE = 100_000
+
   def seed!
     create_mass_projects!
   end
@@ -82,49 +84,28 @@ class Gitlab::Seeder::Projects
           JOIN namespaces n ON n.owner_id=u.id
         WHERE u.username like 'mass_%'
       SQL
+    end
 
-      puts "#{Time.now} creating group projects"
-      ActiveRecord::Base.connection.execute <<~SQL
-        INSERT INTO projects (name, path, creator_id, namespace_id, visibility_level, created_at, updated_at)
-        SELECT
-          'Seed project ' || seq || ' ' || ('{#{visibility_per_user}}'::text[])[seq] AS project_name,
-          '#{Gitlab::Seeder::MASS_INSERT_PROJECT_START}' || ('{#{visibility_per_user}}'::text[])[seq] || '_' || seq AS project_path,
-          #{User.first.id} AS user_id,
-          namespaces.id AS namespace_id,
-          ('{#{visibility_level_per_user}}'::int[])[seq] AS visibility_level,
-          NOW() AS created_at,
-          NOW() AS updated_at
-        FROM namespaces
-          CROSS JOIN generate_series(1, #{projects_per_user_count}) AS seq
-        WHERE type='Group' and path like 'mass_%'
-      SQL
+    Gitlab::Seeder.with_mass_insert(Namespace.where("path LIKE 'mass_%'").count * projects_per_user_count, "Group projects") do
+      Namespace.each_batch(of: BATCH_SIZE) do |batch, index|
+        range = batch.pluck(Arel.sql('MIN(id)'), Arel.sql('MAX(id)')).first
+        puts "Creating #{index * BATCH_SIZE * projects_per_user_count} projects."
 
-      puts "#{Time.now} creating project features"
-      ActiveRecord::Base.connection.execute <<~SQL
-        INSERT INTO project_features (project_id, merge_requests_access_level, issues_access_level, wiki_access_level,
-                                      pages_access_level)
-        SELECT
-          id,
-          #{ProjectFeature::ENABLED} AS merge_requests_access_level,
-          #{ProjectFeature::ENABLED} AS issues_access_level,
-          #{ProjectFeature::ENABLED} AS wiki_access_level,
-          #{ProjectFeature::ENABLED} AS pages_access_level
-        FROM projects ON CONFLICT (project_id) DO NOTHING;
-      SQL
-
-      puts "#{Time.now} creating project routes"
-      ActiveRecord::Base.connection.execute <<~SQL
-        INSERT INTO routes (source_id, source_type, name, path)
-        SELECT
-          p.id,
-          'Project',
-          routes.name || ' / ' || p.name,
-          routes.path || '/' || p.path
-        FROM projects p
-        INNER JOIN routes ON routes.source_id = p.namespace_id and source_type = 'Namespace'
-        WHERE p.path like 'mass_%'
-        ON CONFLICT (source_type, source_id) DO NOTHING;
-      SQL
+        ActiveRecord::Base.connection.execute <<~SQL
+          INSERT INTO projects (name, path, creator_id, namespace_id, visibility_level, created_at, updated_at)
+          SELECT
+            'Seed project ' || seq || ' ' || ('{#{visibility_per_user}}'::text[])[seq] AS project_name,
+            '#{Gitlab::Seeder::MASS_INSERT_PROJECT_START}' || ('{#{visibility_per_user}}'::text[])[seq] || '_' || seq AS project_path,
+            #{User.first.id} AS user_id,
+            namespaces.id AS namespace_id,
+            ('{#{visibility_level_per_user}}'::int[])[seq] AS visibility_level,
+            NOW() AS created_at,
+            NOW() AS updated_at
+          FROM namespaces
+            CROSS JOIN generate_series(1, #{projects_per_user_count}) AS seq
+          WHERE type='Group' AND path LIKE 'mass_%' AND namespaces.id BETWEEN #{range.first} AND #{range.last}
+        SQL
+      end
     end
   end
 end
