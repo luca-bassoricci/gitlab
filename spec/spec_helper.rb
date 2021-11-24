@@ -321,10 +321,6 @@ RSpec.configure do |config|
       # For more information check https://gitlab.com/gitlab-org/gitlab/-/issues/339348
       stub_feature_flags(new_header_search: false)
 
-      # Disable the override flag in order to enable the feature by default.
-      # See https://docs.gitlab.com/ee/development/feature_flags/#selectively-disable-by-actor
-      stub_feature_flags(surface_environment_creation_failure_override: false)
-
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
@@ -452,6 +448,13 @@ RSpec.configure do |config|
   # Allows stdout to be redirected to reduce noise
   config.before(:each, :silence_stdout) do
     $stdout = StringIO.new
+  end
+
+  # Makes diffs show entire non-truncated values.
+  config.before(:each, unlimited_max_formatted_output_length: true) do |_example|
+    config.expect_with :rspec do |c|
+      c.max_formatted_output_length = nil
+    end
   end
 
   config.after(:each, :silence_stdout) do

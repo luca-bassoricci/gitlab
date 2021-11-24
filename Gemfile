@@ -197,7 +197,7 @@ gem 'state_machines-activerecord', '~> 0.8.0'
 gem 'acts-as-taggable-on', '~> 7.0'
 
 # Background jobs
-gem 'sidekiq', '~> 6.2.2'
+gem 'sidekiq', '~> 6.3'
 gem 'sidekiq-cron', '~> 1.0'
 gem 'redis-namespace', '~> 1.8.1'
 gem 'gitlab-sidekiq-fetcher', '0.8.0', require: 'sidekiq-reliable-fetch'
@@ -376,7 +376,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 6.4.0', require: false
+  gem 'gitlab-styles', '~> 6.5.0', require: false
 
   gem 'haml_lint', '~> 0.36.0', require: false
   gem 'bundler-audit', '~> 0.7.0.1', require: false
@@ -494,7 +494,7 @@ gem 'flipper', '~> 0.21.0'
 gem 'flipper-active_record', '~> 0.21.0'
 gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 3.2.2'
-gem 'gitlab-experiment', '~> 0.6.4'
+gem 'gitlab-experiment', '~> 0.6.5'
 
 # Structured logging
 gem 'lograge', '~> 0.5'
@@ -539,4 +539,4 @@ gem 'ipaddress', '~> 0.8.3'
 
 gem 'parslet', '~> 1.8'
 
-gem 'ipynbdiff', '0.3.7'
+gem 'ipynbdiff', '0.3.8'

@@ -676,9 +676,9 @@ Input type: `ApiFuzzingCiConfigurationCreateInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationapifuzzingciconfigurationcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationapifuzzingciconfigurationcreateconfigurationyaml"></a>`configurationYaml` | [`String`](#string) | A YAML snippet that can be inserted into the project's `.gitlab-ci.yml` to set up API fuzzing scans. |
+| <a id="mutationapifuzzingciconfigurationcreateconfigurationyaml"></a>`configurationYaml` **{warning-solid}** | [`String`](#string) | **Deprecated:** The configuration snippet is now generated client-side. Deprecated in 14.6. |
 | <a id="mutationapifuzzingciconfigurationcreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationapifuzzingciconfigurationcreategitlabciyamleditpath"></a>`gitlabCiYamlEditPath` | [`String`](#string) | Location at which the project's `.gitlab-ci.yml` file can be edited in the browser. |
+| <a id="mutationapifuzzingciconfigurationcreategitlabciyamleditpath"></a>`gitlabCiYamlEditPath` **{warning-solid}** | [`String`](#string) | **Deprecated:** The configuration snippet is now generated client-side. Deprecated in 14.6. |
 
 ### `Mutation.awardEmojiAdd`
 
@@ -2846,7 +2846,7 @@ Input type: `IssueSetCrmContactsInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationissuesetcrmcontactsclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationissuesetcrmcontactscrmcontactids"></a>`crmContactIds` | [`[CustomerRelationsContactID!]!`](#customerrelationscontactid) | Customer relations contact IDs to set. Replaces existing contacts by default. |
+| <a id="mutationissuesetcrmcontactscontactids"></a>`contactIds` | [`[CustomerRelationsContactID!]!`](#customerrelationscontactid) | Customer relations contact IDs to set. Replaces existing contacts by default. |
 | <a id="mutationissuesetcrmcontactsiid"></a>`iid` | [`String!`](#string) | IID of the issue to mutate. |
 | <a id="mutationissuesetcrmcontactsoperationmode"></a>`operationMode` | [`MutationOperationMode`](#mutationoperationmode) | Changes the operation mode. Defaults to REPLACE. |
 | <a id="mutationissuesetcrmcontactsprojectpath"></a>`projectPath` | [`ID!`](#id) | Project the issue to mutate is in. |
@@ -8339,6 +8339,7 @@ Represents an epic on an issue board.
 | <a id="boardepicdownvotes"></a>`downvotes` | [`Int!`](#int) | Number of downvotes the epic has received. |
 | <a id="boardepicduedate"></a>`dueDate` | [`Time`](#time) | Due date of the epic. |
 | <a id="boardepicduedatefixed"></a>`dueDateFixed` | [`Time`](#time) | Fixed due date of the epic. |
+| <a id="boardepicduedatefrominheritedsource"></a>`dueDateFromInheritedSource` | [`Time`](#time) | Inherited due date of the epic from child epics or milestones. |
 | <a id="boardepicduedatefrommilestones"></a>`dueDateFromMilestones` | [`Time`](#time) | Inherited due date of the epic from milestones. |
 | <a id="boardepicduedateisfixed"></a>`dueDateIsFixed` | [`Boolean`](#boolean) | Indicates if the due date has been manually set. |
 | <a id="boardepicevents"></a>`events` | [`EventConnection`](#eventconnection) | List of events associated with the object. (see [Connections](#connections)) |
@@ -8358,6 +8359,7 @@ Represents an epic on an issue board.
 | <a id="boardepicrelativeposition"></a>`relativePosition` | [`Int`](#int) | Relative position of the epic in the epic tree. |
 | <a id="boardepicstartdate"></a>`startDate` | [`Time`](#time) | Start date of the epic. |
 | <a id="boardepicstartdatefixed"></a>`startDateFixed` | [`Time`](#time) | Fixed start date of the epic. |
+| <a id="boardepicstartdatefrominheritedsource"></a>`startDateFromInheritedSource` | [`Time`](#time) | Inherited start date of the epic from child epics or milestones. |
 | <a id="boardepicstartdatefrommilestones"></a>`startDateFromMilestones` | [`Time`](#time) | Inherited start date of the epic from milestones. |
 | <a id="boardepicstartdateisfixed"></a>`startDateIsFixed` | [`Boolean`](#boolean) | Indicates if the start date has been manually set. |
 | <a id="boardepicstate"></a>`state` | [`EpicState!`](#epicstate) | State of the epic. |
@@ -8661,6 +8663,7 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cijobneeds"></a>`needs` | [`CiBuildNeedConnection`](#cibuildneedconnection) | References to builds that must complete before the jobs run. (see [Connections](#connections)) |
 | <a id="cijobpipeline"></a>`pipeline` | [`Pipeline`](#pipeline) | Pipeline the job belongs to. |
 | <a id="cijobplayable"></a>`playable` | [`Boolean!`](#boolean) | Indicates the job can be played. |
+| <a id="cijobpreviousstagejobsandneeds"></a>`previousStageJobsAndNeeds` | [`CiJobConnection`](#cijobconnection) | All prerequisite jobs. (see [Connections](#connections)) |
 | <a id="cijobqueuedat"></a>`queuedAt` | [`Time`](#time) | When the job was enqueued and marked as pending. |
 | <a id="cijobqueuedduration"></a>`queuedDuration` | [`Duration`](#duration) | How long the job was enqueued before starting. |
 | <a id="cijobrefname"></a>`refName` | [`String`](#string) | Ref name of the job. |
@@ -9765,6 +9768,7 @@ Represents an epic.
 | <a id="epicdownvotes"></a>`downvotes` | [`Int!`](#int) | Number of downvotes the epic has received. |
 | <a id="epicduedate"></a>`dueDate` | [`Time`](#time) | Due date of the epic. |
 | <a id="epicduedatefixed"></a>`dueDateFixed` | [`Time`](#time) | Fixed due date of the epic. |
+| <a id="epicduedatefrominheritedsource"></a>`dueDateFromInheritedSource` | [`Time`](#time) | Inherited due date of the epic from child epics or milestones. |
 | <a id="epicduedatefrommilestones"></a>`dueDateFromMilestones` | [`Time`](#time) | Inherited due date of the epic from milestones. |
 | <a id="epicduedateisfixed"></a>`dueDateIsFixed` | [`Boolean`](#boolean) | Indicates if the due date has been manually set. |
 | <a id="epicevents"></a>`events` | [`EventConnection`](#eventconnection) | List of events associated with the object. (see [Connections](#connections)) |
@@ -9784,6 +9788,7 @@ Represents an epic.
 | <a id="epicrelativeposition"></a>`relativePosition` | [`Int`](#int) | Relative position of the epic in the epic tree. |
 | <a id="epicstartdate"></a>`startDate` | [`Time`](#time) | Start date of the epic. |
 | <a id="epicstartdatefixed"></a>`startDateFixed` | [`Time`](#time) | Fixed start date of the epic. |
+| <a id="epicstartdatefrominheritedsource"></a>`startDateFromInheritedSource` | [`Time`](#time) | Inherited start date of the epic from child epics or milestones. |
 | <a id="epicstartdatefrommilestones"></a>`startDateFromMilestones` | [`Time`](#time) | Inherited start date of the epic from milestones. |
 | <a id="epicstartdateisfixed"></a>`startDateIsFixed` | [`Boolean`](#boolean) | Indicates if the start date has been manually set. |
 | <a id="epicstate"></a>`state` | [`EpicState!`](#epicstate) | State of the epic. |
@@ -18291,6 +18296,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 | <a id="boardissueinputepicid"></a>`epicId` | [`EpicID`](#epicid) | Filter by epic ID. Incompatible with epicWildcardId. |
 | <a id="boardissueinputepicwildcardid"></a>`epicWildcardId` | [`EpicWildcardId`](#epicwildcardid) | Filter by epic ID wildcard. Incompatible with epicId. |
 | <a id="boardissueinputiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example `["1", "2"]`. |
+| <a id="boardissueinputiterationcadenceid"></a>`iterationCadenceId` | [`[IterationsCadenceID!]`](#iterationscadenceid) | Filter by a list of iteration cadence IDs. |
 | <a id="boardissueinputiterationid"></a>`iterationId` | [`[IterationID!]`](#iterationid) | Filter by a list of iteration IDs. Incompatible with iterationWildcardId. |
 | <a id="boardissueinputiterationtitle"></a>`iterationTitle` | [`String`](#string) | Filter by iteration title. |
 | <a id="boardissueinputiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |

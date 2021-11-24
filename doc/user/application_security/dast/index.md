@@ -16,6 +16,10 @@ Dynamic Application Security Testing (DAST) examines applications for
 vulnerabilities like these in deployed environments. DAST uses the open source
 tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/) for analysis.
 
+INFO:
+Want to try out security scanning?
+[Try GitLab Ultimate free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-dast-docs). 
+
 After DAST creates its report, GitLab evaluates it for discovered
 vulnerabilities between the source and target branches. Relevant
 findings are noted in the merge request.
@@ -254,7 +258,7 @@ The included template creates a `dast` job in your CI/CD pipeline and scans
 your project's running application for possible vulnerabilities.
 
 The results are saved as a
-[DAST report artifact](../../../ci/yaml/index.md#artifactsreportsdast)
+[DAST report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportsdast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest DAST artifact available. Behind the scenes, the
 [GitLab DAST Docker image](https://gitlab.com/security-products/dast)

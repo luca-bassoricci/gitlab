@@ -12,12 +12,12 @@ import { __ } from '~/locale';
 import {
   DEFAULT_MILESTONES_GRAPHQL,
   TOKEN_TITLE_MY_REACTION,
+  OPERATOR_IS_AND_IS_NOT,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
-import WeightToken from '~/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
 
 export default {
   types: {
@@ -34,9 +34,6 @@ export default {
     incident: __('Incident'),
     issue: __('Issue'),
     milestone: __('Milestone'),
-    weight: __('Weight'),
-    is: __('is'),
-    isNot: __('is not'),
   },
   components: { BoardFilteredSearch },
   inject: ['isSignedIn'],
@@ -60,18 +57,7 @@ export default {
         : this.fullPath.slice(0, this.fullPath.lastIndexOf('/'));
     },
     tokensCE() {
-      const {
-        label,
-        is,
-        isNot,
-        author,
-        assignee,
-        issue,
-        incident,
-        type,
-        milestone,
-        weight,
-      } = this.$options.i18n;
+      const { label, author, assignee, issue, incident, type, milestone } = this.$options.i18n;
       const { types } = this.$options;
       const { fetchAuthors, fetchLabels } = issueBoardFilters(
         this.$apollo,
@@ -84,10 +70,7 @@ export default {
           icon: 'user',
           title: assignee,
           type: 'assignee_username',
-          operators: [
-            { value: '=', description: is },
-            { value: '!=', description: isNot },
-          ],
+          operators: OPERATOR_IS_AND_IS_NOT,
           token: AuthorToken,
           unique: true,
           fetchAuthors,
@@ -97,10 +80,7 @@ export default {
           icon: 'pencil',
           title: author,
           type: 'author_username',
-          operators: [
-            { value: '=', description: is },
-            { value: '!=', description: isNot },
-          ],
+          operators: OPERATOR_IS_AND_IS_NOT,
           symbol: '@',
           token: AuthorToken,
           unique: true,
@@ -111,10 +91,7 @@ export default {
           icon: 'labels',
           title: label,
           type: 'label_name',
-          operators: [
-            { value: '=', description: is },
-            { value: '!=', description: isNot },
-          ],
+          operators: OPERATOR_IS_AND_IS_NOT,
           token: LabelToken,
           unique: false,
           symbol: '~',
@@ -166,13 +143,6 @@ export default {
             { icon: 'issue-type-issue', value: types.ISSUE, title: issue },
             { icon: 'issue-type-incident', value: types.INCIDENT, title: incident },
           ],
-        },
-        {
-          type: 'weight',
-          title: weight,
-          icon: 'weight',
-          token: WeightToken,
-          unique: true,
         },
       ];
     },

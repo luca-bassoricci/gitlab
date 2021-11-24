@@ -97,7 +97,7 @@ From there, you can see the following actions:
 - 2FA enforcement or grace period changed.
 - Roles allowed to create project changed.
 - Group CI/CD variable added, removed, or protected status changed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.3.
-- Compliance framework created, updated, or deleted. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340649) in GitLab 14.6.
+- Compliance framework created, updated, or deleted. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340649) in GitLab 14.5.
 
 Group events can also be accessed via the [Group Audit Events API](../api/audit_events.md#group-audit-events)
 
@@ -128,6 +128,10 @@ From there, you can see the following actions:
 - Release was updated
 - Release milestone associations changed
 - Permission to approve merge requests by committers was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
+- Permission to approve merge requests by committers was updated.
+  - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9.
+  - Message for event [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/72623/diffs) in GitLab 14.6.
+
 - Permission to approve merge requests by authors was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Number of required approvals was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Added or removed users and groups from project approval groups ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213603) in GitLab 13.2)

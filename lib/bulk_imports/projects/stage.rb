@@ -27,6 +27,10 @@ module BulkImports
             pipeline: BulkImports::Projects::Pipelines::IssuesPipeline,
             stage: 3
           },
+          snippets: {
+            pipeline: BulkImports::Projects::Pipelines::SnippetsPipeline,
+            stage: 3
+          },
           boards: {
             pipeline: BulkImports::Common::Pipelines::BoardsPipeline,
             stage: 4
@@ -41,6 +45,10 @@ module BulkImports
           },
           protected_branches: {
             pipeline: BulkImports::Projects::Pipelines::ProtectedBranchesPipeline,
+            stage: 4
+          },
+          ci_pipelines: {
+            pipeline: BulkImports::Projects::Pipelines::CiPipelinesPipeline,
             stage: 4
           },
           wiki: {

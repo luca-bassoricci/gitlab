@@ -49,11 +49,9 @@ module SimpleCovEnv
       track_files '{app,config/initializers,config/initializers_before_autoloader,db/post_migrate,haml_lint,lib,rubocop,tooling}/**/*.rb'
 
       add_filter '/vendor/ruby/'
-      add_filter '/app/controllers/sherlock/'
+      add_filter '/app/controllers/sherlock/' # Profiling tool used only in development
       add_filter '/bin/'
       add_filter 'db/fixtures/' # Matches EE files as well
-      add_filter '/lib/gitlab/sidekiq_middleware/'
-      add_filter '/lib/system_check/'
 
       add_group 'Channels',     'app/channels' # Matches EE files as well
       add_group 'Controllers',  'app/controllers' # Matches EE files as well

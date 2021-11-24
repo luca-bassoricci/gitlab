@@ -85,7 +85,7 @@ are included when cloning.
 Top-level groups created after August 12, 2021 have delayed project deletion enabled by default.
 Projects are permanently deleted after a seven-day delay.
 
-You can disable this by changing the [group setting](../group/index.md#enable-delayed-project-removal).
+You can disable this by changing the [group setting](../group/index.md#enable-delayed-project-deletion).
 
 ## Alternative SSH port
 
@@ -141,7 +141,7 @@ the related documentation.
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 | Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
 | [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | Free tier: `50` per-group / `50` per-project <br/> All paid tiers: `1_000` per-group  / `1_000` per-project | `1_000` per-group / `1_000` per-project |
-| [Limit dotenv variables](../../administration/instance_limits.md#limit-dotenv-variables) | Free tier: `50` / Premium tier: `100` / Ultimate tier: `150` | Unlimited |
+| [Limit dotenv variables](../../administration/instance_limits.md#limit-dotenv-variables) | Free tier: `50` / Premium tier: `100` / Ultimate tier: `150` | 150 |
 
 ## Account and limit settings
 

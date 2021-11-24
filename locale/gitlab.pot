@@ -717,7 +717,7 @@ msgstr ""
 msgid "%{link_start}Remove the %{draft_snippet} prefix%{link_end} from the title to allow this merge request to be merged when it's ready."
 msgstr ""
 
-msgid "%{link_start}Start the title with %{draft_snippet}%{link_end} to prevent a merge request that is a work in progress from being merged before it's ready."
+msgid "%{link_start}Start the title with %{draft_snippet}%{link_end} to prevent a merge request draft from merging before it's ready."
 msgstr ""
 
 msgid "%{link_start}What information does GitLab Inc. collect?%{link_end}"
@@ -1500,9 +1500,6 @@ msgstr ""
 msgid "A new Release %{tag} for %{name} was published. Visit the Releases page to read more about it:"
 msgstr ""
 
-msgid "A new branch will be created in your fork and a new merge request will be started."
-msgstr ""
-
 msgid "A new impersonation token has been created."
 msgstr ""
 
@@ -1537,9 +1534,6 @@ msgid "A rebase is already in progress."
 msgstr ""
 
 msgid "A sign-in to your account has been made from the following IP address: %{ip}"
-msgstr ""
-
-msgid "A string appended to the project path to form the Service Desk email address."
 msgstr ""
 
 msgid "A title is required"
@@ -1974,6 +1968,9 @@ msgstr ""
 msgid "Add a related issue"
 msgstr ""
 
+msgid "Add a suffix to Service Desk email address. %{linkStart}Learn more.%{linkEnd}"
+msgstr ""
+
 msgid "Add a table"
 msgstr ""
 
@@ -2020,6 +2017,12 @@ msgid "Add commit messages as comments to Asana tasks. %{docs_link}"
 msgstr ""
 
 msgid "Add commit messages as comments to Pivotal Tracker stories. %{docs_link}"
+msgstr ""
+
+msgid "Add customer relation contact(s)."
+msgstr ""
+
+msgid "Add customer relation contacts"
 msgstr ""
 
 msgid "Add deploy freeze"
@@ -2223,7 +2226,7 @@ msgstr ""
 msgid "Adds %{labels} %{label_text}."
 msgstr ""
 
-msgid "Adds a Zoom meeting"
+msgid "Adds a Zoom meeting."
 msgstr ""
 
 msgid "Adds a to do."
@@ -2232,7 +2235,7 @@ msgstr ""
 msgid "Adds an issue to an epic."
 msgstr ""
 
-msgid "Adds email participant(s)"
+msgid "Adds email participant(s)."
 msgstr ""
 
 msgid "Adjust how frequently the GitLab UI polls for updates."
@@ -3573,6 +3576,9 @@ msgstr ""
 msgid "An error occurred fetching the project authors."
 msgstr ""
 
+msgid "An error occurred fetching the public deploy keys. Please try again."
+msgstr ""
+
 msgid "An error occurred previewing the blob"
 msgstr ""
 
@@ -3912,6 +3918,9 @@ msgid "An example project that shows off the best practices for setting up GitLa
 msgstr ""
 
 msgid "An example showing how to use Jsonnet with GitLab dynamic child pipelines"
+msgstr ""
+
+msgid "An integer value is required for seconds"
 msgstr ""
 
 msgid "An issue already exists"
@@ -6519,10 +6528,10 @@ msgstr ""
 msgid "ChangeReviewer|Unassigned"
 msgstr ""
 
-msgid "ChangeTypeAction|A new branch will be created in your fork and a new merge request will be started."
+msgid "ChangeTypeAction|Cherry-pick"
 msgstr ""
 
-msgid "ChangeTypeAction|Cherry-pick"
+msgid "ChangeTypeAction|GitLab will create a branch in your fork and start a merge request."
 msgstr ""
 
 msgid "ChangeTypeAction|Pick into branch"
@@ -6929,9 +6938,6 @@ msgid "Chinese language support using"
 msgstr ""
 
 msgid "Choose File..."
-msgstr ""
-
-msgid "Choose a branch/tag (e.g. %{branch}) or enter a commit (e.g. %{sha}) to see what's changed or to create a merge request."
 msgstr ""
 
 msgid "Choose a file"
@@ -7426,6 +7432,9 @@ msgstr ""
 msgid "ClusterAgents|GitLab Agents provide an increased level of security when integrating with clusters. %{linkStart}Learn more about the GitLab Kubernetes Agent.%{linkEnd}"
 msgstr ""
 
+msgid "ClusterAgents|GitLab Kubernetes Agent"
+msgstr ""
+
 msgid "ClusterAgents|Go to the repository"
 msgstr ""
 
@@ -7445,6 +7454,12 @@ msgid "ClusterAgents|Learn how to create an agent access token"
 msgstr ""
 
 msgid "ClusterAgents|Learn how to troubleshoot"
+msgstr ""
+
+msgid "ClusterAgents|Learn more about installing a GitLab Kubernetes Agent"
+msgstr ""
+
+msgid "ClusterAgents|Learn more about the GitLab Kubernetes Agent registration."
 msgstr ""
 
 msgid "ClusterAgents|Learn more about the GitLab Kubernetes Agent."
@@ -7471,9 +7486,6 @@ msgstr ""
 msgid "ClusterAgents|Not connected"
 msgstr ""
 
-msgid "ClusterAgents|Read more about getting started"
-msgstr ""
-
 msgid "ClusterAgents|Recommended"
 msgstr ""
 
@@ -7495,13 +7507,16 @@ msgstr ""
 msgid "ClusterAgents|Select an Agent"
 msgstr ""
 
-msgid "ClusterAgents|Select the Agent you want to register with GitLab and install on your cluster. To learn more about the Kubernetes Agent registration process %{linkStart}go to the documentation%{linkEnd}."
+msgid "ClusterAgents|Select an Agent to register with GitLab and install on your cluster."
 msgstr ""
 
 msgid "ClusterAgents|Select which Agent you want to install"
 msgstr ""
 
 msgid "ClusterAgents|The Agent has not been connected in a long time. There might be a connectivity issue. Last contact was %{timeAgo}."
+msgstr ""
+
+msgid "ClusterAgents|The GitLab Agent also requires %{linkStart}enabling the Agent Server%{linkEnd}"
 msgstr ""
 
 msgid "ClusterAgents|The recommended installation method provided below includes the token. If you want to follow the alternative installation method provided in the docs make sure you save the token value before you close the window."
@@ -8330,6 +8345,9 @@ msgid "Code owners"
 msgstr ""
 
 msgid "Code review"
+msgstr ""
+
+msgid "Code snippet"
 msgstr ""
 
 msgid "Code snippet copied. Insert it in the correct location in the YAML file."
@@ -12672,6 +12690,9 @@ msgstr ""
 msgid "Email a new %{name} to this project"
 msgstr ""
 
+msgid "Email address suffix"
+msgstr ""
+
 msgid "Email address to use for Support Desk"
 msgstr ""
 
@@ -15853,6 +15874,9 @@ msgstr ""
 msgid "GitLab version"
 msgstr ""
 
+msgid "GitLab will create a branch in your fork and start a merge request."
+msgstr ""
+
 msgid "GitLab.com"
 msgstr ""
 
@@ -16495,7 +16519,7 @@ msgstr ""
 msgid "GroupSAML|\"persistent\" recommended"
 msgstr ""
 
-msgid "GroupSAML|%{strongOpen}Warning%{strongClose} - Enabling %{linkStart}SSO enforcement%{linkEnd} can reduce security risks."
+msgid "GroupSAML|%{strongOpen}Warning%{strongClose} - Enable %{linkStart}SSO enforcement%{linkEnd} to reduce security risks."
 msgstr ""
 
 msgid "GroupSAML|Active SAML Group Links (%{count})"
@@ -16978,9 +17002,6 @@ msgstr ""
 msgid "Have more to say about GitLab?"
 msgstr ""
 
-msgid "Header cannot be associated with both a request and a response"
-msgstr ""
-
 msgid "Header logo"
 msgstr ""
 
@@ -16991,9 +17012,6 @@ msgid "Header logo will be removed. Are you sure?"
 msgstr ""
 
 msgid "Header message"
-msgstr ""
-
-msgid "Header must be associated with a request or response"
 msgstr ""
 
 msgid "Headers"
@@ -17090,6 +17108,9 @@ msgid "Here you will find recent merge request activity"
 msgstr ""
 
 msgid "Hi %{username}!"
+msgstr ""
+
+msgid "Hidden"
 msgstr ""
 
 msgid "Hide"
@@ -19645,9 +19666,6 @@ msgstr ""
 msgid "Japanese language support using"
 msgstr ""
 
-msgid "Jira Issues"
-msgstr ""
-
 msgid "Jira display name"
 msgstr ""
 
@@ -19777,16 +19795,10 @@ msgstr ""
 msgid "JiraService|If different from Web URL."
 msgstr ""
 
-msgid "JiraService|Issue List"
-msgstr ""
-
 msgid "JiraService|Issues created from vulnerabilities in this project will be Jira issues, even if GitLab issues are enabled."
 msgstr ""
 
 msgid "JiraService|Jira API URL"
-msgstr ""
-
-msgid "JiraService|Jira Issues"
 msgstr ""
 
 msgid "JiraService|Jira comments are created when an issue is referenced in a commit."
@@ -19796,6 +19808,9 @@ msgid "JiraService|Jira comments are created when an issue is referenced in a me
 msgstr ""
 
 msgid "JiraService|Jira issue type"
+msgstr ""
+
+msgid "JiraService|Jira issues"
 msgstr ""
 
 msgid "JiraService|Jira project key"
@@ -20583,6 +20598,9 @@ msgstr ""
 msgid "LearnGitLab|Use your new GitLab workflow to deploy your application, monitor its health, and keep it secure:"
 msgstr ""
 
+msgid "LearnGitLab|Your team is growing! You've successfully invited new team members to the %{projectName} project."
+msgstr ""
+
 msgid "LearnGitlab|Creating your onboarding experience..."
 msgstr ""
 
@@ -21035,7 +21053,7 @@ msgstr ""
 msgid "MERGED"
 msgstr ""
 
-msgid "MR widget|Back to the Merge request"
+msgid "MR widget|Back to the merge request"
 msgstr ""
 
 msgid "MR widget|See your pipeline in action"
@@ -21788,9 +21806,6 @@ msgstr ""
 msgid "Merge requests are a place to propose changes you've made to a project and discuss those changes with others"
 msgstr ""
 
-msgid "Merge requests are read-only in a secondary Geo node"
-msgstr ""
-
 msgid "Merge requests assigned to me"
 msgstr ""
 
@@ -21798,6 +21813,9 @@ msgid "Merge requests that I'm a reviewer"
 msgstr ""
 
 msgid "Merge the branch and fix any conflicts that come up"
+msgstr ""
+
+msgid "Merge unavailable: merge requests are read-only in a secondary Geo node."
 msgstr ""
 
 msgid "Merge when pipeline succeeds"
@@ -23521,6 +23539,9 @@ msgstr ""
 msgid "No projects found"
 msgstr ""
 
+msgid "No public deploy keys"
+msgstr ""
+
 msgid "No public groups"
 msgstr ""
 
@@ -24216,6 +24237,12 @@ msgid "One more item"
 msgid_plural "%d more items"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "One or more contacts were successfully added."
+msgstr ""
+
+msgid "One or more contacts were successfully removed."
+msgstr ""
 
 msgid "One or more groups that you don't have access to."
 msgstr ""
@@ -25950,6 +25977,9 @@ msgstr ""
 msgid "Please enter a valid number"
 msgstr ""
 
+msgid "Please enter a valid time interval"
+msgstr ""
+
 msgid "Please enter or upload a valid license."
 msgstr ""
 
@@ -26217,7 +26247,7 @@ msgstr ""
 msgid "Prev"
 msgstr ""
 
-msgid "Prevent adding new members to project membership within this group"
+msgid "Prevent adding new members to projects within this group"
 msgstr ""
 
 msgid "Prevent auto-stopping"
@@ -26902,9 +26932,6 @@ msgid "Project milestone"
 msgstr ""
 
 msgid "Project name"
-msgstr ""
-
-msgid "Project name suffix"
 msgstr ""
 
 msgid "Project navigation"
@@ -28741,6 +28768,9 @@ msgstr ""
 msgid "Remove Zoom meeting"
 msgstr ""
 
+msgid "Remove Zoom meeting."
+msgstr ""
+
 msgid "Remove access"
 msgstr ""
 
@@ -28778,6 +28808,12 @@ msgid "Remove card"
 msgstr ""
 
 msgid "Remove child epic from an epic"
+msgstr ""
+
+msgid "Remove customer relation contact(s)."
+msgstr ""
+
+msgid "Remove customer relation contacts"
 msgstr ""
 
 msgid "Remove deploy key"
@@ -30807,7 +30843,7 @@ msgstr ""
 msgid "SecurityOrchestration|Scan execution policies can only be created by project owners."
 msgstr ""
 
-msgid "SecurityOrchestration|Scan to be performed every %{cadence} on the %{branches}"
+msgid "SecurityOrchestration|Scan to be performed %{cadence} on the %{branches}"
 msgstr ""
 
 msgid "SecurityOrchestration|Scan to be performed on every pipeline on the %{branches}"
@@ -31880,13 +31916,25 @@ msgstr ""
 msgid "Sherlock Transactions"
 msgstr ""
 
+msgid "Shimo|Go to Shimo Workspace"
+msgstr ""
+
 msgid "Shimo|Link to a Shimo Workspace from the sidebar."
 msgstr ""
 
 msgid "Shimo|Shimo"
 msgstr ""
 
+msgid "Shimo|Shimo Workspace"
+msgstr ""
+
 msgid "Shimo|Shimo Workspace URL"
+msgstr ""
+
+msgid "Shimo|Shimo Workspace integration is enabled"
+msgstr ""
+
+msgid "Shimo|You've enabled the Shimo Workspace integration. You can view your wiki directly in Shimo."
 msgstr ""
 
 msgid "Should you ever lose your phone or access to your one time password secret, each of these recovery codes can be used one time each to regain access to your account. Please save them in a safe place, or you %{boldStart}will%{boldEnd} lose access to your account."
@@ -36235,6 +36283,9 @@ msgstr ""
 msgid "To see this project's operational details, contact an owner of group %{groupName} to upgrade the plan. You can also remove the project from the dashboard."
 msgstr ""
 
+msgid "To see what's changed or create a merge request, choose a branch or tag (like %{branch}), or enter a commit (like %{sha})."
+msgstr ""
+
 msgid "To set up SAML authentication for your group through an identity provider like Azure, Okta, Onelogin, Ping Identity, or your custom SAML 2.0 provider:"
 msgstr ""
 
@@ -37225,6 +37276,9 @@ msgid "Upload image"
 msgstr ""
 
 msgid "Upload license"
+msgstr ""
+
+msgid "Upload new file"
 msgstr ""
 
 msgid "Upload object map"
@@ -39140,6 +39194,12 @@ msgstr ""
 msgid "WikiPage|Create page"
 msgstr ""
 
+msgid "WikiPage|Edit rich text"
+msgstr ""
+
+msgid "WikiPage|Edit source"
+msgstr ""
+
 msgid "WikiPage|Format"
 msgstr ""
 
@@ -39536,6 +39596,9 @@ msgstr ""
 msgid "You can only %{action} files when you are on a branch"
 msgstr ""
 
+msgid "You can only add up to %{max_contacts} contacts at one time"
+msgstr ""
+
 msgid "You can only edit files when you are on a branch"
 msgstr ""
 
@@ -39576,6 +39639,9 @@ msgid "You cannot %{action} %{state} users."
 msgstr ""
 
 msgid "You cannot access the raw file. Please wait a minute."
+msgstr ""
+
+msgid "You cannot combine replace_ids with add_ids or remove_ids"
 msgstr ""
 
 msgid "You cannot impersonate a blocked user"
@@ -39714,6 +39780,9 @@ msgid "You have insufficient permissions to remove an on-call schedule from this
 msgstr ""
 
 msgid "You have insufficient permissions to remove this HTTP integration"
+msgstr ""
+
+msgid "You have insufficient permissions to set customer relations contacts for this issue"
 msgstr ""
 
 msgid "You have insufficient permissions to update an on-call schedule for this project"
@@ -41412,6 +41481,9 @@ msgstr ""
 msgid "mrWidget|Merge blocked: all threads must be resolved."
 msgstr ""
 
+msgid "mrWidget|Merge blocked: denied licenses must be removed."
+msgstr ""
+
 msgid "mrWidget|Merge blocked: fast-forward merge is not possible. To merge this request, first rebase locally."
 msgstr ""
 
@@ -41422,6 +41494,9 @@ msgid "mrWidget|Merge failed."
 msgstr ""
 
 msgid "mrWidget|Merge locally"
+msgstr ""
+
+msgid "mrWidget|Merge unavailable: merge requests are read-only on archived projects."
 msgstr ""
 
 msgid "mrWidget|Merged by"
@@ -41535,9 +41610,6 @@ msgstr ""
 msgid "mrWidget|This merge request failed to be merged automatically"
 msgstr ""
 
-msgid "mrWidget|This project is archived, write access has been disabled"
-msgstr ""
-
 msgid "mrWidget|To approve this merge request, please enter your password. This project requires all approvals to be authenticated."
 msgstr ""
 
@@ -41548,9 +41620,6 @@ msgid "mrWidget|To merge, a Jira issue key must be mentioned in the title or des
 msgstr ""
 
 msgid "mrWidget|What is a merge train?"
-msgstr ""
-
-msgid "mrWidget|You can merge after removing denied licenses"
 msgstr ""
 
 msgid "mrWidget|You can only merge once this merge request is approved."

@@ -14,6 +14,10 @@ This page describes SAML for groups. For instance-wide SAML on self-managed GitL
 
 SAML on GitLab.com allows users to sign in through their SAML identity provider. If the user is not already a member, the sign-in process automatically adds the user to the appropriate group.
 
+INFO:
+Use your own SAML authentication to log in to [GitLab.com](http://gitlab.com/).
+[Try GitLab Ultimate free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=p-saml-sso-docs).
+
 User synchronization of SAML SSO groups is supported through [SCIM](scim_setup.md). SCIM supports adding and removing users from the GitLab group automatically.
 For example, if you remove a user from the SCIM app, SCIM removes that same user from the GitLab group.
 
@@ -29,13 +33,15 @@ If required, you can find [a glossary of common terms](../../../integration/saml
    Alternatively GitLab provides [metadata XML configuration](#metadata-configuration).
    See [specific identity provider documentation](#providers) for more details.
 1. Configure the SAML response to include a NameID that uniquely identifies each user.
-1. Configure [required assertions](#assertions) at minimum containing
-   the user's email address.
+1. Configure the required [user attributes](#user-attributes), ensuring you include the user's email address.
 1. While the default is enabled for most SAML providers, please ensure the app is set to have service provider
    initiated calls in order to link existing GitLab accounts.
 1. Once the identity provider is set up, move on to [configuring GitLab](#configuring-gitlab).
 
 ![Issuer and callback for configuring SAML identity provider with GitLab.com](img/group_saml_configuration_information.png)
+
+If your account is the only owner in the group after SAML is set up, you can't unlink the account. To [unlink the account](#unlinking-accounts),
+set up another user as a group owner.
 
 ### NameID
 
@@ -60,15 +66,16 @@ Once users have signed into GitLab using the SSO SAML setup, changing the `NameI
 We recommend setting the NameID format to `Persistent` unless using a field (such as email) that requires a different format.
 Most NameID formats can be used, except `Transient` due to the temporary nature of this format.
 
-### Assertions
+### User attributes
 
-For users to be created with the right information with the improved [user access and management](#user-access-and-management),
-the user details need to be passed to GitLab as SAML assertions.
+To create users with the correct information for improved [user access and management](#user-access-and-management),
+the user's details must be passed to GitLab as attributes in the SAML assertion. At a minimum, the user's email address
+must be specified as an attribute named `email` or `mail`.
 
-At a minimum, the user's email address *must* be specified as an assertion named `email` or `mail`.
-See [the assertions list](../../../integration/saml.md#assertions) for other available claims.
-In addition to the attributes in the linked assertions list, GitLab.com supports `username`
-and `nickname` attributes.
+GitLab.com supports the following attributes:
+
+- `username` or `nickname`. We recommend you configure only one of these.
+- The [attributes also available](../../../integration/saml.md#assertions) to self-managed GitLab instances.
 
 ### Metadata configuration
 
@@ -374,7 +381,10 @@ Users granted:
 ### Automatic member removal
 
 After a group sync, users who are not members of a mapped SAML group are removed from
-the GitLab group.
+the GitLab group. Even if SSO authentication is successful, if an existing user is not a member of any of the configured groups:
+
+- They get an "unauthorized" message if they try to view the group.
+- All of their permissions to subgroups and projects are also removed.
 
 For example, in the following diagram:
 
@@ -474,6 +484,24 @@ Specific attention should be paid to:
 - The [NameID](#nameid), which we use to identify which user is signing in. If the user has previously signed in, this [must match the value we have stored](#verifying-nameid).
 - The presence of a `X509Certificate`, which we require to verify the response signature.
 - The `SubjectConfirmation` and `Conditions`, which can cause errors if misconfigured.
+
+#### Generate a SAML Response
+
+SAML Responses can be used to preview the attribute names and values sent in the assertions list while attempting to sign in using an IdP. 
+
+To generate a SAML Response:
+
+1. Install either:
+   - [SAML Chrome Panel](https://chrome.google.com/webstore/detail/saml-chrome-panel/paijfdbeoenhembfhkhllainmocckace) for Chrome.
+   - [SAML-tracer](https://addons.mozilla.org/en-US/firefox/addon/saml-tracer/) for Firefox.
+1. Open a new browser tab.
+1. Open the SAML tracer console:
+   - Chrome: Right click on the page, select **Inspect**, then click on the SAML tab in the opened developer console.
+   - Firefox: Select the SAML-tracer icon located on the browser toolbar.
+1. Go to the GitLab single sign-on URL for the group in the same browser tab with the SAML tracer open.
+1. Select **Authorize** or attempt to log in. A SAML response is displayed in the tracer console that resembles this
+   [example SAML response](#example-saml-response).
+1. Within the SAML tracer, select the **Export** icon to save the response in JSON format.
 
 ### Verifying configuration
 

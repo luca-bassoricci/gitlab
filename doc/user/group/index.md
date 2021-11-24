@@ -508,7 +508,7 @@ To prevent a project from being shared with other groups:
 This setting applies to all subgroups unless overridden by a group owner. Groups already
 added to a project lose access when the setting is enabled.
 
-## Prevent members from being added to a group **(PREMIUM)**
+## Prevent members from being added to projects in a group **(PREMIUM)**
 
 As a group owner, you can prevent any new project membership for all
 projects in a group, allowing tighter control over project membership.
@@ -516,7 +516,11 @@ projects in a group, allowing tighter control over project membership.
 For example, if you want to lock the group for an [Audit Event](../../administration/audit_events.md),
 you can guarantee that project membership cannot be modified during the audit.
 
-To prevent members from being added to a group:
+You can still invite groups or to add members to groups, implicitly giving members access to projects in the **locked** group.
+
+The setting does not cascade. Projects in subgroups observe the subgroup configuration, ignoring the parent group.
+
+To prevent members from being added to projects in a group:
 
 1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
@@ -563,6 +567,8 @@ You should consider these security implications before configuring IP address re
   requests a new job or an update to a job's state, it is also not bound by
   the IP restrictions. But when the running CI/CD job sends Git requests from a
   restricted IP address, the IP restriction prevents code from being cloned.
+- **User dashboard activity**: Users may still see some events from the IP restricted groups and projects
+  on their dashboard. Activity may include push, merge, issue, or comment events. 
 
 To restrict group access by IP address:
 
@@ -660,7 +666,7 @@ To disable group mentions:
 1. Select **Disable group mentions**.
 1. Select **Save changes**.
 
-## Enable delayed project removal **(PREMIUM)**
+## Enable delayed project deletion **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 > - [Inheritance and enforcement added](https://gitlab.com/gitlab-org/gitlab/-/issues/321724) in GitLab 13.11.
@@ -685,12 +691,12 @@ To enable delayed deletion of projects in a group:
 
 1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
-1. Check **Enable delayed project removal**.
+1. Check **Enable delayed project deletion**.
 1. Optional. To prevent subgroups from changing this setting, select **Enforce for all subgroups**.
 1. Select **Save changes**.
 
 NOTE:
-In GitLab 13.11 and above the group setting for delayed project removal is inherited by subgroups. As discussed in [Cascading settings](../../development/cascading_settings.md) inheritance can be overridden, unless enforced by an ancestor.
+In GitLab 13.11 and above the group setting for delayed project deletion is inherited by subgroups. As discussed in [Cascading settings](../../development/cascading_settings.md) inheritance can be overridden, unless enforced by an ancestor.
 
 ## Prevent project forking outside group **(PREMIUM)**
 

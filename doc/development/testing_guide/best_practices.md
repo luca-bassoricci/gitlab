@@ -483,6 +483,43 @@ expect(page).to have_css '[data-testid="weight"]', text: 2
 expect(page).to have_css '.atwho-view ul', visible: true
 ```
 
+##### Interacting with modals
+
+Use the `within_modal` helper to interact with [GitLab UI modals](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-modal--default).
+
+```ruby
+include Spec::Support::Helpers::ModalHelpers
+
+within_modal do
+  expect(page).to have_link _('UI testing docs')
+
+  fill_in _('Search projects'), with: 'gitlab'
+
+  click_button 'Continue'
+end
+```
+
+Furthermore, you can use `accept_gl_confirm` for confirmation modals that only need to be accepted.
+This is helpful when migrating [`window.confirm()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm) to [`confirmAction`](https://gitlab.com/gitlab-org/gitlab/-/blob/ee280ed2b763d1278ad38c6e7e8a0aff092f617a/app/assets/javascripts/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal.js#L3).
+
+```ruby
+include Spec::Support::Helpers::ModalHelpers
+
+accept_gl_confirm do
+  click_button 'Delete user'
+end
+```
+
+You can also pass the expected confirmation message and button text to `accept_gl_confirm`.
+
+```ruby
+include Spec::Support::Helpers::ModalHelpers
+
+accept_gl_confirm('Are you sure you want to delete this user?', button_text: 'Delete') do
+  click_button 'Delete user'
+end
+```
+
 ##### Other useful methods
 
 After you retrieve an element using a [finder method](#finders), you can invoke a number of
@@ -699,6 +736,42 @@ it 'is overdue' do
   travel_to(3.days.from_now) do
     expect(issue).to be_overdue
   end
+end
+```
+
+#### RSpec helpers
+
+You can use the `:freeze_time` and `:time_travel_to` RSpec metadata tag helpers to help reduce the amount of
+boilerplate code needed to wrap entire specs with the [`ActiveSupport::Testing::TimeHelpers`](https://api.rubyonrails.org/v6.0.3.1/classes/ActiveSupport/Testing/TimeHelpers.html)
+methods.
+
+```ruby
+describe 'specs which require time to be frozen', :freeze_time do
+  it 'freezes time' do
+    right_now = Time.now
+
+    expect(Time.now).to eq(right_now)
+  end
+end
+
+describe 'specs which require time to be frozen to a specific date and/or time', time_travel_to: '2020-02-02 10:30:45 -0700' do
+  it 'freezes time to the specified date and time' do
+    expect(Time.now).to eq(Time.new(2020, 2, 2, 17, 30, 45, '+00:00'))
+  end
+end
+```
+
+[Under the hood](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/support/time_travel.rb), these helpers use the `around(:each)` hook and the block syntax of the
+[`ActiveSupport::Testing::TimeHelpers`](https://api.rubyonrails.org/v6.0.3.1/classes/ActiveSupport/Testing/TimeHelpers.html)
+methods:
+
+```ruby
+around(:each) do |example|
+  freeze_time { example.run }
+end
+
+around(:each) do |example|
+  travel_to(date_or_time) { example.run }
 end
 ```
 

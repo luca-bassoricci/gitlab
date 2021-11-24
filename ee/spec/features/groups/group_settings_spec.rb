@@ -76,7 +76,7 @@ RSpec.describe 'Edit group settings' do
       it 'is not visible' do
         visit edit_group_path(group)
 
-        expect(page).not_to have_content('Prevent adding new members to project membership within this group')
+        expect(page).not_to have_content('Prevent adding new members to projects within this group')
       end
     end
 
@@ -84,7 +84,7 @@ RSpec.describe 'Edit group settings' do
       it 'is visible' do
         visit edit_group_path(group)
 
-        expect(page).to have_content('Prevent adding new members to project membership within this group')
+        expect(page).to have_content('Prevent adding new members to projects within this group')
       end
 
       context 'when current user is not the Owner' do
@@ -153,7 +153,7 @@ RSpec.describe 'Edit group settings' do
     end
   end
 
-  context 'enable delayed project removal' do
+  context 'enable delayed project deletion' do
     before do
       stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
     end
