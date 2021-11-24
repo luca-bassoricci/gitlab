@@ -37124,9 +37124,6 @@ msgstr ""
 msgid "Unknown response text"
 msgstr ""
 
-msgid "Unknown root"
-msgstr ""
-
 msgid "Unknown user"
 msgstr ""
 
