@@ -4,7 +4,7 @@ class Gitlab::Seeder::Users
   include ActionView::Helpers::NumberHelper
 
   RANDOM_USERS_COUNT = 20
-  MASS_USERS_COUNT = 1000
+  MASS_USERS_COUNT = 100
 
   attr_reader :opts
 
@@ -24,15 +24,17 @@ class Gitlab::Seeder::Users
 
     Gitlab::Seeder.with_mass_insert(MASS_USERS_COUNT, User) do
       ActiveRecord::Base.connection.execute <<~SQL
-        INSERT INTO users (username, name, email, confirmed_at, projects_limit, encrypted_password)
+        INSERT INTO users (username, name, email, state, confirmed_at, projects_limit, encrypted_password)
         SELECT
           '#{Gitlab::Seeder::MASS_INSERT_USER_START}' || seq,
           'Seed user ' || seq,
           'seed_user' || seq || '@example.com',
+          'active',
           to_timestamp(seq),
           #{MASS_USERS_COUNT},
           '#{encrypted_password}'
         FROM generate_series(1, #{MASS_USERS_COUNT}) AS seq
+        ON CONFLICT DO NOTHING;
       SQL
     end
 
@@ -46,7 +48,7 @@ class Gitlab::Seeder::Users
           id,
           'User'
         FROM users WHERE NOT admin
-        ON CONFLICT DO NOTHING
+        ON CONFLICT DO NOTHING;
       SQL
     end
 
@@ -55,7 +57,7 @@ class Gitlab::Seeder::Users
         INSERT INTO routes (source_id, source_type, path, name)
         SELECT id, 'Namespace', path, name
           FROM namespaces WHERE type IS NULL OR type = 'User'
-          ON CONFLICT (source_type, source_id) DO NOTHING;
+          ON CONFLICT DO NOTHING;
       SQL
     end
 
@@ -73,6 +75,7 @@ class Gitlab::Seeder::Users
           'mass_insert_group_0_' || seq,
           'Group'
         FROM generate_series(1, #{MASS_USERS_COUNT}) AS seq
+        ON CONFLICT DO NOTHING;
       SQL
 
       (1..9).each do |idx|
@@ -87,6 +90,7 @@ class Gitlab::Seeder::Users
           FROM namespaces
           CROSS JOIN generate_series(1, 2) AS seq
           WHERE namespaces.type='Group' AND namespaces.path like 'mass_insert_group_#{idx-1}_%'
+          ON CONFLICT DO NOTHING;
         SQL
       end
 
@@ -113,7 +117,7 @@ class Gitlab::Seeder::Users
         )
         INSERT INTO routes (source_id, source_type, path, name)
           SELECT cte.namespace_id, 'Namespace', cte.path, cte.path FROM cte
-          ON CONFLICT (source_type, source_id) DO NOTHING;
+          ON CONFLICT DO NOTHING;
       SQL
 
       puts "#{Time.now} filling traversal ids"
@@ -137,9 +141,9 @@ class Gitlab::Seeder::Users
               AND "n"."parent_id" = "cte"."namespace_id"
           )
         )
-        update namespaces
-        set traversal_ids = computed.source_id from (SELECT namespace_id, source_id FROM cte) as computed
-        where computed.namespace_id = namespaces.id AND namespaces.path like 'mass_insert_%'
+        UPDATE namespaces
+        SET traversal_ids = computed.source_id FROM (SELECT namespace_id, source_id FROM cte) AS computed
+        where computed.namespace_id = namespaces.id AND namespaces.path LIKE 'mass_insert_%'
       SQL
 
       puts "#{Time.now} creating namespace settings"

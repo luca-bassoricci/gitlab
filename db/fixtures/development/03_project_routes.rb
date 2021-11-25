@@ -24,7 +24,7 @@ class Gitlab::Seeder::ProjectRoutes
           INNER JOIN routes ON routes.source_id = p.namespace_id and source_type = 'Namespace'
           WHERE p.id BETWEEN #{range.first} AND #{range.last}
           --WHERE p.path like 'mass_%'
-          ON CONFLICT (source_type, source_id) DO NOTHING;
+          ON CONFLICT DO NOTHING;
         SQL
       end
     end

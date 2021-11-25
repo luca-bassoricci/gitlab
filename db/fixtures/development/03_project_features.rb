@@ -23,7 +23,7 @@ class Gitlab::Seeder::ProjectFeatures
             #{ProjectFeature::ENABLED} AS pages_access_level
           FROM projects 
           WHERE projects.id BETWEEN #{range.first} AND #{range.last}
-          ON CONFLICT (project_id) DO NOTHING;
+          ON CONFLICT DO NOTHING;
         SQL
       end
     end

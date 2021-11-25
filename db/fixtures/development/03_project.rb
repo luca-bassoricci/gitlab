@@ -83,6 +83,7 @@ class Gitlab::Seeder::Projects
           CROSS JOIN generate_series(1, #{projects_per_user_count}) AS seq
           JOIN namespaces n ON n.owner_id=u.id
         WHERE u.username like 'mass_%'
+        ON CONFLICT DO NOTHING;
       SQL
     end
 
@@ -104,6 +105,7 @@ class Gitlab::Seeder::Projects
           FROM namespaces
             CROSS JOIN generate_series(1, #{projects_per_user_count}) AS seq
           WHERE type='Group' AND path LIKE 'mass_%' AND namespaces.id BETWEEN #{range.first} AND #{range.last}
+          ON CONFLICT DO NOTHING;
         SQL
       end
     end
