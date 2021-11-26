@@ -3,8 +3,8 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import CodeOwners from '~/repository/components/code_owners.vue';
-import codeOwnersInfoQuery from '~/repository/queries/code_owners_info.query.graphql';
+import CodeOwners from 'ee_component/repository/components/code_owners.vue';
+import codeOwnersInfoQuery from 'ee/repository/queries/code_owners_info.query.graphql';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { codeOwnerMock, codeOwnersDataMock, refMock } from '../mock_data';
 

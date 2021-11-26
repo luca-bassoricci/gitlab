@@ -73,6 +73,7 @@ module Types
 
       field :code_owners, [Types::UserType], null: true,
             description: 'List of code owners for the blob.',
+            method: :code_owners,
             calls_gitaly: true
 
       field :file_type, GraphQL::Types::String, null: true,

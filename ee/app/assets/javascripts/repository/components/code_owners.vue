@@ -3,8 +3,8 @@ import { GlIcon, GlLink } from '@gitlab/ui';
 import { __ } from '~/locale';
 import createFlash from '~/flash';
 import { helpPagePath } from '~/helpers/help_page_helper';
+import getRefMixin from '~/repository/mixins/get_ref';
 import codeOwnersInfoQuery from '../queries/code_owners_info.query.graphql';
-import getRefMixin from '../mixins/get_ref';
 
 export default {
   i18n: {
