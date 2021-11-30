@@ -10,7 +10,7 @@ module Gitlab
           VARIABLES_REGEXP = /\$\$|%%|\$(?<key>[a-zA-Z_][a-zA-Z0-9_]*)|\${\g<key>?}|%\g<key>%/.freeze.freeze
           VARIABLE_REF_CHARS = %w[$ %].freeze
 
-          def initialize(key:, value:, public: true, file: false, masked: false, raw: false)
+          def initialize(key:, value:, public: true, file: false, masked: false, raw: false, description: nil)
             raise ArgumentError, "`#{key}` must be of type String or nil value, while it was: #{value.class}" unless
               value.is_a?(String) || value.nil?
 

@@ -22,11 +22,18 @@ module Gitlab
             # rubocop: disable CodeReuse/ActiveRecord
             def expand(config)
               config.flat_map do |config|
-                values = config.values
+                values = config.map { |var| var[:value] }
 
                 values[0]
                   .product(*values.from(1))
-                  .map { |vals| config.keys.zip(vals).to_h }
+                  .map do |vals|
+                    config.map { |var| var[:key] }.zip(vals).map do |key, value|
+                      {
+                        key: key,
+                        value: value
+                      }
+                    end
+                  end
               end
             end
             # rubocop: enable CodeReuse/ActiveRecord
@@ -35,7 +42,7 @@ module Gitlab
           def initialize(job_name, instance, variables, total)
             @job_name = job_name
             @instance = instance
-            @variables = variables.to_h
+            @variables = variables
             @total = total
           end
 
@@ -50,7 +57,7 @@ module Gitlab
 
           def name
             vars = variables
-              .values
+              .map { |var| var[:value] }
               .compact
               .join(', ')
 

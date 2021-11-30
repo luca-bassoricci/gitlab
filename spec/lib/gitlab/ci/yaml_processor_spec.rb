@@ -1301,59 +1301,59 @@ module Gitlab
           it 'returns the parallel config' do
             build_options = builds.map { |build| build[:options] }
             parallel_config = {
-              matrix: parallel[:matrix].map { |var| var.transform_values { |v| Array(v).flatten }},
+              matrix: parallel[:matrix].map { |hash| hash.map { |key, value| { key: key, value: Array(value) } } },
               total: build_options.size
             }
 
-            expect(build_options).to all(include(:instance, parallel: parallel_config))
+            expect(build_options).to all(a_hash_including(:instance, parallel: parallel_config))
           end
 
           it 'sets matrix variables' do
             build_variables = builds.map { |build| build[:job_variables] }
             expected_variables = [
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'aws' },
-                { key: 'STACK', value: 'monitoring' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'aws' },
+                { key: 'STACK', public: true, value: 'monitoring' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'aws' },
-                { key: 'STACK', value: 'app1' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'aws' },
+                { key: 'STACK', public: true, value: 'app1' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'aws' },
-                { key: 'STACK', value: 'app2' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'aws' },
+                { key: 'STACK', public: true, value: 'app2' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'ovh' },
-                { key: 'STACK', value: 'monitoring' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'ovh' },
+                { key: 'STACK', public: true, value: 'monitoring' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'ovh' },
-                { key: 'STACK', value: 'backup' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'ovh' },
+                { key: 'STACK', public: true, value: 'backup' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'ovh' },
-                { key: 'STACK', value: 'app' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'ovh' },
+                { key: 'STACK', public: true, value: 'app' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'gcp' },
-                { key: 'STACK', value: 'data' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'gcp' },
+                { key: 'STACK', public: true, value: 'data' }
               ],
               [
-                { key: 'VAR1', value: '1' },
-                { key: 'PROVIDER', value: 'gcp' },
-                { key: 'STACK', value: 'processing' }
+                { key: 'VAR1', public: true, value: '1' },
+                { key: 'PROVIDER', public: true, value: 'gcp' },
+                { key: 'STACK', public: true, value: 'processing' }
               ]
-            ].map { |vars| vars.map { |var| a_hash_including(var) } }
+            ]
 
-            expect(build_variables).to match(expected_variables)
+            expect(build_variables).to match_array(expected_variables)
           end
 
           it 'does not have the original job' do

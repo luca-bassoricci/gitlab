@@ -99,7 +99,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
               only: { refs: %w[branches tags] },
               stage: 'test',
               trigger: { project: 'my/project' },
-              job_variables: {},
+              job_variables: [],
               root_variables_inheritance: true,
               scheduling_type: :stage
             },
@@ -109,7 +109,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
               only: { refs: %w[branches tags] },
               script: ['something'],
               stage: 'test',
-              job_variables: {},
+              job_variables: [],
               root_variables_inheritance: true,
               scheduling_type: :stage
             })

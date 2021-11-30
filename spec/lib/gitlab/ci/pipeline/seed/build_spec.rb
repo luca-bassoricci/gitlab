@@ -81,12 +81,12 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
           ref: 'master',
           job_variables: [{ key: 'VAR1', value: 'var 1', public: true },
                           { key: 'VAR2', value: 'var 2', public: true }],
-          rules: [{ if: '$VAR == null', variables: { VAR1: 'new var 1', VAR3: 'var 3' } }] }
+          rules: [{ if: '$VAR == null', variables: [{ key: 'VAR1', value: 'new var 1' }, { key: 'VAR3', value: 'var 3' }] }] }
       end
 
       it do
-        is_expected.to include(yaml_variables: [{ key: 'VAR1', value: 'new var 1', public: true },
-                                                { key: 'VAR2', value: 'var 2', public: true },
+        is_expected.to include(yaml_variables: [{ key: 'VAR2', value: 'var 2', public: true },
+                                                { key: 'VAR1', value: 'new var 1', public: true },
                                                 { key: 'VAR3', value: 'var 3', public: true }])
       end
     end
@@ -316,7 +316,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
 
       context 'when the rules use job variables' do
         let(:rules) do
-          [{ if: '$VAR1 == "var 1"', variables: { VAR1: 'overridden var 1', VAR2: 'new var 2' } }]
+          [{ if: '$VAR1 == "var 1"', variables: [{ key: 'VAR1', value: 'overridden var 1' }, { key: 'VAR2', value: 'new var 2' }] }]
         end
 
         it 'recalculates the variables' do
@@ -331,7 +331,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         end
 
         let(:rules) do
-          [{ if: '$VAR2 == "var pipeline 2"', variables: { VAR1: 'overridden var 1', VAR2: 'overridden var 2' } }]
+          [{ if: '$VAR2 == "var pipeline 2"', variables: [{ key: 'VAR1', value: 'overridden var 1' }, { key: 'VAR2', value: 'overridden var 2' }] }]
         end
 
         it 'recalculates the variables' do

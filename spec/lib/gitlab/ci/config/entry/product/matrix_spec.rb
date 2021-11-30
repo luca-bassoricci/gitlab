@@ -72,7 +72,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Product::Matrix do
         end
 
         it 'returns the value without raising an error' do
-          expect(matrix.value).to eq([{ 'VAR_1' => %w[build test] }])
+          expect(matrix.value).to match_array([[{ key: 'VAR_1', value: %w[build test] }]])
         end
       end
 
@@ -102,7 +102,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Product::Matrix do
           end
 
           it 'returns the value without raising an error' do
-            expect(matrix.value).to eq([{ 'VAR_1' => %w[test] }])
+            expect(matrix.value).to match_array([[{ key: 'VAR_1', value: %w[test] }]])
           end
         end
       end
@@ -143,10 +143,10 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Product::Matrix do
         it 'returns key value' do
           expect(matrix.value).to match(
             [
-              { 'PROVIDER' => %w[aws], 'STACK' => %w[monitoring app1 app2] },
-              { 'PROVIDER' => %w[ovh], 'STACK' => %w[monitoring backup app] },
-              { 'ARGS' => %w[normal], 'PROVIDER' => %w[gcp], 'STACK' => %w[data processing] },
-              { 'ARGS' => %w[store], 'PROVIDER' => %w[vultr], 'STACK' => %w[data] }
+              [{ key: 'PROVIDER', value: %w[aws] }, { key: 'STACK', value: %w[monitoring app1 app2] }],
+              [{ key: 'STACK', value: %w[monitoring backup app] }, { key: 'PROVIDER', value: %w[ovh] }],
+              [{ key: 'PROVIDER', value: %w[gcp] }, { key: 'STACK', value: %w[data processing] }, { key: 'ARGS', value: %w[normal] }],
+              [{ key: 'PROVIDER', value: %w[vultr] }, { key: 'STACK', value: %w[data] }, { key: 'ARGS', value: %w[store] }]
             ]
           )
         end

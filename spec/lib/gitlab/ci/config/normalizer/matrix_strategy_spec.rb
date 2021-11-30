@@ -35,8 +35,8 @@ RSpec.describe Gitlab::Ci::Config::Normalizer::MatrixStrategy do
     let(:config) do
       {
         matrix: [
-          { 'PROVIDER' => %w[aws], 'STACK' => %w[app1 app2] },
-          { 'PROVIDER' => %w[ovh gcp], 'STACK' => %w[app] }
+          [{ key: 'PROVIDER', value: %w[aws] }, { key: 'STACK', value: %w[app1 app2] }],
+          [{ key: 'PROVIDER', value: %w[ovh gcp] }, { key: 'STACK', value: %w[app] }]
         ]
       }
     end
@@ -50,37 +50,37 @@ RSpec.describe Gitlab::Ci::Config::Normalizer::MatrixStrategy do
             name: 'test: [aws, app1]',
             instance: 1,
             parallel: { total: 4 },
-            job_variables: {
-              'PROVIDER' => 'aws',
-              'STACK' => 'app1'
-            }
+            job_variables: [
+              { key: 'PROVIDER', value: 'aws' },
+              { key: 'STACK', value: 'app1' }
+            ]
           },
           {
             name: 'test: [aws, app2]',
             instance: 2,
             parallel: { total: 4 },
-            job_variables: {
-              'PROVIDER' => 'aws',
-              'STACK' => 'app2'
-            }
+            job_variables: [
+              { key: 'PROVIDER', value: 'aws' },
+              { key: 'STACK', value: 'app2' }
+            ]
           },
           {
             name: 'test: [ovh, app]',
             instance: 3,
             parallel: { total: 4 },
-            job_variables: {
-              'PROVIDER' => 'ovh',
-              'STACK' => 'app'
-            }
+            job_variables: [
+              { key: 'PROVIDER', value: 'ovh' },
+              { key: 'STACK', value: 'app' }
+            ]
           },
           {
             name: 'test: [gcp, app]',
             instance: 4,
             parallel: { total: 4 },
-            job_variables: {
-              'PROVIDER' => 'gcp',
-              'STACK' => 'app'
-            }
+            job_variables: [
+              { key: 'PROVIDER', value: 'gcp' },
+              { key: 'STACK', value: 'app' }
+            ]
           }
         ]
       )

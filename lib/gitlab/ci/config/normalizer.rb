@@ -65,8 +65,11 @@ module Gitlab
           @jobs_config.each_with_object({}) do |(job_name, config), hash|
             if parallelized_jobs.key?(job_name)
               parallelized_jobs[job_name].each do |job|
+                merged_variables = Array(config[:job_variables]) + Array(job.attributes[:job_variables])
                 hash[job.name.to_sym] =
-                  yield(job.name, config.deep_merge(job.attributes))
+                  yield(job.name, config.deep_merge(job.attributes)).tap do |merged_config|
+                    merged_config[:job_variables] = merged_variables
+                  end
               end
             else
               hash[job_name] = yield(job_name, config)

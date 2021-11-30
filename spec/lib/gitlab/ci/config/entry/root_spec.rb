@@ -81,7 +81,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
         end
 
         it 'sets correct variables value' do
-          expect(root.variables_value).to eq('VAR' => 'root', 'VAR2' => 'val 2')
+          expect(root.variables_value).to match_array([{ key: 'VAR', value: 'root' }, { key: 'VAR2', value: 'val 2', description: 'this is var 2' }])
         end
 
         describe '#leaf?' do
@@ -132,7 +132,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
                       services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                       stage: 'test',
                       cache: [{ key: 'k', untracked: true, paths: ['public/'], policy: 'pull-push', when: 'on_success' }],
-                      job_variables: {},
+                      job_variables: [],
                       root_variables_inheritance: true,
                       ignore: false,
                       after_script: ['make clean'],
@@ -147,7 +147,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
                         services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                         stage: 'test',
                         cache: [{ key: 'k', untracked: true, paths: ['public/'], policy: 'pull-push', when: 'on_success' }],
-                        job_variables: {},
+                        job_variables: [],
                         root_variables_inheritance: true,
                         ignore: false,
                         after_script: ['make clean'],
@@ -164,7 +164,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
                         services: [{ name: "postgres:9.1" }, { name: "mysql:5.5" }],
                         cache: [{ key: "k", untracked: true, paths: ["public/"], policy: "pull-push", when: 'on_success' }],
                         only: { refs: %w(branches tags) },
-                        job_variables: { 'VAR' => 'job' },
+                        job_variables: [{ key: 'VAR', value: 'job' }],
                         root_variables_inheritance: true,
                         after_script: [],
                         ignore: false,
@@ -211,7 +211,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
                       services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                       stage: 'test',
                       cache: [{ key: 'k', untracked: true, paths: ['public/'], policy: 'pull-push', when: 'on_success' }],
-                      job_variables: {},
+                      job_variables: [],
                       root_variables_inheritance: true,
                       ignore: false,
                       after_script: ['make clean'],
@@ -224,7 +224,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
                         services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                         stage: 'test',
                         cache: [{ key: 'k', untracked: true, paths: ['public/'], policy: 'pull-push', when: 'on_success' }],
-                        job_variables: { 'VAR' => 'job' },
+                        job_variables: [{ key: 'VAR', value: 'job' }],
                         root_variables_inheritance: true,
                         ignore: false,
                         after_script: ['make clean'],
@@ -258,7 +258,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
 
       describe '#variables_value' do
         it 'returns root value for variables' do
-          expect(root.variables_value).to eq({})
+          expect(root.variables_value).to eq([])
         end
       end
 
@@ -289,7 +289,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
 
       describe '#variables_value' do
         it 'returns root value for variables' do
-          expect(root.variables_value).to eq("script" => "ENV_VALUE")
+          expect(root.variables_value).to match_array([{ key: 'script', value: 'ENV_VALUE' }])
         end
       end
 
@@ -317,7 +317,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
 
       describe '#variables_value' do
         it 'undefined entry returns a root value' do
-          expect(root.variables_value).to eq({})
+          expect(root.variables_value).to eq([])
         end
       end
     end

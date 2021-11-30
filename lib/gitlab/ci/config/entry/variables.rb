@@ -18,15 +18,16 @@ module Gitlab
           end
 
           def value
-            @config.to_h { |key, value| [key.to_s, expand_value(value)[:value]] }
+            @config.map do |key, value|
+              {
+                key: key.to_s,
+                **expand_value(value)
+              }
+            end
           end
 
           def self.default(**)
             {}
-          end
-
-          def value_with_data
-            @config.to_h { |key, value| [key.to_s, expand_value(value)] }
           end
 
           def use_value_data?
@@ -37,9 +38,11 @@ module Gitlab
 
           def expand_value(value)
             if value.is_a?(Hash)
-              { value: value[:value].to_s, description: value[:description] }
+              { value: value[:value].to_s }.tap do |hash|
+                hash[:description] = value[:description].to_s if value[:description]
+              end
             else
-              { value: value.to_s, description: nil }
+              { value: value.to_s }
             end
           end
         end

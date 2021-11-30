@@ -65,16 +65,16 @@ module Gitlab
         root.variables_value
       end
 
-      def variables_with_data
-        root.variables_entry.value_with_data
-      end
-
       def stages
         root.stages_value
       end
 
       def jobs
         root.jobs_value
+      end
+
+      def workflow_rules
+        root.workflow_value[:rules]
       end
 
       def normalized_jobs

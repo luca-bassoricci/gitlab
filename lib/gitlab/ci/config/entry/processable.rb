@@ -13,6 +13,7 @@ module Gitlab
           include ::Gitlab::Config::Entry::Configurable
           include ::Gitlab::Config::Entry::Attributable
           include ::Gitlab::Config::Entry::Inheritable
+          include ::Gitlab::Utils::StrongMemoize
 
           PROCESSABLE_ALLOWED_KEYS = %i[extends stage only except rules variables
                                         inherit allow_failure when needs resource_group].freeze
@@ -36,6 +37,8 @@ module Gitlab
                 validates :rules, nested_array_of_hashes_or_arrays: { max_level: MAX_NESTING_LEVEL }
                 validates :resource_group, type: String
               end
+
+              validate(on: :composed) { validate_against_warnings }
             end
 
             entry :stage, Entry::Stage,
@@ -72,22 +75,16 @@ module Gitlab
 
           def compose!(deps = nil)
             super do
-              has_workflow_rules = deps&.workflow_entry&.has_rules?
-
               # If workflow:rules: or rules: are used
               # they are considered not compatible
               # with `only/except` defaults
               #
               # Context: https://gitlab.com/gitlab-org/gitlab/merge_requests/21742
-              if has_rules? || has_workflow_rules
+              if has_rules? || has_workflow_rules?
                 # Remove only/except defaults
                 # defaults are not considered as defined
                 @entries.delete(:only) unless only_defined? # rubocop:disable Gitlab/ModuleWithInstanceVariables
                 @entries.delete(:except) unless except_defined? # rubocop:disable Gitlab/ModuleWithInstanceVariables
-              end
-
-              unless has_workflow_rules
-                validate_against_warnings
               end
 
               yield if block_given?
@@ -96,6 +93,7 @@ module Gitlab
 
           def validate_against_warnings
             # If rules are valid format and workflow rules are not specified
+            return if has_workflow_rules?
             return unless rules_value
 
             last_rule = rules_value.last
@@ -103,6 +101,12 @@ module Gitlab
             if last_rule&.keys == [:when] && last_rule[:when] != 'never'
               docs_url = 'read more: https://docs.gitlab.com/ee/ci/troubleshooting.html#pipeline-warnings'
               add_warning("may allow multiple pipelines to run for a single action due to `rules:when` clause with no `workflow:rules` - #{docs_url}")
+            end
+          end
+
+          def has_workflow_rules?
+            strong_memoize(:has_workflow_rules) do
+              !!ancestors.first&.try(:workflow_entry)&.has_rules?
             end
           end
 
@@ -122,7 +126,7 @@ module Gitlab
               stage: stage_value,
               extends: extends,
               rules: rules_value,
-              job_variables: variables_value.to_h,
+              job_variables: variables_value,
               root_variables_inheritance: root_variables_inheritance,
               only: only_value,
               except: except_value,

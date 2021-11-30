@@ -106,7 +106,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       ignore: false,
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
-                                      job_variables: {},
+                                      job_variables: [],
                                       root_variables_inheritance: true,
                                       scheduling_type: :stage)
         end
@@ -130,7 +130,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       ignore: false,
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
-                                      job_variables: {},
+                                      job_variables: [],
                                       root_variables_inheritance: true,
                                       scheduling_type: :stage)
         end
@@ -283,9 +283,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
               ignore: false,
               stage: 'test',
               only: { refs: %w[branches tags] },
-              parallel: { matrix: [{ 'PROVIDER' => ['aws'], 'STACK' => %w(monitoring app1) },
-                                   { 'PROVIDER' => ['gcp'], 'STACK' => %w(data) }] },
-              job_variables: {},
+              parallel: { matrix: [
+                [{ key: 'PROVIDER', value: ['aws'] }, { key: 'STACK', value: %w(monitoring app1) }],
+                [{ key: 'PROVIDER', value: ['gcp'] }, { key: 'STACK', value: %w(data) }]
+              ] },
+              job_variables: [],
               root_variables_inheritance: true,
               scheduling_type: :stage
             )

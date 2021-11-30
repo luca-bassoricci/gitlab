@@ -12,10 +12,6 @@ module Gitlab
             validates :config, type: Array
           end
 
-          def value
-            [@config].flatten
-          end
-
           def composable_class
             Entry::Rules::Rule
           end

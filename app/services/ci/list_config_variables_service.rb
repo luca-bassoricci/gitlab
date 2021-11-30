@@ -29,12 +29,20 @@ module Ci
                                                      user:    current_user,
                                                      sha:     sha).execute
 
-      result.valid? ? result.variables_with_data : {}
+      result.valid? ? transform_variables(result.variables) : {}
     end
 
     # Required for ReactiveCaching, it is also used in `reactive_cache_worker_finder`
     def id
       "#{project.id}-#{current_user.id}"
+    end
+
+    private
+
+    def transform_variables(variables)
+      variables.to_h do |var_hash|
+        [var_hash[:key], var_hash.except(:key)]
+      end
     end
   end
 end

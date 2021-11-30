@@ -588,8 +588,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
     let(:deps) do
       double('deps',
         'default_entry' => default,
-        'workflow_entry' => workflow,
         'variables_value' => nil)
+    end
+
+    before do
+      allow(entry).to receive(:ancestors).and_return([double('root', key: :root, workflow_entry: workflow)])
     end
 
     context 'when job config overrides default config' do
@@ -637,9 +640,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
       with_them do
         let(:config) { { script: 'ls', rules: rules, only: only }.compact }
 
-        it "#{name}" do
-          expect(workflow).to receive(:has_rules?) { has_workflow_rules? }
+        before do
+          allow(workflow).to receive(:has_rules?) { has_workflow_rules? }
+        end
 
+        it "#{name}" do
           entry.compose!(deps)
 
           expect(entry.only_value).to eq(result)
@@ -692,7 +697,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
                    ignore: false,
                    after_script: %w[cleanup],
                    only: { refs: %w[branches tags] },
-                   job_variables: {},
+                   job_variables: [],
                    root_variables_inheritance: true,
                    scheduling_type: :stage)
         end

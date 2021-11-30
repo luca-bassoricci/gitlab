@@ -45,6 +45,12 @@ module Gitlab
             self.when == 'delayed'
           end
 
+          def value
+            @config.tap do |config|
+              config[:variables] = variables_value if variables_defined?
+            end
+          end
+
           def default
           end
         end

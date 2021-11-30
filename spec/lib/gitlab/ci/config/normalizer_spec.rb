@@ -104,7 +104,7 @@ RSpec.describe Gitlab::Ci::Config::Normalizer do
     end
 
     context 'with parallel config as integer' do
-      let(:variables_config) { {} }
+      let(:variables_config) { [] }
       let(:parallel_config) { 5 }
 
       let(:expanded_job_names) do
@@ -169,18 +169,18 @@ RSpec.describe Gitlab::Ci::Config::Normalizer do
 
     context 'with parallel matrix config' do
       let(:variables_config) do
-        {
-          USER_VARIABLE: 'user value'
-        }
+        [
+          { key: 'USER_VARIABLE', value: 'user value' }
+        ]
       end
 
       let(:parallel_config) do
         {
           matrix: [
-            {
-              VAR_1: ['A'],
-              VAR_2: %w[B C]
-            }
+            [
+              { key: 'VAR_1', value: ['A'] },
+              { key: 'VAR_2', value: %w[B C] }
+            ]
           ]
         }
       end
@@ -202,11 +202,11 @@ RSpec.describe Gitlab::Ci::Config::Normalizer do
 
       it 'sets job variables', :aggregate_failures do
         expect(subject.values[0]).to match(
-          a_hash_including(job_variables: { VAR_1: 'A', VAR_2: 'B', USER_VARIABLE: 'user value' })
+          a_hash_including(job_variables: [{ key: 'USER_VARIABLE', value: 'user value' }, { key: 'VAR_1', value: 'A' }, { key: 'VAR_2', value: 'B' }])
         )
 
         expect(subject.values[1]).to match(
-          a_hash_including(job_variables: { VAR_1: 'A', VAR_2: 'C', USER_VARIABLE: 'user value' })
+          a_hash_including(job_variables: [{ key: 'USER_VARIABLE', value: 'user value' }, { key: 'VAR_1', value: 'A' }, { key: 'VAR_2', value: 'C' }])
         )
       end
 
@@ -231,7 +231,7 @@ RSpec.describe Gitlab::Ci::Config::Normalizer do
     end
 
     context 'when parallel config does not matches a factory' do
-      let(:variables_config) { {} }
+      let(:variables_config) { [] }
       let(:parallel_config) { }
 
       it 'does not alter the job config' do

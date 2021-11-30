@@ -11,13 +11,23 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         description: 'Set the default tags.',
         inherit: true
 
+      attr_reader :ancestors
+
+      def initialize(config, **metadata)
+        super do
+          @ancestors = metadata[:ancestors]
+        end
+      end
+
       def self.name
         'job'
       end
     end
   end
 
-  let(:entry) { node_class.new(config, name: :rspec) }
+  let(:ancestor_double) { double(key: :root, workflow_entry: workflow) }
+  let(:entry) { node_class.new(config, name: :rspec, ancestors: [ancestor_double]) }
+  let(:workflow) { nil }
 
   describe 'validations' do
     before do
@@ -34,18 +44,18 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
       end
 
       context 'when job name is more than 255' do
-        let(:entry) { node_class.new(config, name: ('a' * 256).to_sym) }
+        let(:entry) { node_class.new(config, name: ('a' * 256).to_sym, ancestors: [ancestor_double]) }
 
         it 'shows a validation error' do
-          expect(entry.errors).to include "job name is too long (maximum is 255 characters)"
+          expect(entry.errors).to include "root:job name is too long (maximum is 255 characters)"
         end
       end
 
       context 'when job name is empty' do
-        let(:entry) { node_class.new(config, name: ''.to_sym) }
+        let(:entry) { node_class.new(config, name: ''.to_sym, ancestors: [ancestor_double]) }
 
         it 'reports error' do
-          expect(entry.errors).to include "job name can't be blank"
+          expect(entry.errors).to include "root:job name can't be blank"
         end
       end
     end
@@ -57,7 +67,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         describe '#errors' do
           it 'reports error about a config type' do
             expect(entry.errors)
-              .to include 'job config should be a hash'
+              .to include 'root:job config should be a hash'
           end
         end
       end
@@ -77,7 +87,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
 
         it 'returns error about wrong value type' do
           expect(entry).not_to be_valid
-          expect(entry.errors).to include "job extends should be an array of strings or a string"
+          expect(entry.errors).to include 'root:job extends should be an array of strings or a string'
         end
       end
 
@@ -86,7 +96,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
 
         it 'returns error about wrong value type' do
           expect(entry).not_to be_valid
-          expect(entry.errors).to include "job resource group should be a string"
+          expect(entry.errors).to include 'root:job resource group should be a string'
         end
       end
 
@@ -101,7 +111,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
 
         it 'returns an error about when: being combined with rules' do
           expect(entry).not_to be_valid
-          expect(entry.errors).to include 'job config key may not be used with `rules`: when'
+          expect(entry.errors).to include 'root:job config key may not be used with `rules`: when'
         end
       end
 
@@ -218,7 +228,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
     let(:deps) do
       double('deps',
         default_entry: default,
-        workflow_entry: workflow,
         variables_value: variables)
     end
 
@@ -237,9 +246,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
       with_them do
         let(:config) { { script: 'ls', rules: rules, only: only }.compact }
 
-        it "#{name}" do
-          expect(workflow).to receive(:has_rules?) { has_workflow_rules? }
+        before do
+          allow(workflow).to receive(:has_rules?) { has_workflow_rules? }
+        end
 
+        it "#{name}" do
           entry.compose!(deps)
 
           expect(entry.only_value).to eq(result)
@@ -431,7 +442,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             name: :rspec,
             stage: 'test',
             only: { refs: %w[branches tags] },
-            job_variables: {},
+            job_variables: [],
             root_variables_inheritance: true
           )
         end

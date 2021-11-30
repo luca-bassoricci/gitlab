@@ -48,7 +48,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Variables do
     end
 
     let(:result) do
-      { 'VARIABLE_1' => 'value 1', 'VARIABLE_2' => 'value 2' }
+      [{ key: 'VARIABLE_1', value: 'value 1' }, { key: 'VARIABLE_2', value: 'value 2' }]
     end
 
     it_behaves_like 'valid config'
@@ -57,7 +57,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Variables do
   context 'with numeric keys and values in the config' do
     let(:config) { { 10 => 20 } }
     let(:result) do
-      { '10' => '20' }
+      [{ key: '10', value: '20' }]
     end
 
     it_behaves_like 'valid config'
@@ -70,7 +70,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Variables do
     end
 
     let(:result) do
-      { 'VARIABLE_1' => 'value 1', 'VARIABLE_2' => 'value 2' }
+      [{ key: 'VARIABLE_1', value: 'value 1', description: 'variable 1' }, { key: 'VARIABLE_2', value: 'value 2' }]
     end
 
     it_behaves_like 'invalid config'
@@ -114,7 +114,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Variables do
       end
 
       let(:result) do
-        { 'VARIABLE_1' => 'value 1' }
+        [{ key: 'VARIABLE_1', value: 'value 1' }]
       end
 
       it_behaves_like 'valid config'

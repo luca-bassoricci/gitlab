@@ -39,7 +39,7 @@ module Gitlab
         end
 
         def workflow_rules
-          @workflow_rules ||= hash_config.dig(:workflow, :rules)
+          @workflow_rules ||= @ci_config.workflow_rules
         end
 
         def root_variables
@@ -106,10 +106,6 @@ module Gitlab
           @ci_config&.to_hash&.deep_stringify_keys&.to_yaml
         end
 
-        def variables_with_data
-          @ci_config.variables_with_data
-        end
-
         def yaml_variables_for(job_name)
           job = jobs[job_name]
 
@@ -126,11 +122,11 @@ module Gitlab
           jobs.dig(job_name, :stage)
         end
 
-        private
-
         def variables
           @variables ||= @ci_config.variables
         end
+
+        private
 
         def hash_config
           @hash_config ||= @ci_config.to_hash

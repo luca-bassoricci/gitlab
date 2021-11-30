@@ -21,14 +21,14 @@ RSpec.describe Gitlab::Ci::Config::Entry::Product::Variables do
 
       describe '#value' do
         it 'returns hash with key value strings' do
-          expect(entry.value).to match({
-            'VARIABLE_1' => ['1'],
-            'VARIABLE_2' => ['value 2'],
-            'VARIABLE_3' => ['value_3'],
-            'VARIABLE_4' => ['value 4'],
-            '5' => ['value 5'],
-            'VARIABLE_6' => ['value 6']
-          })
+          expect(entry.value).to match_array([
+            { key: 'VARIABLE_1', value: ['1'] },
+            { key: 'VARIABLE_2', value: ['value 2'] },
+            { key: 'VARIABLE_3', value: ['value_3'] },
+            { key: 'VARIABLE_4', value: ['value 4'] },
+            { key: '5', value: ['value 5'] },
+            { key: 'VARIABLE_6', value: ['value 6'] }
+          ])
         end
       end
 

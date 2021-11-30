@@ -5,20 +5,19 @@ require 'support/helpers/stub_feature_flags'
 require_dependency 'active_model'
 
 RSpec.describe Gitlab::Ci::Config::Entry::Rules do
+  subject(:entry) { factory.create! }
+
+  let(:metadata) { { allowed_when: %w[always never] } }
+
   let(:factory) do
     Gitlab::Config::Entry::Factory.new(described_class)
       .metadata(metadata)
       .value(config)
   end
 
-  let(:metadata) { { allowed_when: %w[always never] } }
-  let(:entry)    { factory.create! }
-
   describe '.new' do
-    subject { entry }
-
     before do
-      subject.compose!
+      entry.compose!
     end
 
     context 'with a list of rule rule' do
@@ -73,7 +72,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules do
   end
 
   describe '#value' do
-    subject { entry.value }
+    subject(:value) { entry.value }
+
+    before do
+      entry.compose!
+    end
 
     context 'with a list of rule rule' do
       let(:config) do
@@ -92,14 +95,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules do
       end
 
       it { is_expected.to eq(config) }
-    end
-
-    context 'with a single rule object' do
-      let(:config) do
-        { if: '$SKIP', when: 'never' }
-      end
-
-      it { is_expected.to eq([config]) }
     end
 
     context 'with nested rules' do

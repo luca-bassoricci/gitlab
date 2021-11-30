@@ -54,7 +54,7 @@ module Gitlab
           def to_hash
             {
               tag_list: tags || [],
-              job_variables: yaml_variables,
+              job_variables: Gitlab::Ci::Variables::Helpers.transform_to_yaml_variables(variables_value),
               options: {
                 image: image_value,
                 services: services_value,
@@ -62,16 +62,6 @@ module Gitlab
                 script: script_value || DEFAULT_SCRIPT
               }.compact
             }.compact
-          end
-
-          def yaml_variables
-            strong_memoize(:yaml_variables) do
-              next unless variables_value
-
-              variables_value.map do |key, value|
-                { key: key.to_s, value: value, public: true }
-              end
-            end
           end
         end
       end
