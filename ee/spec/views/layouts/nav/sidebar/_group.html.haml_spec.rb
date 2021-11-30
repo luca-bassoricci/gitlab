@@ -8,34 +8,6 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
 
   before do
     assign(:group, group)
-    allow(view).to receive(:show_trial_status_widget?).and_return(false)
-  end
-
-  describe 'trial status widget', :aggregate_failures do
-    subject do
-      render
-      rendered
-    end
-
-    context 'when the widget should not be shown' do
-      it 'does not render the widget & popover' do
-        is_expected.not_to have_selector '#js-trial-status-widget'
-        is_expected.not_to have_selector '#js-trial-status-popover'
-      end
-    end
-
-    context 'when the widget should be shown' do
-      before do
-        allow(view).to receive(:show_trial_status_widget?).and_return(true)
-        allow(view).to receive(:trial_status_widget_data_attrs).and_return({ foo: 'bar' })
-        allow(view).to receive(:trial_status_popover_data_attrs).and_return({ baz: 'quux' })
-      end
-
-      it 'renders both the widget & popover component initialization elements' do
-        is_expected.to have_selector '#js-trial-status-widget[data-foo="bar"]'
-        is_expected.to have_selector '#js-trial-status-popover[data-baz="quux"]'
-      end
-    end
   end
 
   describe 'Epics menu' do
@@ -98,28 +70,10 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
           stub_licensed_features(iterations: true)
         end
 
-        context 'with group iterations feature flag enabled' do
-          before do
-            stub_feature_flags(group_iterations: true)
-          end
+        it 'is visible' do
+          render
 
-          it 'is visible' do
-            render
-
-            expect(rendered).to have_text 'Iterations'
-          end
-        end
-
-        context 'with iterations feature flag disabled' do
-          before do
-            stub_feature_flags(group_iterations: false)
-          end
-
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
+          expect(rendered).to have_text 'Iterations'
         end
       end
 

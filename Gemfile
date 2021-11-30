@@ -376,7 +376,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 6.5.0', require: false
+  gem 'gitlab-styles', '~> 6.6.0', require: false
 
   gem 'haml_lint', '~> 0.36.0', require: false
   gem 'bundler-audit', '~> 0.7.0.1', require: false
@@ -410,7 +410,10 @@ end
 
 # Gems required in omnibus-gitlab pipeline
 group :development, :test, :omnibus do
-  gem 'license_finder', '~> 6.0', require: false
+  # Using a fork until https://github.com/pivotal/LicenseFinder/pull/816 is
+  # resolved. For details, check discussion in
+  # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/74881
+  gem 'gitlab-license_finder', '~> 6.0', require: false
 end
 
 group :test do

@@ -39,7 +39,7 @@ review-build-cng:
   variables:
     HOST_SUFFIX: "${CI_ENVIRONMENT_SLUG}"
     DOMAIN: "-${CI_ENVIRONMENT_SLUG}.${REVIEW_APPS_DOMAIN}"
-    GITLAB_HELM_CHART_REF: "v5.4.1"
+    GITLAB_HELM_CHART_REF: "v5.5.0"
   environment:
     name: review/${CI_COMMIT_REF_SLUG}${FREQUENCY}
     url: https://gitlab-${CI_ENVIRONMENT_SLUG}.${REVIEW_APPS_DOMAIN}
@@ -65,6 +65,7 @@ review-deploy:
     - deploy || (display_deployment_debug && exit 1)
     - verify_deploy || exit 1
     - disable_sign_ups || (delete_release && exit 1)
+    - create_sample_projects
   after_script:
     # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
     # Set DAST_RUN to true when jobs are manually scheduled.

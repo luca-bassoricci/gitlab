@@ -5,12 +5,21 @@ class Groups::UsageQuotasController < Groups::ApplicationController
   before_action :verify_usage_quotas_enabled!
   before_action :push_additional_repo_storage_by_namespace_feature, only: :index
 
+  before_action do
+    push_frontend_feature_flag(:new_route_storage_purchase, @group, default_enabled: :yaml)
+  end
+
   layout 'group_settings'
 
   feature_category :purchase
 
   def index
     @projects = @group.all_projects.with_shared_runners.page(params[:page])
+  end
+
+  def pending_members
+    render_404 unless ::Feature.enabled?(:saas_user_caps, @group.root_ancestor, default_enabled: :yaml)
+    @hide_search_settings = true
   end
 
   private

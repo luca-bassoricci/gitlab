@@ -178,6 +178,13 @@ RSpec.describe MergeRequest, factory_default: :keep do
     it 'returns the merge request title' do
       expect(subject.default_squash_commit_message).to eq(subject.title)
     end
+
+    it 'uses template from target project' do
+      subject.target_project.squash_commit_template = 'Squashed branch %{source_branch} into %{target_branch}'
+
+      expect(subject.default_squash_commit_message)
+        .to eq('Squashed branch master into feature')
+    end
   end
 
   describe 'modules' do
@@ -1132,7 +1139,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
       end
 
       it 'returns the correct overflow count' do
-        allow(Commit).to receive(:max_diff_options).and_return(max_files: 2)
+        allow(Commit).to receive(:diff_max_files).and_return(2)
         set_compare(merge_request)
 
         expect(merge_request.diff_size).to eq('2+')

@@ -452,6 +452,7 @@ class Project < ApplicationRecord
     to: :project_setting
   delegate :active?, to: :prometheus_integration, allow_nil: true, prefix: true
   delegate :merge_commit_template, :merge_commit_template=, to: :project_setting, allow_nil: true
+  delegate :squash_commit_template, :squash_commit_template=, to: :project_setting, allow_nil: true
 
   delegate :log_jira_dvcs_integration_usage, :jira_dvcs_server_last_sync_at, :jira_dvcs_cloud_last_sync_at, to: :feature_usage
 
@@ -476,7 +477,8 @@ class Project < ApplicationRecord
   validates :project_feature, presence: true
 
   validates :namespace, presence: true
-  validates :project_namespace, presence: true, if: -> { self.namespace && self.root_namespace.project_namespace_creation_enabled? }
+  validates :project_namespace, presence: true, on: :create, if: -> { self.namespace && self.root_namespace.project_namespace_creation_enabled? }
+  validates :project_namespace, presence: true, on: :update, if: -> { self.project_namespace_id_changed?(to: nil) }
   validates :name, uniqueness: { scope: :namespace_id }
   validates :import_url, public_url: { schemes: ->(project) { project.persisted? ? VALID_MIRROR_PROTOCOLS : VALID_IMPORT_PROTOCOLS },
                                        ports: ->(project) { project.persisted? ? VALID_MIRROR_PORTS : VALID_IMPORT_PORTS },

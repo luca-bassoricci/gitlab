@@ -2,6 +2,8 @@
 
 require 'spec_helper'
 
+# Any new stages must be added to
+# `ee/spec/lib/ee/bulk_imports/projects/stage_spec.rb` as well.
 RSpec.describe BulkImports::Projects::Stage do
   let(:pipelines) do
     [
@@ -9,6 +11,7 @@ RSpec.describe BulkImports::Projects::Stage do
       [1, BulkImports::Projects::Pipelines::RepositoryPipeline],
       [2, BulkImports::Common::Pipelines::LabelsPipeline],
       [2, BulkImports::Common::Pipelines::MilestonesPipeline],
+      [2, BulkImports::Common::Pipelines::BadgesPipeline],
       [3, BulkImports::Projects::Pipelines::IssuesPipeline],
       [3, BulkImports::Projects::Pipelines::SnippetsPipeline],
       [4, BulkImports::Common::Pipelines::BoardsPipeline],
@@ -16,6 +19,7 @@ RSpec.describe BulkImports::Projects::Stage do
       [4, BulkImports::Projects::Pipelines::ExternalPullRequestsPipeline],
       [4, BulkImports::Projects::Pipelines::ProtectedBranchesPipeline],
       [4, BulkImports::Projects::Pipelines::CiPipelinesPipeline],
+      [4, BulkImports::Projects::Pipelines::ProjectFeaturePipeline],
       [5, BulkImports::Common::Pipelines::WikiPipeline],
       [5, BulkImports::Common::Pipelines::UploadsPipeline],
       [6, BulkImports::Common::Pipelines::EntityFinisher]

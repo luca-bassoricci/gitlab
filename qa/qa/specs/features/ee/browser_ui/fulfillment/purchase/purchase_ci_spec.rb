@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module QA
+  include QA::Support::Helpers::Plan
+
   RSpec.describe 'Fulfillment', :requires_admin, only: { subdomain: :staging } do
     context 'Purchase CI minutes' do
       # the quantity of products to purchase
@@ -71,25 +73,15 @@ module QA
         end
 
         Gitlab::Page::Group::Settings::UsageQuotas.perform do |usage_quota|
-          expected_minutes = ci_product[:minutes] * purchase_quantity
+          expected_minutes = CI_MINUTES[:ci_minutes] * purchase_quantity
 
-          expect { usage_quota.purchase_successful_alert? }.to eventually_be_truthy.within(max_duration: 120, max_attempts: 60)
+          expect { usage_quota.ci_purchase_successful_alert? }.to eventually_be_truthy.within(max_duration: 60, max_attempts: 30)
           expect { usage_quota.additional_minutes? }.to eventually_be_truthy.within(max_duration: 120, max_attempts: 60, reload_page: page)
           expect(usage_quota.additional_limits).to eq(expected_minutes.to_s)
         end
       end
 
       private
-
-      # Hash presentation of CI minutes addon
-      # @return [Hash] CI Minutes addon
-      def ci_product
-        {
-          name: 'CI Minutes', # the name as it appears to purchase in GitLab
-          price: 10, # unit price in USD
-          minutes: 1000 # additional CI minutes per pack
-        }.freeze
-      end
 
       def credit_card_info
         {

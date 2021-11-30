@@ -10,6 +10,7 @@ module Ci
     include Presentable
     include Importable
     include Ci::HasRef
+    extend ::Gitlab::Utils::Override
 
     BuildArchivedError = Class.new(StandardError)
 
@@ -723,6 +724,14 @@ module Ci
       self.token && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
     end
 
+    # acts_as_taggable uses this method create/remove tags with contexts
+    # defined by taggings and to get those contexts it executes a query.
+    # We don't use any other contexts except `tags`, so we don't need it.
+    override :custom_contexts
+    def custom_contexts
+      []
+    end
+
     def tag_list
       if tags.loaded?
         tags.map(&:name)
@@ -1073,6 +1082,16 @@ module Ci
 
     def shared_runner_build?
       runner&.instance_type?
+    end
+
+    def job_variables_attributes
+      strong_memoize(:job_variables_attributes) do
+        job_variables.map do |variable|
+          variable.attributes.except('id', 'job_id', 'encrypted_value', 'encrypted_value_iv').tap do |attrs|
+            attrs[:value] = variable.value
+          end
+        end
+      end
     end
 
     protected

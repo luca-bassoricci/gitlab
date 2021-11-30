@@ -685,7 +685,7 @@ subdirectories of `binaries/`.
 
 **Related topics**:
 
-- [Exclude files from job artifacts](../pipelines/job_artifacts.md#exclude-files-from-job-artifacts)
+- [Exclude files from job artifacts](../pipelines/job_artifacts.md#exclude-files-from-job-artifacts).
 
 #### `artifacts:expire_in`
 
@@ -781,6 +781,10 @@ test:
   - `.xml`
   - `.log`
 
+**Related topics**:
+
+- [Expose job artifacts in the merge request UI](../pipelines/job_artifacts.md#expose-job-artifacts-in-the-merge-request-ui).
+
 #### `artifacts:name`
 
 Use the `artifacts:name` keyword to define the name of the created artifacts
@@ -793,7 +797,8 @@ If not defined, the default name is `artifacts`, which becomes `artifacts.zip` w
 
 **Possible inputs**:
 
-- The name of the artifacts archive. Can use [CI/CD variables](../variables/index.md).
+- The name of the artifacts archive. Can use [CI/CD variables](../variables/index.md). Must be combined with
+  [`artifacts:paths`](#artifactspaths).
 
 **Example of `artifacts:name`**:
 
@@ -809,7 +814,7 @@ job:
 
 **Related topics**:
 
-- [Use CI/CD variables to define the artifacts name.](../pipelines/job_artifacts.md#use-cicd-variables-to-define-the-artifacts-name)
+- [Use CI/CD variables to define the artifacts name](../pipelines/job_artifacts.md#use-cicd-variables-to-define-the-artifacts-name).
 
 #### `artifacts:paths`
 
@@ -2204,7 +2209,7 @@ its parent pipeline or another child pipeline in the same parent-child pipeline 
   ```yaml
   create-artifact:
     stage: build
-    script: echo 'sample artifact' > artifact.txt
+    script: echo "sample artifact" > artifact.txt
     artifacts:
       paths: [artifact.txt]
 
@@ -2408,10 +2413,10 @@ job2:
 
   ```yaml
   job1:
-    script: echo 'test'
+    script: echo "test"
 
   job2:
-    script: echo 'test'
+    script: echo "test"
     only:
     - branches
     - tags
@@ -2668,7 +2673,7 @@ you can use this image from the GitLab Container Registry: `registry.gitlab.com/
     rules:
       - if: $CI_COMMIT_TAG                  # Run this job when a tag is created manually
     script:
-      - echo 'Running the release job.'
+      - echo "Running the release job."
     release:
       name: 'Release $CI_COMMIT_TAG'
       description: 'Release created using the release-cli.'
@@ -2686,7 +2691,7 @@ This example creates a release:
 
   ```yaml
   script:
-    - echo 'release job'
+    - echo "release job"
   ```
 
   An [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/223856) exists to remove this requirement.
@@ -2724,7 +2729,7 @@ To create a release when a new tag is added to the project:
 
 ```yaml
 job:
-  script: echo 'Running the release job for the new tag.'
+  script: echo "Running the release job for the new tag."
   release:
     tag_name: $CI_COMMIT_TAG
     description: 'Release description'
@@ -2737,7 +2742,7 @@ should **not** configure the job to run only for new tags. A semantic versioning
 
 ```yaml
 job:
-  script: echo 'Running the release job and creating a new tag.'
+  script: echo "Running the release job and creating a new tag."
   release:
     tag_name: ${MAJOR}_${MINOR}_${REVISION}
     description: 'Release description'
@@ -3648,7 +3653,8 @@ variable defined, the [job-level variable takes precedence](../variables/index.m
 
 **Possible inputs**: Variable name and value pairs:
 
-- The name can use only numbers, letters, and underscores (`_`).
+- The name can use only numbers, letters, and underscores (`_`). In some shells,
+  the first character must be a letter.
 - The value must be a string.
 
 **Examples of `variables`:**

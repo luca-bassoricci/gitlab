@@ -51,9 +51,7 @@ class Namespace < ApplicationRecord
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
-  # TODO: can this be moved into the UserNamespace class?
-  #       evaluate in issue https://gitlab.com/gitlab-org/gitlab/-/issues/341070
-  belongs_to :owner, class_name: "User"
+  belongs_to :owner, class_name: 'User'
 
   belongs_to :parent, class_name: "Namespace"
   has_many :children, -> { where(type: Group.sti_name) }, class_name: "Namespace", foreign_key: :parent_id
@@ -96,7 +94,7 @@ class Namespace < ApplicationRecord
 
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
-  validate :validate_parent_type, if: -> { Feature.enabled?(:validate_namespace_parent_type, default_enabled: :yaml) }
+  validate :validate_parent_type
 
   # ProjectNamespaces excluded as they are not meant to appear in the group hierarchy at the moment.
   validate :nesting_level_allowed, unless: -> { project_namespace? }

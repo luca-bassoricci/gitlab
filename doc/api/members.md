@@ -65,7 +65,8 @@ Example response:
     "web_url": "http://192.168.1.8:3000/root",
     "expires_at": "2012-10-22T14:13:35Z",
     "access_level": 30,
-    "group_saml_identity": null
+    "group_saml_identity": null,
+    "membership_state": "active"
   },
   {
     "id": 2,
@@ -81,7 +82,8 @@ Example response:
       "extern_uid":"ABC-1234567890",
       "provider": "group_saml",
       "saml_provider_id": 10
-    }
+    },
+    "membership_state": "active"
   }
 ]
 ```
@@ -107,6 +109,7 @@ GET /projects/:id/members/all
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `query`   | string | no     | A query string to search for members |
 | `user_ids`   | array of integers | no     | Filter the results on the given user IDs |
+| `state`   | string | no | Filter results by member state, one of `awaiting`, `active` or `created` **(PREMIUM)** |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/members/all"
@@ -126,7 +129,8 @@ Example response:
     "web_url": "http://192.168.1.8:3000/root",
     "expires_at": "2012-10-22T14:13:35Z",
     "access_level": 30,
-    "group_saml_identity": null
+    "group_saml_identity": null,
+    "membership_state": "active"
   },
   {
     "id": 2,
@@ -142,7 +146,8 @@ Example response:
       "extern_uid":"ABC-1234567890",
       "provider": "group_saml",
       "saml_provider_id": 10
-    }
+    },
+    "membership_state": "active"
   },
   {
     "id": 3,
@@ -153,7 +158,8 @@ Example response:
     "web_url": "http://192.168.1.8:3000/root",
     "expires_at": "2012-11-22T14:13:35Z",
     "access_level": 30,
-    "group_saml_identity": null
+    "group_saml_identity": null,
+    "membership_state": "active"
   }
 ]
 ```
@@ -191,7 +197,8 @@ Example response:
   "email": "john@example.com",
   "created_at": "2012-10-22T14:13:35Z",
   "expires_at": null,
-  "group_saml_identity": null
+  "group_saml_identity": null,
+  "membership_state": "active"
 }
 ```
 
@@ -229,7 +236,8 @@ Example response:
   "access_level": 30,
   "email": "john@example.com",
   "expires_at": null,
-  "group_saml_identity": null
+  "group_saml_identity": null,
+  "membership_state": "active"
 }
 ```
 

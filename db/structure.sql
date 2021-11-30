@@ -27,9 +27,8 @@ CREATE FUNCTION insert_into_loose_foreign_keys_deleted_records() RETURNS trigger
     AS $$
 BEGIN
   INSERT INTO loose_foreign_keys_deleted_records
-  (partition, fully_qualified_table_name, primary_key_value)
-  SELECT 1, TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME, old_table.id FROM old_table
-  ON CONFLICT DO NOTHING;
+  (fully_qualified_table_name, primary_key_value)
+  SELECT TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME, old_table.id FROM old_table;
 
   RETURN NULL;
 END
@@ -1016,7 +1015,7 @@ ALTER TABLE ONLY analytics_cycle_analytics_merge_request_stage_events ATTACH PAR
 
 CREATE TABLE loose_foreign_keys_deleted_records (
     id bigint NOT NULL,
-    partition bigint NOT NULL,
+    partition bigint DEFAULT 1 NOT NULL,
     primary_key_value bigint NOT NULL,
     status smallint DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -1037,7 +1036,7 @@ ALTER SEQUENCE loose_foreign_keys_deleted_records_id_seq OWNED BY loose_foreign_
 
 CREATE TABLE gitlab_partitions_static.loose_foreign_keys_deleted_records_1 (
     id bigint DEFAULT nextval('loose_foreign_keys_deleted_records_id_seq'::regclass) NOT NULL,
-    partition bigint NOT NULL,
+    partition bigint DEFAULT 1 NOT NULL,
     primary_key_value bigint NOT NULL,
     status smallint DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -9721,6 +9720,30 @@ CREATE SEQUENCE abuse_reports_id_seq
 
 ALTER SEQUENCE abuse_reports_id_seq OWNED BY abuse_reports.id;
 
+CREATE TABLE agent_activity_events (
+    id bigint NOT NULL,
+    agent_id bigint NOT NULL,
+    user_id bigint,
+    project_id bigint,
+    merge_request_id bigint,
+    agent_token_id bigint,
+    recorded_at timestamp with time zone NOT NULL,
+    kind smallint NOT NULL,
+    level smallint NOT NULL,
+    sha bytea,
+    detail text,
+    CONSTRAINT check_068205e735 CHECK ((char_length(detail) <= 255))
+);
+
+CREATE SEQUENCE agent_activity_events_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE agent_activity_events_id_seq OWNED BY agent_activity_events.id;
+
 CREATE TABLE agent_group_authorizations (
     id bigint NOT NULL,
     group_id bigint NOT NULL,
@@ -10524,6 +10547,7 @@ CREATE TABLE approval_merge_request_rules (
     report_type smallint,
     section text,
     modified_from_project_rule boolean DEFAULT false NOT NULL,
+    orchestration_policy_idx smallint,
     CONSTRAINT check_6fca5928b2 CHECK ((char_length(section) <= 255))
 );
 
@@ -10593,7 +10617,8 @@ CREATE TABLE approval_project_rules (
     vulnerabilities_allowed smallint DEFAULT 0 NOT NULL,
     severity_levels text[] DEFAULT '{}'::text[] NOT NULL,
     report_type smallint,
-    vulnerability_states text[] DEFAULT '{newly_detected}'::text[] NOT NULL
+    vulnerability_states text[] DEFAULT '{newly_detected}'::text[] NOT NULL,
+    orchestration_policy_idx smallint
 );
 
 CREATE TABLE approval_project_rules_groups (
@@ -15255,6 +15280,22 @@ CREATE SEQUENCE issue_email_participants_id_seq
 
 ALTER SEQUENCE issue_email_participants_id_seq OWNED BY issue_email_participants.id;
 
+CREATE TABLE issue_emails (
+    id bigint NOT NULL,
+    issue_id bigint NOT NULL,
+    email_message_id text NOT NULL,
+    CONSTRAINT check_5abf3e6aea CHECK ((char_length(email_message_id) <= 1000))
+);
+
+CREATE SEQUENCE issue_emails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE issue_emails_id_seq OWNED BY issue_emails.id;
+
 CREATE TABLE issue_links (
     id integer NOT NULL,
     source_id integer NOT NULL,
@@ -15400,7 +15441,7 @@ CREATE TABLE iterations_cadences (
     group_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    start_date date NOT NULL,
+    start_date date,
     last_run_date date,
     duration_in_weeks integer,
     iterations_in_advance integer,
@@ -16314,7 +16355,7 @@ CREATE TABLE namespaces (
     owner_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    type character varying,
+    type character varying DEFAULT 'User'::character varying,
     description character varying DEFAULT ''::character varying NOT NULL,
     avatar character varying,
     membership_lock boolean DEFAULT false,
@@ -18260,7 +18301,9 @@ CREATE TABLE project_settings (
     warn_about_potentially_unwanted_characters boolean DEFAULT true NOT NULL,
     merge_commit_template text,
     has_shimo boolean DEFAULT false NOT NULL,
+    squash_commit_template text,
     CONSTRAINT check_3a03e7557a CHECK ((char_length(previous_default_branch) <= 4096)),
+    CONSTRAINT check_b09644994b CHECK ((char_length(squash_commit_template) <= 500)),
     CONSTRAINT check_bde223416c CHECK ((show_default_award_emojis IS NOT NULL)),
     CONSTRAINT check_eaf7cfb6a7 CHECK ((char_length(merge_commit_template) <= 500))
 );
@@ -18845,8 +18888,7 @@ CREATE TABLE requirements_management_test_reports (
     author_id bigint,
     state smallint NOT NULL,
     build_id bigint,
-    issue_id bigint,
-    CONSTRAINT requirements_test_reports_requirement_id_xor_issue_id CHECK ((num_nonnulls(requirement_id, issue_id) = 1))
+    issue_id bigint
 );
 
 CREATE SEQUENCE requirements_management_test_reports_id_seq
@@ -21064,6 +21106,8 @@ ALTER SEQUENCE zoom_meetings_id_seq OWNED BY zoom_meetings.id;
 
 ALTER TABLE ONLY abuse_reports ALTER COLUMN id SET DEFAULT nextval('abuse_reports_id_seq'::regclass);
 
+ALTER TABLE ONLY agent_activity_events ALTER COLUMN id SET DEFAULT nextval('agent_activity_events_id_seq'::regclass);
+
 ALTER TABLE ONLY agent_group_authorizations ALTER COLUMN id SET DEFAULT nextval('agent_group_authorizations_id_seq'::regclass);
 
 ALTER TABLE ONLY agent_project_authorizations ALTER COLUMN id SET DEFAULT nextval('agent_project_authorizations_id_seq'::regclass);
@@ -21539,6 +21583,8 @@ ALTER TABLE ONLY issuable_slas ALTER COLUMN id SET DEFAULT nextval('issuable_sla
 ALTER TABLE ONLY issue_customer_relations_contacts ALTER COLUMN id SET DEFAULT nextval('issue_customer_relations_contacts_id_seq'::regclass);
 
 ALTER TABLE ONLY issue_email_participants ALTER COLUMN id SET DEFAULT nextval('issue_email_participants_id_seq'::regclass);
+
+ALTER TABLE ONLY issue_emails ALTER COLUMN id SET DEFAULT nextval('issue_emails_id_seq'::regclass);
 
 ALTER TABLE ONLY issue_links ALTER COLUMN id SET DEFAULT nextval('issue_links_id_seq'::regclass);
 
@@ -22412,6 +22458,9 @@ ALTER TABLE ONLY gitlab_partitions_static.product_analytics_events_experimental_
 ALTER TABLE ONLY abuse_reports
     ADD CONSTRAINT abuse_reports_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY agent_activity_events
+    ADD CONSTRAINT agent_activity_events_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY agent_group_authorizations
     ADD CONSTRAINT agent_group_authorizations_pkey PRIMARY KEY (id);
 
@@ -23209,6 +23258,9 @@ ALTER TABLE ONLY issue_customer_relations_contacts
 
 ALTER TABLE ONLY issue_email_participants
     ADD CONSTRAINT issue_email_participants_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY issue_emails
+    ADD CONSTRAINT issue_emails_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY issue_links
     ADD CONSTRAINT issue_links_pkey PRIMARY KEY (id);
@@ -24907,6 +24959,16 @@ CREATE UNIQUE INDEX idx_vulnerability_issue_links_on_vulnerability_id_and_link_t
 
 CREATE INDEX index_abuse_reports_on_user_id ON abuse_reports USING btree (user_id);
 
+CREATE INDEX index_agent_activity_events_on_agent_id_and_recorded_at_and_id ON agent_activity_events USING btree (agent_id, recorded_at, id);
+
+CREATE INDEX index_agent_activity_events_on_agent_token_id ON agent_activity_events USING btree (agent_token_id) WHERE (agent_token_id IS NOT NULL);
+
+CREATE INDEX index_agent_activity_events_on_merge_request_id ON agent_activity_events USING btree (merge_request_id) WHERE (merge_request_id IS NOT NULL);
+
+CREATE INDEX index_agent_activity_events_on_project_id ON agent_activity_events USING btree (project_id) WHERE (project_id IS NOT NULL);
+
+CREATE INDEX index_agent_activity_events_on_user_id ON agent_activity_events USING btree (user_id) WHERE (user_id IS NOT NULL);
+
 CREATE UNIQUE INDEX index_agent_group_authorizations_on_agent_id_and_group_id ON agent_group_authorizations USING btree (agent_id, group_id);
 
 CREATE INDEX index_agent_group_authorizations_on_group_id ON agent_group_authorizations USING btree (group_id);
@@ -26120,6 +26182,10 @@ CREATE UNIQUE INDEX index_issue_crm_contacts_on_issue_id_and_contact_id ON issue
 CREATE INDEX index_issue_customer_relations_contacts_on_contact_id ON issue_customer_relations_contacts USING btree (contact_id);
 
 CREATE UNIQUE INDEX index_issue_email_participants_on_issue_id_and_lower_email ON issue_email_participants USING btree (issue_id, lower(email));
+
+CREATE INDEX index_issue_emails_on_email_message_id ON issue_emails USING btree (email_message_id);
+
+CREATE INDEX index_issue_emails_on_issue_id ON issue_emails USING btree (issue_id);
 
 CREATE INDEX index_issue_links_on_source_id ON issue_links USING btree (source_id);
 
@@ -27469,7 +27535,7 @@ CREATE INDEX index_users_on_name ON users USING btree (name);
 
 CREATE INDEX index_users_on_name_trigram ON users USING gin (name gin_trgm_ops);
 
-CREATE INDEX index_users_on_public_email ON users USING btree (public_email) WHERE ((public_email)::text <> ''::text);
+CREATE INDEX index_users_on_public_email_excluding_null_and_empty ON users USING btree (public_email) WHERE (((public_email)::text <> ''::text) AND (public_email IS NOT NULL));
 
 CREATE INDEX index_users_on_require_two_factor_authentication_from_group ON users USING btree (require_two_factor_authentication_from_group) WHERE (require_two_factor_authentication_from_group = true);
 
@@ -28803,6 +28869,9 @@ ALTER TABLE ONLY import_failures
 ALTER TABLE ONLY project_ci_cd_settings
     ADD CONSTRAINT fk_24c15d2f2e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY agent_activity_events
+    ADD CONSTRAINT fk_256c631779 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_25b99c1be3 FOREIGN KEY (parent_id) REFERENCES epics(id) ON DELETE CASCADE;
 
@@ -28874,6 +28943,9 @@ ALTER TABLE ONLY bulk_import_exports
 
 ALTER TABLE ONLY ci_builds
     ADD CONSTRAINT fk_3a9eaa254d FOREIGN KEY (stage_id) REFERENCES ci_stages(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY agent_activity_events
+    ADD CONSTRAINT fk_3af186389b FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_3b8c72ea56 FOREIGN KEY (sprint_id) REFERENCES sprints(id) ON DELETE SET NULL;
@@ -29319,6 +29391,12 @@ ALTER TABLE ONLY geo_event_log
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_c63cbf6c25 FOREIGN KEY (closed_by_id) REFERENCES users(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY agent_activity_events
+    ADD CONSTRAINT fk_c815368376 FOREIGN KEY (agent_id) REFERENCES cluster_agents(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY agent_activity_events
+    ADD CONSTRAINT fk_c8b006d40f FOREIGN KEY (agent_token_id) REFERENCES cluster_agent_tokens(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY issue_links
     ADD CONSTRAINT fk_c900194ff2 FOREIGN KEY (source_id) REFERENCES issues(id) ON DELETE CASCADE;
 
@@ -29372,6 +29450,9 @@ ALTER TABLE ONLY geo_event_log
 
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_d6cf4279f7 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY agent_activity_events
+    ADD CONSTRAINT fk_d6f785c9fc FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY metrics_users_starred_dashboards
     ADD CONSTRAINT fk_d76a2b9a8c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -30938,6 +31019,9 @@ ALTER TABLE ONLY packages_packages
 
 ALTER TABLE ONLY cluster_platforms_kubernetes
     ADD CONSTRAINT fk_rails_e1e2cf841a FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY issue_emails
+    ADD CONSTRAINT fk_rails_e2ee00a8f7 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerability_finding_evidences
     ADD CONSTRAINT fk_rails_e3205a0c65 FOREIGN KEY (vulnerability_occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;

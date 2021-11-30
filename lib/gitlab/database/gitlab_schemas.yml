@@ -1,4 +1,5 @@
 abuse_reports: :gitlab_main
+agent_activity_events: :gitlab_main
 agent_group_authorizations: :gitlab_main
 agent_project_authorizations: :gitlab_main
 alert_management_alert_assignees: :gitlab_main
@@ -260,6 +261,7 @@ issuable_severities: :gitlab_main
 issuable_slas: :gitlab_main
 issue_assignees: :gitlab_main
 issue_customer_relations_contacts: :gitlab_main
+issue_emails: :gitlab_main
 issue_email_participants: :gitlab_main
 issue_links: :gitlab_main
 issue_metrics: :gitlab_main

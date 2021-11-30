@@ -23,6 +23,10 @@ module BulkImports
             pipeline: BulkImports::Common::Pipelines::MilestonesPipeline,
             stage: 2
           },
+          badges: {
+            pipeline: BulkImports::Common::Pipelines::BadgesPipeline,
+            stage: 2
+          },
           issues: {
             pipeline: BulkImports::Projects::Pipelines::IssuesPipeline,
             stage: 3
@@ -49,6 +53,10 @@ module BulkImports
           },
           ci_pipelines: {
             pipeline: BulkImports::Projects::Pipelines::CiPipelinesPipeline,
+            stage: 4
+          },
+          project_feature: {
+            pipeline: BulkImports::Projects::Pipelines::ProjectFeaturePipeline,
             stage: 4
           },
           wiki: {

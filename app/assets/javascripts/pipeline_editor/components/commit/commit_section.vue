@@ -87,7 +87,7 @@ export default {
       try {
         const {
           data: {
-            commitCreate: { errors },
+            commitCreate: { errors, commitPipelinePath: pipelineEtag },
           },
         } = await this.$apollo.mutate({
           mutation: commitCIFile,
@@ -101,13 +101,11 @@ export default {
             content: this.ciFileContent,
             lastCommitId: this.commitSha,
           },
-          update(_, { data }) {
-            const pipelineEtag = data?.commitCreate?.commit?.commitPipelinePath;
-            if (pipelineEtag) {
-              this.$apollo.mutate({ mutation: updatePipelineEtag, variables: pipelineEtag });
-            }
-          },
         });
+
+        if (pipelineEtag) {
+          this.updatePipelineEtag(pipelineEtag);
+        }
 
         if (errors?.length) {
           this.$emit('showError', { type: COMMIT_FAILURE, reasons: errors });
@@ -127,9 +125,6 @@ export default {
         this.isSaving = false;
       }
     },
-    onCommitCancel() {
-      this.$emit('resetContent');
-    },
     updateCurrentBranch(currentBranch) {
       this.$apollo.mutate({
         mutation: updateCurrentBranchMutation,
@@ -142,6 +137,9 @@ export default {
         variables: { lastCommitBranch },
       });
     },
+    updatePipelineEtag(pipelineEtag) {
+      this.$apollo.mutate({ mutation: updatePipelineEtag, variables: { pipelineEtag } });
+    },
   },
 };
 </script>
@@ -153,7 +151,6 @@ export default {
     :is-saving="isSaving"
     :scroll-to-commit-form="scrollToCommitForm"
     v-on="$listeners"
-    @cancel="onCommitCancel"
     @submit="onCommitSubmit"
   />
 </template>

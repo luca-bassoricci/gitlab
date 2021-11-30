@@ -26,6 +26,9 @@ Planning features everyone needs to use day-to-day.
 Get work done as a team.
 
 - [Comments and threads](../user/discussions/index.md)
+- [Customer relations (CRM)](../user/crm/index.md)
+  - [Contacts](../user/crm/index.md#contacts)
+  - [Organizations](../user/crm/index.md#organizations)
 - [Issues](../user/project/issues/index.md)
 - [Iterations](../user/group/iterations/index.md)
 - [Labels](../user/project/labels.md)
@@ -42,5 +45,6 @@ Align your work across teams.
 - [Epics](../user/group/epics/index.md)
   - [Multi-level epics](../user/group/epics/manage_epics.md#multi-level-child-epics)
   - [Epic boards](../user/group/epics/epic_boards.md)
-  - [View heath status](../user/project/issues/managing_issues.md#health-status)
+  - [View health status](../user/project/issues/managing_issues.md#health-status)
 - [Roadmaps](../user/group/roadmap/index.md)
+- [Planning hierarchies](../user/group/planning_hierarchy/index.md)

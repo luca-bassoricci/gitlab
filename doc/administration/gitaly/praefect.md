@@ -255,7 +255,7 @@ this, you must point Praefect to PgBouncer by setting Praefect database paramete
 
 ```ruby
 praefect['database_host'] = PGBOUNCER_HOST
-praefect['database_port'] = 6432
+praefect['database_port'] = 5432
 praefect['database_user'] = 'praefect'
 praefect['database_password'] = PRAEFECT_SQL_PASSWORD
 praefect['database_dbname'] = 'praefect_production'
@@ -1105,17 +1105,6 @@ To get started quickly:
 Congratulations! You've configured an observable fault-tolerant Praefect
 cluster.
 
-## Strong consistency
-
-[Strong consistency](index.md#strong-consistency) is the default from GitLab 14.0.
-For configuration information on earlier versions, refer to documentation:
-
-- On your GitLab instance at `/help`.
-- The [13.12 documentation](https://docs.gitlab.com/13.12/ee/administration/gitaly/praefect.html#strong-consistency).
-
-For information on monitoring strong consistency, see the Gitaly Cluster
-[Prometheus metrics documentation](index.md#monitor-gitaly-cluster).
-
 ## Configure replication factor
 
 WARNING:
@@ -1171,8 +1160,7 @@ Praefect regularly checks the health of each Gitaly node. This is used to automa
 to a newly-elected primary Gitaly node if the current primary node is found to be unhealthy.
 
 We recommend using [repository-specific primary nodes](#repository-specific-primary-nodes). This is
-[planned to be the only available election strategy](https://gitlab.com/gitlab-org/gitaly/-/issues/3574)
-from GitLab 14.0.
+[the only available election strategy](https://gitlab.com/gitlab-org/gitaly/-/issues/3574) from GitLab 14.0.
 
 ### Repository-specific primary nodes
 
@@ -1286,7 +1274,7 @@ To migrate existing clusters:
 ### Deprecated election strategies
 
 WARNING:
-The below election strategies are deprecated and are scheduled for removal in GitLab 14.0.
+The below election strategies are deprecated and were removed in GitLab 14.0.
 Migrate to [repository-specific primary nodes](#repository-specific-primary-nodes).
 
 - **PostgreSQL:** Enabled by default until GitLab 14.0, and equivalent to:

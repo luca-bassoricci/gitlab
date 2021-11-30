@@ -506,7 +506,7 @@ class MergeRequest < ApplicationRecord
   def self.reference_pattern
     @reference_pattern ||= %r{
       (#{Project.reference_pattern})?
-      #{Regexp.escape(reference_prefix)}(?<merge_request>\d+)
+      #{Regexp.escape(reference_prefix)}(?<merge_request>\d+)(?<format>\+)?
     }x
   end
 
@@ -768,7 +768,7 @@ class MergeRequest < ApplicationRecord
   def diff_size
     # Calling `merge_request_diff.diffs.real_size` will also perform
     # highlighting, which we don't need here.
-    merge_request_diff&.real_size || diff_stats&.real_size(project: project) || diffs.real_size
+    merge_request_diff&.real_size || diff_stats&.real_size || diffs.real_size
   end
 
   def modified_paths(past_merge_request_diff: nil, fallback_on_overflow: false)
@@ -1317,7 +1317,7 @@ class MergeRequest < ApplicationRecord
 
   def default_merge_commit_message(include_description: false)
     if self.target_project.merge_commit_template.present? && !include_description
-      return ::Gitlab::MergeRequests::MergeCommitMessage.new(merge_request: self).message
+      return ::Gitlab::MergeRequests::CommitMessageGenerator.new(merge_request: self).merge_message
     end
 
     closes_issues_references = visible_closing_issues_for.map do |issue|
@@ -1340,6 +1340,10 @@ class MergeRequest < ApplicationRecord
   end
 
   def default_squash_commit_message
+    if self.target_project.squash_commit_template.present?
+      return ::Gitlab::MergeRequests::CommitMessageGenerator.new(merge_request: self).squash_message
+    end
+
     title
   end
 

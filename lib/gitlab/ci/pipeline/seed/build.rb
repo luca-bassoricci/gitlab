@@ -200,12 +200,14 @@ module Gitlab
           end
 
           def runner_tags
-            { tag_list: evaluate_runner_tags }.compact
+            strong_memoize(:runner_tags) do
+              { tag_list: evaluate_runner_tags }.compact
+            end
           end
 
           def evaluate_runner_tags
-            @seed_attributes[:tag_list]&.map do |tag|
-              ExpandVariables.expand_existing(tag, evaluate_context.variables)
+            @seed_attributes.delete(:tag_list)&.map do |tag|
+              ExpandVariables.expand_existing(tag, -> { evaluate_context.variables_hash })
             end
           end
 
