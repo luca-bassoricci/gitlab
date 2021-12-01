@@ -987,7 +987,7 @@ module Gitlab
                 %w(VAR1 value1 VAR2 value2)
               end
 
-              it_behaves_like 'returns errors', /jobs:rspec:variables config should be a hash of key value pairs/
+              it_behaves_like 'returns errors', /jobs:rspec:variables config should be a hash/
             end
 
             context 'when variables key defined but value not specified' do
@@ -2622,13 +2622,7 @@ module Gitlab
         context 'returns errors if variables is not a map' do
           let(:config) { YAML.dump({ variables: "test", rspec: { script: "test" } }) }
 
-          it_behaves_like 'returns errors', 'variables config should be a hash of key value pairs, value can be a hash'
-        end
-
-        context 'returns errors if variables is not a map of key-value strings' do
-          let(:config) { YAML.dump({ variables: { test: false }, rspec: { script: "test" } }) }
-
-          it_behaves_like 'returns errors', 'variables config should be a hash of key value pairs, value can be a hash'
+          it_behaves_like 'returns errors', 'variables config should be a hash'
         end
 
         context 'returns errors if job when is not on_success, on_failure or always' do

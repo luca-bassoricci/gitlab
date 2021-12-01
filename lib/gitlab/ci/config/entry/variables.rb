@@ -7,43 +7,25 @@ module Gitlab
         ##
         # Entry that represents environment variables.
         #
-        class Variables < ::Gitlab::Config::Entry::Node
+        class Variables < ::Gitlab::Config::Entry::ComposableHash
           include ::Gitlab::Config::Entry::Validatable
 
-          ALLOWED_VALUE_DATA = %i[value description].freeze
-
           validations do
-            validates :config, variables: { allowed_value_data: ALLOWED_VALUE_DATA }, if: :use_value_data?
-            validates :config, variables: true, unless: :use_value_data?
+            validates :config, type: Hash
           end
 
           def value
-            @config.map do |key, value|
-              {
-                key: key.to_s,
-                **expand_value(value)
-              }
-            end
+            @entries.values.map(&:value)
           end
 
           def self.default(**)
             {}
           end
 
-          def use_value_data?
-            opt(:use_value_data)
-          end
-
           private
 
-          def expand_value(value)
-            if value.is_a?(Hash)
-              { value: value[:value].to_s }.tap do |hash|
-                hash[:description] = value[:description].to_s if value[:description]
-              end
-            else
-              { value: value.to_s }
-            end
+          def composable_class(name, config)
+            Entry::Variable
           end
         end
       end

@@ -352,7 +352,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules::Rule do
         it { is_expected.not_to be_valid }
 
         it 'returns an error about invalid variables:' do
-          expect(subject.errors).to include(/variables config should be a hash of key value pairs/)
+          expect(subject.errors).to include(/variables config should be a hash/)
         end
       end
     end
