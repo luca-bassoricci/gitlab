@@ -39,7 +39,7 @@ To create a project in GitLab:
    - Create a project with a:
       - [built-in template](#create-a-project-with-a-built-in-template) 
       - [custom template](#create-a-project-with-a-custom-template)  
-      - [enterprise template](#enterprise-templates)
+      - [enterprise template](#create-a-project-with-an-enterprise-template)
    - If enabled in your GitLab instance, [import a project](#import-a-project) from a different repository.
      Contact your GitLab administrator if this is unavailable.
    - [Connect an external repository to GitLab CI/CD](../../ci/ci_cd_for_external_repos/index.md).
@@ -63,8 +63,7 @@ To create a blank project:
      slug as the URL path to the project. To change the slug, first enter the project name, 
      then change the slug. 
    - The description of your project's dashboard in the **Project description (optional)** field.
-   - To modify the project's [viewing and access rights](../../public_access/public_access.md) for users, 
-     change the **Visibility Level**.
+   - To modify the project's [viewing and access rights](../../public_access/public_access.md) for users, change the **Visibility Level**.
    - To create README file so that the Git repository is initialized, has a default branch, and
      can be cloned, select **Initialize repository with a README**.
    - To analyze the source code in the project for known security vulnerabilities, select **Enable Static Application Security Testing (SAST)**.   
