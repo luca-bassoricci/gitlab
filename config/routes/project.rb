@@ -316,6 +316,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :terraform, only: [:index]
 
         resources :google_cloud, only: [:index]
+        get '/google_cloud/revoke', to: 'google_cloud#revoke'
 
         namespace :google_cloud do
           resources :service_accounts, only: [:index, :create]

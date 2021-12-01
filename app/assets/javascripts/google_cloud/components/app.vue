@@ -2,9 +2,11 @@
 import { GlTab, GlTabs } from '@gitlab/ui';
 import ServiceAccountsList from './service_accounts_list.vue';
 import IncubationBanner from './incubation_banner.vue';
-import ServiceAccountsForm from './service_accounts_form.vue';
 import NoGcpProjects from './errors/no_gcp_projects.vue';
-import GcpError from './errors/gcp_error.vue';
+import RevokeAuth from './revoke_auth.vue';
+import SectionDivider from './section_divider.vue';
+import ServiceAccountsForm from './service_accounts_form.vue';
+import ServiceAccountsList from './service_accounts_list.vue';
 
 export default {
   components: {
@@ -13,6 +15,8 @@ export default {
     GlTabs,
     IncubationBanner,
     NoGcpProjects,
+    RevokeAuth,
+    SectionDivider,
     ServiceAccountsForm,
     ServiceAccountsList,
   },
@@ -98,6 +102,8 @@ export default {
             :create-url="createServiceAccountUrl"
             :empty-illustration-url="emptyIllustrationUrl"
           />
+          <section-divider />
+          <revoke-auth />
         </gl-tab>
         <gl-tab :title="__('Deployments')" disabled />
         <gl-tab :title="__('Services')" disabled />
