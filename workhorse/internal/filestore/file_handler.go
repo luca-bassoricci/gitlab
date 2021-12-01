@@ -14,6 +14,7 @@ import (
 
 	"gitlab.com/gitlab-org/labkit/log"
 
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/filestore/multihash"
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/objectstore"
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/secret"
 )
@@ -117,8 +118,11 @@ func SaveFileFromReader(ctx context.Context, reader io.Reader, size int64, opts 
 	}
 	uploadStartTime := time.Now()
 	defer func() { fh.uploadDuration = time.Since(uploadStartTime).Seconds() }()
-	hashes := newMultiHash()
-	reader = io.TeeReader(reader, hashes.Writer)
+
+	mhw := multihash.New()
+	defer mhw.Close()
+
+	reader = io.TeeReader(reader, mhw)
 
 	var clientMode string
 	var uploadDestination consumer
@@ -206,7 +210,7 @@ func SaveFileFromReader(ctx context.Context, reader io.Reader, size int64, opts 
 	}
 
 	logger.Info("saved file")
-	fh.hashes = hashes.finish()
+	fh.hashes = mhw.Hashes()
 	return fh, nil
 }
 
