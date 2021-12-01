@@ -1282,6 +1282,12 @@ module Ci
       end
     end
 
+    def create_deployment_in_separate_transaction?
+      strong_memoize(:create_deployment_in_separate_transaction) do
+        ::Feature.enabled?(:create_deployment_in_separate_transaction, pipeline.project, default_enabled: :yaml)
+      end
+    end
+
     private
 
     def add_message(severity, content)

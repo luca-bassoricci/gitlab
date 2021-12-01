@@ -110,6 +110,10 @@ module Gitlab
 
             build.persisted_environment = environment
 
+            if pipeline.create_deployment_in_separate_transaction?
+              build.disable_autosave_for_deployment
+            end
+
             {
               deployment: Seed::Deployment.new(build, environment).to_resource,
               metadata_attributes: {

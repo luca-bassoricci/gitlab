@@ -40,12 +40,19 @@ module Ci
       check_access!(build)
 
       new_build = clone_build(build)
+
+      if ::Feature.enabled?(:create_deployment_in_separate_transaction, new_build.project, default_enabled: :yaml)
+        new_build.disable_autosave_for_deployment
+      end
+
       ::Ci::Pipelines::AddJobService.new(build.pipeline).execute!(new_build) do |job|
         BulkInsertableAssociations.with_bulk_insert do
           job.save!
         end
       end
       build.reset # refresh the data to get new values of `retried` and `processed`.
+
+      persist_associations(new_build)
 
       new_build
     end
@@ -79,6 +86,12 @@ module Ci
     def deployment_attributes_for(new_build, old_build)
       ::Gitlab::Ci::Pipeline::Seed::Build
         .deployment_attributes_for(new_build, old_build.persisted_environment)
+    end
+
+    def persist_associations(new_build)
+      return unless ::Feature.enabled?(:create_deployment_in_separate_transaction, new_build.project, default_enabled: :yaml)
+
+      new_build.deployment.save!
     end
   end
 end

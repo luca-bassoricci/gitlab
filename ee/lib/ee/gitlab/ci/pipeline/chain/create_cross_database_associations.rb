@@ -11,6 +11,8 @@ module EE
 
             override :perform!
             def perform!
+              super
+
               create_dast_associations
             end
 

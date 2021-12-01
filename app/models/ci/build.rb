@@ -35,7 +35,7 @@ module Ci
     DEGRADATION_THRESHOLD_VARIABLE_NAME = 'DEGRADATION_THRESHOLD'
     RUNNERS_STATUS_CACHE_EXPIRATION = 1.minute
 
-    has_one :deployment, as: :deployable, class_name: 'Deployment'
+    has_one :deployment, as: :deployable, class_name: 'Deployment' # `autosave: false` can't use the feature flag. We should disable it dynamically. 
     has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
     has_one :queuing_entry, class_name: 'Ci::PendingBuild', foreign_key: :build_id
     has_one :runtime_metadata, class_name: 'Ci::RunningBuild', foreign_key: :build_id
