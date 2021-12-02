@@ -39,7 +39,7 @@ To create a project in GitLab:
    - Create a project with a:
       - [built-in template](#create-a-project-with-a-built-in-template) 
       - [custom template](#create-a-project-with-a-custom-template)  
-      - [enterprise template](#create-a-project-with-an-enterprise-template)
+      - [enterprise template](#create-a-project-with-the-hipaa-audit-protocol-template)
    - If enabled in your GitLab instance, [import a project](#import-a-project) from a different repository.
      Contact your GitLab administrator if this is unavailable.
    - [Connect an external repository to GitLab CI/CD](../../ci/ci_cd_for_external_repos/index.md).
@@ -128,25 +128,20 @@ GitLab configures custom project templates that are available at:
       change the **Visibility Level**.
 1. Select **Create project**.
 
-## Create a project with an enterprise template **(ULTIMATE)**
+## Create a project with the HIPAA Audit Protocol template **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13756) in GitLab 12.10
 
-Enterprise templates are a type of built-in template that import issues that correspond to regulatory 
-requirements.
-
-Enterprise templates include:
-
-- HIPAA Audit Protocol. A project that contains issues for each audit inquiry in the 
+The HIPAA Audit Protocol template contains issues for each audit inquiry in the 
 HIPAA Audit Protocol, published by the U.S Department of Health and Human Service.
 
-To create a project with an enterprise template:
+To create a project with the HIPAA Audit Protocol template:
 
 1. On the top bar, select **Menu > Project**.
 1. Select **Create new project**.
 1. Select **Create from template**.
 1. Select the **Built-in** tab.
-1. Locate the **HIPAA Audit Protocol**:
+1. Locate the **HIPAA Audit Protocol** template:
    - To view a preview of the template, select **Preview**.
    - To use the template for the project, select **Use template**.
 1. Enter the project details:
