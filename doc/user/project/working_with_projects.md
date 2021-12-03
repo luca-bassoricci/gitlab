@@ -48,7 +48,7 @@ NOTE:
 For a list of words that can't be used as project names see
 [reserved project and group names](../../user/reserved_names.md).
 
-## Create a blank project
+## Create a new blank project
 
 To create a blank project:
 
@@ -69,7 +69,7 @@ To create a blank project:
    - To analyze the source code in the project for known security vulnerabilities, select **Enable Static Application Security Testing (SAST)**.   
 1. Select **Create project**.
 
-## Create a project with a built-in template
+## Create a project from a built-in template
 
 A built-in project template populates a new project with files to get you started.
 Built-in templates are sourced from the following groups:
@@ -100,7 +100,7 @@ To create a project with a built-in template:
       change the **Visibility Level**.
 1. Select **Create project**.      
 
-## Create a project with a custom template (**PREMIUM**)
+## Create a project from a custom template **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6860) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
 
@@ -128,7 +128,7 @@ GitLab configures custom project templates that are available at:
       change the **Visibility Level**.
 1. Select **Create project**.
 
-## Create a project with the HIPAA Audit Protocol template **(ULTIMATE)**
+## Create a project from the HIPAA Audit Protocol template **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13756) in GitLab 12.10
 
@@ -160,50 +160,59 @@ To create a project with the HIPAA Audit Protocol template:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26388) in GitLab 10.5.
 
-When you create a new repository locally, you don't have to sign in to the GitLab
-interface to create a project and
-[clone its repository](../../gitlab-basics/start-using-git.md#clone-a-repository).
-You can directly push your new repository to GitLab, which creates your new project
-without leaving your terminal.
+Use `git push` to push a local project repository to GitLab. After pushing your repository, 
+GitLab creates your project in your chosen namespace.
 
-To push a new project:
+You cannot use `git push` to create projects with project paths that:
 
-1. Identify the [namespace](../group/index.md#namespaces) you want to add the new
-   project to, as you need this information in a future step. To determine if you have
-   permission to create new projects in a namespace, view the group's page in a
-   web browser and confirm the page displays a **New project** button.
+- Have previously been used.
+- [Renamed](settings/index.md#renaming-a-repository). 
 
-   NOTE:
-   As project creation permissions can have many factors, contact your
-   GitLab administrator if you're unsure.
+Previously used project paths have a redirect. The redirect causes push attempts to redirect requests 
+to the renamed project location, instead of creating a new project. To create a new project for a previously 
+used or renamed project, use the [UI](#create-a-project) or the [Projects API](../../api/projects.md#create-project).
 
-1. If you want to push using SSH, ensure you have [created a SSH key](../../ssh/index.md) and
-   [added it to your GitLab account](../../ssh/index.md#add-an-ssh-key-to-your-gitlab-account).
-1. Push with one of the following methods. Replace `gitlab.example.com` with the
-   domain name of the machine that hosts your Git repository, `namespace` with the name of
-   your namespace, and `myproject` with the name of your new project:
-   - To push with SSH: `git push --set-upstream git@gitlab.example.com:namespace/myproject.git master`
-   - To push with HTTPS: `git push --set-upstream https://gitlab.example.com/namespace/myproject.git master`
-   Optional: to export existing repository tags, append the `--tags` flag to your `git push` command.
-1. When the push completes, GitLab displays a message:
+Pre-requisites:
 
-   ```plaintext
+- To push using SSH, you must have [an SSH key](../../ssh/index.md) that is
+[added to your GitLab account](../../ssh/index.md#add-an-ssh-key-to-your-gitlab-account).
+- You must have permission to add new projects to a namespace. To check if you have permission, 
+view the group's page in the UI and confirm it has a **New project** button. Contact your GitLab 
+administrator if you require permission.
+
+1. Identify the [namespace](../group/index.md#namespaces) for your new project.
+1. Push with SSH or HTTPS.
+   - To push with SSH: 
+
+      ```shell
+      git push --set-upstream git@gitlab.example.com:namespace/myproject.git master
+      ```
+
+   - To push with HTTPS: 
+
+      ```shell
+      git push --set-upstream https://gitlab.example.com/namespace/myproject.git master
+      ```
+
+   - For `gitlab.example.com`, use the domain name of the machine that hosts your Git repository.
+   - For `namespace`, use the name of your namespace.
+   - For `myproject`, use the name of your new project.
+   - Optional. To export existing repository tags, append the `--tags` flag to your `git push` command.
+1. Optional. To configure the remote:
+   
+   ```shell
+   git remote add origin https://gitlab.example.com/namespace/myproject.git
+   ```
+
+When the push completes, GitLab displays the message:
+
+   ```shell
    remote: The private project namespace/myproject was created.
    ```
 
-1. (Optional) To configure the remote, alter the command
-   `git remote add origin https://gitlab.example.com/namespace/myproject.git`
-   to match your namespace and project names.
-
-You can view your new project at `https://gitlab.example.com/namespace/myproject`.
-Your project's visibility is set to **Private** by default, but you can change it
-in your [project's settings](../../public_access/public_access.md#change-project-visibility)).
-
-This feature does not work for project paths that have previously been in use and
-[renamed](settings/index.md#renaming-a-repository). A redirect exists over the previous project path
-that causes push attempts to redirect requests to the renamed project location, instead of creating
-a new project. To create a new project, use the [Web UI](#create-a-project) or the
-[Projects API](../../api/projects.md#create-project).
+To view your new project, go to `https://gitlab.example.com/namespace/myproject`.
+Your project's visibility is set to **Private** by default. To change it, adjust your 
+[project's settings](../../public_access/public_access.md#change-project-visibility)).
 
 ## Import a project
 
@@ -213,8 +222,7 @@ different repository. Contact your GitLab administrator if this is unavailable.
 ## Connect an external repository to GitLab CI/CD **(PREMIUM)**
 
 Instead of moving your entire project to GitLab, you can 
-[connect your external repository](../../ci/ci_cd_for_external_repos/index.md) to get the benefits 
-of GitLab CI/CD.
+[connect your external repository](../../ci/ci_cd_for_external_repos/index.md) to GitLab CI/CD.
 
 ## Fork a project
 
@@ -227,7 +235,7 @@ To fork a project in GitLab, [complete these steps](repository/forking_workflow.
 ## Star a project
 
 You can star a project to make it easier to find projects you frequently use.
-The number of stars a project has can indicate its popularity.
+The number of stars a project has indicates its popularity.
 
 To star a project:
 
@@ -252,6 +260,10 @@ To star a project:
 
 To delete a project, first navigate to the home page for that project.
 
+After you delete a project, projects in personal namespaces are deleted immediately. You can 
+[Enable delayed project removal](../group/index.md#enable-delayed-project-removal) to 
+delayed deletion of projects in a group.
+
 1. On the top bar, select **Menu > Project**.
 1. Select **Your projects** or **Explore projects**.
 1. Select a project.
@@ -261,16 +273,14 @@ To delete a project, first navigate to the home page for that project.
 1. Select **Delete project**
 1. Confirm this action by completing the field.
 
-Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [Enable delayed project removal](../group/index.md#enable-delayed-project-removal).
+## Project visibility level
 
-## Project settings
-
-Set the project's visibility level and the access levels to its various pages
-and perform actions like archiving, renaming or transferring a project.
+Set the project's visibility level and the access levels to its pages
+and perform actions like archiving, renaming, or transferring a project.
 
 Read through the documentation on [project settings](settings/index.md).
 
-## Project activity
+## View project activity
 
 To view the activity of a project:
 
