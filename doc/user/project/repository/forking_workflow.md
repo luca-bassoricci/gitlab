@@ -86,9 +86,8 @@ You can unlink your fork from its upstream project in the [advanced settings](..
 ## Create a fork with the fork project form **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15013) in GitLab 13.11.
-> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
+> - It's enabled on GitLab.com.
+> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default on self-managed instances.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-the-fork-project-form). **(FREE SELF)**
 
 This experimental version of the fork project form is available only if your GitLab
