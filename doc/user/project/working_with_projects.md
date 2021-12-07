@@ -22,9 +22,9 @@ GitLab displays a list of projects, sorted by last updated date.
 - To view projects with the largest number of comments in the past month, select **Trending**.
 
 NOTE:
-By default, the **Explore projects** tab is visible to unauthenticated users. If the
+The **Explore projects** tab is visible to unauthenticated users unless the
 [**Public** visibility level](../admin_area/settings/visibility_and_access_controls.md#restrict-visibility-levels)
-is restricted, the **Explore projects** tab is visible only to signed-in users.
+is restricted. Then the tab is visible only to signed-in users.
 
 ## Create a project
 
