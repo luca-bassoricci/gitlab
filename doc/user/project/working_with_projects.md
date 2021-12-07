@@ -38,8 +38,8 @@ To create a project in GitLab:
       - [built-in template](#create-a-project-from-a-built-in-template). 
       - [custom template](#create-a-project-from-a-custom-template).  
       - [HIPAA audit protocol template](#create-a-project-from-the-hipaa-audit-protocol-template).
-   - If enabled in your GitLab instance, [import a project](../../user/project/import/index.md) 
-   from a different repository. Contact your GitLab administrator if this is unavailable.
+   - [Import a project](../../user/project/import/index.md) 
+   from a different repository. Contact your GitLab administrator if this option is not available.
    - [Connect an external repository to GitLab CI/CD](../../ci/ci_cd_for_external_repos/index.md).
 
 NOTE:
