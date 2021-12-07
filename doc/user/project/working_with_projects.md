@@ -172,7 +172,7 @@ Previously used project paths have a redirect. The redirect causes push attempts
 to the renamed project location, instead of creating a new project. To create a new project for a previously 
 used or renamed project, use the [UI](#create-a-project) or the [Projects API](../../api/projects.md#create-project).
 
-Pre-requisites:
+Prerequisites:
 
 - To push with SSH, you must have [an SSH key](../../ssh/index.md) that is
 [added to your GitLab account](../../ssh/index.md#add-an-ssh-key-to-your-gitlab-account).
