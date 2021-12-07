@@ -212,9 +212,9 @@ To push your repository and create a project:
 
 When the push completes, GitLab displays the message:
 
-   ```shell
-   remote: The private project namespace/myproject was created.
-   ```
+```shell
+remote: The private project namespace/myproject was created.
+```
 
 To view your new project, go to `https://gitlab.example.com/namespace/myproject`.
 Your project's visibility is set to **Private** by default. To change project visibility, adjust your 
