@@ -16,8 +16,13 @@ module Gitlab
         @conan_revision_regex ||= %r{\A0\z}.freeze
       end
 
+      def conan_recipe_user_channel_regex
+        %r{\A(_|#{conan_name_regex})\z}.freeze
+      end
+
       def conan_recipe_component_regex
-        @conan_recipe_component_regex ||= %r{\A[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,49}\z}.freeze
+        # https://docs.conan.io/en/latest/reference/conanfile/attributes.html#name
+        @conan_recipe_component_regex ||= %r{\A#{conan_name_regex}\z}.freeze
       end
 
       def composer_package_version_regex
@@ -57,7 +62,7 @@ module Gitlab
       end
 
       def maven_version_regex
-        @maven_version_regex ||= /\A(\.?[\w\+-]+\.?)+\z/.freeze
+        @maven_version_regex ||= /\A(?!.*\.\.)[\w+.-]+\z/.freeze
       end
 
       def maven_app_group_regex
@@ -210,6 +215,12 @@ module Gitlab
 
       def generic_package_file_name_regex
         generic_package_name_regex
+      end
+
+      private
+
+      def conan_name_regex
+        @conan_name_regex ||= %r{[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,49}}.freeze
       end
     end
 
@@ -416,6 +427,10 @@ module Gitlab
       @issue ||= /(?<issue>\d+)(?<format>\+)?(?=\W|\z)/
     end
 
+    def merge_request
+      @merge_request ||= /(?<merge_request>\d+)(?<format>\+)?/
+    end
+
     def base64_regex
       @base64_regex ||= %r{(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?}.freeze
     end
@@ -430,3 +445,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Regex.prepend_mod

@@ -73,6 +73,8 @@ RSpec.describe Ci::RetryBuildService do
              scheduled_at: 10.seconds.since)
     end
 
+    let_it_be(:internal_job_variable) { create(:ci_job_variable, job: build) }
+
     before_all do
       # Make sure that build has both `stage_id` and `stage` because FactoryBot
       # can reset one of the fields when assigning another. We plan to deprecate
@@ -86,7 +88,7 @@ RSpec.describe Ci::RetryBuildService do
                file_type: file_type, job: build, expire_at: build.artifacts_expire_at)
       end
 
-      create(:ci_job_variable, job: build)
+      create(:ci_job_variable, :dotenv_source, job: build)
       create(:ci_build_need, build: build)
       create(:terraform_state_version, build: build)
     end
@@ -126,12 +128,25 @@ RSpec.describe Ci::RetryBuildService do
         expect(new_build.needs).not_to match(build.needs)
       end
 
-      it 'clones only the job variables attributes' do
-        expect(new_build.job_variables.exists?).to be_truthy
-        expect(build.job_variables.exists?).to be_truthy
+      context 'when clone_job_variables_at_job_retry is enabled' do
+        before do
+          stub_feature_flags(clone_job_variables_at_job_retry: true)
+        end
 
-        expect(new_build.job_variables_attributes).to match(build.job_variables_attributes)
-        expect(new_build.job_variables).not_to match(build.job_variables)
+        it 'clones only internal job variables' do
+          expect(new_build.job_variables.count).to eq(1)
+          expect(new_build.job_variables).to contain_exactly(having_attributes(key: internal_job_variable.key, value: internal_job_variable.value))
+        end
+      end
+
+      context 'when clone_job_variables_at_job_retry is not enabled' do
+        before do
+          stub_feature_flags(clone_job_variables_at_job_retry: false)
+        end
+
+        it 'does not clone internal job variables' do
+          expect(new_build.job_variables.count).to eq(0)
+        end
       end
     end
 
@@ -155,7 +170,7 @@ RSpec.describe Ci::RetryBuildService do
         Ci::Build.attribute_names.map(&:to_sym) +
         Ci::Build.attribute_aliases.keys.map(&:to_sym) +
         Ci::Build.reflect_on_all_associations.map(&:name) +
-        [:tag_list, :needs_attributes, :job_variables_attributes] -
+        [:tag_list, :needs_attributes] -
         # ee-specific accessors should be tested in ee/spec/services/ci/retry_build_service_spec.rb instead
         described_class.extra_accessors -
         [:dast_site_profiles_build, :dast_scanner_profiles_build] # join tables

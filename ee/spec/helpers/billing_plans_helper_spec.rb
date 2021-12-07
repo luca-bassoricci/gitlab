@@ -167,7 +167,7 @@ RSpec.describe BillingPlansHelper, :saas do
   end
 
   describe '#use_new_purchase_flow?' do
-    where type: [Group.sti_name, nil],
+    where type: [Group.sti_name, Namespaces::UserNamespace.sti_name],
       plan: Plan.all_plans,
       trial_active: [true, false]
 
@@ -345,7 +345,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
   end
 
-  describe "#plan_purchase_or_upgrade_url" do
+  describe '#plan_purchase_or_upgrade_url' do
     let(:plan) { double('Plan') }
 
     it 'is upgradable' do
@@ -364,7 +364,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
   end
 
-  describe "#plan_purchase_url" do
+  describe '#plan_purchase_url' do
     let_it_be(:group) { create(:group) }
     let_it_be(:user) { create(:user) }
 
@@ -390,7 +390,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
   end
 
-  describe "#hand_raise_props" do
+  describe '#hand_raise_props' do
     let_it_be(:namespace) { create(:namespace) }
     let_it_be(:user) { create(:user, username: 'Joe', first_name: 'Joe', last_name: 'Doe', organization: 'ACME') }
 
@@ -584,6 +584,89 @@ RSpec.describe BillingPlansHelper, :saas do
       it 'returns correct boolean value' do
         expect(helper.show_start_free_trial_messages?(namespace)).to eql(expected)
       end
+    end
+  end
+
+  describe '#contact_sales_button_data' do
+    let(:plan) { double('Plan', code: '_code_') }
+    let(:data) do
+      {
+        track_action: 'click_button',
+        track_label: 'contact_sales',
+        track_property: plan.code
+      }
+    end
+
+    it 'has experiment attribute' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.contact_sales_button_data(plan)).to eq data.merge(track_experiment: :billing_in_side_nav)
+    end
+
+    it 'does not have experiment attribute' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.contact_sales_button_data(plan)).to eq data
+    end
+  end
+
+  describe '#billing_upgrade_button_data' do
+    let(:plan) { double('Plan', code: '_code_') }
+    let(:data) do
+      {
+        track_action: 'click_button',
+        track_label: 'upgrade',
+        track_property: plan.code,
+        qa_selector: "upgrade_to_#{plan.code}"
+      }
+    end
+
+    it 'has experiment attribute' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.billing_upgrade_button_data(plan)).to eq data.merge(track_experiment: :billing_in_side_nav)
+    end
+
+    it 'does not have experiment attribute' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.billing_upgrade_button_data(plan)).to eq data
+    end
+  end
+
+  describe '#start_free_trial_data' do
+    let(:data) do
+      {
+        track_action: 'click_button',
+        track_label: 'start_trial',
+        qa_selector: 'start_your_free_trial'
+      }
+    end
+
+    it 'has experiment attribute' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.start_free_trial_data).to eq data.merge(track_experiment: :billing_in_side_nav)
+    end
+
+    it 'does not have experiment attribute' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.start_free_trial_data).to eq data
+    end
+  end
+
+  describe '#accessed_billing_from_side_nav?' do
+    it 'comes from billing side nav link click' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.accessed_billing_from_side_nav?).to eq(true)
+    end
+
+    it 'does not come from side nav link click' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.accessed_billing_from_side_nav?).to eq(false)
     end
   end
 end

@@ -21,6 +21,8 @@ module Gitlab
       FAILED_TO_READ_ERROR_MESSAGE = 'Failed to read from the redis primary_store.'
       FAILED_TO_WRITE_ERROR_MESSAGE = 'Failed to write to the redis primary_store.'
 
+      SKIP_LOG_METHOD_MISSING_FOR_COMMANDS = %i(info).freeze
+
       READ_COMMANDS = %i(
         get
         mget
@@ -95,11 +97,15 @@ module Gitlab
       end
 
       def use_primary_and_secondary_stores?
-        Feature.enabled?("use_primary_and_secondary_stores_for_#{instance_name.underscore}", default_enabled: :yaml) && !same_redis_store?
+        feature_flags_available? &&
+          Feature.enabled?("use_primary_and_secondary_stores_for_#{instance_name.underscore}", default_enabled: :yaml) &&
+          !same_redis_store?
       end
 
       def use_primary_store_as_default?
-        Feature.enabled?("use_primary_store_as_default_for_#{instance_name.underscore}", default_enabled: :yaml) && !same_redis_store?
+        feature_flags_available? &&
+          Feature.enabled?("use_primary_store_as_default_for_#{instance_name.underscore}", default_enabled: :yaml) &&
+          !same_redis_store?
       end
 
       private
@@ -109,6 +115,8 @@ module Gitlab
       end
 
       def log_method_missing(command_name, *_args)
+        return if SKIP_LOG_METHOD_MISSING_FOR_COMMANDS.include?(command_name)
+
         log_error(MethodMissingError.new, command_name)
         increment_method_missing_count(command_name)
       end

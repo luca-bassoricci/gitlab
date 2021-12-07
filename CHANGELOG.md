@@ -2,6 +2,19 @@
 documentation](doc/development/changelog.md) for instructions on adding your own
 entry.
 
+## 14.5.2 (2021-12-03)
+
+No changes.
+
+## 14.5.1 (2021-12-01)
+
+### Fixed (4 changes)
+
+- [Check validation for license only if new record](gitlab-org/gitlab@3e34c2dc431a2b1c1828f5154a4d2be350359b16) ([merge request](gitlab-org/gitlab!75498)) **GitLab Enterprise Edition**
+- [Fix for hexadecimal branch deletion](gitlab-org/gitlab@eb74cd44edac0c16c44aa11d710b742586c31741) ([merge request](gitlab-org/gitlab!75498))
+- [Fix the SSL_CERT_DIR logging on git operations](gitlab-org/gitlab@6ef3b63ad5e58baa0e0e0a922fe43a2fb4494508) ([merge request](gitlab-org/gitlab!75498))
+- [Support Action Cable on GCP Memorystore](gitlab-org/gitlab@d62aa5bcbad5851209a9d248ca267d0c46d1e7c9) ([merge request](gitlab-org/gitlab!75498))
+
 ## 14.5.0 (2021-11-19)
 
 ### Added (113 changes)
@@ -531,6 +544,21 @@ entry.
 - [Add pipeline artifacts and uploads sizes to project REST API](gitlab-org/gitlab@58d66f28faf42ae98ca11ff1ba0bdd9180e988ad) by @guillaume.chauvel ([merge request](gitlab-org/gitlab!72075))
 - [Remove not used parameter from epics finder](gitlab-org/gitlab@49fce172b57b2f376a114726b1dd1900fe36a238) ([merge request](gitlab-org/gitlab!72285)) **GitLab Enterprise Edition**
 
+## 14.4.4 (2021-12-03)
+
+No changes.
+
+## 14.4.3 (2021-12-01)
+
+### Fixed (6 changes)
+
+- [Check validation only if new record of license](gitlab-org/gitlab@5e0834a921dad1b1e07119de629ea44eb0ad5733) ([merge request](gitlab-org/gitlab!75421)) **GitLab Enterprise Edition**
+- [Fix for hexadecimal branch deletion](gitlab-org/gitlab@fc3c2f211d5a2f190032c4d0109e2bcb31050b4d) ([merge request](gitlab-org/gitlab!75421))
+- [Geo - Fix no repo error message for group-level wikis](gitlab-org/gitlab@bdf3a712a4bfe245dfa7e7a90c24f2fdb482e309) ([merge request](gitlab-org/gitlab!75421)) **GitLab Enterprise Edition**
+- [Prevent Git operations from checking replication lag on non-Geo-secondary sites](gitlab-org/gitlab@c158c01027f61aadd1c72f0817731d368d0d58cc) ([merge request](gitlab-org/gitlab!75421)) **GitLab Enterprise Edition**
+- [Allow SSO callbacks through maintenance mode](gitlab-org/gitlab@1acae9807b1808ac360a4be098a50c547c9540b9) by @dzaporozhets ([merge request](gitlab-org/gitlab!75421)) **GitLab Enterprise Edition**
+- [Fix 2FA setup for LDAP users](gitlab-org/gitlab@9b9a7230aed3ffeef3e8f608dd1a569397c71684) ([merge request](gitlab-org/gitlab!75421))
+
 ## 14.4.2 (2021-11-08)
 
 ### Fixed (3 changes)
@@ -953,6 +981,10 @@ entry.
 - [Remove pipeline foreign keys from package tables](gitlab-org/gitlab@3b8d317b98a2054f2a6251b02940974bb3a74d5d) ([merge request](gitlab-org/gitlab!70614))
 - [Cleanup bigint conversion for ci_builds](gitlab-org/gitlab@176992aa2b2e76b22637a07d5bafbd6541324a7d) ([merge request](gitlab-org/gitlab!70351))
 - [Drop support for data-track-event](gitlab-org/gitlab@ac6027fbef6adf41643412a84945fda6f15c9666) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/70234))
+
+## 14.3.6 (2021-12-03)
+
+No changes.
 
 ## 14.3.5 (2021-11-26)
 

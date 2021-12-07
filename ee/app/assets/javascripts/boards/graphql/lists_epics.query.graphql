@@ -10,7 +10,9 @@ query epicBoardListEpics(
   $first: Int
 ) {
   group(fullPath: $fullPath) {
+    id
     epicBoard(id: $boardId) {
+      id
       lists(id: $id) {
         nodes {
           id

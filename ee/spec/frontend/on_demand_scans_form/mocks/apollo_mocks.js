@@ -1,4 +1,5 @@
-import { scannerProfiles, siteProfiles } from './mock_data';
+import { siteProfiles } from 'ee_jest/security_configuration/dast_profiles/mocks/mock_data';
+import { scannerProfiles } from './mock_data';
 
 const defaults = {
   pageInfo: {
@@ -12,6 +13,7 @@ const defaults = {
 export const dastScannerProfiles = (profiles = scannerProfiles) => ({
   data: {
     project: {
+      id: '1',
       scannerProfiles: {
         ...defaults,
         edges: profiles.map((profile) => ({
@@ -26,6 +28,7 @@ export const dastScannerProfiles = (profiles = scannerProfiles) => ({
 export const dastSiteProfiles = (profiles = siteProfiles) => ({
   data: {
     project: {
+      id: '1',
       siteProfiles: {
         ...defaults,
         edges: profiles.map((profile) => ({

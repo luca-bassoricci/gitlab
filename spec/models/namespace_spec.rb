@@ -259,13 +259,12 @@ RSpec.describe Namespace do
       end
     end
 
-    context 'creating a Namespace with nil type' do
+    context 'unable to create a Namespace with nil type' do
+      let(:namespace) { nil }
       let(:namespace_type) { nil }
 
-      it 'is the correct type of namespace' do
-        expect(Namespace.find(namespace.id)).to be_a(Namespace)
-        expect(namespace.kind).to eq('user')
-        expect(namespace.user_namespace?).to be_truthy
+      it 'raises ActiveRecord::NotNullViolation' do
+        expect { create(:namespace, type: namespace_type, parent: parent) }.to raise_error(ActiveRecord::NotNullViolation)
       end
     end
 
@@ -2055,5 +2054,9 @@ RSpec.describe Namespace do
 
       it { is_expected.to be(true) }
     end
+  end
+
+  it_behaves_like 'it has loose foreign keys' do
+    let(:factory_name) { :group }
   end
 end

@@ -44,7 +44,7 @@ module Ci
 
     AVAILABLE_TYPES_LEGACY = %w[specific shared].freeze
     AVAILABLE_TYPES = runner_types.keys.freeze
-    AVAILABLE_STATUSES = %w[active paused online offline not_connected].freeze
+    AVAILABLE_STATUSES = %w[active paused online offline not_connected stale].freeze
     AVAILABLE_SCOPES = (AVAILABLE_TYPES_LEGACY + AVAILABLE_TYPES + AVAILABLE_STATUSES).freeze
 
     FORM_EDITABLE = %i[description tag_list active run_untagged locked access_level maximum_timeout_human_readable].freeze
@@ -81,14 +81,7 @@ module Ci
 
     scope :belonging_to_group, -> (group_id, include_ancestors: false) {
       groups = ::Group.where(id: group_id)
-
-      if include_ancestors
-        groups = if Feature.enabled?(:linear_runner_ancestor_scopes, default_enabled: :yaml)
-                   groups.self_and_ancestors
-                 else
-                   Gitlab::ObjectHierarchy.new(groups).base_and_ancestors
-                 end
-      end
+      groups = groups.self_and_ancestors if include_ancestors
 
       joins(:runner_namespaces)
         .where(ci_runner_namespaces: { namespace_id: groups })
@@ -109,14 +102,9 @@ module Ci
 
     scope :belonging_to_parent_group_of_project, -> (project_id) {
       project_groups = ::Group.joins(:projects).where(projects: { id: project_id })
-      hierarchy_groups = if Feature.enabled?(:linear_runner_ancestor_scopes, default_enabled: :yaml)
-                           project_groups.self_and_ancestors.as_ids
-                         else
-                           Gitlab::ObjectHierarchy.new(project_groups).base_and_ancestors
-                         end
 
       joins(:groups)
-        .where(namespaces: { id: hierarchy_groups })
+        .where(namespaces: { id: project_groups.self_and_ancestors.as_ids })
         .allow_cross_joins_across_databases(url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/336433')
     }
 
@@ -287,10 +275,15 @@ module Ci
     end
 
     def stale?
+      return false unless created_at
+
       [created_at, contacted_at].compact.max < self.class.stale_deadline
     end
 
-    def status
+    def status(legacy_mode = nil)
+      return deprecated_rest_status if legacy_mode == '14.5'
+
+      return :stale if stale?
       return :not_connected unless contacted_at
 
       online? ? :online : :offline

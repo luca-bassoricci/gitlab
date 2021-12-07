@@ -2,6 +2,7 @@
 
 query searchEpics($fullPath: ID!, $search: String, $state: EpicState) {
   group(fullPath: $fullPath) {
+    id
     epics(
       search: $search
       state: $state

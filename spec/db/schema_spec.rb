@@ -29,7 +29,6 @@ RSpec.describe 'Database schema' do
     ci_builds: %w[erased_by_id runner_id trigger_request_id user_id],
     ci_namespace_monthly_usages: %w[namespace_id],
     ci_pipelines: %w[user_id],
-    ci_pipeline_chat_data: %w[chat_name_id], # it uses the loose foreign key featue
     ci_runner_projects: %w[runner_id],
     ci_trigger_requests: %w[commit_id],
     cluster_providers_aws: %w[security_group_id vpc_id access_key_id],
@@ -67,8 +66,6 @@ RSpec.describe 'Database schema' do
     oauth_access_grants: %w[resource_owner_id application_id],
     oauth_access_tokens: %w[resource_owner_id application_id],
     oauth_applications: %w[owner_id],
-    packages_build_infos: %w[pipeline_id],
-    packages_package_file_build_infos: %w[pipeline_id],
     product_analytics_events_experimental: %w[event_id txn_id user_id],
     project_group_links: %w[group_id],
     project_statistics: %w[namespace_id],
@@ -102,6 +99,8 @@ RSpec.describe 'Database schema' do
         let(:indexes) { connection.indexes(table) }
         let(:columns) { connection.columns(table) }
         let(:foreign_keys) { connection.foreign_keys(table) }
+        let(:loose_foreign_keys) { Gitlab::Database::LooseForeignKeys.definitions.group_by(&:from_table).fetch(table, []) }
+        let(:all_foreign_keys) { foreign_keys + loose_foreign_keys }
         # take the first column in case we're using a composite primary key
         let(:primary_key_column) { Array(connection.primary_key(table)).first }
 
@@ -114,7 +113,7 @@ RSpec.describe 'Database schema' do
               columns = columns.split(',') if columns.is_a?(String)
               columns.first.chomp
             end
-            foreign_keys_columns = foreign_keys.map(&:column)
+            foreign_keys_columns = all_foreign_keys.map(&:column)
 
             # Add the primary key column to the list of indexed columns because
             # postgres and mysql both automatically create an index on the primary
@@ -129,7 +128,7 @@ RSpec.describe 'Database schema' do
         context 'columns ending with _id' do
           let(:column_names) { columns.map(&:name) }
           let(:column_names_with_id) { column_names.select { |column_name| column_name.ends_with?('_id') } }
-          let(:foreign_keys_columns) { foreign_keys.map(&:column) }
+          let(:foreign_keys_columns) { all_foreign_keys.map(&:column).uniq } # we can have FK and loose FK present at the same time
           let(:ignored_columns) { ignored_fk_columns(table) }
 
           it 'do have the foreign keys' do

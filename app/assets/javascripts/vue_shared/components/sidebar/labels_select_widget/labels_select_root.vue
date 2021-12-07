@@ -2,7 +2,7 @@
 import { debounce } from 'lodash';
 import { MutationOperationMode, getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createFlash from '~/flash';
-import { IssuableType } from '~/issue_show/constants';
+import { IssuableType } from '~/issues/show/constants';
 import { __ } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { issuableLabelsQueries } from '~/sidebar/constants';
@@ -231,9 +231,10 @@ export default {
             throw new Error();
           }
 
+          this.issuableLabels = data[mutationName]?.[this.issuableType]?.labels?.nodes;
           this.$emit('updateSelectedLabels', {
             id: data[mutationName]?.[this.issuableType]?.id,
-            labels: data[mutationName]?.[this.issuableType]?.labels?.nodes,
+            labels: this.issuableLabels,
           });
         })
         .catch((error) =>

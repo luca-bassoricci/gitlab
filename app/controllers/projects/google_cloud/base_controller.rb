@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Projects::GoogleCloud::BaseController < Projects::ApplicationController
-  feature_category :google_cloud
+  feature_category :five_minute_production_app
 
   before_action :admin_project_google_cloud!
   before_action :google_oauth2_enabled!
@@ -21,6 +21,6 @@ class Projects::GoogleCloud::BaseController < Projects::ApplicationController
   end
 
   def feature_flag_enabled!
-    access_denied! unless Feature.enabled?(:incubation_5mp_google_cloud)
+    access_denied! unless Feature.enabled?(:incubation_5mp_google_cloud, project)
   end
 end

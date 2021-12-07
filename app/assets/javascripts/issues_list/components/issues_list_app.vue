@@ -18,8 +18,8 @@ import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { ITEM_TYPE } from '~/groups/constants';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
 import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
-import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
-import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
+import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_root.vue';
+import { IssuableListTabs, IssuableStates } from '~/vue_shared/issuable/list/constants';
 import {
   CREATED_DESC,
   i18n,
@@ -302,6 +302,7 @@ export default {
           unique: true,
           defaultAuthors: [],
           fetchAuthors: this.fetchUsers,
+          recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-author`,
           preloadedAuthors,
         },
         {
@@ -313,6 +314,7 @@ export default {
           unique: !this.hasMultipleIssueAssigneesFeature,
           defaultAuthors: DEFAULT_NONE_ANY,
           fetchAuthors: this.fetchUsers,
+          recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-assignee`,
           preloadedAuthors,
         },
         {
@@ -321,6 +323,7 @@ export default {
           icon: 'clock',
           token: MilestoneToken,
           fetchMilestones: this.fetchMilestones,
+          recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-milestone`,
         },
         {
           type: TOKEN_TYPE_LABEL,
@@ -329,6 +332,7 @@ export default {
           token: LabelToken,
           defaultLabels: DEFAULT_NONE_ANY,
           fetchLabels: this.fetchLabels,
+          recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-label`,
         },
         {
           type: TOKEN_TYPE_TYPE,
@@ -350,6 +354,7 @@ export default {
           icon: 'rocket',
           token: ReleaseToken,
           fetchReleases: this.fetchReleases,
+          recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-release`,
         });
       }
 
@@ -361,6 +366,7 @@ export default {
           token: EmojiToken,
           unique: true,
           fetchEmojis: this.fetchEmojis,
+          recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-my_reaction`,
         });
 
         tokens.push({
@@ -446,7 +452,12 @@ export default {
           query: searchLabelsQuery,
           variables: { fullPath: this.fullPath, search, isProject: this.isProject },
         })
-        .then(({ data }) => data[this.namespace]?.labels.nodes);
+        .then(({ data }) => data[this.namespace]?.labels.nodes)
+        .then((labels) =>
+          // TODO remove once we can search by title-only on the backend
+          // https://gitlab.com/gitlab-org/gitlab/-/issues/346353
+          labels.filter((label) => label.title.toLowerCase().includes(search.toLowerCase())),
+        );
     },
     fetchMilestones(search) {
       return this.$apollo

@@ -97,7 +97,7 @@ gem 'grape-entity', '~> 0.10.0'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
-gem 'graphql', '~> 1.11.8'
+gem 'graphql', '~> 1.11.10'
 # NOTE: graphiql-rails v1.5+ doesn't work: https://gitlab.com/gitlab-org/gitlab/issues/31771
 # TODO: remove app/views/graphiql/rails/editors/show.html.erb when https://github.com/rmosolgo/graphiql-rails/pull/71 is released:
 # https://gitlab.com/gitlab-org/gitlab/issues/31747
@@ -400,12 +400,14 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.5.0', require: false
+  gem 'gitlab-dangerfiles', '~> 2.6.1', require: false
 end
 
 group :development, :test, :coverage do
   gem 'simplecov', '~> 0.18.5', require: false
+  gem 'simplecov-lcov', '~> 0.8.0', require: false
   gem 'simplecov-cobertura', '~> 1.3.1', require: false
+  gem 'undercover', '~> 0.4.4', require: false
 end
 
 # Gems required in omnibus-gitlab pipeline

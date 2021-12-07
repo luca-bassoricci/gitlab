@@ -56,11 +56,11 @@ Before proceeding with the Pages configuration, you must:
    | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
 
 1. Configure a **wildcard DNS record**.
-1. (Optional) Have a **wildcard certificate** for that domain if you decide to
+1. Optional. Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
-1. (Optional but recommended) Enable [Shared runners](../../ci/runners/index.md)
+1. Optional but recommended. Enable [Shared runners](../../ci/runners/index.md)
    so that your users don't have to bring their own.
-1. (Only for custom domains) Have a **secondary IP**.
+1. For custom domains, have a **secondary IP**.
 
 NOTE:
 If your GitLab instance and the Pages daemon are deployed in a private network or behind a firewall, your GitLab Pages websites are only accessible to devices/users that have access to the private network.
@@ -144,7 +144,8 @@ The Pages daemon doesn't listen to the outside world.
 1. Set the external URL for GitLab Pages in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   pages_external_url 'http://example.io'
+   external_url "http://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "http://pages.example.com" # not a subdomain of external_url
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -169,7 +170,8 @@ outside world.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
-   pages_external_url 'https://example.io'
+   external_url "https://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "https://pages.example.com" # not a subdomain of external_url
 
    pages_nginx['redirect_http_to_https'] = true
    ```
@@ -288,7 +290,8 @@ world. Custom domains are supported, but no TLS.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
-   pages_external_url "http://example.io"
+   external_url "http://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "http://pages.example.com" # not a subdomain of external_url
    nginx['listen_addresses'] = ['192.0.2.1'] # The primary IP of the GitLab instance
    pages_nginx['enable'] = false
    gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80'] # The secondary IPs for the GitLab Pages daemon
@@ -318,7 +321,8 @@ world. Custom domains and TLS are supported.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
-   pages_external_url "https://example.io"
+   external_url "https://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "https://pages.example.com" # not a subdomain of external_url
    nginx['listen_addresses'] = ['192.0.2.1'] # The primary IP of the GitLab instance
    pages_nginx['enable'] = false
    gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80'] # The secondary IPs for the GitLab Pages daemon

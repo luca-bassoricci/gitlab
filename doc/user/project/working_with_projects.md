@@ -194,7 +194,7 @@ To push a new project:
    remote: The private project namespace/myproject was created.
    ```
 
-1. (Optional) To configure the remote, alter the command
+1. Optional. To configure the remote, alter the command
    `git remote add origin https://gitlab.example.com/namespace/myproject.git`
    to match your namespace and project names.
 
@@ -248,7 +248,7 @@ To delete a project, first navigate to the home page for that project.
 1. Click **Delete project**
 1. Confirm this action by typing in the expected text.
 
-Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [Enable delayed project deletion](../group/index.md#enable-delayed-project-deletion).
+Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [delayed project deletion](settings/index.md#delayed-project-deletion).
 
 ## Project settings
 

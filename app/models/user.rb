@@ -917,6 +917,8 @@ class User < ApplicationRecord
   end
 
   def two_factor_u2f_enabled?
+    return false if Feature.enabled?(:webauthn)
+
     if u2f_registrations.loaded?
       u2f_registrations.any?
     else
@@ -991,11 +993,7 @@ class User < ApplicationRecord
 
   # Returns the groups a user is a member of, either directly or through a parent group
   def membership_groups
-    if Feature.enabled?(:linear_user_membership_groups, self, default_enabled: :yaml)
-      groups.self_and_descendants
-    else
-      Gitlab::ObjectHierarchy.new(groups).base_and_descendants
-    end
+    groups.self_and_descendants
   end
 
   # Returns a relation of groups the user has access to, including their parent
@@ -1616,14 +1614,8 @@ class User < ApplicationRecord
         .joins(:runner)
         .select('ci_runners.*')
 
-      base_and_descendants = if Feature.enabled?(:linear_user_ci_owned_runners, self, default_enabled: :yaml)
-                               owned_groups.self_and_descendant_ids
-                             else
-                               Gitlab::ObjectHierarchy.new(owned_groups).base_and_descendants.select(:id)
-                             end
-
       group_runners = Ci::RunnerNamespace
-        .where(namespace_id: base_and_descendants)
+        .where(namespace_id: owned_groups.self_and_descendant_ids)
         .joins(:runner)
         .select('ci_runners.*')
 
@@ -2168,12 +2160,7 @@ class User < ApplicationRecord
       project_creation_levels << nil
     end
 
-    if Feature.enabled?(:linear_user_groups_with_developer_maintainer_project_access, self, default_enabled: :yaml)
-      developer_groups.self_and_descendants.where(project_creation_level: project_creation_levels)
-    else
-      developer_groups_hierarchy = ::Gitlab::ObjectHierarchy.new(developer_groups).base_and_descendants
-      ::Group.where(id: developer_groups_hierarchy.select(:id), project_creation_level: project_creation_levels)
-    end
+    developer_groups.self_and_descendants.where(project_creation_level: project_creation_levels)
   end
 
   def no_recent_activity?

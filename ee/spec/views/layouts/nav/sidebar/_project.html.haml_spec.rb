@@ -4,8 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_project' do
   let_it_be_with_refind(:project) { create(:project, :repository) }
-
-  let(:user) { project.owner }
+  let_it_be(:user) { project.owner }
 
   before do
     assign(:project, project)
@@ -176,27 +175,27 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
 
       it 'security dashboard link is visible' do
-        expect(rendered).to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        expect(rendered).to have_link('Security dashboard', href: project_security_dashboard_index_path(project))
       end
 
       it 'security vulnerability report link is visible' do
-        expect(rendered).to have_link('Vulnerability Report', href: project_security_vulnerability_report_index_path(project))
+        expect(rendered).to have_link('Vulnerability report', href: project_security_vulnerability_report_index_path(project))
       end
 
       it 'security on demand scans link is visible' do
-        expect(rendered).to have_link('On-demand Scans', href: project_on_demand_scans_path(project))
+        expect(rendered).to have_link('On-demand scans', href: project_on_demand_scans_path(project))
       end
 
       it 'dependency list link is visible' do
-        expect(rendered).to have_link('Dependency List', href: project_dependencies_path(project))
+        expect(rendered).to have_link('Dependency list', href: project_dependencies_path(project))
       end
 
       it 'license compliance link is visible' do
-        expect(rendered).to have_link('License Compliance', href: project_licenses_path(project))
+        expect(rendered).to have_link('License compliance', href: project_licenses_path(project))
       end
 
       it 'threat monitoring link is visible' do
-        expect(rendered).to have_link('Threat Monitoring', href: project_threat_monitoring_path(project))
+        expect(rendered).to have_link('Threat monitoring', href: project_threat_monitoring_path(project))
       end
 
       it 'policies link is visible' do
@@ -208,7 +207,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
 
       it 'audit events link is visible' do
-        expect(rendered).to have_link('Audit Events', href: project_audit_events_path(project))
+        expect(rendered).to have_link('Audit events', href: project_audit_events_path(project))
       end
     end
 
@@ -224,7 +223,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
 
       it 'links to on-demand scans form instead of index page' do
-        expect(rendered).to have_link('On-demand Scans', href: new_project_on_demand_scan_path(project))
+        expect(rendered).to have_link('On-demand scans', href: new_project_on_demand_scan_path(project))
       end
     end
   end
@@ -388,6 +387,32 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           expect(rendered).not_to have_link('Monitor', href: project_settings_operations_path(project))
         end
       end
+    end
+  end
+
+  describe 'Billing Menu' do
+    let_it_be(:group) { create(:group).tap { |group| group.add_owner(user) } }
+
+    before do
+      allow(project).to receive(:namespace).and_return(group)
+      allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+      allow(view).to receive(:current_user).and_return(user)
+    end
+
+    it 'has a link to the billing page' do
+      stub_experiments(billing_in_side_nav: :candidate)
+
+      render
+
+      expect(rendered).to have_link('Billing', href: group_billings_path(group, from: :side_nav))
+    end
+
+    it 'does not have a link to the billing page' do
+      stub_experiments(billing_in_side_nav: :control)
+
+      render
+
+      expect(rendered).not_to have_link('Billing', href: group_billings_path(group, from: :side_nav))
     end
   end
 end

@@ -204,38 +204,26 @@ RSpec.describe Ci::Runner do
   end
 
   describe '.belonging_to_parent_group_of_project' do
-    shared_examples 'returns parent group project runners' do
-      let(:project) { create(:project, group: group) }
-      let(:group) { create(:group) }
-      let(:runner) { create(:ci_runner, :group, groups: [group]) }
-      let!(:unrelated_group) { create(:group) }
-      let!(:unrelated_project) { create(:project, group: unrelated_group) }
-      let!(:unrelated_runner) { create(:ci_runner, :group, groups: [unrelated_group]) }
+    let(:project) { create(:project, group: group) }
+    let(:group) { create(:group) }
+    let(:runner) { create(:ci_runner, :group, groups: [group]) }
+    let!(:unrelated_group) { create(:group) }
+    let!(:unrelated_project) { create(:project, group: unrelated_group) }
+    let!(:unrelated_runner) { create(:ci_runner, :group, groups: [unrelated_group]) }
 
-      it 'returns the specific group runner' do
-        expect(described_class.belonging_to_parent_group_of_project(project.id)).to contain_exactly(runner)
-      end
-
-      context 'with a parent group with a runner' do
-        let(:runner) { create(:ci_runner, :group, groups: [parent_group]) }
-        let(:project) { create(:project, group: group) }
-        let(:group) { create(:group, parent: parent_group) }
-        let(:parent_group) { create(:group) }
-
-        it 'returns the group runner from the parent group' do
-          expect(described_class.belonging_to_parent_group_of_project(project.id)).to contain_exactly(runner)
-        end
-      end
+    it 'returns the specific group runner' do
+      expect(described_class.belonging_to_parent_group_of_project(project.id)).to contain_exactly(runner)
     end
 
-    it_behaves_like 'returns parent group project runners'
+    context 'with a parent group with a runner' do
+      let(:runner) { create(:ci_runner, :group, groups: [parent_group]) }
+      let(:project) { create(:project, group: group) }
+      let(:group) { create(:group, parent: parent_group) }
+      let(:parent_group) { create(:group) }
 
-    context 'when feature flag :linear_runner_ancestor_scopes is disabled' do
-      before do
-        stub_feature_flags(linear_runner_ancestor_scopes: false)
+      it 'returns the group runner from the parent group' do
+        expect(described_class.belonging_to_parent_group_of_project(project.id)).to contain_exactly(runner)
       end
-
-      it_behaves_like 'returns parent group project runners'
     end
   end
 
@@ -342,6 +330,7 @@ RSpec.describe Ci::Runner do
       using RSpec::Parameterized::TableSyntax
 
       where(:created_at, :contacted_at, :expected_stale?) do
+        nil                       | nil                          | false
         3.months.ago - 1.second   | 3.months.ago - 0.001.seconds | true
         3.months.ago - 1.second   | 3.months.ago + 1.hour        | false
         3.months.ago - 1.second   | nil                          | true
@@ -376,6 +365,8 @@ RSpec.describe Ci::Runner do
         end
 
         def stub_redis_runner_contacted_at(value)
+          return unless created_at
+
           Gitlab::Redis::Cache.with do |redis|
             cache_key = runner.send(:cache_attribute_key)
             expect(redis).to receive(:get).with(cache_key)
@@ -419,7 +410,7 @@ RSpec.describe Ci::Runner do
         it { is_expected.to be_falsey }
       end
 
-      context 'contacted long time ago time' do
+      context 'contacted long time ago' do
         before do
           runner.contacted_at = 1.year.ago
         end
@@ -437,7 +428,7 @@ RSpec.describe Ci::Runner do
     end
 
     context 'with cache value' do
-      context 'contacted long time ago time' do
+      context 'contacted long time ago' do
         before do
           runner.contacted_at = 1.year.ago
           stub_redis_runner_contacted_at(1.year.ago.to_s)
@@ -699,16 +690,33 @@ RSpec.describe Ci::Runner do
   end
 
   describe '#status' do
-    let(:runner) { build(:ci_runner, :instance) }
+    let(:runner) { build(:ci_runner, :instance, created_at: 4.months.ago) }
+    let(:legacy_mode) { }
 
-    subject { runner.status }
+    subject { runner.status(legacy_mode) }
 
     context 'never connected' do
       before do
         runner.contacted_at = nil
       end
 
-      it { is_expected.to eq(:not_connected) }
+      context 'with legacy_mode enabled' do
+        let(:legacy_mode) { '14.5' }
+
+        it { is_expected.to eq(:not_connected) }
+      end
+
+      context 'with legacy_mode disabled' do
+        it { is_expected.to eq(:stale) }
+      end
+
+      context 'created recently' do
+        before do
+          runner.created_at = 1.day.ago
+        end
+
+        it { is_expected.to eq(:not_connected) }
+      end
     end
 
     context 'inactive but online' do
@@ -717,7 +725,15 @@ RSpec.describe Ci::Runner do
         runner.active = false
       end
 
-      it { is_expected.to eq(:online) }
+      context 'with legacy_mode enabled' do
+        let(:legacy_mode) { '14.5' }
+
+        it { is_expected.to eq(:paused) }
+      end
+
+      context 'with legacy_mode disabled' do
+        it { is_expected.to eq(:online) }
+      end
     end
 
     context 'contacted 1s ago' do
@@ -728,12 +744,28 @@ RSpec.describe Ci::Runner do
       it { is_expected.to eq(:online) }
     end
 
-    context 'contacted long time ago' do
+    context 'contacted recently' do
       before do
-        runner.contacted_at = 1.year.ago
+        runner.contacted_at = (3.months - 1.hour).ago
       end
 
       it { is_expected.to eq(:offline) }
+    end
+
+    context 'contacted long time ago' do
+      before do
+        runner.contacted_at = (3.months + 1.second).ago
+      end
+
+      context 'with legacy_mode enabled' do
+        let(:legacy_mode) { '14.5' }
+
+        it { is_expected.to eq(:offline) }
+      end
+
+      context 'with legacy_mode disabled' do
+        it { is_expected.to eq(:stale) }
+      end
     end
   end
 

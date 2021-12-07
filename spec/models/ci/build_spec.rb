@@ -3762,6 +3762,12 @@ RSpec.describe Ci::Build do
 
       build.enqueue
     end
+
+    it 'queues BuildHooksWorker' do
+      expect(BuildHooksWorker).to receive(:perform_async).with(build.id)
+
+      build.enqueue
+    end
   end
 
   describe 'state transition: pending: :running' do
@@ -5402,5 +5408,9 @@ RSpec.describe Ci::Build do
 
       expect(subject).to be true
     end
+  end
+
+  it_behaves_like 'it has loose foreign keys' do
+    let(:factory_name) { :ci_build }
   end
 end

@@ -239,6 +239,7 @@ RSpec.configure do |config|
   # is not yet opened at the time that is triggered
   config.prepend_before do
     ApplicationRecord.set_open_transactions_baseline
+    ::Ci::ApplicationRecord.set_open_transactions_baseline
   end
 
   config.append_before do
@@ -247,6 +248,7 @@ RSpec.configure do |config|
 
   config.append_after do
     ApplicationRecord.reset_open_transactions_baseline
+    ::Ci::ApplicationRecord.reset_open_transactions_baseline
   end
 
   config.before do |example|
@@ -478,3 +480,18 @@ Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
 
 # Initialize FactoryDefault to use create_default helper
 TestProf::FactoryDefault.init
+
+# Exclude the Geo proxy API request from getting on_next_request Warden handlers,
+# necessary to prevent race conditions with feature tests not getting authenticated.
+::Warden.asset_paths << %r{^/api/v4/geo/proxy$}
+
+module TouchRackUploadedFile
+  def initialize_from_file_path(path)
+    super
+
+    # This is a no-op workaround for https://github.com/docker/for-linux/issues/1015
+    File.utime @tempfile.atime, @tempfile.mtime, @tempfile.path # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  end
+end
+
+Rack::Test::UploadedFile.prepend(TouchRackUploadedFile)

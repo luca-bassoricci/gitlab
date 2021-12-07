@@ -228,7 +228,13 @@ must create an association between that project and the project you want to appl
    project you would like to link from the dropdown menu.
 1. Select **Save**.
 
-   ![Security Policy Project](img/security_policy_project_v14_3.png)
+   ![Security Policy Project](img/security_policy_project_v14_6.png)
+
+### Unlink Security Policy projects
+
+Project owners can unlink Security Policy projects from development projects. To do this, follow
+the steps described in [Security Policy project selection](#security-policy-project-selection),
+but select the trash can icon in the modal.
 
 ### Scan Execution Policy editor
 
@@ -237,9 +243,9 @@ Only project Owners have the [permissions](../../permissions.md#project-members-
 to select Security Policy Project.
 
 Once your policy is complete, save it by selecting **Create merge request**
-at the bottom of the editor. You will be redirected to the merge request on the project's
+at the bottom of the editor. You are redirected to the merge request on the project's
 configured security policy project. If one does not link to your project, a security
-policy project will be automatically created. Existing policies can also be
+policy project is automatically created. Existing policies can also be
 removed from the editor interface by selecting **Delete policy**
 at the bottom of the editor.
 
@@ -287,7 +293,7 @@ This rule enforces the defined actions and schedules a scan on the provided date
 | `type`     | `string` | `schedule` | The rule's type. |
 | `branches` | `array` of `string` | `*` or the branch's name | The branch the given policy applies to (supports wildcard). |
 | `cadence`  | `string` | CRON expression (for example, `0 0 * * *`) | A whitespace-separated string containing five fields that represents the scheduled time. |
-| `clusters` | `object` | | The cluster where the given policy will enforce running selected scans (only for `container_scanning`/`cluster_image_scanning` scans). The key of the object is the name of the Kubernetes cluster configured for your project in GitLab. In the optionally provided value of the object, you can precisely select Kubernetes resources that will be scanned. |
+| `clusters` | `object` | | The cluster where the given policy enforces running selected scans (only for `container_scanning`/`cluster_image_scanning` scans). The key of the object is the name of the Kubernetes cluster configured for your project in GitLab. In the optionally provided value of the object, you can precisely select Kubernetes resources that are scanned. |
 
 #### `cluster` schema
 
@@ -295,10 +301,10 @@ Use this schema to define `clusters` objects in the [`schedule` rule type](#sche
 
 | Field        | Type                | Possible values          | Description |
 |--------------|---------------------|--------------------------|-------------|
-| `containers` | `array` of `string` | | The container name that will be scanned (only the first value is currently supported). |
-| `resources`  | `array` of `string` | | The resource name that will be scanned (only the first value is currently supported). |
-| `namespaces` | `array` of `string` | | The namespace that will be scanned (only the first value is currently supported). |
-| `kinds`      | `array` of `string` | `deployment`/`daemonset` | The resource kind that should be scanned (only the first value is currently supported). |
+| `containers` | `array` of `string` | | The container name to be scanned (only the first value is currently supported). |
+| `resources`  | `array` of `string` | | The resource name to be scanned (only the first value is currently supported). |
+| `namespaces` | `array` of `string` | | The namespace to be scanned (only the first value is currently supported). |
+| `kinds`      | `array` of `string` | `deployment`/`daemonset` | The resource kind to be scanned (only the first value is currently supported). |
 
 ### `scan` action type
 
@@ -307,7 +313,7 @@ rule in the defined policy are met.
 
 | Field | Type | Possible values | Description |
 |-------|------|-----------------|-------------|
-| `scan` | `string` | `dast`, `secret_detection` | The action's type. |
+| `scan` | `string` | `dast`, `secret_detection`, `sast` | The action's type. |
 | `site_profile` | `string` | Name of the selected [DAST site profile](../dast/index.md#site-profile). | The DAST site profile to execute the DAST scan. This field should only be set if `scan` type is `dast`. |
 | `scanner_profile` | `string` or `null` | Name of the selected [DAST scanner profile](../dast/index.md#scanner-profile). | The DAST scanner profile to execute the DAST scan. This field should only be set if `scan` type is `dast`.|
 
@@ -327,9 +333,10 @@ Note the following:
 - A secret detection scan runs in `normal` mode when executed as part of a pipeline, and in
   [`historic`](../secret_detection/index.md#full-history-secret-detection)
   mode when executed as part of a scheduled scan.
-- A container scanning and cluster image scanning scans configured for the `pipeline` rule type will ignore the cluster defined in the `clusters` object.
-  They will use predefined CI/CD variables defined for your project. Cluster selection with the `clusters` object is supported for the `schedule` rule type.
+- A container scanning and cluster image scanning scans configured for the `pipeline` rule type ignores the cluster defined in the `clusters` object.
+  They use predefined CI/CD variables defined for your project. Cluster selection with the `clusters` object is supported for the `schedule` rule type.
   Cluster with name provided in `clusters` object must be created and configured for the project. To be able to successfully perform the `container_scanning`/`cluster_image_scanning` scans for the cluster you must follow instructions for the [Cluster Image Scanning feature](../cluster_image_scanning/index.md#prerequisites).
+- The SAST scan uses the default template and runs in a [child pipeline](../../../ci/pipelines/parent_child_pipelines.md).
 
 ### Example security policies project
 

@@ -14,7 +14,7 @@ describe('PolicyAlertPicker component', () => {
   const createMockApolloProvider = ({ agentCount }) => {
     const getAgentCountHandler = jest
       .fn()
-      .mockResolvedValue({ data: { project: { clusterAgents: { count: agentCount } } } });
+      .mockResolvedValue({ data: { project: { id: '1', clusterAgents: { count: agentCount } } } });
 
     return createMockApollo([[getAgentCount, getAgentCountHandler]]);
   };
@@ -38,7 +38,6 @@ describe('PolicyAlertPicker component', () => {
           ...propsData,
         },
         provide: {
-          configureAgentHelpPath: '',
           createAgentHelpPath: '',
           projectPath: '',
         },

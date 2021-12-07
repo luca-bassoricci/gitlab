@@ -13,7 +13,7 @@ RSpec.describe Boards::Lists::ListService do
     end
 
     shared_examples 'list service for board with assignee lists' do
-      let!(:assignee_list) { build(:user_list, board: board).tap { |l| l.save(validate: false) } }
+      let!(:assignee_list) { build(:user_list, board: board).tap { |l| l.save!(validate: false) } }
       let!(:backlog_list) { create(:backlog_list, board: board) }
       let!(:list) { create(:list, board: board, label: label) }
 
@@ -35,7 +35,7 @@ RSpec.describe Boards::Lists::ListService do
     end
 
     shared_examples 'list service for board with milestone lists' do
-      let!(:milestone_list) { build(:milestone_list, board: board).tap { |l| l.save(validate: false) } }
+      let!(:milestone_list) { build(:milestone_list, board: board).tap { |l| l.save!(validate: false) } }
       let!(:backlog_list) { create(:backlog_list, board: board) }
       let!(:list) { create(:list, board: board, label: label) }
 
@@ -58,7 +58,7 @@ RSpec.describe Boards::Lists::ListService do
     end
 
     shared_examples 'list service for board with iteration lists' do
-      let!(:iteration_list) { build(:iteration_list, board: board).tap { |l| l.save(validate: false) } }
+      let!(:iteration_list) { build(:iteration_list, board: board).tap { |l| l.save!(validate: false) } }
       let!(:backlog_list) { create(:backlog_list, board: board) }
       let!(:list) { create(:list, board: board, label: label) }
 
@@ -70,16 +70,6 @@ RSpec.describe Boards::Lists::ListService do
         it 'returns all lists' do
           expect(execute_service)
             .to match_array([backlog_list, list, iteration_list, board.lists.closed.first])
-        end
-
-        context 'when the feature flag is disabled' do
-          before do
-            stub_feature_flags(iteration_board_lists: false)
-          end
-
-          it 'filters out iteration lists that might have been created while subscribed' do
-            expect(execute_service).to match_array [backlog_list, list, board.lists.closed.first]
-          end
         end
       end
 

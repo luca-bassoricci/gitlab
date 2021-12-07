@@ -82,8 +82,6 @@ module Ci
     # Merge requests for which the current pipeline is running against
     # the merge request's latest commit.
     has_many :merge_requests_as_head_pipeline, foreign_key: "head_pipeline_id", class_name: 'MergeRequest'
-    has_many :package_build_infos, class_name: 'Packages::BuildInfo', dependent: :nullify, inverse_of: :pipeline # rubocop:disable Cop/ActiveRecordDependent
-    has_many :package_file_build_infos, class_name: 'Packages::PackageFileBuildInfo', dependent: :nullify, inverse_of: :pipeline # rubocop:disable Cop/ActiveRecordDependent
     has_many :pending_builds, -> { pending }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :failed_builds, -> { latest.failed }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :retryable_builds, -> { latest.failed_or_canceled.includes(:project) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
@@ -236,7 +234,12 @@ module Ci
 
         pipeline.run_after_commit do
           PipelineHooksWorker.perform_async(pipeline.id)
-          ExpirePipelineCacheWorker.perform_async(pipeline.id)
+
+          if Feature.enabled?(:expire_job_and_pipeline_cache_synchronously, pipeline.project, default_enabled: :yaml)
+            Ci::ExpirePipelineCacheService.new.execute(pipeline) # rubocop: disable CodeReuse/ServiceClass
+          else
+            ExpirePipelineCacheWorker.perform_async(pipeline.id)
+          end
         end
       end
 
@@ -643,7 +646,7 @@ module Ci
     def coverage
       coverage_array = latest_statuses.map(&:coverage).compact
       if coverage_array.size >= 1
-        '%.2f' % (coverage_array.reduce(:+) / coverage_array.size)
+        coverage_array.reduce(:+) / coverage_array.size
       end
     end
 
@@ -957,7 +960,7 @@ module Ci
                                         .limit(100)
                                         .pluck(:expanded_environment_name)
 
-        Environment.where(project: project, name: expanded_environment_names)
+        Environment.where(project: project, name: expanded_environment_names).with_deployments
       else
         environment_ids = self_and_descendants.joins(:deployments).select(:'deployments.environment_id')
 
@@ -1279,6 +1282,12 @@ module Ci
     def authorized_cluster_agents
       strong_memoize(:authorized_cluster_agents) do
         ::Clusters::AgentAuthorizationsFinder.new(project).execute.map(&:agent)
+      end
+    end
+
+    def create_deployment_in_separate_transaction?
+      strong_memoize(:create_deployment_in_separate_transaction) do
+        ::Feature.enabled?(:create_deployment_in_separate_transaction, project, default_enabled: :yaml)
       end
     end
 

@@ -35,8 +35,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   it { is_expected.to have_many(:sourced_pipelines) }
   it { is_expected.to have_many(:triggered_pipelines) }
   it { is_expected.to have_many(:pipeline_artifacts) }
-  it { is_expected.to have_many(:package_build_infos).dependent(:nullify).inverse_of(:pipeline) }
-  it { is_expected.to have_many(:package_file_build_infos).dependent(:nullify).inverse_of(:pipeline) }
 
   it { is_expected.to have_one(:chat_data) }
   it { is_expected.to have_one(:source_pipeline) }
@@ -757,23 +755,23 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     context 'with multiple pipelines' do
       before_all do
         create(:ci_build, name: "rspec", coverage: 30, pipeline: pipeline)
-        create(:ci_build, name: "rubocop", coverage: 40, pipeline: pipeline)
+        create(:ci_build, name: "rubocop", coverage: 35, pipeline: pipeline)
       end
 
       it "calculates average when there are two builds with coverage" do
-        expect(pipeline.coverage).to eq("35.00")
+        expect(pipeline.coverage).to be_within(0.001).of(32.5)
       end
 
       it "calculates average when there are two builds with coverage and one with nil" do
         create(:ci_build, pipeline: pipeline)
 
-        expect(pipeline.coverage).to eq("35.00")
+        expect(pipeline.coverage).to be_within(0.001).of(32.5)
       end
 
       it "calculates average when there are two builds with coverage and one is retried" do
         create(:ci_build, name: "rubocop", coverage: 30, pipeline: pipeline, retried: true)
 
-        expect(pipeline.coverage).to eq("35.00")
+        expect(pipeline.coverage).to be_within(0.001).of(32.5)
       end
     end
 
@@ -1503,10 +1501,30 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
 
     describe 'pipeline caching' do
-      it 'performs ExpirePipelinesCacheWorker' do
-        expect(ExpirePipelineCacheWorker).to receive(:perform_async).with(pipeline.id)
+      context 'when expire_job_and_pipeline_cache_synchronously is enabled' do
+        before do
+          stub_feature_flags(expire_job_and_pipeline_cache_synchronously: true)
+        end
 
-        pipeline.cancel
+        it 'executes Ci::ExpirePipelineCacheService' do
+          expect_next_instance_of(Ci::ExpirePipelineCacheService) do |service|
+            expect(service).to receive(:execute).with(pipeline)
+          end
+
+          pipeline.cancel
+        end
+      end
+
+      context 'when expire_job_and_pipeline_cache_synchronously is disabled' do
+        before do
+          stub_feature_flags(expire_job_and_pipeline_cache_synchronously: false)
+        end
+
+        it 'performs ExpirePipelinesCacheWorker' do
+          expect(ExpirePipelineCacheWorker).to receive(:perform_async).with(pipeline.id)
+
+          pipeline.cancel
+        end
       end
     end
 
@@ -3180,6 +3198,20 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       end
     end
 
+    context 'when an associated environment does not have deployments' do
+      let_it_be(:pipeline) { create(:ci_pipeline, :created) }
+      let_it_be(:build) { create(:ci_build, :stop_review_app, pipeline: pipeline) }
+      let_it_be(:environment) { create(:environment, project: pipeline.project) }
+
+      before_all do
+        build.metadata.update!(expanded_environment_name: environment.name)
+      end
+
+      it 'does not return environments' do
+        expect(subject).to be_empty
+      end
+    end
+
     context 'when pipeline is in extended family' do
       let_it_be(:parent) { create(:ci_pipeline) }
       let_it_be(:parent_build) { create(:ci_build, :with_deployment, environment: 'staging', pipeline: parent) }
@@ -4610,5 +4642,9 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       expect(pipeline.authorized_cluster_agents).to contain_exactly(agent)
       expect(pipeline.authorized_cluster_agents).to contain_exactly(agent) # cached
     end
+  end
+
+  it_behaves_like 'it has loose foreign keys' do
+    let(:factory_name) { :ci_pipeline }
   end
 end

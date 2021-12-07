@@ -1726,6 +1726,52 @@ RSpec.describe User do
     end
   end
 
+  context 'two_factor_u2f_enabled?' do
+    let_it_be(:user) { create(:user, :two_factor) }
+
+    context 'when webauthn feature flag is enabled' do
+      context 'user has no U2F registration' do
+        it { expect(user.two_factor_u2f_enabled?).to eq(false) }
+      end
+
+      context 'user has existing U2F registration' do
+        it 'returns false' do
+          device = U2F::FakeU2F.new(FFaker::BaconIpsum.characters(5))
+          create(:u2f_registration, name: 'my u2f device',
+                 user: user,
+                 certificate: Base64.strict_encode64(device.cert_raw),
+                 key_handle: U2F.urlsafe_encode64(device.key_handle_raw),
+                 public_key: Base64.strict_encode64(device.origin_public_key_raw))
+
+          expect(user.two_factor_u2f_enabled?).to eq(false)
+        end
+      end
+    end
+
+    context 'when webauthn feature flag is disabled' do
+      before do
+        stub_feature_flags(webauthn: false)
+      end
+
+      context 'user has no U2F registration' do
+        it { expect(user.two_factor_u2f_enabled?).to eq(false) }
+      end
+
+      context 'user has existing U2F registration' do
+        it 'returns true' do
+          device = U2F::FakeU2F.new(FFaker::BaconIpsum.characters(5))
+          create(:u2f_registration, name: 'my u2f device',
+                 user: user,
+                 certificate: Base64.strict_encode64(device.cert_raw),
+                 key_handle: U2F.urlsafe_encode64(device.key_handle_raw),
+                 public_key: Base64.strict_encode64(device.origin_public_key_raw))
+
+          expect(user.two_factor_u2f_enabled?).to eq(true)
+        end
+      end
+    end
+  end
+
   describe 'projects' do
     before do
       @user = create(:user)
@@ -3479,19 +3525,7 @@ RSpec.describe User do
 
     subject { user.membership_groups }
 
-    shared_examples 'returns groups where the user is a member' do
-      specify { is_expected.to contain_exactly(parent_group, child_group) }
-    end
-
-    it_behaves_like 'returns groups where the user is a member'
-
-    context 'when feature flag :linear_user_membership_groups is disabled' do
-      before do
-        stub_feature_flags(linear_user_membership_groups: false)
-      end
-
-      it_behaves_like 'returns groups where the user is a member'
-    end
+    specify { is_expected.to contain_exactly(parent_group, child_group) }
   end
 
   describe '#authorizations_for_projects' do
@@ -3689,321 +3723,309 @@ RSpec.describe User do
   end
 
   describe '#ci_owned_runners' do
-    shared_examples 'ci_owned_runners examples' do
-      let(:user) { create(:user) }
+    let(:user) { create(:user) }
 
-      shared_examples :nested_groups_owner do
-        context 'when the user is the owner of a multi-level group' do
-          before do
-            set_permissions_for_users
-          end
+    shared_examples :nested_groups_owner do
+      context 'when the user is the owner of a multi-level group' do
+        before do
+          set_permissions_for_users
+        end
 
-          it 'loads all the runners in the tree of groups' do
-            expect(user.ci_owned_runners).to contain_exactly(runner, group_runner)
-          end
+        it 'loads all the runners in the tree of groups' do
+          expect(user.ci_owned_runners).to contain_exactly(runner, group_runner)
+        end
 
-          it 'returns true for owns_runner?' do
-            expect(user.owns_runner?(runner)).to eq(true)
-            expect(user.owns_runner?(group_runner)).to eq(true)
-          end
+        it 'returns true for owns_runner?' do
+          expect(user.owns_runner?(runner)).to eq(true)
+          expect(user.owns_runner?(group_runner)).to eq(true)
+        end
+      end
+    end
+
+    shared_examples :group_owner do
+      context 'when the user is the owner of a one level group' do
+        before do
+          group.add_owner(user)
+        end
+
+        it 'loads the runners in the group' do
+          expect(user.ci_owned_runners).to contain_exactly(group_runner)
+        end
+
+        it 'returns true for owns_runner?' do
+          expect(user.owns_runner?(group_runner)).to eq(true)
+        end
+      end
+    end
+
+    shared_examples :project_owner do
+      context 'when the user is the owner of a project' do
+        it 'loads the runner belonging to the project' do
+          expect(user.ci_owned_runners).to contain_exactly(runner)
+        end
+
+        it 'returns true for owns_runner?' do
+          expect(user.owns_runner?(runner)).to eq(true)
+        end
+      end
+    end
+
+    shared_examples :project_member do
+      context 'when the user is a maintainer' do
+        before do
+          add_user(:maintainer)
+        end
+
+        it 'loads the runners of the project' do
+          expect(user.ci_owned_runners).to contain_exactly(project_runner)
+        end
+
+        it 'returns true for owns_runner?' do
+          expect(user.owns_runner?(project_runner)).to eq(true)
         end
       end
 
-      shared_examples :group_owner do
-        context 'when the user is the owner of a one level group' do
-          before do
-            group.add_owner(user)
-          end
-
-          it 'loads the runners in the group' do
-            expect(user.ci_owned_runners).to contain_exactly(group_runner)
-          end
-
-          it 'returns true for owns_runner?' do
-            expect(user.owns_runner?(group_runner)).to eq(true)
-          end
-        end
-      end
-
-      shared_examples :project_owner do
-        context 'when the user is the owner of a project' do
-          it 'loads the runner belonging to the project' do
-            expect(user.ci_owned_runners).to contain_exactly(runner)
-          end
-
-          it 'returns true for owns_runner?' do
-            expect(user.owns_runner?(runner)).to eq(true)
-          end
-        end
-      end
-
-      shared_examples :project_member do
-        context 'when the user is a maintainer' do
-          before do
-            add_user(:maintainer)
-          end
-
-          it 'loads the runners of the project' do
-            expect(user.ci_owned_runners).to contain_exactly(project_runner)
-          end
-
-          it 'returns true for owns_runner?' do
-            expect(user.owns_runner?(project_runner)).to eq(true)
-          end
+      context 'when the user is a developer' do
+        before do
+          add_user(:developer)
         end
 
-        context 'when the user is a developer' do
-          before do
-            add_user(:developer)
-          end
-
-          it 'does not load any runner' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(project_runner)).to eq(false)
-          end
-        end
-
-        context 'when the user is a reporter' do
-          before do
-            add_user(:reporter)
-          end
-
-          it 'does not load any runner' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(project_runner)).to eq(false)
-          end
-        end
-
-        context 'when the user is a guest' do
-          before do
-            add_user(:guest)
-          end
-
-          it 'does not load any runner' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(project_runner)).to eq(false)
-          end
-        end
-      end
-
-      shared_examples :group_member do
-        context 'when the user is a maintainer' do
-          before do
-            add_user(:maintainer)
-          end
-
-          it 'does not load the runners of the group' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(runner)).to eq(false)
-          end
-        end
-
-        context 'when the user is a developer' do
-          before do
-            add_user(:developer)
-          end
-
-          it 'does not load any runner' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(runner)).to eq(false)
-          end
-        end
-
-        context 'when the user is a reporter' do
-          before do
-            add_user(:reporter)
-          end
-
-          it 'does not load any runner' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(runner)).to eq(false)
-          end
-        end
-
-        context 'when the user is a guest' do
-          before do
-            add_user(:guest)
-          end
-
-          it 'does not load any runner' do
-            expect(user.ci_owned_runners).to be_empty
-          end
-
-          it 'returns false for owns_runner?' do
-            expect(user.owns_runner?(runner)).to eq(false)
-          end
-        end
-      end
-
-      context 'without any projects nor groups' do
         it 'does not load any runner' do
           expect(user.ci_owned_runners).to be_empty
         end
 
         it 'returns false for owns_runner?' do
-          expect(user.owns_runner?(create(:ci_runner))).to eq(false)
+          expect(user.owns_runner?(project_runner)).to eq(false)
         end
       end
 
-      context 'with runner in a personal project' do
-        let!(:namespace) { create(:user_namespace, owner: user) }
-        let!(:project) { create(:project, namespace: namespace) }
-        let!(:runner) { create(:ci_runner, :project, projects: [project]) }
-
-        it_behaves_like :project_owner
-      end
-
-      context 'with group runner in a non owned group' do
-        let!(:group) { create(:group) }
-        let!(:runner) { create(:ci_runner, :group, groups: [group]) }
-
-        def add_user(access)
-          group.add_user(user, access)
+      context 'when the user is a reporter' do
+        before do
+          add_user(:reporter)
         end
-
-        it_behaves_like :group_member
-      end
-
-      context 'with group runner in an owned group' do
-        let!(:group) { create(:group) }
-        let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-
-        it_behaves_like :group_owner
-      end
-
-      context 'with group runner in an owned group and group runner in a different owner subgroup' do
-        let!(:group) { create(:group) }
-        let!(:runner) { create(:ci_runner, :group, groups: [group]) }
-        let!(:subgroup) { create(:group, parent: group) }
-        let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
-        let!(:another_user) { create(:user) }
-
-        def set_permissions_for_users
-          group.add_owner(user)
-          subgroup.add_owner(another_user)
-        end
-
-        it_behaves_like :nested_groups_owner
-      end
-
-      context 'with personal project runner in an an owned group and a group runner in that same group' do
-        let!(:group) { create(:group) }
-        let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-        let!(:project) { create(:project, group: group) }
-        let!(:runner) { create(:ci_runner, :project, projects: [project]) }
-
-        def set_permissions_for_users
-          group.add_owner(user)
-        end
-
-        it_behaves_like :nested_groups_owner
-      end
-
-      context 'with personal project runner in an owned group and a group runner in a subgroup' do
-        let!(:group) { create(:group) }
-        let!(:subgroup) { create(:group, parent: group) }
-        let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
-        let!(:project) { create(:project, group: group) }
-        let!(:runner) { create(:ci_runner, :project, projects: [project]) }
-
-        def set_permissions_for_users
-          group.add_owner(user)
-        end
-
-        it_behaves_like :nested_groups_owner
-      end
-
-      context 'with personal project runner in an owned group in an owned namespace and a group runner in that group' do
-        let!(:namespace) { create(:user_namespace, owner: user) }
-        let!(:group) { create(:group) }
-        let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-        let!(:project) { create(:project, namespace: namespace, group: group) }
-        let!(:runner) { create(:ci_runner, :project, projects: [project]) }
-
-        def set_permissions_for_users
-          group.add_owner(user)
-        end
-
-        it_behaves_like :nested_groups_owner
-      end
-
-      context 'with personal project runner in an owned namespace, an owned group, a subgroup and a group runner in that subgroup' do
-        let!(:namespace) { create(:user_namespace, owner: user) }
-        let!(:group) { create(:group) }
-        let!(:subgroup) { create(:group, parent: group) }
-        let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
-        let!(:project) { create(:project, namespace: namespace, group: group) }
-        let!(:runner) { create(:ci_runner, :project, projects: [project]) }
-
-        def set_permissions_for_users
-          group.add_owner(user)
-        end
-
-        it_behaves_like :nested_groups_owner
-      end
-
-      context 'with a project runner that belong to projects that belong to a not owned group' do
-        let!(:group) { create(:group) }
-        let!(:project) { create(:project, group: group) }
-        let!(:project_runner) { create(:ci_runner, :project, projects: [project]) }
-
-        def add_user(access)
-          project.add_user(user, access)
-        end
-
-        it_behaves_like :project_member
-      end
-
-      context 'with project runners that belong to projects that do not belong to any group' do
-        let!(:project) { create(:project) }
-        let!(:runner) { create(:ci_runner, :project, projects: [project]) }
 
         it 'does not load any runner' do
           expect(user.ci_owned_runners).to be_empty
         end
+
+        it 'returns false for owns_runner?' do
+          expect(user.owns_runner?(project_runner)).to eq(false)
+        end
       end
 
-      context 'with a group runner that belongs to a subgroup of a group owned by another user' do
-        let!(:group) { create(:group) }
-        let!(:subgroup) { create(:group, parent: group) }
-        let!(:runner) { create(:ci_runner, :group, groups: [subgroup]) }
-        let!(:another_user) { create(:user) }
-
-        def add_user(access)
-          subgroup.add_user(user, access)
-          group.add_user(another_user, :owner)
+      context 'when the user is a guest' do
+        before do
+          add_user(:guest)
         end
 
-        it_behaves_like :group_member
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+
+        it 'returns false for owns_runner?' do
+          expect(user.owns_runner?(project_runner)).to eq(false)
+        end
       end
     end
 
-    it_behaves_like 'ci_owned_runners examples'
+    shared_examples :group_member do
+      context 'when the user is a maintainer' do
+        before do
+          add_user(:maintainer)
+        end
 
-    context 'when feature flag :linear_user_ci_owned_runners is disabled' do
-      before do
-        stub_feature_flags(linear_user_ci_owned_runners: false)
+        it 'does not load the runners of the group' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+
+        it 'returns false for owns_runner?' do
+          expect(user.owns_runner?(runner)).to eq(false)
+        end
       end
 
-      it_behaves_like 'ci_owned_runners examples'
+      context 'when the user is a developer' do
+        before do
+          add_user(:developer)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+
+        it 'returns false for owns_runner?' do
+          expect(user.owns_runner?(runner)).to eq(false)
+        end
+      end
+
+      context 'when the user is a reporter' do
+        before do
+          add_user(:reporter)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+
+        it 'returns false for owns_runner?' do
+          expect(user.owns_runner?(runner)).to eq(false)
+        end
+      end
+
+      context 'when the user is a guest' do
+        before do
+          add_user(:guest)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+
+        it 'returns false for owns_runner?' do
+          expect(user.owns_runner?(runner)).to eq(false)
+        end
+      end
+    end
+
+    context 'without any projects nor groups' do
+      it 'does not load any runner' do
+        expect(user.ci_owned_runners).to be_empty
+      end
+
+      it 'returns false for owns_runner?' do
+        expect(user.owns_runner?(create(:ci_runner))).to eq(false)
+      end
+    end
+
+    context 'with runner in a personal project' do
+      let!(:namespace) { create(:user_namespace, owner: user) }
+      let!(:project) { create(:project, namespace: namespace) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      it_behaves_like :project_owner
+    end
+
+    context 'with group runner in a non owned group' do
+      let!(:group) { create(:group) }
+      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
+
+      def add_user(access)
+        group.add_user(user, access)
+      end
+
+      it_behaves_like :group_member
+    end
+
+    context 'with group runner in an owned group' do
+      let!(:group) { create(:group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+
+      it_behaves_like :group_owner
+    end
+
+    context 'with group runner in an owned group and group runner in a different owner subgroup' do
+      let!(:group) { create(:group) }
+      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:another_user) { create(:user) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+        subgroup.add_owner(another_user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an an owned group and a group runner in that same group' do
+      let!(:group) { create(:group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+      let!(:project) { create(:project, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an owned group and a group runner in a subgroup' do
+      let!(:group) { create(:group) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:project) { create(:project, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an owned group in an owned namespace and a group runner in that group' do
+      let!(:namespace) { create(:user_namespace, owner: user) }
+      let!(:group) { create(:group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+      let!(:project) { create(:project, namespace: namespace, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an owned namespace, an owned group, a subgroup and a group runner in that subgroup' do
+      let!(:namespace) { create(:user_namespace, owner: user) }
+      let!(:group) { create(:group) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:project) { create(:project, namespace: namespace, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with a project runner that belong to projects that belong to a not owned group' do
+      let!(:group) { create(:group) }
+      let!(:project) { create(:project, group: group) }
+      let!(:project_runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def add_user(access)
+        project.add_user(user, access)
+      end
+
+      it_behaves_like :project_member
+    end
+
+    context 'with project runners that belong to projects that do not belong to any group' do
+      let!(:project) { create(:project) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      it 'does not load any runner' do
+        expect(user.ci_owned_runners).to be_empty
+      end
+    end
+
+    context 'with a group runner that belongs to a subgroup of a group owned by another user' do
+      let!(:group) { create(:group) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:another_user) { create(:user) }
+
+      def add_user(access)
+        subgroup.add_user(user, access)
+        group.add_user(another_user, :owner)
+      end
+
+      it_behaves_like :group_member
     end
   end
 
@@ -6246,19 +6268,7 @@ RSpec.describe User do
 
     subject { user.send(:groups_with_developer_maintainer_project_access) }
 
-    shared_examples 'groups_with_developer_maintainer_project_access examples' do
-      specify { is_expected.to contain_exactly(developer_group2) }
-    end
-
-    it_behaves_like 'groups_with_developer_maintainer_project_access examples'
-
-    context 'when feature flag :linear_user_groups_with_developer_maintainer_project_access is disabled' do
-      before do
-        stub_feature_flags(linear_user_groups_with_developer_maintainer_project_access: false)
-      end
-
-      it_behaves_like 'groups_with_developer_maintainer_project_access examples'
-    end
+    specify { is_expected.to contain_exactly(developer_group2) }
   end
 
   describe '.get_ids_by_username' do

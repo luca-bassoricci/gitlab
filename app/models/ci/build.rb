@@ -190,8 +190,6 @@ module Ci
     scope :without_coverage, -> { where(coverage: nil) }
     scope :with_coverage_regex, -> { where.not(coverage_regex: nil) }
 
-    scope :for_project, -> (project_id) { where(project_id: project_id) }
-
     acts_as_taggable
 
     add_authentication_token_field :token, encrypted: :required
@@ -288,6 +286,7 @@ module Ci
 
         build.run_after_commit do
           BuildQueueWorker.perform_async(id)
+          BuildHooksWorker.perform_async(id)
         end
       end
 
@@ -1086,7 +1085,7 @@ module Ci
 
     def job_variables_attributes
       strong_memoize(:job_variables_attributes) do
-        job_variables.map do |variable|
+        job_variables.internal_source.map do |variable|
           variable.attributes.except('id', 'job_id', 'encrypted_value', 'encrypted_value_iv').tap do |attrs|
             attrs[:value] = variable.value
           end

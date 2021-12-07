@@ -30,6 +30,7 @@ export default {
     description: s__(
       'SecurityOrchestration|Select a project to store your security policies in. %{linkStart}More information.%{linkEnd}',
     ),
+    emptyPlaceholder: s__('SecurityOrchestration|Choose a project'),
   },
   components: {
     GlButton,
@@ -54,9 +55,11 @@ export default {
   },
   data() {
     return {
+      previouslySelectedProject: {},
       selectedProject: { ...this.assignedPolicyProject },
       hasSelectedNewProject: false,
       shouldShowUnlinkWarning: false,
+      savingChanges: false,
     };
   },
   computed: {
@@ -94,6 +97,8 @@ export default {
           throw new Error(data.securityPolicyProjectAssign.errors);
         }
 
+        this.previouslySelectedProject = this.selectedProject;
+
         this.$emit('project-updated', {
           text: this.$options.i18n.save.okLink,
           variant: 'success',
@@ -122,7 +127,7 @@ export default {
         }
 
         this.shouldShowUnlinkWarning = false;
-        this.selectedProject = {};
+        this.previouslySelectedProject = {};
         this.$emit('project-updated', {
           text: this.$options.i18n.save.okUnlink,
           variant: 'success',
@@ -136,6 +141,7 @@ export default {
     },
 
     async saveChanges() {
+      this.savingChanges = true;
       this.$emit('updating-project');
 
       if (this.shouldShowUnlinkWarning) {
@@ -144,7 +150,7 @@ export default {
         await this.linkProject();
       }
 
-      this.hasSelectedNewProject = false;
+      this.savingChanges = false;
     },
     setSelectedProject(data) {
       this.shouldShowUnlinkWarning = false;
@@ -154,8 +160,18 @@ export default {
     },
     confirmDeletion() {
       this.shouldShowUnlinkWarning = !this.shouldShowUnlinkWarning;
+      this.selectedProject = {};
+      this.hasSelectedNewProject = true;
+    },
+    restoreProject() {
+      this.selectedProject = this.previouslySelectedProject;
     },
     closeModal() {
+      if (this.hasSelectedNewProject && !this.savingChanges) {
+        this.restoreProject();
+      }
+
+      this.hasSelectedNewProject = false;
       this.shouldShowUnlinkWarning = false;
       this.$emit('close');
     },
@@ -201,7 +217,7 @@ export default {
           class="gl-w-full"
           menu-class="gl-w-full! gl-max-w-full!"
           :disabled="disableSecurityPolicyProject"
-          :text="selectedProjectName"
+          :text="selectedProjectName || $options.i18n.emptyPlaceholder"
         >
           <instance-project-selector
             class="gl-w-full"
@@ -211,7 +227,7 @@ export default {
           />
         </gl-dropdown>
         <gl-button
-          v-if="selectedProjectId"
+          v-if="selectedProjectId || shouldShowUnlinkWarning"
           icon="remove"
           class="gl-ml-3"
           :aria-label="$options.i18n.unlinkButtonLabel"

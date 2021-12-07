@@ -14,7 +14,7 @@ miss.
 
 INFO:
 Try fuzz testing in GitLab Ultimate.
-[It's free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-api-fuzzing-docs). 
+[It's free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-api-fuzzing-docs).
 
 We recommend that you use fuzz testing in addition to [GitLab Secure](../index.md)'s
 other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/index.md),
@@ -1185,7 +1185,7 @@ A bug exists in versions of the API Fuzzing analyzer prior to v1.6.196 that can 
 
 The version information can be found in the job details for the `apifuzzer_fuzz` job.
 
-If the issue is occuring with versions v1.6.196 or greater, please contact Support and provide the following information:
+If the issue is occurring with versions v1.6.196 or greater, please contact Support and provide the following information:
 
 1. Reference this troubleshooting section and ask for the issue to be escalated to the Dynamic Analysis Team.
 1. The full console output of the job.
