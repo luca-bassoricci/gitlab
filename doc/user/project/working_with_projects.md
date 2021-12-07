@@ -11,8 +11,6 @@ code are saved in projects, and most features are in the scope of projects.
 
 ## View projects
 
-Use **Explore projects** to view projects on GitLab. 
-
 To explore projects:
 
 1. On the top bar, select **Menu > Project**.
