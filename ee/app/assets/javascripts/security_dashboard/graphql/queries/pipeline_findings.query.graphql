@@ -1,5 +1,7 @@
 #import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
 #import "../fragments/vulnerability_location.fragment.graphql"
+#import "../fragments/vulnerability_request.fragment.graphql"
+#import "../fragments/vulnerability_response.fragment.graphql"
 
 query pipelineFindings(
   $fullPath: ID!
@@ -44,6 +46,34 @@ query pipelineFindings(
           solution
           location {
             ...VulnerabilityLocation
+          }
+          assets {
+            name
+            type
+            url
+          }
+          evidence {
+            request {
+              ...VulnerabilityRequest
+            }
+            response {
+              ...VulnerabilityResponse
+            }
+            source {
+              id
+              name
+              url
+            }
+            summary
+            supportingMessages {
+              name
+              request {
+                ...VulnerabilityRequest
+              }
+              response {
+                ...VulnerabilityResponse
+              }
+            }
           }
         }
         pageInfo {
