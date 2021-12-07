@@ -220,21 +220,6 @@ To view your new project, go to `https://gitlab.example.com/namespace/myproject`
 Your project's visibility is set to **Private** by default. To change project visibility, adjust your 
 [project's settings](../../public_access/public_access.md#change-project-visibility).
 
-## Import a project
-
-If enabled on your GitLab instance, you can [migrate a project](../../user/project/import/index.md) to your GitLab instance. Contact your GitLab administrator if this is not enabled.
-
-## Connect an external repository to GitLab CI/CD **(PREMIUM)**
-
-Instead of moving your entire project to GitLab, you can 
-[connect your external repository](../../ci/ci_cd_for_external_repos/index.md) to get the benefits of GitLab CI/CD.
-
-## Fork a project
-
-A fork is a copy of an original repository that you put in another namespace.
-You can [fork a project](repository/forking_workflow.md#creating-a-fork) to experiment and apply 
-changes, without affecting the original project.
-
 ## Star a project
 
 You can add a star to projects you use frequently to make them easier to find.
@@ -274,10 +259,6 @@ To delete a project:
 1. Scroll down to the **Delete project** section.
 1. Select **Delete project**
 1. Confirm this action by completing the field.
-
-## Adjust project visibility and access levels 
-
-Adjust the project settings to set the [project's visibility and access levels](settings/index.md#sharing-and-permissions).
 
 ## View project activity
 
@@ -452,3 +433,10 @@ For users without permissions to view the project's code, GitLab displays:
 
 - The wiki homepage, if any.
 - The list of issues in the project.
+
+## Related topics
+
+- [Import a project](../../user/project/import/index.md).
+- [Connect an external repository to GitLab CI/CD](../../ci/ci_cd_for_external_repos/index.md).
+- [Fork a project](repository/forking_workflow.md#creating-a-fork).
+- [Adjust project visibility and access levels](settings/index.md#sharing-and-permissions).
