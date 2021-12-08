@@ -60,7 +60,7 @@ query pipelineFindings(
               ...VulnerabilityResponse
             }
             source {
-              id
+              identifier
               name
               url
             }
