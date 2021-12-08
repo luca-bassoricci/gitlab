@@ -12,9 +12,9 @@ module EE
 
     # For Iteration
     class Predefined
-      None = ::Timebox::TimeboxStruct.new('None', 'none', ::Timebox::None.id).freeze
-      Any = ::Timebox::TimeboxStruct.new('Any', 'any', ::Timebox::Any.id).freeze
-      Current = ::Timebox::TimeboxStruct.new('Current', 'current', -4).freeze
+      None = ::Timebox::TimeboxStruct.new('None', 'none', ::Timebox::None.id, ::Iteration.name).freeze
+      Any = ::Timebox::TimeboxStruct.new('Any', 'any', ::Timebox::Any.id, ::Iteration.name).freeze
+      Current = ::Timebox::TimeboxStruct.new('Current', 'current', -4, ::Iteration.name).freeze
 
       ALL = [None, Any, Current].freeze
 
@@ -56,7 +56,6 @@ module EE
       before_destroy :check_if_can_be_destroyed
 
       scope :due_date_order_asc, -> { order(:due_date) }
-      scope :due_date_order_desc, -> { order(due_date: :desc) }
       scope :upcoming, -> { with_state(:upcoming) }
       scope :current, -> { with_state(:current) }
       scope :closed, -> { with_state(:closed) }
@@ -65,7 +64,7 @@ module EE
       scope :with_start_date_after, ->(date) { where('start_date > :date', date: date) }
 
       scope :within_timeframe, -> (start_date, end_date) do
-        where('start_date <= ?', end_date).where('due_date >= ?', start_date)
+        where('sprints.start_date <= ?', end_date).where('sprints.due_date >= ?', start_date)
       end
 
       scope :start_date_passed, -> { where('start_date <= ?', Date.current).where('due_date >= ?', Date.current) }

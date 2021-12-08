@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
   let(:sticking) do
-    described_class.new(ActiveRecord::Base.connection.load_balancer)
+    described_class.new(ActiveRecord::Base.load_balancer)
   end
 
   after do
@@ -73,7 +73,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
   end
 
   describe '#all_caught_up?' do
-    let(:lb) { ActiveRecord::Base.connection.load_balancer }
+    let(:lb) { ActiveRecord::Base.load_balancer }
     let(:last_write_location) { 'foo' }
 
     before do
@@ -137,7 +137,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
   end
 
   describe '#unstick_or_continue_sticking' do
-    let(:lb) { ActiveRecord::Base.connection.load_balancer }
+    let(:lb) { ActiveRecord::Base.load_balancer }
 
     it 'simply returns if no write location could be found' do
       allow(sticking)
@@ -182,13 +182,13 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
 
   RSpec.shared_examples 'sticking' do
     before do
-      allow(ActiveRecord::Base.connection.load_balancer)
+      allow(ActiveRecord::Base.load_balancer)
         .to receive(:primary_write_location)
         .and_return('foo')
     end
 
     it 'sticks an entity to the primary', :aggregate_failures do
-      allow(ActiveRecord::Base.connection.load_balancer)
+      allow(ActiveRecord::Base.load_balancer)
         .to receive(:primary_only?)
         .and_return(false)
 
@@ -227,11 +227,11 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
 
   describe '#mark_primary_write_location' do
     it 'updates the write location with the load balancer' do
-      allow(ActiveRecord::Base.connection.load_balancer)
+      allow(ActiveRecord::Base.load_balancer)
         .to receive(:primary_write_location)
         .and_return('foo')
 
-      allow(ActiveRecord::Base.connection.load_balancer)
+      allow(ActiveRecord::Base.load_balancer)
         .to receive(:primary_only?)
         .and_return(false)
 
@@ -256,28 +256,11 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
 
       expect(sticking.last_write_location_for(:user, 4)).to be_nil
     end
-
-    it 'removes the old key' do
-      Gitlab::Redis::SharedState.with do |redis|
-        redis.set(sticking.send(:old_redis_key_for, :user, 4), 'foo', ex: 30)
-      end
-
-      sticking.unstick(:user, 4)
-      expect(sticking.last_write_location_for(:user, 4)).to be_nil
-    end
   end
 
   describe '#last_write_location_for' do
     it 'returns the last WAL write location for a user' do
       sticking.set_write_location_for(:user, 4, 'foo')
-
-      expect(sticking.last_write_location_for(:user, 4)).to eq('foo')
-    end
-
-    it 'falls back to reading the old key' do
-      Gitlab::Redis::SharedState.with do |redis|
-        redis.set(sticking.send(:old_redis_key_for, :user, 4), 'foo', ex: 30)
-      end
 
       expect(sticking.last_write_location_for(:user, 4)).to eq('foo')
     end
@@ -291,7 +274,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
   end
 
   describe '#select_caught_up_replicas' do
-    let(:lb) { ActiveRecord::Base.connection.load_balancer }
+    let(:lb) { ActiveRecord::Base.load_balancer }
 
     context 'with no write location' do
       before do

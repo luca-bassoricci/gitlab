@@ -15,12 +15,18 @@ module Namespaces
           select('namespaces.traversal_ids[array_length(namespaces.traversal_ids, 1)] AS id')
         end
 
+        def roots
+          return super unless use_traversal_ids_roots?
+
+          root_ids = all.select("#{quoted_table_name}.traversal_ids[1]").distinct
+          unscoped.where(id: root_ids)
+        end
+
         def self_and_ancestors(include_self: true, hierarchy_order: nil)
           return super unless use_traversal_ids_for_ancestor_scopes?
 
           records = unscoped
-            .without_sti_condition
-            .where(id: without_sti_condition.select('unnest(traversal_ids)'))
+            .where(id: select('unnest(traversal_ids)'))
             .order_by_depth(hierarchy_order)
             .normal_select
 
@@ -60,16 +66,6 @@ module Namespaces
           end
         end
 
-        # Make sure we drop the STI `type = 'Group'` condition for better performance.
-        # Logically equivalent so long as hierarchies remain homogeneous.
-        def without_sti_condition
-          if Feature.enabled?(:include_sti_condition, default_enabled: :yaml)
-            all
-          else
-            unscope(where: :type)
-          end
-        end
-
         def order_by_depth(hierarchy_order)
           return all unless hierarchy_order
 
@@ -85,13 +81,18 @@ module Namespaces
         # When we have queries that break this SELECT * format we can run in to errors.
         # For example `SELECT DISTINCT on(...)` will fail when we chain a `.count` c
         def normal_select
-          unscoped.without_sti_condition.from(all, :namespaces)
+          unscoped.from(all, :namespaces)
         end
 
         private
 
         def use_traversal_ids?
           Feature.enabled?(:use_traversal_ids, default_enabled: :yaml)
+        end
+
+        def use_traversal_ids_roots?
+          Feature.enabled?(:use_traversal_ids_roots, default_enabled: :yaml) &&
+          use_traversal_ids?
         end
 
         def use_traversal_ids_for_ancestor_scopes?
@@ -108,7 +109,6 @@ module Namespaces
 
           namespaces = Arel::Table.new(:namespaces)
           records = unscoped
-            .without_sti_condition
             .with(cte.to_arel)
             .from([cte.table, namespaces])
 
@@ -136,7 +136,6 @@ module Namespaces
           base_ids = select(:id)
 
           records = unscoped
-            .without_sti_condition
             .from("namespaces, (#{base_ids.to_sql}) base")
             .where('namespaces.traversal_ids @> ARRAY[base.id]')
 

@@ -268,7 +268,6 @@ class MergeRequest < ApplicationRecord
     from_fork.where('source_project_id = ? OR target_project_id = ?', project.id, project.id)
   end
   scope :merged, -> { with_state(:merged) }
-  scope :closed_and_merged, -> { with_states(:closed, :merged) }
   scope :open_and_closed, -> { with_states(:opened, :closed) }
   scope :drafts, -> { where(draft: true) }
   scope :from_source_branches, ->(branches) { where(source_branch: branches) }
@@ -507,12 +506,12 @@ class MergeRequest < ApplicationRecord
   def self.reference_pattern
     @reference_pattern ||= %r{
       (#{Project.reference_pattern})?
-      #{Regexp.escape(reference_prefix)}(?<merge_request>\d+)
+      #{Regexp.escape(reference_prefix)}#{Gitlab::Regex.merge_request}
     }x
   end
 
   def self.link_reference_pattern
-    @link_reference_pattern ||= super("merge_requests", /(?<merge_request>\d+)/)
+    @link_reference_pattern ||= super("merge_requests", Gitlab::Regex.merge_request)
   end
 
   def self.reference_valid?(reference)
@@ -663,7 +662,7 @@ class MergeRequest < ApplicationRecord
   # updates `merge_jid` with the MergeWorker#jid.
   # This helps tracking enqueued and ongoing merge jobs.
   def merge_async(user_id, params)
-    jid = MergeWorker.perform_async(id, user_id, params.to_h)
+    jid = MergeWorker.with_status.perform_async(id, user_id, params.to_h)
     update_column(:merge_jid, jid)
 
     # merge_ongoing? depends on merge_jid
@@ -682,7 +681,7 @@ class MergeRequest < ApplicationRecord
       # attribute is set *and* that the sidekiq job is still running. So a JID
       # for a completed RebaseWorker is equivalent to a nil JID.
       jid = Sidekiq::Worker.skipping_transaction_check do
-        RebaseWorker.perform_async(id, user_id, skip_ci)
+        RebaseWorker.with_status.perform_async(id, user_id, skip_ci)
       end
 
       update_column(:rebase_jid, jid)
@@ -769,7 +768,7 @@ class MergeRequest < ApplicationRecord
   def diff_size
     # Calling `merge_request_diff.diffs.real_size` will also perform
     # highlighting, which we don't need here.
-    merge_request_diff&.real_size || diff_stats&.real_size(project: project) || diffs.real_size
+    merge_request_diff&.real_size || diff_stats&.real_size || diffs.real_size
   end
 
   def modified_paths(past_merge_request_diff: nil, fallback_on_overflow: false)
@@ -1317,6 +1316,10 @@ class MergeRequest < ApplicationRecord
   end
 
   def default_merge_commit_message(include_description: false)
+    if self.target_project.merge_commit_template.present? && !include_description
+      return ::Gitlab::MergeRequests::CommitMessageGenerator.new(merge_request: self).merge_message
+    end
+
     closes_issues_references = visible_closing_issues_for.map do |issue|
       issue.to_reference(target_project)
     end
@@ -1337,6 +1340,10 @@ class MergeRequest < ApplicationRecord
   end
 
   def default_squash_commit_message
+    if self.target_project.squash_commit_template.present?
+      return ::Gitlab::MergeRequests::CommitMessageGenerator.new(merge_request: self).squash_message
+    end
+
     title
   end
 
@@ -1795,7 +1802,7 @@ class MergeRequest < ApplicationRecord
 
   def pipeline_coverage_delta
     if base_pipeline&.coverage && head_pipeline&.coverage
-      '%.2f' % (head_pipeline.coverage.to_f - base_pipeline.coverage.to_f)
+      head_pipeline.coverage - base_pipeline.coverage
     end
   end
 
@@ -1940,6 +1947,10 @@ class MergeRequest < ApplicationRecord
     strong_memoize(:context_commits_diff) do
       ContextCommitsDiff.new(self)
     end
+  end
+
+  def attention_requested_enabled?
+    Feature.enabled?(:mr_attention_requests, project, default_enabled: :yaml)
   end
 
   private

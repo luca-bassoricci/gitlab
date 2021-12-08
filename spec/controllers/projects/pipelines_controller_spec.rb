@@ -44,7 +44,7 @@ RSpec.describe Projects::PipelinesController do
         end
       end
 
-      it 'does not execute N+1 queries' do
+      it 'does not execute N+1 queries', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/345470' do
         get_pipelines_index_json
 
         control_count = ActiveRecord::QueryRecorder.new do
@@ -745,9 +745,28 @@ RSpec.describe Projects::PipelinesController do
   describe 'GET #charts' do
     let(:pipeline) { create(:ci_pipeline, project: project) }
 
-    it_behaves_like 'tracking unique visits', :charts do
-      let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id } }
-      let(:target_id) { 'p_analytics_pipelines' }
+    [
+      {
+        chart_param: '',
+        event: 'p_analytics_ci_cd_pipelines'
+      },
+      {
+        chart_param: 'pipelines',
+        event: 'p_analytics_ci_cd_pipelines'
+      },
+      {
+        chart_param: 'deployment-frequency',
+        event: 'p_analytics_ci_cd_deployment_frequency'
+      },
+      {
+        chart_param: 'lead-time',
+        event: 'p_analytics_ci_cd_lead_time'
+      }
+    ].each do |tab|
+      it_behaves_like 'tracking unique visits', :charts do
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:target_id) { ['p_analytics_pipelines', tab[:event]] }
+      end
     end
   end
 

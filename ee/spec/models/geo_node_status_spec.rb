@@ -144,50 +144,6 @@ RSpec.describe GeoNodeStatus, :geo do
     end
   end
 
-  describe '#attachments_synced_count' do
-    it 'only counts successful syncs' do
-      create_list(:user, 3, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'))
-      uploads = Upload.pluck(:id)
-
-      create(:geo_upload_registry, :synced, file_id: uploads[0])
-      create(:geo_upload_registry, :synced, file_id: uploads[1])
-      create(:geo_upload_registry, :failed, file_id: uploads[2])
-
-      expect(subject.attachments_synced_count).to eq(2)
-    end
-  end
-
-  describe '#attachments_failed_count' do
-    it 'counts failed avatars, attachment, personal snippets and files' do
-      # These two should be ignored
-      create(:geo_lfs_object_registry, :failed)
-      create(:geo_upload_registry)
-
-      create(:geo_upload_registry, :failed)
-      create(:geo_upload_registry, :failed)
-
-      expect(subject.attachments_failed_count).to eq(2)
-    end
-  end
-
-  describe '#attachments_synced_in_percentage' do
-    it 'returns 0 when no registries are available' do
-      expect(subject.attachments_synced_in_percentage).to eq(0)
-    end
-
-    it 'returns the right percentage' do
-      create_list(:user, 4, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'))
-      uploads = Upload.pluck(:id)
-
-      create(:geo_upload_registry, :synced, file_id: uploads[0])
-      create(:geo_upload_registry, :synced, file_id: uploads[1])
-      create(:geo_upload_registry, :failed, file_id: uploads[2])
-      create(:geo_upload_registry, :started, file_id: uploads[3])
-
-      expect(subject.attachments_synced_in_percentage).to be_within(0.0001).of(50)
-    end
-  end
-
   describe '#db_replication_lag_seconds' do
     it 'returns the set replication lag if secondary' do
       allow(Gitlab::Geo).to receive(:secondary?).and_return(true)
@@ -543,6 +499,18 @@ RSpec.describe GeoNodeStatus, :geo do
       end
 
       it 'returns nil' do
+        expect(subject.container_repositories_count).to be_nil
+      end
+    end
+
+    context 'when old container repositories counts exist' do
+      before do
+        stub_geo_setting(registry_replication: { enabled: false })
+      end
+
+      it 'returns nil' do
+        described_class.current_node_status.update!(container_repositories_count: 3)
+
         expect(subject.container_repositories_count).to be_nil
       end
     end
@@ -979,7 +947,6 @@ RSpec.describe GeoNodeStatus, :geo do
       result = described_class.from_json(data)
 
       expect(result.id).to be_nil
-      expect(result.attachments_count).to eq(status.attachments_count)
       expect(result.cursor_last_event_date).to eq(Time.zone.at(status.cursor_last_event_timestamp))
       expect(result.storage_shards.count).to eq(Settings.repositories.storages.count)
     end
@@ -1327,12 +1294,6 @@ RSpec.describe GeoNodeStatus, :geo do
         stub_current_geo_node(primary)
       end
 
-      it 'does not call AttachmentLegacyRegistryFinder#registry_count' do
-        expect_any_instance_of(Geo::AttachmentLegacyRegistryFinder).not_to receive(:registry_count)
-
-        subject
-      end
-
       it 'does not call JobArtifactRegistryFinder#registry_count' do
         expect_any_instance_of(Geo::JobArtifactRegistryFinder).not_to receive(:registry_count)
 
@@ -1341,41 +1302,25 @@ RSpec.describe GeoNodeStatus, :geo do
     end
 
     context 'on the secondary' do
-      it 'calls AttachmentLegacyRegistryFinder#registry_count' do
-        expect_any_instance_of(Geo::AttachmentLegacyRegistryFinder).to receive(:registry_count).twice
+      it 'returns data from the deprecated field if it is not defined in the status field' do
+        subject.write_attribute(:projects_count, 10)
+        subject.status = {}
 
-        subject
+        expect(subject.projects_count).to eq 10
       end
 
-      it 'calls JobArtifactRegistryFinder#registry_count' do
-        expect_any_instance_of(Geo::JobArtifactRegistryFinder).to receive(:registry_count).twice
+      it 'sets data in the new status field' do
+        subject.projects_count = 10
 
-        subject
+        expect(subject.projects_count).to eq 10
       end
-    end
 
-    context 'backward compatibility when counters stored in separate columns' do
-      describe '#projects_count' do
-        it 'returns data from the deprecated field if it is not defined in the status field' do
-          subject.write_attribute(:projects_count, 10)
-          subject.status = {}
+      it 'uses column counters when calculates percents using attr_in_percentage' do
+        subject.write_attribute(:design_repositories_count, 10)
+        subject.write_attribute(:design_repositories_synced_count, 5)
+        subject.status = {}
 
-          expect(subject.projects_count).to eq 10
-        end
-
-        it 'sets data in the new status field' do
-          subject.projects_count = 10
-
-          expect(subject.projects_count).to eq 10
-        end
-
-        it 'uses column counters when calculates percents using attr_in_percentage' do
-          subject.write_attribute(:design_repositories_count, 10)
-          subject.write_attribute(:design_repositories_synced_count, 5)
-          subject.status = {}
-
-          expect(subject.design_repositories_synced_in_percentage).to be_within(0.0001).of(50)
-        end
+        expect(subject.design_repositories_synced_in_percentage).to be_within(0.0001).of(50)
       end
     end
 

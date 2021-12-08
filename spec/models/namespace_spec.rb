@@ -32,9 +32,10 @@ RSpec.describe Namespace do
     describe '#children' do
       let_it_be(:group) { create(:group) }
       let_it_be(:subgroup) { create(:group, parent: group) }
-      let_it_be(:project_namespace) { create(:project_namespace, parent: group) }
+      let_it_be(:project_with_namespace) { create(:project, namespace: group) }
 
       it 'excludes project namespaces' do
+        expect(project_with_namespace.project_namespace.parent).to eq(group)
         expect(group.children).to match_array([subgroup])
       end
     end
@@ -102,34 +103,6 @@ RSpec.describe Namespace do
             expect(namespace).not_to be_valid
             expect(namespace.errors[:parent_id].first).to eq(error)
           else
-            expect(namespace).to be_valid
-          end
-        end
-      end
-
-      context 'when the feature flag `validate_namespace_parent_type` is disabled' do
-        before do
-          stub_feature_flags(validate_namespace_parent_type: false)
-        end
-
-        context 'when the namespace has no parent' do
-          it 'allows a namespace to have no parent associated with it' do
-            namespace = build(:namespace)
-
-            expect(namespace).to be_valid
-          end
-        end
-
-        context 'when the namespace has a parent' do
-          it 'allows a namespace to have a group as its parent' do
-            namespace = build(:namespace, parent: build(:group))
-
-            expect(namespace).to be_valid
-          end
-
-          it 'allows a namespace to have another namespace as its parent' do
-            namespace = build(:namespace, parent: build(:namespace))
-
             expect(namespace).to be_valid
           end
         end
@@ -239,7 +212,9 @@ RSpec.describe Namespace do
         let(:namespace) { build(:project_namespace) }
 
         it 'allows to update path to single char' do
-          namespace = create(:project_namespace)
+          project = create(:project)
+          namespace = project.project_namespace
+
           namespace.update!(path: 'j')
 
           expect(namespace).to be_valid
@@ -284,18 +259,17 @@ RSpec.describe Namespace do
       end
     end
 
-    context 'creating a default Namespace' do
+    context 'unable to create a Namespace with nil type' do
+      let(:namespace) { nil }
       let(:namespace_type) { nil }
 
-      it 'is the correct type of namespace' do
-        expect(Namespace.find(namespace.id)).to be_a(Namespace)
-        expect(namespace.kind).to eq('user')
-        expect(namespace.user_namespace?).to be_truthy
+      it 'raises ActiveRecord::NotNullViolation' do
+        expect { create(:namespace, type: namespace_type, parent: parent) }.to raise_error(ActiveRecord::NotNullViolation)
       end
     end
 
     context 'creating an unknown Namespace type' do
-      let(:namespace_type) { 'One' }
+      let(:namespace_type) { 'nonsense' }
 
       it 'creates a default Namespace' do
         expect(Namespace.find(namespace.id)).to be_a(Namespace)
@@ -342,9 +316,13 @@ RSpec.describe Namespace do
 
     describe '.without_project_namespaces' do
       let_it_be(:user_namespace) { create(:user_namespace) }
-      let_it_be(:project_namespace) { create(:project_namespace) }
+      let_it_be(:project) { create(:project) }
+      let_it_be(:project_namespace) { project.project_namespace }
 
       it 'excludes project namespaces' do
+        expect(project_namespace).not_to be_nil
+        expect(project_namespace.parent).not_to be_nil
+        expect(described_class.all).to include(project_namespace)
         expect(described_class.without_project_namespaces).to match_array([namespace, namespace1, namespace2, namespace1sub, namespace2sub, user_namespace, project_namespace.parent])
       end
     end
@@ -562,7 +540,7 @@ RSpec.describe Namespace do
 
     context 'with project namespaces' do
       let_it_be(:project) { create(:project, namespace: parent_group, path: 'some-new-path') }
-      let_it_be(:project_namespace) { create(:project_namespace, project: project) }
+      let_it_be(:project_namespace) { project.project_namespace }
 
       it 'does not return project namespace' do
         search_result = described_class.search('path')
@@ -690,20 +668,6 @@ RSpec.describe Namespace do
 
     it 'only contains root namespaces' do
       is_expected.to contain_exactly(group.id, namespace.id)
-    end
-  end
-
-  describe '#ancestors_upto' do
-    let(:parent) { create(:group) }
-    let(:child) { create(:group, parent: parent) }
-    let(:child2) { create(:group, parent: child) }
-
-    it 'returns all ancestors when no namespace is given' do
-      expect(child2.ancestors_upto).to contain_exactly(child, parent)
-    end
-
-    it 'includes ancestors upto but excluding the given ancestor' do
-      expect(child2.ancestors_upto(parent)).to contain_exactly(child)
     end
   end
 
@@ -1253,6 +1217,38 @@ RSpec.describe Namespace do
     context 'when use_traversal_ids_for_ancestors? feature flag is false' do
       before do
         stub_feature_flags(use_traversal_ids_for_ancestors: false)
+      end
+
+      it { is_expected.to eq false }
+    end
+
+    context 'when use_traversal_ids? feature flag is false' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
+
+      it { is_expected.to eq false }
+    end
+  end
+
+  describe '#use_traversal_ids_for_ancestors_upto?' do
+    let_it_be(:namespace, reload: true) { create(:namespace) }
+
+    subject { namespace.use_traversal_ids_for_ancestors_upto? }
+
+    context 'when use_traversal_ids_for_ancestors_upto feature flag is true' do
+      before do
+        stub_feature_flags(use_traversal_ids_for_ancestors_upto: true)
+      end
+
+      it { is_expected.to eq true }
+
+      it_behaves_like 'disabled feature flag when traversal_ids is blank'
+    end
+
+    context 'when use_traversal_ids_for_ancestors_upto feature flag is false' do
+      before do
+        stub_feature_flags(use_traversal_ids_for_ancestors_upto: false)
       end
 
       it { is_expected.to eq false }
@@ -2058,5 +2054,9 @@ RSpec.describe Namespace do
 
       it { is_expected.to be(true) }
     end
+  end
+
+  it_behaves_like 'it has loose foreign keys' do
+    let(:factory_name) { :group }
   end
 end

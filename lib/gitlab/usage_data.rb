@@ -10,6 +10,12 @@
 #   alt_usage_data { Gitlab::VERSION }
 #   redis_usage_data(Gitlab::UsageDataCounters::WikiPageCounter)
 #   redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] }
+
+# NOTE:
+# Implementing metrics direct in `usage_data.rb` is deprecated,
+# please add new instrumentation class and use add_metric method.
+# For more information, see https://docs.gitlab.com/ee/development/service_ping/metrics_instrumentation.html
+
 module Gitlab
   class UsageData
     DEPRECATED_VALUE = -1000
@@ -45,10 +51,7 @@ module Gitlab
         clear_memoized
 
         with_finished_at(:recording_ce_finished_at) do
-          usage_data = usage_data_metrics
-          usage_data = usage_data.with_indifferent_access.deep_merge(instrumentation_metrics.with_indifferent_access) if Feature.enabled?(:usage_data_instrumentation)
-
-          usage_data
+          usage_data_metrics
         end
       end
 
@@ -225,7 +228,9 @@ module Gitlab
             operating_system: alt_usage_data(fallback: nil) { operating_system },
             gitaly_apdex: alt_usage_data { gitaly_apdex },
             collected_data_categories: add_metric('CollectedDataCategoriesMetric', time_frame: 'none'),
-            service_ping_features_enabled: add_metric('ServicePingFeaturesMetric', time_frame: 'none')
+            service_ping_features_enabled: add_metric('ServicePingFeaturesMetric', time_frame: 'none'),
+            snowplow_enabled: add_metric('SnowplowEnabledMetric', time_frame: 'none'),
+            snowplow_configured_to_gitlab_collector: add_metric('SnowplowConfiguredToGitlabCollectorMetric', time_frame: 'none')
           }
         }
       end
@@ -296,9 +301,11 @@ module Gitlab
             version: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.container_registry_version }
           },
           database: {
-            adapter: alt_usage_data { Gitlab::Database.main.adapter_name },
-            version: alt_usage_data { Gitlab::Database.main.version },
-            pg_system_id: alt_usage_data { Gitlab::Database.main.system_id }
+            # rubocop: disable UsageData/LargeTable
+            adapter: alt_usage_data { ApplicationRecord.database.adapter_name },
+            version: alt_usage_data { ApplicationRecord.database.version },
+            pg_system_id: alt_usage_data { ApplicationRecord.database.system_id }
+            # rubocop: enable UsageData/LargeTable
           },
           mail: {
             smtp_server: alt_usage_data { ActionMailer::Base.smtp_settings[:address] }
@@ -399,7 +406,8 @@ module Gitlab
         results[:projects_jira_cloud_active] = jira_integration_data_hash[:projects_jira_cloud_active]
 
         results
-      rescue ActiveRecord::StatementInvalid
+      rescue ActiveRecord::StatementInvalid => error
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error)
         { projects_jira_server_active: FALLBACK, projects_jira_cloud_active: FALLBACK }
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -616,9 +624,9 @@ module Gitlab
           todos: distinct_count(::Todo.where(time_period), :author_id),
           service_desk_enabled_projects: distinct_count_service_desk_enabled_projects(time_period),
           service_desk_issues: count(::Issue.service_desk.where(time_period)),
-          projects_jira_active: distinct_count(::Project.with_active_integration(::Integrations::Jira) .where(time_period), :creator_id),
-          projects_jira_dvcs_cloud_active: distinct_count(::Project.with_active_integration(::Integrations::Jira) .with_jira_dvcs_cloud.where(time_period), :creator_id),
-          projects_jira_dvcs_server_active: distinct_count(::Project.with_active_integration(::Integrations::Jira) .with_jira_dvcs_server.where(time_period), :creator_id)
+          projects_jira_active: distinct_count(::Project.with_active_integration(::Integrations::Jira).where(time_period), :creator_id),
+          projects_jira_dvcs_cloud_active: distinct_count(::Project.with_active_integration(::Integrations::Jira).with_jira_dvcs_cloud.where(time_period), :creator_id),
+          projects_jira_dvcs_server_active: distinct_count(::Project.with_active_integration(::Integrations::Jira).with_jira_dvcs_server.where(time_period), :creator_id)
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -661,8 +669,6 @@ module Gitlab
       end
 
       def redis_hll_counters
-        return {} unless Feature.enabled?(:redis_hll_tracking, type: :ops, default_enabled: :yaml)
-
         { redis_hll_counters: ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events_data }
       end
 
@@ -723,7 +729,9 @@ module Gitlab
         else
           # rubocop: disable CodeReuse/ActiveRecord
           # rubocop: disable UsageData/LargeTable
-          estimate_batch_distinct_count(::Event.where(time_period), :author_id)
+          start = ::Event.where(time_period).select(:id).order(created_at: :asc).first&.id
+          finish = ::Event.where(time_period).select(:id).order(created_at: :desc).first&.id
+          estimate_batch_distinct_count(::Event.where(time_period), :author_id, start: start, finish: finish)
           # rubocop: enable UsageData/LargeTable
           # rubocop: enable CodeReuse/ActiveRecord
         end
@@ -747,10 +755,6 @@ module Gitlab
           .merge(search_unique_visits_data)
           .merge(redis_hll_counters)
           .deep_merge(aggregated_metrics_data)
-      end
-
-      def instrumentation_metrics
-        Gitlab::UsageDataMetrics.uncached_data # rubocop:disable UsageData/LargeTable
       end
 
       def metric_time_period(time_period)
@@ -829,7 +833,13 @@ module Gitlab
 
         Users::InProductMarketingEmail.tracks.keys.each_with_object({}) do |track, result|
           # rubocop: enable UsageData/LargeTable:
-          series_amount = Namespaces::InProductMarketingEmailsService::TRACKS[track.to_sym][:interval_days].count
+          series_amount =
+            if track.to_sym == Namespaces::InviteTeamEmailService::TRACK
+              0
+            else
+              Namespaces::InProductMarketingEmailsService::TRACKS[track.to_sym][:interval_days].count
+            end
+
           0.upto(series_amount - 1).map do |series|
             # When there is an error with the query and it's not the Hash we expect, we return what we got from `count`.
             sent_count = sent_emails.is_a?(Hash) ? sent_emails.fetch([track, series], 0) : sent_emails
@@ -905,7 +915,30 @@ module Gitlab
       end
 
       def projects_imported_count(from, time_period)
-        count(::Project.imported_from(from).where(time_period).where.not(import_type: nil)) # rubocop: disable CodeReuse/ActiveRecord
+        # rubocop:disable CodeReuse/ActiveRecord
+        relation = ::Project.imported_from(from).where.not(import_type: nil) # rubocop:disable UsageData/LargeTable
+        if time_period.empty?
+          count(relation)
+        else
+          @project_import_id ||= {}
+          start = time_period[:created_at].first
+          finish = time_period[:created_at].last
+
+          # can be nil values here if no records are in our range and it is possible the same instance
+          # is called with different time periods since it is passed in as a variable
+          unless @project_import_id.key?(start)
+            @project_import_id[start] = ::Project.select(:id).where(Project.arel_table[:created_at].gteq(start)) # rubocop:disable UsageData/LargeTable
+                                                 .order(created_at: :asc).limit(1).first&.id
+          end
+
+          unless @project_import_id.key?(finish)
+            @project_import_id[finish] = ::Project.select(:id).where(Project.arel_table[:created_at].lteq(finish)) # rubocop:disable UsageData/LargeTable
+                                                  .order(created_at: :desc).limit(1).first&.id
+          end
+
+          count(relation, start: @project_import_id[start], finish: @project_import_id[finish])
+        end
+        # rubocop:enable CodeReuse/ActiveRecord
       end
 
       def issue_imports(time_period)

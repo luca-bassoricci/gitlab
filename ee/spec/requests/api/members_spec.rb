@@ -947,4 +947,293 @@ RSpec.describe API::Members do
       end
     end
   end
+
+  context 'group with pending members' do
+    let_it_be(:owner) { create(:user, username: 'owner_user') }
+    let_it_be(:developer) { create(:user) }
+    let_it_be(:group) { create(:group, :public) }
+    let_it_be(:subgroup) { create(:group, parent: group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:not_an_owner) { create(:user) }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    describe 'PUT /groups/:id/members/:member_id/approve' do
+      let_it_be(:member) { create(:group_member, :awaiting, group: group, user: developer) }
+
+      let(:url) { "/groups/#{group.id}/members/#{member.id}/approve" }
+
+      context 'with invalid params' do
+        context 'when a subgroup is used' do
+          let(:url) { "/groups/#{subgroup.id}/members/#{member.id}/approve" }
+
+          it 'returns a bad request response' do
+            put api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        context 'when no group is found' do
+          let(:url) { "/groups/#{non_existing_record_id}/members/#{member.id}/approve" }
+
+          it 'returns a not found response' do
+            put api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
+
+      context 'when the current user does not have the :admin_group_member ability' do
+        it 'returns a bad request response' do
+          put api(url, not_an_owner)
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
+      context 'when the current user has permission to approve' do
+        context 'when the member is not found' do
+          let(:url) { "/groups/#{group.id}/members/#{non_existing_record_id}/approve" }
+
+          it 'returns not found response' do
+            put api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+
+        context 'when the activation fails due to no pending members to activate' do
+          let(:member) { create(:group_member, :active, group: group) }
+
+          it 'returns a bad request response' do
+            put api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        shared_examples 'successful activation' do
+          it 'activates the member' do
+            put api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:success)
+            expect(member.reload.active?).to be true
+          end
+        end
+
+        context 'when the member is a root group member' do
+          it_behaves_like 'successful activation'
+        end
+
+        context 'when the member is a subgroup member' do
+          let(:member) { create(:group_member, :awaiting, group: subgroup) }
+
+          it_behaves_like 'successful activation'
+        end
+
+        context 'when the member is a project member' do
+          let(:member) { create(:project_member, :awaiting, project: project) }
+
+          it_behaves_like 'successful activation'
+        end
+
+        context 'when the member is an invited user' do
+          let(:member) { create(:group_member, :awaiting, :invited, group: group) }
+
+          it_behaves_like 'successful activation'
+        end
+      end
+    end
+
+    describe 'PUT /groups/:id/members/approve_all' do
+      let(:url) { "/groups/#{group.id}/members/approve_all" }
+
+      context 'when the current user is not authorized' do
+        it 'returns a bad request response' do
+          post api(url, not_an_owner)
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
+      context 'when the current user is authorized' do
+        before do
+          group.add_owner(owner)
+        end
+
+        context 'when the group ID is a subgroup' do
+          let(:url) { "/groups/#{subgroup.id}/members/approve_all" }
+
+          it 'returns a bad request response' do
+            post api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        context 'when params are valid' do
+          it 'approves all pending members' do
+            pending_group_member = create(:group_member, :awaiting, group: group)
+            pending_subgroup_member = create(:group_member, :awaiting, group: subgroup)
+            pending_project_member = create(:project_member, :awaiting, project: project)
+
+            post api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:success)
+
+            [pending_group_member, pending_subgroup_member, pending_subgroup_member, pending_project_member].each do |member|
+              expect(member.reload.active?).to be true
+            end
+          end
+        end
+
+        context 'when activation fails' do
+          it 'returns a bad request response' do
+            allow_next_instance_of(::Members::ActivateService) do |service|
+              allow(service).to receive(:execute).and_return({ status: :error })
+            end
+
+            post api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+      end
+    end
+
+    describe 'GET /groups/:id/pending_members' do
+      let(:url) { "/groups/#{group.id}/pending_members" }
+
+      context 'when the current user is not authorized' do
+        it 'returns a bad request response' do
+          get api(url, not_an_owner)
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
+      context 'when the current user is authorized' do
+        let_it_be(:pending_group_member) { create(:group_member, :awaiting, group: group) }
+        let_it_be(:pending_subgroup_member) { create(:group_member, :awaiting, group: subgroup) }
+        let_it_be(:pending_project_member) { create(:project_member, :awaiting, project: project) }
+        let_it_be(:pending_invited_member) { create(:group_member, :awaiting, :invited, group: group) }
+
+        it 'returns only pending members' do
+          create(:group_member, group: group)
+
+          get api(url, owner)
+
+          expect(json_response.map { |m| m['id'] }).to match_array [
+            pending_group_member.id,
+            pending_subgroup_member.id,
+            pending_project_member.id,
+            pending_invited_member.id
+          ]
+        end
+
+        it 'includes activated invited members' do
+          pending_invited_member.activate!
+
+          get api(url, owner)
+
+          expect(json_response.map { |m| m['id'] }).to match_array [
+            pending_group_member.id,
+            pending_subgroup_member.id,
+            pending_project_member.id,
+            pending_invited_member.id
+          ]
+        end
+
+        it 'paginates the response' do
+          get api(url, owner)
+
+          expect_paginated_array_response(*[
+            pending_group_member.id,
+            pending_subgroup_member.id,
+            pending_project_member.id,
+            pending_invited_member.id
+          ])
+        end
+
+        context 'when the group ID is a subgroup' do
+          let(:url) { "/groups/#{subgroup.id}/pending_members" }
+
+          it 'returns a bad request response' do
+            get api(url, owner)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+      end
+    end
+  end
+
+  context 'filtering project and group members' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:owner) { create(:user) }
+
+    let(:params) { { state: state } }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    subject do
+      get api("/#{source_type}/#{source.id}/members/all", owner), params: params
+      json_response
+    end
+
+    shared_examples 'filtered results' do
+      context 'for active members' do
+        let(:state) { 'active' }
+
+        it 'returns only active members' do
+          expect(subject.map { |u| u['id'] }).to match_array [active_member.user_id, owner.id]
+        end
+      end
+
+      context 'for awaiting members' do
+        let(:state) { 'awaiting' }
+
+        it 'returns only awaiting members' do
+          expect(subject.map { |u| u['id'] }).to match_array [awaiting_member.user_id]
+        end
+      end
+
+      context 'for created members' do
+        let(:state) { 'created' }
+
+        it 'returns only created members' do
+          expect(subject.map { |u| u['id'] }).to match_array [created_member.user_id]
+        end
+      end
+    end
+
+    context 'for group sources' do
+      let(:source_type) { 'groups' }
+      let(:source) { group }
+
+      it_behaves_like 'filtered results' do
+        let_it_be(:awaiting_member) { create(:group_member, :awaiting, group: group) }
+        let_it_be(:active_member)   { create(:group_member, :active, group: group) }
+        let_it_be(:created_member)  { create(:group_member, :created, group: group) }
+      end
+    end
+
+    context 'for project sources' do
+      let(:source_type) { 'projects' }
+      let(:source) { project }
+
+      it_behaves_like 'filtered results' do
+        let_it_be(:awaiting_member) { create(:project_member, :awaiting, project: project) }
+        let_it_be(:active_member)   { create(:project_member, :active, project: project) }
+        let_it_be(:created_member)  { create(:project_member, :created, project: project) }
+      end
+    end
+  end
 end

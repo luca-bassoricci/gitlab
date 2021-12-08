@@ -16,9 +16,8 @@ explains how 4 of the top 6 attacks were application based. Download it to learn
 organization.
 
 If you're using [GitLab CI/CD](../../../ci/index.md), you can use Static Application Security
-Testing (SAST) to check your source code for known vulnerabilities. When a pipeline completes,
-the results of the SAST analysis are processed and shown in the pipeline's Security tab. If the
-pipeline is associated with a merge request, the SAST analysis is compared with the results of
+Testing (SAST) to check your source code for known vulnerabilities.
+If the pipeline is associated with a merge request, the SAST analysis is compared with the results of
 the target branch's analysis (if available). The results of that comparison are shown in the merge
 request. If the pipeline is running from the default branch, the results of the SAST
 analysis are available in the [security dashboards](../security_dashboard/index.md).
@@ -145,7 +144,7 @@ as shown in the following table:
 | Capability                                                                             | In Free             | In Ultimate        |
 |:---------------------------------------------------------------------------------------|:--------------------|:-------------------|
 | [Configure SAST Scanners](#configuration)                                              | **{check-circle}**  | **{check-circle}** |
-| [Customize SAST Settings](#customizing-the-sast-settings)                              | **{check-circle}**  | **{check-circle}** |
+| [Customize SAST Settings](#available-cicd-variables)                                   | **{check-circle}**  | **{check-circle}** |
 | View [JSON Report](#reports-json-format)                                               | **{check-circle}**  | **{check-circle}** |
 | Presentation of JSON Report in Merge Request                                           | **{dotted-circle}** | **{check-circle}** |
 | [Address vulnerabilities](../../application_security/vulnerabilities/index.md)         | **{dotted-circle}** | **{check-circle}** |
@@ -185,7 +184,7 @@ The included template creates SAST jobs in your CI/CD pipeline and scans
 your project's source code for possible vulnerabilities.
 
 The results are saved as a
-[SAST report artifact](../../../ci/yaml/index.md#artifactsreportssast)
+[SAST report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportssast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest SAST artifact available.
 
@@ -242,25 +241,6 @@ NOTE:
 The configuration tool works best with no existing `.gitlab-ci.yml` file, or with a minimal
 configuration file. If you have a complex GitLab configuration file it may not be parsed
 successfully, and an error may occur.
-
-### Customizing the SAST settings
-
-The SAST settings can be changed through [CI/CD variables](#available-cicd-variables)
-by using the
-[`variables`](../../../ci/yaml/index.md#variables) parameter in `.gitlab-ci.yml`.
-In the following example, we include the SAST template and at the same time we
-set the `SAST_GOSEC_LEVEL` variable to `2`:
-
-```yaml
-include:
-  - template: Security/SAST.gitlab-ci.yml
-
-variables:
-  SAST_GOSEC_LEVEL: 2
-```
-
-Because the template is [evaluated before](../../../ci/yaml/index.md#include)
-the pipeline configuration, the last mention of the variable takes precedence.
 
 ### Overriding SAST jobs
 
@@ -484,7 +464,20 @@ can use `MAVEN_REPO_PATH`. See
 
 ### Available CI/CD variables
 
-SAST can be [configured](#customizing-the-sast-settings) using CI/CD variables.
+SAST can be configured using the [`variables`](../../../ci/yaml/index.md#variables) parameter in
+`.gitlab-ci.yml`.
+
+The following example includes the SAST template to override the `SAST_GOSEC_LEVEL`
+variable to `2`. The template is [evaluated before](../../../ci/yaml/index.md#include) the pipeline
+configuration, so the last mention of the variable takes precedence.
+
+```yaml
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+variables:
+  SAST_GOSEC_LEVEL: 2
+```
 
 #### Logging level
 

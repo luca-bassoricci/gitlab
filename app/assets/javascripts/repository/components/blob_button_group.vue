@@ -53,6 +53,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    canPushToBranch: {
+      type: Boolean,
+      required: true,
+    },
     emptyRepo: {
       type: Boolean,
       required: true,
@@ -98,6 +102,7 @@ export default {
         :is-locked="isLocked"
         :can-lock="canLock"
         data-testid="lock"
+        data-qa-selector="lock_button"
       />
       <gl-button v-gl-modal="replaceModalId" data-testid="replace">
         {{ $options.i18n.replace }}
@@ -125,6 +130,7 @@ export default {
       :target-branch="targetBranch || ref"
       :original-branch="originalBranch || ref"
       :can-push-code="canPushCode"
+      :can-push-to-branch="canPushToBranch"
       :empty-repo="emptyRepo"
     />
   </div>

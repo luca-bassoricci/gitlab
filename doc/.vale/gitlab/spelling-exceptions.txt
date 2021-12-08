@@ -128,7 +128,7 @@ crosslinked
 crosslinking
 crosslinks
 Crossplane
-CrowdIn
+Crowdin
 CSV
 cybersecurity
 Dangerfile
@@ -187,6 +187,7 @@ downvotes
 Dpl
 Dreamweaver
 Ecto
+ElastiCache
 Elasticsearch
 enablement
 enqueued

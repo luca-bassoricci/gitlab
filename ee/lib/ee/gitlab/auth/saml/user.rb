@@ -13,6 +13,7 @@ module EE
 
             if user_in_required_group?
               unblock_user(user, "in required group") if user&.persisted? && user&.ldap_blocked?
+              unblock_user(user, "user cap not reached yet") if activate_user_based_on_user_cap?(user)
             elsif user&.persisted?
               block_user(user, "not in required group") unless user.blocked?
             else
@@ -33,19 +34,12 @@ module EE
 
           def block_user(user, reason)
             user.ldap_block
-            log_user_changes(user, "#{reason}, blocking")
+            log_user_changes(user, 'SAML', "#{reason}, blocking")
           end
 
           def unblock_user(user, reason)
             user.activate
-            log_user_changes(user, "#{reason}, unblocking")
-          end
-
-          def log_user_changes(user, message)
-            ::Gitlab::AppLogger.info(
-              "SAML(#{auth_hash.provider}) account \"#{auth_hash.uid}\" #{message} " \
-              "GitLab user \"#{user.name}\" (#{user.email})"
-            )
+            log_user_changes(user, 'SAML', "#{reason}, unblocking")
           end
 
           def user_in_required_group?

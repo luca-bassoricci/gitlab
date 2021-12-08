@@ -13,12 +13,12 @@ This page describes how to:
 
 ## Snowplow JavaScript frontend tracking
 
-GitLab provides a `Tracking` interface that wraps the [Snowplow JavaScript tracker](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/) 
-to track custom events. 
+GitLab provides a `Tracking` interface that wraps the [Snowplow JavaScript tracker](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/)
+to track custom events.
 
 For the recommended frontend tracking implementation, see [Usage recommendations](#usage-recommendations).
 
-Tracking implementations must have an `action` and a `category`. You can provide additional 
+Tracking implementations must have an `action` and a `category`. You can provide additional
 categories from the [structured event taxonomy](index.md#structured-event-taxonomy) with an `extra` object
 that accepts key-value pairs.
 
@@ -60,15 +60,15 @@ The following example shows `data-track-*` attributes assigned to a button:
 | `data-track-action`    | true     | Action the user is taking. Clicks must be prepended with `click` and activations must be prepended with `activate`. For example, focusing a form field is `activate_form_input` and clicking a button is `click_button`. Replaces `data-track-event`, which was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/290962) in GitLab 13.11. |
 | `data-track-label`    | false    | The specific element or object to act on. This can be: the label of the element, for example, a tab labeled 'Create from template' for `create_from_template`; a unique identifier if no text is available, for example, `groups_dropdown_close` for closing the Groups dropdown in the top bar; or the name or title attribute of a record being created. |
 | `data-track-property` | false    | Any additional property of the element, or object being acted on. |
-| `data-track-value`    | false    | Describes a numeric value or something directly related to the event. This could be the value of an input. For example, `10` when clicking `internal` visibility. If omitted, this is the element's `value` property or `undefined`. For checkboxes, the default value is the element's checked attribute or `0` when unchecked. |
+| `data-track-value`    | false    | Describes a numeric value (decimal) directly related to the event. This could be the value of an input. For example, `10` when clicking `internal` visibility. If omitted, this is the element's `value` property or `undefined`. For checkboxes, the default value is the element's checked attribute or `0` when unchecked. |
 | `data-track-extra` | false    | A key-value pair object passed as a valid JSON string. This attribute is added to the `extra` property in our [`gitlab_standard`](schemas.md#gitlab_standard) schema. |
 | `data-track-context`  | false    | The `context` as described in our [Structured event taxonomy](index.md#structured-event-taxonomy). |
 
 #### Event listeners
 
 Event listeners bind at the document level to handle click events in elements with data attributes.
-This allows them to be handled when the DOM re-renders or changes. Document-level binding reduces 
-the likelihood that click events stop propagating up the DOM tree. 
+This allows them to be handled when the DOM re-renders or changes. Document-level binding reduces
+the likelihood that click events stop propagating up the DOM tree.
 
 If click events stop propagating, you must implement listeners and [Vue component tracking](#implement-vue-component-tracking) or [raw JavaScript tracking](#implement-raw-javascript-tracking).
 
@@ -102,12 +102,12 @@ track_action: "click_button" })
 ### Implement Vue component tracking
 
 For custom event tracking, use a Vue `mixin` in components. Vue `mixin` exposes the `Tracking.event`
-static method and the `track` method. You can specify tracking options in `data` or `computed`. 
-These options override any defaults and allow the values to be dynamic from props or based on state. 
+static method and the `track` method. You can specify tracking options in `data` or `computed`.
+These options override any defaults and allow the values to be dynamic from props or based on state.
 
-Several default options are passed when an event is tracked from the component: 
+Several default options are passed when an event is tracked from the component:
 
-- `category`: If you don't specify, by default `document.body.dataset.page` is used. 
+- `category`: If you don't specify, by default `document.body.dataset.page` is used.
 - `label`
 - `property`
 - `value`
@@ -121,7 +121,7 @@ To implement Vue component tracking:
     const trackingMixin = Tracking.mixin;
     ```
 
-1. Provide categories to track the event from the component. For example, to track all events in a 
+1. Provide categories to track the event from the component. For example, to track all events in a
 component with a label, use the `label` category:
 
     ```javascript
@@ -293,14 +293,14 @@ describe('MyTracking', () => {
 
 ### Form tracking
 
-To enable Snowplow automatic [form tracking](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v2/tracking-specific-events/#form-tracking): 
+To enable Snowplow automatic [form tracking](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v2/tracking-specific-events/#form-tracking):
 
-1. Call `Tracking.enableFormTracking` when the DOM is ready. 
+1. Call `Tracking.enableFormTracking` when the DOM is ready.
 1. Provide a `config` object that includes at least one of the following elements:
     - `forms` determines the forms to track. Identified by the CSS class name.
     - `fields` determines the fields inside the tracked forms to track. Identified by the field `name`.
 1. Optional. Provide a list of contexts as the second argument. The [`gitlab_standard`](schemas.md#gitlab_standard) schema is excluded from these events.
-    
+
 ```javascript
 Tracking.enableFormTracking({
   forms: { allow: ['sign-in-form', 'password-recovery-form'] },
@@ -339,7 +339,7 @@ Backend tracking provides:
 - User behavior tracking
 - Instrumentation to monitor and visualize performance over time in a section or aspect of code.
 
-To add custom event tracking and instrumentation, call the `GitLab::Tracking.event` class method. 
+To add custom event tracking and instrumentation, call the `GitLab::Tracking.event` class method.
 For example:
 
 ```ruby
@@ -361,7 +361,7 @@ Use the following arguments:
 | `action`   | String                    |               | The action being taken. For example, a controller action such as `create`, or an Active Record callback. |
 | `label`    | String                    | nil           | The specific element or object to act on. This can be one of the following: the label of the element, for example, a tab labeled 'Create from template' for `create_from_template`; a unique identifier if no text is available, for example, `groups_dropdown_close` for closing the Groups dropdown in the top bar; or the name or title attribute of a record being created.                                                          |
 | `property` | String                    | nil           | Any additional property of the element, or object being acted on.                                                          |
-| `value`    | Numeric                   | nil           | Describes a numeric value or something directly related to the event. This could be the value of an input. For example, `10` when clicking `internal` visibility.                                                          |
+| `value`    | Numeric                   | nil           | Describes a numeric value (decimal) directly related to the event. This could be the value of an input. For example, `10` when clicking `internal` visibility.                                                          |
 | `context`  | Array\[SelfDescribingJSON\] | nil           | An array of custom contexts to send with this event. Most events should not have any custom contexts.                             |
 | `project`  | Project                   | nil           | The project associated with the event. |
 | `user`     | User                      | nil           | The user associated with the event. |
@@ -370,7 +370,7 @@ Use the following arguments:
 
 ### Unit testing
 
-To test backend Snowplow events, use the `expect_snowplow_event` helper. For more information, see 
+To test backend Snowplow events, use the `expect_snowplow_event` helper. For more information, see
 [testing best practices](../testing_guide/best_practices.md#test-snowplow-events).
 
 ### Performance
@@ -419,90 +419,35 @@ Snowplow Inspector Chrome Extension is a browser extension for testing frontend 
 
 [Snowplow Micro](https://snowplowanalytics.com/blog/2019/07/17/introducing-snowplow-micro/) is a
 Docker-based solution for testing backend and frontend in a local development environment. Snowplow Micro
-records the same events as the full Snowplow pipeline. To query events, use the Snowplow Micro API. 
+records the same events as the full Snowplow pipeline. To query events, use the Snowplow Micro API.
 
-To install and run Snowplow Micro, complete these steps to modify the 
+To install and run Snowplow Micro, complete these steps to modify the
 [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit):
 
-1. Ensure Docker is installed and running.
+1. Ensure [Docker is installed](https://docs.docker.com/get-docker/) and running.
 
-1. To install Snowplow Micro, clone the settings in 
+1. To install Snowplow Micro, clone the settings in
 [this project](https://gitlab.com/gitlab-org/snowplow-micro-configuration).
 
-1. Navigate to the directory with the cloned project, 
+1. Navigate to the directory with the cloned project,
    and start the appropriate Docker container:
 
    ```shell
    ./snowplow-micro.sh
    ```
 
-1. Use GDK to start the PostgreSQL terminal and connect 
-   to the `gitlabhq_development` database:
+1. Set the environment variable to tell the GDK to use Snowplow Micro in development. This overrides two `application_settings` options:
+   - `snowplow_enabled` setting will instead return `true` from `Gitlab::Tracking.enabled?`
+   - `snowplow_collector_hostname` setting will instead always return `localhost:9090` (or whatever is set for `SNOWPLOW_MICRO_URI`) from `Gitlab::Tracking.collector_hostname`.
 
    ```shell
-   gdk psql -d gitlabhq_development
+   export SNOWPLOW_MICRO_ENABLE=1
    ```
 
-1. Update your instance's settings to enable Snowplow events and 
-   point to the Snowplow Micro collector:
+   Optionally, you can set the URI for you Snowplow Micro instance as well (the default value is `http://localhost:9090`):
 
    ```shell
-   update application_settings set snowplow_collector_hostname='localhost:9090', snowplow_enabled=true, snowplow_cookie_domain='.gitlab.com';
-   ```
-
-1. Update `DEFAULT_SNOWPLOW_OPTIONS` in `app/assets/javascripts/tracking/constants.js` to remove `forceSecureTracker: true`:
-
-   ```diff
-   diff --git a/app/assets/javascripts/tracking/constants.js b/app/assets/javascripts/tracking/constants.js
-   index 598111e4086..eff38074d4c 100644
-   --- a/app/assets/javascripts/tracking/constants.js
-   +++ b/app/assets/javascripts/tracking/constants.js
-   @@ -7,7 +7,6 @@ export const DEFAULT_SNOWPLOW_OPTIONS = {
-      appId: '',
-      userFingerprint: false,
-      respectDoNotTrack: true,
-   -  forceSecureTracker: true,
-      eventMethod: 'post',
-      contexts: { webPage: true, performanceTiming: true },
-      formTracking: false,
-   ```
-
-1. Update `options` in `lib/gitlab/tracking.rb` to add `protocol` and `port`:
-
-   ```diff
-   diff --git a/lib/gitlab/tracking.rb b/lib/gitlab/tracking.rb
-   index 618e359211b..e9084623c43 100644
-   --- a/lib/gitlab/tracking.rb
-   +++ b/lib/gitlab/tracking.rb
-   @@ -41,7 +41,9 @@ def options(group)
-              cookie_domain: Gitlab::CurrentSettings.snowplow_cookie_domain,
-              app_id: Gitlab::CurrentSettings.snowplow_app_id,
-              form_tracking: additional_features,
-   -          link_click_tracking: additional_features
-   +          link_click_tracking: additional_features,
-   +          protocol: 'http',
-   +          port: 9090
-            }.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
-          end
-   ```
-
-1. Update `emitter` in `lib/gitlab/tracking/destinations/snowplow.rb` to change `protocol`:
-
-   ```diff
-   diff --git a/lib/gitlab/tracking/destinations/snowplow.rb b/lib/gitlab/tracking/destinations/snowplow.rb
-   index 4fa844de325..5dd9d0eacfb 100644
-   --- a/lib/gitlab/tracking/destinations/snowplow.rb
-   +++ b/lib/gitlab/tracking/destinations/snowplow.rb
-   @@ -40,7 +40,7 @@ def tracker
-            def emitter
-              SnowplowTracker::AsyncEmitter.new(
-                Gitlab::CurrentSettings.snowplow_collector_hostname,
-   -            protocol: 'https'
-   +            protocol: 'http'
-              )
-            end
-          end
-
+   export SNOWPLOW_MICRO_URI=https://127.0.0.1:8080
    ```
 
 1. Restart GDK:

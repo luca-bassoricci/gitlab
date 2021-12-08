@@ -112,7 +112,7 @@ export default {
     isBranchesLoading() {
       return this.$apollo.queries.availableBranches.loading || this.isSearchingBranches;
     },
-    showBranchSwitcher() {
+    enableBranchSwitcher() {
       return this.branches.length > 0 || this.searchTerm.length > 0;
     },
   },
@@ -230,11 +230,11 @@ export default {
 
 <template>
   <gl-dropdown
-    v-if="showBranchSwitcher"
     v-gl-tooltip.hover
     :title="$options.i18n.dropdownHeader"
     :header-text="$options.i18n.dropdownHeader"
     :text="currentBranch"
+    :disabled="!enableBranchSwitcher"
     icon="branch"
     data-qa-selector="branch_selector_button"
     data-testid="branch-selector"
@@ -247,6 +247,7 @@ export default {
     <gl-infinite-scroll
       :fetched-items="branches.length"
       :max-list-height="250"
+      data-qa-selector="branch_menu_container"
       @bottomReached="fetchNextBranches"
     >
       <template #items>
@@ -255,7 +256,7 @@ export default {
           :key="branch"
           :is-checked="currentBranch === branch"
           :is-check-item="true"
-          data-qa-selector="menu_branch_button"
+          data-qa-selector="branch_menu_item_button"
           @click="selectBranch(branch)"
         >
           {{ branch }}

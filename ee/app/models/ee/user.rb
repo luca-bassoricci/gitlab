@@ -65,6 +65,8 @@ module EE
       has_many :protected_branch_push_access_levels, dependent: :destroy, class_name: "::ProtectedBranch::PushAccessLevel" # rubocop:disable Cop/ActiveRecordDependent
       has_many :protected_branch_unprotect_access_levels, dependent: :destroy, class_name: "::ProtectedBranch::UnprotectAccessLevel" # rubocop:disable Cop/ActiveRecordDependent
 
+      has_many :deployment_approvals, class_name: 'Deployments::Approval'
+
       has_many :smartcard_identities
       has_many :scim_identities
 
@@ -167,6 +169,16 @@ module EE
         scope = scope.excluding_guests if License.current&.exclude_guests_from_active_count?
 
         scope
+      end
+
+      def user_cap_reached?
+        return false unless user_cap_max
+
+        billable.limit(user_cap_max + 1).count >= user_cap_max
+      end
+
+      def user_cap_max
+        ::Gitlab::CurrentSettings.new_user_signups_cap
       end
     end
 
@@ -410,6 +422,20 @@ module EE
       has_valid_credit_card? || !requires_credit_card_to_enable_shared_runners?(project)
     end
 
+    def activate_based_on_user_cap?
+      !blocked_auto_created_omniauth_user? &&
+        blocked_pending_approval? &&
+        self.class.user_cap_max.present?
+    end
+
+    def blocked_auto_created_omniauth_user?
+      ::Gitlab.config.omniauth.block_auto_created_users && identities.any?
+    end
+
+    def has_valid_credit_card?
+      credit_card_validated_at.present?
+    end
+
     protected
 
     override :password_required?
@@ -424,10 +450,6 @@ module EE
     def created_after_credit_card_release_day?(project)
       created_at >= ::Users::CreditCardValidation::RELEASE_DAY ||
         ::Feature.enabled?(:ci_require_credit_card_for_old_users, project, default_enabled: :yaml)
-    end
-
-    def has_valid_credit_card?
-      credit_card_validated_at.present?
     end
 
     def requires_credit_card_to_run_pipelines?(project)
@@ -487,6 +509,7 @@ module EE
 
     def perform_user_cap_check
       return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+      return if active?
 
       run_after_commit do
         SetUserStatusBasedOnUserCapSettingWorker.perform_async(id)

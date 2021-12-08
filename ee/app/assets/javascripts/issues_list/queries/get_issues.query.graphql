@@ -1,7 +1,7 @@
 #import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
 #import "~/issues_list/queries/issue.fragment.graphql"
 
-query getIssues(
+query getIssuesEE(
   $isProject: Boolean = false
   $isSignedIn: Boolean = false
   $fullPath: ID!
@@ -30,6 +30,7 @@ query getIssues(
   $lastPageSize: Int
 ) {
   group(fullPath: $fullPath) @skip(if: $isProject) {
+    id
     issues(
       includeSubepics: true
       includeSubgroups: true
@@ -68,6 +69,7 @@ query getIssues(
     }
   }
   project(fullPath: $fullPath) @include(if: $isProject) {
+    id
     issues(
       includeSubepics: true
       search: $search

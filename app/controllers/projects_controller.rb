@@ -35,9 +35,8 @@ class ProjectsController < Projects::ApplicationController
   before_action do
     push_frontend_feature_flag(:lazy_load_commits, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:refactor_blob_viewer, @project, default_enabled: :yaml)
-    push_frontend_feature_flag(:refactor_text_viewer, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:highlight_js, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:increase_page_size_exponentially, @project, default_enabled: :yaml)
-    push_frontend_feature_flag(:paginated_tree_graphql_query, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:new_dir_modal, @project, default_enabled: :yaml)
   end
 
@@ -52,6 +51,9 @@ class ProjectsController < Projects::ApplicationController
   feature_category :team_planning, [:preview_markdown, :new_issuable_address]
   feature_category :importers, [:export, :remove_export, :generate_new_export, :download_export]
   feature_category :code_review, [:unfoldered_environment_names]
+
+  urgency :low, [:refs]
+  urgency :high, [:unfoldered_environment_names]
 
   def index
     redirect_to(current_user ? root_path : explore_root_path)
@@ -126,6 +128,8 @@ class ProjectsController < Projects::ApplicationController
     if ::Projects::UnlinkForkService.new(@project, current_user).execute
       flash[:notice] = _('The fork relationship has been removed.')
     end
+
+    redirect_to edit_project_path(@project)
   end
 
   def activity
@@ -293,7 +297,11 @@ class ProjectsController < Projects::ApplicationController
     end
 
     if find_tags && @repository.tag_count.nonzero?
-      tags, _ = TagsFinder.new(@repository, params).execute
+      tags = begin
+        TagsFinder.new(@repository, params).execute
+      rescue Gitlab::Git::CommandError
+        []
+      end
 
       options['Tags'] = tags.take(100).map(&:name)
     end
@@ -447,6 +455,8 @@ class ProjectsController < Projects::ApplicationController
       :suggestion_commit_message,
       :packages_enabled,
       :service_desk_enabled,
+      :merge_commit_template,
+      :squash_commit_template,
       project_setting_attributes: project_setting_attributes
     ] + [project_feature_attributes: project_feature_attributes]
   end

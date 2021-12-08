@@ -29,11 +29,11 @@ module Groups
         update_group_attributes
         ensure_ownership
         update_integrations
-        update_pending_builds!
       end
 
       post_update_hooks(@updated_project_ids)
       propagate_integrations
+      update_pending_builds
 
       true
     end
@@ -175,21 +175,18 @@ module Groups
     end
 
     def refresh_project_authorizations
-      ProjectAuthorization.where(project_id: @group.all_projects.select(:id)).delete_all # rubocop: disable CodeReuse/ActiveRecord
+      projects_to_update = Set.new
 
-      # refresh authorized projects for current_user immediately
-      current_user.refresh_authorized_projects
-
-      # schedule refreshing projects for all the members of the group
-      @group.refresh_members_authorized_projects
+      # All projects in this hierarchy need to have their project authorizations recalculated
+      @group.all_projects.each_batch { |prjs| projects_to_update.merge(prjs.ids) } # rubocop: disable CodeReuse/ActiveRecord
 
       # When a group is transferred, it also affects who gets access to the projects shared to
       # the subgroups within its hierarchy, so we also schedule jobs that refresh authorizations for all such shared projects.
-      project_group_shares_within_the_hierarchy = ProjectGroupLink.in_group(group.self_and_descendants.select(:id))
-
-      project_group_shares_within_the_hierarchy.find_each do |project_group_link|
-        AuthorizedProjectUpdate::ProjectRecalculateWorker.perform_async(project_group_link.project_id)
+      ProjectGroupLink.in_group(@group.self_and_descendants.select(:id)).each_batch do |project_group_links|
+        projects_to_update.merge(project_group_links.pluck(:project_id)) # rubocop: disable CodeReuse/ActiveRecord
       end
+
+      AuthorizedProjectUpdate::ProjectAccessChangedService.new(projects_to_update.to_a).execute unless projects_to_update.empty?
     end
 
     def raise_transfer_error(message)
@@ -231,13 +228,15 @@ module Groups
       end
     end
 
-    def update_pending_builds!
-      update_params = {
+    def update_pending_builds
+      ::Ci::PendingBuilds::UpdateGroupWorker.perform_async(group.id, pending_builds_params)
+    end
+
+    def pending_builds_params
+      {
         namespace_traversal_ids: group.traversal_ids,
         namespace_id: group.id
       }
-
-      ::Ci::UpdatePendingBuildService.new(group, update_params).execute
     end
   end
 end

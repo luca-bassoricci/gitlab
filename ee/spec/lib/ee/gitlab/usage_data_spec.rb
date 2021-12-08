@@ -62,7 +62,7 @@ RSpec.describe Gitlab::UsageData do
     subject { described_class.data }
 
     it 'gathers usage data' do
-      expect(subject.keys).to include(*%w(
+      expect(subject.keys).to include(*%i(
         historical_max_users
         license_add_ons
         license_plan
@@ -85,7 +85,7 @@ RSpec.describe Gitlab::UsageData do
       expect(count_data[:boards]).to eq(1)
       expect(count_data[:projects]).to eq(3)
 
-      expect(count_data.keys).to include(*%w(
+      expect(count_data.keys).to include(*%i(
         confidential_epics
         container_scanning_jobs
         coverage_fuzzing_jobs
@@ -154,10 +154,6 @@ RSpec.describe Gitlab::UsageData do
   describe '.features_usage_data_ee' do
     subject { described_class.features_usage_data_ee }
 
-    before do
-      stub_feature_flags(usage_data_instrumentation: false)
-    end
-
     it 'gathers feature usage data of EE' do
       expect(subject[:elasticsearch_enabled]).to eq(Gitlab::CurrentSettings.elasticsearch_search?)
       expect(subject[:geo_enabled]).to eq(Gitlab::Geo.enabled?)
@@ -179,39 +175,9 @@ RSpec.describe Gitlab::UsageData do
       expect(subject[:license_trial]).to eq(license.trial?)
       expect(subject[:license_subscription_id]).to eq(license.subscription_id)
       expect(subject[:license_billable_users]).to eq(license.daily_billable_users_count)
-    end
-
-    context 'with usage_data_instrumentation feature flag' do
-      let(:license) { ::License.current }
-
-      context 'when enabled' do
-        before do
-          stub_feature_flags(usage_data_instrumentation: true)
-        end
-
-        it 'returns fallback value to be overriden' do
-          expect(subject[:licensee]).to eq(Gitlab::Utils::UsageData::INSTRUMENTATION_CLASS_FALLBACK)
-          expect(subject[:license_md5]).to eq(Gitlab::Utils::UsageData::INSTRUMENTATION_CLASS_FALLBACK)
-          expect(subject[:historical_max_users]).to eq(Gitlab::Utils::UsageData::INSTRUMENTATION_CLASS_FALLBACK)
-
-          uncached_data = described_class.uncached_data
-          expect(uncached_data[:licensee]).to eq(license.licensee)
-          expect(uncached_data[:license_md5]).to eq(Digest::MD5.hexdigest(license.data))
-          expect(uncached_data[:historical_max_users]).to eq(license.historical_max)
-        end
-      end
-
-      context 'when disabled' do
-        before do
-          stub_feature_flags(usage_data_instrumentation: false)
-        end
-
-        it 'computes historical_max_users, licensee and license_md5 values' do
-          expect(subject[:licensee]).to eq(license.licensee)
-          expect(subject[:license_md5]).to eq(Digest::MD5.hexdigest(license.data))
-          expect(subject[:historical_max_users]).to eq(license.historical_max)
-        end
-      end
+      expect(subject[:licensee]).to eq(license.licensee)
+      expect(subject[:license_md5]).to eq(Digest::MD5.hexdigest(license.data))
+      expect(subject[:historical_max_users]).to eq(license.historical_max)
     end
   end
 
@@ -557,36 +523,8 @@ RSpec.describe Gitlab::UsageData do
     it 'includes accurate usage_activity_by_stage data' do
       expect(described_class.usage_activity_by_stage_release({})).to include(projects_mirrored_with_pipelines_enabled: 2)
       expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(projects_mirrored_with_pipelines_enabled: 1)
-    end
-
-    context 'with usage_data_instrumentation feature flag' do
-      let(:license) { ::License.current }
-
-      context 'when enabled' do
-        before do
-          stub_feature_flags(usage_data_instrumentation: true)
-        end
-
-        it 'returns fallback value to be overriden' do
-          expect(described_class.usage_activity_by_stage_release({})).to include(releases_with_group_milestones: Gitlab::Utils::UsageData::INSTRUMENTATION_CLASS_FALLBACK)
-          expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(releases_with_group_milestones: Gitlab::Utils::UsageData::INSTRUMENTATION_CLASS_FALLBACK)
-
-          uncached_data = described_class.uncached_data
-          expect(uncached_data[:usage_activity_by_stage][:release]).to include(releases_with_milestones: 2)
-          expect(uncached_data[:usage_activity_by_stage_monthly][:release]).to include(releases_with_milestones: 1)
-        end
-      end
-
-      context 'when disabled' do
-        before do
-          stub_feature_flags(usage_data_instrumentation: false)
-        end
-
-        it 'computes releases_with_group_milestones values' do
-          expect(described_class.usage_activity_by_stage_release({})).to include(releases_with_group_milestones: 2)
-          expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(releases_with_group_milestones: 1)
-        end
-      end
+      expect(described_class.usage_activity_by_stage_release({})).to include(releases_with_group_milestones: 2)
+      expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(releases_with_group_milestones: 1)
     end
   end
 
@@ -773,43 +711,62 @@ RSpec.describe Gitlab::UsageData do
       )
     end
 
-    it 'has to resort to 0 for counting license scan' do
-      for_defined_days_back do
-        create(:security_scan)
+    context 'when count fails' do
+      subject { described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params) }
+
+      before do
+        allow(Gitlab::Database::BatchCount).to receive(:batch_distinct_count).and_raise(ActiveRecord::StatementInvalid)
+        allow(Gitlab::Database::BatchCount).to receive(:batch_count).and_raise(ActiveRecord::StatementInvalid)
+        allow(Gitlab::Database::PostgresHll::BatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid)
+        allow(::Ci::Build).to receive(:distinct_count_by).and_raise(ActiveRecord::StatementInvalid)
+        allow(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(should_raise_for_dev)
       end
 
-      allow(Gitlab::Database::BatchCount).to receive(:batch_distinct_count).and_raise(ActiveRecord::StatementInvalid)
-      allow(Gitlab::Database::BatchCount).to receive(:batch_count).and_raise(ActiveRecord::StatementInvalid)
-      allow(Gitlab::Database::PostgresHll::BatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid)
-      allow(::Ci::Build).to receive(:distinct_count_by).and_raise(ActiveRecord::StatementInvalid)
+      context 'with should_raise_for_dev? true' do
+        let(:should_raise_for_dev) { true }
 
-      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
-        user_preferences_group_overview_security_dashboard: -1,
-        user_api_fuzzing_jobs: -1,
-        user_api_fuzzing_dnd_jobs: -1,
-        user_container_scanning_jobs: -1,
-        user_coverage_fuzzing_jobs: -1,
-        user_dast_jobs: -1,
-        user_dependency_scanning_jobs: -1,
-        user_license_management_jobs: -1,
-        user_sast_jobs: -1,
-        user_secret_detection_jobs: -1,
-        sast_pipeline: -1,
-        sast_scans: -1,
-        dependency_scanning_pipeline: -1,
-        dependency_scanning_scans: -1,
-        container_scanning_pipeline: -1,
-        container_scanning_scans: -1,
-        dast_pipeline: -1,
-        dast_scans: -1,
-        secret_detection_pipeline: -1,
-        secret_detection_scans: -1,
-        coverage_fuzzing_pipeline: -1,
-        coverage_fuzzing_scans: -1,
-        api_fuzzing_pipeline: -1,
-        api_fuzzing_scans: -1,
-        user_unique_users_all_secure_scanners: -1
-      )
+        it 'raises an error' do
+          expect { subject }.to raise_error(ActiveRecord::StatementInvalid)
+        end
+      end
+
+      context 'with should_raise_for_dev? false' do
+        let(:should_raise_for_dev) { false }
+
+        it 'has to resort to 0 for counting license scan' do
+          for_defined_days_back do
+            create(:security_scan)
+          end
+
+          expect(subject).to include(
+            user_preferences_group_overview_security_dashboard: -1,
+            user_api_fuzzing_jobs: -1,
+            user_api_fuzzing_dnd_jobs: -1,
+            user_container_scanning_jobs: -1,
+            user_coverage_fuzzing_jobs: -1,
+            user_dast_jobs: -1,
+            user_dependency_scanning_jobs: -1,
+            user_license_management_jobs: -1,
+            user_sast_jobs: -1,
+            user_secret_detection_jobs: -1,
+            sast_pipeline: -1,
+            sast_scans: -1,
+            dependency_scanning_pipeline: -1,
+            dependency_scanning_scans: -1,
+            container_scanning_pipeline: -1,
+            container_scanning_scans: -1,
+            dast_pipeline: -1,
+            dast_scans: -1,
+            secret_detection_pipeline: -1,
+            secret_detection_scans: -1,
+            coverage_fuzzing_pipeline: -1,
+            coverage_fuzzing_scans: -1,
+            api_fuzzing_pipeline: -1,
+            api_fuzzing_scans: -1,
+            user_unique_users_all_secure_scanners: -1
+          )
+        end
+      end
     end
 
     it 'deprecates count for users who have run scans' do

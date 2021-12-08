@@ -11,6 +11,8 @@ class GitlabSchema < GraphQL::Schema
   AUTHENTICATED_MAX_DEPTH = 20
 
   # Tracers (order is important)
+  use Gitlab::Graphql::Tracers::ApplicationContextTracer
+  use Gitlab::Graphql::Tracers::MetricsTracer
   use Gitlab::Graphql::Tracers::LoggerTracer
   use Gitlab::Graphql::GenericTracing # Old tracer which will be removed eventually
   use Gitlab::Graphql::Tracers::TimerTracer
@@ -29,6 +31,9 @@ class GitlabSchema < GraphQL::Schema
   subscription Types::SubscriptionType
 
   default_max_page_size 100
+
+  validate_max_errors 5
+  validate_timeout 0.2.seconds
 
   lazy_resolve ::Gitlab::Graphql::Lazy, :force
 

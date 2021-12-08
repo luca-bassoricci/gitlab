@@ -589,8 +589,11 @@ Settings.cron_jobs['batched_background_migrations_worker'] ||= Settingslogic.new
 Settings.cron_jobs['batched_background_migrations_worker']['cron'] ||= '* * * * *'
 Settings.cron_jobs['batched_background_migrations_worker']['job_class'] = 'Database::BatchedBackgroundMigrationWorker'
 Settings.cron_jobs['issues_reschedule_stuck_issue_rebalances'] ||= Settingslogic.new({})
-Settings.cron_jobs['issues_reschedule_stuck_issue_rebalances']['cron'] ||= '* 0/15 * * *'
+Settings.cron_jobs['issues_reschedule_stuck_issue_rebalances']['cron'] ||= '*/15 * * * *'
 Settings.cron_jobs['issues_reschedule_stuck_issue_rebalances']['job_class'] = 'Issues::RescheduleStuckIssueRebalancesWorker'
+Settings.cron_jobs['clusters_integrations_check_prometheus_health_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['clusters_integrations_check_prometheus_health_worker']['cron'] ||= '0 * * * *'
+Settings.cron_jobs['clusters_integrations_check_prometheus_health_worker']['job_class'] = 'Clusters::Integrations::CheckPrometheusHealthWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
@@ -687,7 +690,7 @@ Gitlab.ee do
   Settings.cron_jobs['elastic_migration_worker']['cron'] ||= '*/30 * * * *'
   Settings.cron_jobs['elastic_migration_worker']['job_class'] ||= 'Elastic::MigrationWorker'
   Settings.cron_jobs['sync_seat_link_worker'] ||= Settingslogic.new({})
-  Settings.cron_jobs['sync_seat_link_worker']['cron'] ||= "#{rand(60)} 3 * * * UTC"
+  Settings.cron_jobs['sync_seat_link_worker']['cron'] ||= "#{rand(60)} #{rand(3..4)} * * * UTC"
   Settings.cron_jobs['sync_seat_link_worker']['job_class'] = 'SyncSeatLinkWorker'
   Settings.cron_jobs['users_create_statistics_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['users_create_statistics_worker']['cron'] ||= '2 15 * * *'
@@ -916,11 +919,23 @@ Settings.webpack.dev_server['https']   ||= false
 #
 Settings['monitoring'] ||= Settingslogic.new({})
 Settings.monitoring['ip_whitelist'] ||= ['127.0.0.1/8']
+
 Settings.monitoring['sidekiq_exporter'] ||= Settingslogic.new({})
 Settings.monitoring.sidekiq_exporter['enabled'] ||= false
 Settings.monitoring.sidekiq_exporter['log_enabled'] ||= false
 Settings.monitoring.sidekiq_exporter['address'] ||= 'localhost'
 Settings.monitoring.sidekiq_exporter['port'] ||= 8082
+
+# TODO: Once we split out health checks from SidekiqExporter, we
+# should not let this default to the same settings anymore; we only
+# do this for back-compat currently.
+# https://gitlab.com/gitlab-org/gitlab/-/issues/345804
+Settings.monitoring['sidekiq_health_checks'] ||= Settingslogic.new({})
+Settings.monitoring.sidekiq_health_checks['enabled'] ||= Settings.monitoring.sidekiq_exporter['enabled']
+Settings.monitoring.sidekiq_health_checks['log_enabled'] ||= Settings.monitoring.sidekiq_exporter['log_enabled']
+Settings.monitoring.sidekiq_health_checks['address'] ||= Settings.monitoring.sidekiq_exporter['address']
+Settings.monitoring.sidekiq_health_checks['port'] ||= Settings.monitoring.sidekiq_exporter['port']
+
 Settings.monitoring['web_exporter'] ||= Settingslogic.new({})
 Settings.monitoring.web_exporter['enabled'] ||= false
 Settings.monitoring.web_exporter['address'] ||= 'localhost'

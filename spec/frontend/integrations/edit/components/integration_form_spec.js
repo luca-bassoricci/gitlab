@@ -11,11 +11,19 @@ import JiraTriggerFields from '~/integrations/edit/components/jira_trigger_field
 import OverrideDropdown from '~/integrations/edit/components/override_dropdown.vue';
 import ResetConfirmationModal from '~/integrations/edit/components/reset_confirmation_modal.vue';
 import TriggerFields from '~/integrations/edit/components/trigger_fields.vue';
-import { integrationLevels } from '~/integrations/constants';
+import {
+  integrationLevels,
+  TEST_INTEGRATION_EVENT,
+  SAVE_INTEGRATION_EVENT,
+} from '~/integrations/constants';
 import { createStore } from '~/integrations/edit/store';
+import eventHub from '~/integrations/edit/event_hub';
+
+jest.mock('~/integrations/edit/event_hub');
 
 describe('IntegrationForm', () => {
   let wrapper;
+  let dispatch;
 
   const createComponent = ({
     customStateProps = {},
@@ -23,12 +31,15 @@ describe('IntegrationForm', () => {
     initialState = {},
     props = {},
   } = {}) => {
+    const store = createStore({
+      customState: { ...mockIntegrationProps, ...customStateProps },
+      ...initialState,
+    });
+    dispatch = jest.spyOn(store, 'dispatch').mockImplementation();
+
     wrapper = shallowMountExtended(IntegrationForm, {
-      propsData: { ...props },
-      store: createStore({
-        customState: { ...mockIntegrationProps, ...customStateProps },
-        ...initialState,
-      }),
+      propsData: { ...props, formSelector: '.test' },
+      store,
       stubs: {
         OverrideDropdown,
         ActiveCheckbox,
@@ -51,31 +62,13 @@ describe('IntegrationForm', () => {
   const findConfirmationModal = () => wrapper.findComponent(ConfirmationModal);
   const findResetConfirmationModal = () => wrapper.findComponent(ResetConfirmationModal);
   const findResetButton = () => wrapper.findByTestId('reset-button');
+  const findSaveButton = () => wrapper.findByTestId('save-button');
+  const findTestButton = () => wrapper.findByTestId('test-button');
   const findJiraTriggerFields = () => wrapper.findComponent(JiraTriggerFields);
   const findJiraIssuesFields = () => wrapper.findComponent(JiraIssuesFields);
   const findTriggerFields = () => wrapper.findComponent(TriggerFields);
 
   describe('template', () => {
-    describe('showActive is true', () => {
-      it('renders ActiveCheckbox', () => {
-        createComponent();
-
-        expect(findActiveCheckbox().exists()).toBe(true);
-      });
-    });
-
-    describe('showActive is false', () => {
-      it('does not render ActiveCheckbox', () => {
-        createComponent({
-          customStateProps: {
-            showActive: false,
-          },
-        });
-
-        expect(findActiveCheckbox().exists()).toBe(false);
-      });
-    });
-
     describe('integrationLevel is instance', () => {
       it('renders ConfirmationModal', () => {
         createComponent({
@@ -195,12 +188,28 @@ describe('IntegrationForm', () => {
     });
 
     describe('type is "jira"', () => {
-      it('renders JiraTriggerFields', () => {
-        createComponent({
-          customStateProps: { type: 'jira' },
-        });
+      beforeEach(() => {
+        jest.spyOn(document, 'querySelector').mockReturnValue(document.createElement('form'));
 
+        createComponent({
+          customStateProps: { type: 'jira', testPath: '/test' },
+        });
+      });
+
+      it('renders JiraTriggerFields', () => {
         expect(findJiraTriggerFields().exists()).toBe(true);
+      });
+
+      it('renders JiraIssuesFields', () => {
+        expect(findJiraIssuesFields().exists()).toBe(true);
+      });
+
+      describe('when JiraIssueFields emits `request-jira-issue-types` event', () => {
+        it('dispatches `requestJiraIssueTypes` action', () => {
+          findJiraIssuesFields().vm.$emit('request-jira-issue-types');
+
+          expect(dispatch).toHaveBeenCalledWith('requestJiraIssueTypes', expect.any(FormData));
+        });
       });
     });
 
@@ -300,6 +309,124 @@ describe('IntegrationForm', () => {
           'data-confirm': 'Are you sure?',
           'data-method': 'delete',
         });
+      });
+    });
+  });
+
+  describe('ActiveCheckbox', () => {
+    describe.each`
+      showActive
+      ${true}
+      ${false}
+    `('when `showActive` is $showActive', ({ showActive }) => {
+      it(`${showActive ? 'renders' : 'does not render'} ActiveCheckbox`, () => {
+        createComponent({
+          customStateProps: {
+            showActive,
+          },
+        });
+
+        expect(findActiveCheckbox().exists()).toBe(showActive);
+      });
+    });
+
+    describe.each`
+      formActive | novalidate
+      ${true}    | ${null}
+      ${false}   | ${'true'}
+    `(
+      'when `toggle-integration-active` is emitted with $formActive',
+      ({ formActive, novalidate }) => {
+        let mockForm;
+
+        beforeEach(async () => {
+          mockForm = document.createElement('form');
+          jest.spyOn(document, 'querySelector').mockReturnValue(mockForm);
+
+          createComponent({
+            customStateProps: {
+              showActive: true,
+              initialActivated: false,
+            },
+          });
+
+          await findActiveCheckbox().vm.$emit('toggle-integration-active', formActive);
+        });
+
+        it(`sets noValidate to ${novalidate}`, () => {
+          expect(mockForm.getAttribute('novalidate')).toBe(novalidate);
+        });
+      },
+    );
+  });
+
+  describe('when `save` button is clicked', () => {
+    let mockForm;
+
+    describe.each`
+      checkValidityReturn | integrationActive | formValid
+      ${true}             | ${false}          | ${true}
+      ${true}             | ${true}           | ${true}
+      ${false}            | ${true}           | ${false}
+      ${false}            | ${false}          | ${true}
+    `(
+      'when form checkValidity returns $checkValidityReturn and integrationActive is $integrationActive',
+      ({ formValid, integrationActive, checkValidityReturn }) => {
+        beforeEach(() => {
+          mockForm = document.createElement('form');
+          jest.spyOn(document, 'querySelector').mockReturnValue(mockForm);
+          jest.spyOn(mockForm, 'checkValidity').mockReturnValue(checkValidityReturn);
+
+          createComponent({
+            customStateProps: {
+              showActive: true,
+              initialActivated: integrationActive,
+            },
+          });
+
+          findSaveButton().vm.$emit('click', new Event('click'));
+        });
+
+        it('dispatches setIsSaving action', () => {
+          expect(dispatch).toHaveBeenCalledWith('setIsSaving', true);
+        });
+
+        it(`emits \`SAVE_INTEGRATION_EVENT\` event with payload \`${formValid}\``, () => {
+          expect(eventHub.$emit).toHaveBeenCalledWith(SAVE_INTEGRATION_EVENT, formValid);
+        });
+      },
+    );
+  });
+
+  describe('when `test` button is clicked', () => {
+    let mockForm;
+
+    describe.each`
+      formValid
+      ${true}
+      ${false}
+    `('when form checkValidity returns $formValid', ({ formValid }) => {
+      beforeEach(() => {
+        mockForm = document.createElement('form');
+        jest.spyOn(document, 'querySelector').mockReturnValue(mockForm);
+        jest.spyOn(mockForm, 'checkValidity').mockReturnValue(formValid);
+
+        createComponent({
+          customStateProps: {
+            showActive: true,
+            canTest: true,
+          },
+        });
+
+        findTestButton().vm.$emit('click', new Event('click'));
+      });
+
+      it('dispatches setIsTesting action', () => {
+        expect(dispatch).toHaveBeenCalledWith('setIsTesting', true);
+      });
+
+      it(`emits \`TEST_INTEGRATION_EVENT\` event with payload \`${formValid}\``, () => {
+        expect(eventHub.$emit).toHaveBeenCalledWith(TEST_INTEGRATION_EVENT, formValid);
       });
     });
   });

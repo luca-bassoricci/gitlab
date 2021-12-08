@@ -4,11 +4,13 @@ require 'spec_helper'
 
 RSpec.describe 'Admin::Users::User' do
   include Spec::Support::Helpers::Features::AdminUsersHelpers
+  include Spec::Support::Helpers::ModalHelpers
 
   let_it_be(:user) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
   let_it_be(:current_user) { create(:admin) }
 
   before do
+    stub_feature_flags(bootstrap_confirmation_modals: false)
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
   end
@@ -112,7 +114,7 @@ RSpec.describe 'Admin::Users::User' do
 
         click_action_in_user_dropdown(user_sole_owner_of_group.id, 'Delete user and contributions')
 
-        page.within('[role="dialog"]') do
+        within_modal do
           fill_in('username', with: user_sole_owner_of_group.name)
           click_button('Delete user and contributions')
         end
@@ -425,7 +427,7 @@ RSpec.describe 'Admin::Users::User' do
 
         click_button 'Confirm user'
 
-        page.within('[role="dialog"]') do
+        within_modal do
           expect(page).to have_content("Confirm user #{unconfirmed_user.name}?")
           expect(page).to have_content('This user has an unconfirmed email address. You may force a confirmation.')
 

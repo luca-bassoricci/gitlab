@@ -1,9 +1,11 @@
 query getState($projectPath: ID!, $iid: String!) {
   project(fullPath: $projectPath) {
+    id
     archived
     onlyAllowMergeIfPipelineSucceeds
 
     mergeRequest(iid: $iid) {
+      id
       autoMergeEnabled
       commitCount
       conflicts
@@ -23,7 +25,7 @@ query getState($projectPath: ID!, $iid: String!) {
       userPermissions {
         canMerge
       }
-      workInProgress
+      draft
     }
   }
 }

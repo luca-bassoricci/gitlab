@@ -88,7 +88,7 @@ The keywords available for use in trigger jobs are:
 - [`only` and `except`](../yaml/index.md#only--except)
 - [`when`](../yaml/index.md#when) (only with a value of `on_success`, `on_failure`, or `always`)
 - [`extends`](../yaml/index.md#extends)
-- [`needs`](../yaml/index.md#needs), but not [cross project artifact downloads with `needs`](../yaml/index.md#cross-project-artifact-downloads-with-needs)
+- [`needs`](../yaml/index.md#needs), but not [`needs:project`](../yaml/index.md#needsproject)
 
 #### Specify a downstream pipeline branch
 
@@ -154,7 +154,7 @@ trigger-downstream:
   trigger: my/project
 ```
 
-You can stop global variables from reaching the downstream pipeline by using the [`inherit` keyword](../yaml/index.md#inherit).
+You can stop global variables from reaching the downstream pipeline by using the [`inherit:variables` keyword](../yaml/index.md#inheritvariables).
 In this example, the `MY_GLOBAL_VAR` variable is not available in the triggered pipeline:
 
 ```yaml
@@ -190,7 +190,7 @@ the ones defined in the upstream project take precedence.
 
 #### Pass CI/CD variables to a downstream pipeline by using variable inheritance
 
-You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](../variables/index.md#pass-an-environment-variable-to-another-job) and [cross project artifact downloads](../yaml/index.md#cross-project-artifact-downloads-with-needs).
+You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](../variables/index.md#pass-an-environment-variable-to-another-job) and [`needs:project`](../yaml/index.md#needsproject).
 
 In the upstream pipeline:
 
@@ -213,7 +213,7 @@ In the upstream pipeline:
    ```
 
 1. Set the `test` job in the downstream pipeline to inherit the variables from the `build_vars`
-   job in the upstream project with `needs:`. The `test` job inherits the variables in the
+   job in the upstream project with `needs`. The `test` job inherits the variables in the
    `dotenv` report and it can access `BUILD_VERSION` in the script:
 
    ```yaml
@@ -252,21 +252,6 @@ trigger_job:
   trigger:
     project: my/project
     strategy: depend
-```
-
-#### Mirror status from upstream pipeline
-
-You can mirror the pipeline status from an upstream pipeline to a bridge job by
-using the `needs:pipeline` keyword. The latest pipeline status from the default branch is
-replicated to the bridge job.
-
-For example:
-
-```yaml
-upstream_bridge:
-  stage: test
-  needs:
-    pipeline: other/project
 ```
 
 ### Create multi-project pipelines by using the API

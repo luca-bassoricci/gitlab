@@ -15,7 +15,7 @@ module Iterations
         return ::ServiceResponse.error(message: _('Cadence is not automated'), http_status: 422) unless cadence.can_be_automated?
 
         update_existing_iterations!
-        ::Gitlab::Database.main.bulk_insert(Iteration.table_name, build_new_iterations) # rubocop:disable Gitlab/BulkInsert
+        ::ApplicationRecord.legacy_bulk_insert(Iteration.table_name, build_new_iterations) # rubocop:disable Gitlab/BulkInsert
 
         cadence.update!(last_run_date: compute_last_run_date)
 
@@ -55,7 +55,6 @@ module Iterations
         # we end up having 2020-01-01(beginning of day) - 2020-01-07(end of day)
         start_date = next_start_date
         due_date = start_date + duration.weeks - 1.day
-        title = "Iteration #{iteration_number}: #{format_period(start_date, due_date)}"
 
         {
           iid: iid,
@@ -66,7 +65,7 @@ module Iterations
           start_date: start_date,
           due_date: due_date,
           state_enum: Iteration::STATE_ENUM_MAP[::Iteration.compute_state(start_date, due_date)],
-          title: title
+          title: "Iteration #{iteration_number}"
         }
       end
 
@@ -122,11 +121,8 @@ module Iterations
 
         existing_iterations_in_advance.each do |iteration|
           if iteration.duration_in_days != cadence.duration_in_days
-            old_title_dates_substring = format_period(iteration.start_date, iteration.due_date)
             iteration.start_date = prev_iteration.due_date + 1.day if prev_iteration
             iteration.due_date = iteration.start_date + cadence.duration_in_days.days - 1.day
-            new_title_dates_substring = format_period(iteration.start_date, iteration.due_date)
-            iteration.title = iteration.title.gsub(old_title_dates_substring, new_title_dates_substring)
           end
 
           prev_iteration = iteration
@@ -139,12 +135,6 @@ module Iterations
         else
           existing_iterations_in_advance.reverse_each { |it| it.save! }
         end
-      end
-
-      def format_period(start_date, due_date)
-        format = Date::DATE_FORMATS[:long]
-
-        "#{start_date.strftime(format)} - #{due_date.strftime(format)}"
       end
 
       def compute_last_run_date

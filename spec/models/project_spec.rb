@@ -16,7 +16,7 @@ RSpec.describe Project, factory_default: :keep do
   describe 'associations' do
     it { is_expected.to belong_to(:group) }
     it { is_expected.to belong_to(:namespace) }
-    it { is_expected.to belong_to(:project_namespace).class_name('Namespaces::ProjectNamespace').with_foreign_key('project_namespace_id').inverse_of(:project) }
+    it { is_expected.to belong_to(:project_namespace).class_name('Namespaces::ProjectNamespace').with_foreign_key('project_namespace_id') }
     it { is_expected.to belong_to(:creator).class_name('User') }
     it { is_expected.to belong_to(:pool_repository) }
     it { is_expected.to have_many(:users) }
@@ -191,7 +191,7 @@ RSpec.describe Project, factory_default: :keep do
       # using delete rather than destroy due to `delete` skipping AR hooks/callbacks
       # so it's ensured to work at the DB level. Uses AFTER DELETE trigger.
       let_it_be(:project) { create(:project) }
-      let_it_be(:project_namespace) { create(:project_namespace, project: project) }
+      let_it_be(:project_namespace) { project.project_namespace }
 
       it 'also deletes the associated ProjectNamespace' do
         project.delete
@@ -232,6 +232,102 @@ RSpec.describe Project, factory_default: :keep do
       it 'automatically builds a project setting row' do
         expect(project.project_setting).to be_an_instance_of(ProjectSetting)
         expect(project.project_setting).to be_new_record
+      end
+
+      context 'with project namespaces' do
+        it 'automatically creates a project namespace' do
+          project = build(:project, path: 'hopefully-valid-path1')
+          project.save!
+
+          expect(project).to be_persisted
+          expect(project.project_namespace).to be_persisted
+          expect(project.project_namespace).to be_in_sync_with_project(project)
+        end
+
+        context 'with FF disabled' do
+          before do
+            stub_feature_flags(create_project_namespace_on_project_create: false)
+          end
+
+          it 'does not create a project namespace' do
+            project = build(:project, path: 'hopefully-valid-path2')
+            project.save!
+
+            expect(project).to be_persisted
+            expect(project.project_namespace).to be_nil
+          end
+        end
+      end
+    end
+
+    context 'updating a project' do
+      shared_examples 'project update' do
+        let_it_be(:project_namespace) { create(:project_namespace) }
+        let_it_be(:project) { project_namespace.project }
+
+        context 'when project namespace is not set' do
+          before do
+            project.update_column(:project_namespace_id, nil)
+            project.reload
+          end
+
+          it 'updates the project successfully' do
+            # pre-check that project does not have a project namespace
+            expect(project.project_namespace).to be_nil
+
+            project.update!(path: 'hopefully-valid-path2')
+
+            expect(project).to be_persisted
+            expect(project).to be_valid
+            expect(project.path).to eq('hopefully-valid-path2')
+            expect(project.project_namespace).to be_nil
+          end
+        end
+
+        context 'when project has an associated project namespace' do
+          # when FF is disabled creating a project does not create a project_namespace, so we create one
+          it 'project is INVALID when trying to remove project namespace' do
+            project.reload
+            # check that project actually has an associated project namespace
+            expect(project.project_namespace_id).to eq(project_namespace.id)
+
+            expect do
+              project.update!(project_namespace_id: nil, path: 'hopefully-valid-path1')
+            end.to raise_error(ActiveRecord::RecordInvalid)
+            expect(project).to be_invalid
+            expect(project.errors.full_messages).to include("Project namespace can't be blank")
+            expect(project.reload.project_namespace).to be_in_sync_with_project(project)
+          end
+        end
+      end
+
+      context 'with create_project_namespace_on_project_create FF enabled' do
+        it_behaves_like 'project update'
+
+        it 'keeps project namespace in sync with project' do
+          project = create(:project)
+          project.update!(path: 'hopefully-valid-path1')
+
+          expect(project).to be_persisted
+          expect(project.project_namespace).to be_persisted
+          expect(project.project_namespace).to be_in_sync_with_project(project)
+        end
+      end
+
+      context 'with create_project_namespace_on_project_create FF disabled' do
+        before do
+          stub_feature_flags(create_project_namespace_on_project_create: false)
+        end
+
+        it_behaves_like 'project update'
+
+        it 'does not create a project namespace when project is updated' do
+          project = create(:project)
+          project.update!(path: 'hopefully-valid-path1')
+
+          expect(project).to be_persisted
+          expect(project.project_namespace).to be_nil
+        end
       end
     end
 
@@ -294,6 +390,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to validate_presence_of(:namespace) }
     it { is_expected.to validate_presence_of(:repository_storage) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
+    it { is_expected.to validate_length_of(:suggestion_commit_message).is_at_most(255) }
 
     it 'validates build timeout constraints' do
       is_expected.to validate_numericality_of(:build_timeout)
@@ -320,6 +417,18 @@ RSpec.describe Project, factory_default: :keep do
       expect_any_instance_of(described_class).to receive(:visibility_level_allowed_by_group).and_call_original
 
       create(:project)
+    end
+
+    context 'validates project namespace creation' do
+      it 'does not create project namespace if project is not created' do
+        project = build(:project, path: 'tree')
+
+        project.valid?
+
+        expect(project).not_to be_valid
+        expect(project).to be_new_record
+        expect(project.project_namespace).to be_new_record
+      end
     end
 
     context 'repository storages inclusion' do
@@ -739,6 +848,23 @@ RSpec.describe Project, factory_default: :keep do
       it_behaves_like 'a ci_cd_settings predicate method' do
         let(:delegated_method) { :group_runners_enabled? }
       end
+    end
+  end
+
+  describe '#remove_project_authorizations' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:user_1) { create(:user) }
+    let_it_be(:user_2) { create(:user) }
+    let_it_be(:user_3) { create(:user) }
+
+    it 'removes the project authorizations of the specified users in the current project' do
+      create(:project_authorization, user: user_1, project: project)
+      create(:project_authorization, user: user_2, project: project)
+      create(:project_authorization, user: user_3, project: project)
+
+      project.remove_project_authorizations([user_1.id, user_2.id])
+
+      expect(project.project_authorizations.pluck(:user_id)).not_to include(user_1.id, user_2.id)
     end
   end
 
@@ -1797,6 +1923,20 @@ RSpec.describe Project, factory_default: :keep do
       let(:url) { "https://foo.com/bar/baz.git" }
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '.without_integration' do
+    it 'returns projects without the integration' do
+      project_1, project_2, project_3, project_4 = create_list(:project, 4)
+      instance_integration = create(:jira_integration, :instance)
+      create(:jira_integration, project: project_1, inherit_from_id: instance_integration.id)
+      create(:jira_integration, project: project_2, inherit_from_id: nil)
+      create(:jira_integration, group: create(:group), project: nil, inherit_from_id: nil)
+      create(:jira_integration, project: project_3, inherit_from_id: nil)
+      create(:integrations_slack, project: project_4, inherit_from_id: nil)
+
+      expect(Project.without_integration(instance_integration)).to contain_exactly(project_4)
     end
   end
 
@@ -7312,6 +7452,12 @@ RSpec.describe Project, factory_default: :keep do
       subject { project.all_available_runners }
     end
   end
+
+  it_behaves_like 'it has loose foreign keys' do
+    let(:factory_name) { :project }
+  end
+
+  private
 
   def finish_job(export_job)
     export_job.start

@@ -3,9 +3,9 @@
 module Routing
   module PseudonymizationHelper
     class MaskHelper
-      QUERY_PARAMS_TO_MASK = %w[
-        assignee_username
-        author_username
+      QUERY_PARAMS_TO_NOT_MASK = %w[
+        scope
+        state
       ].freeze
 
       def initialize(request_object, group, project)
@@ -31,23 +31,10 @@ module Routing
           end
         end
 
-        generate_url(masked_params.merge(masked_query_params))
+        Gitlab::Routing.url_helpers.url_for(masked_params.merge(params: masked_query_params))
       end
 
       private
-
-      def generate_url(masked_params)
-        # The below check is added since `project/insights` route does not
-        # work with Rails router `url_for` method.
-        # See https://gitlab.com/gitlab-org/gitlab/-/issues/343551
-        if @request.path_parameters[:controller] == 'projects/insights'
-          default_root_url + "#{Gitlab::Routing.url_helpers.namespace_project_insights_path(masked_params)}"
-        elsif @request.path_parameters[:controller] == 'groups/insights'
-          default_root_url + "#{Gitlab::Routing.url_helpers.group_insights_path(masked_params)}"
-        else
-          Gitlab::Routing.url_helpers.url_for(masked_params.merge(masked_query_params))
-        end
-      end
 
       def mask_id(value)
         if @request.path_parameters[:controller] == 'projects/blob'
@@ -71,10 +58,10 @@ module Routing
 
         query_string_hash = Rack::Utils.parse_nested_query(@request.query_string)
 
-        QUERY_PARAMS_TO_MASK.each do |maskable_attribute|
-          next unless query_string_hash.has_key?(maskable_attribute)
+        query_string_hash.keys.each do |key|
+          next if QUERY_PARAMS_TO_NOT_MASK.include?(key)
 
-          query_string_hash[maskable_attribute] = "masked_#{maskable_attribute}"
+          query_string_hash[key] = "masked_#{key}"
         end
 
         query_string_hash
@@ -85,12 +72,10 @@ module Routing
       end
     end
 
-    def masked_page_url
+    def masked_page_url(group:, project:)
       return unless Feature.enabled?(:mask_page_urls, type: :ops)
 
-      current_group = group if defined?(group)
-      current_project = project if defined?(project)
-      mask_helper = MaskHelper.new(request, current_group, current_project)
+      mask_helper = MaskHelper.new(request, group, project)
       mask_helper.mask_params
 
     # We rescue all exception for time being till we test this helper extensively.

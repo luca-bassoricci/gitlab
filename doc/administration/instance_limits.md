@@ -257,7 +257,7 @@ Set the limit to `0` to disable it.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/237891) in GitLab 13.7.
 
 The [minimum wait time between pull refreshes](../user/project/repository/mirror/index.md)
-defaults to 300 seconds (5 minutes). For example, by default a pull refresh will only run once in a given 300 second period regardless of how many times you try to trigger it.
+defaults to 300 seconds (5 minutes). For example, a pull refresh only runs once in a given 300 second period, regardless of how many times you trigger it.
 
 This setting applies in the context of pull refreshes invoked via the [projects API](../api/projects.md#start-the-pull-mirroring-process-for-a-project), or when forcing an update by selecting the **Update now** (**{retry}**) button within **Settings > Repository > Mirroring repositories**. This setting has no effect on the automatic 30 minute interval schedule used by Sidekiq for [pull mirroring](../user/project/repository/mirror/pull.md).
 
@@ -389,6 +389,27 @@ Plan.default.actual_limits.update!(ci_project_subscriptions: 500)
 ```
 
 Set the limit to `0` to disable it.
+
+### Limit the number of pipeline triggers
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33696) in GitLab 14.6.
+
+You can set a limit on the maximum number of pipeline triggers per project. This
+limit is checked every time a new trigger is created.
+
+If a new trigger would cause the total number of pipeline triggers to exceed the
+limit, the trigger is considered invalid.
+
+Set the limit to `0` to disable it. Defaults to `150` on self-managed instances.
+
+To set this limit to `100` on a self-managed installation, run the following in the
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+Plan.default.actual_limits.update!(pipeline_triggers: 100)
+```
+
+This limit is [enabled on GitLab.com](../user/gitlab_com/index.md#gitlab-cicd).
 
 ### Number of pipeline schedules
 
@@ -530,8 +551,8 @@ Plan.default.actual_limits.update!(pages_file_entries: 100)
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321368) in GitLab 13.12. Disabled by default.
 > - Enabled on GitLab.com in GitLab 14.3.
 > - Enabled on self-managed in GitLab 14.4.
-> - Feature flag `ci_runner_limits` removed in GitLab 14.4. You can still use `ci_runner_limits_override`
-    to remove limits for a given scope.
+> - Feature flag `ci_runner_limits` removed in GitLab 14.4.
+> - Feature flag `ci_runner_limits_override` removed in GitLab 14.6.
 
 The total number of registered runners is limited at the group and project levels. Each time a new runner is registered,
 GitLab checks these limits against runners that have been active in the last 3 months.
@@ -584,25 +605,64 @@ Plan.default.actual_limits.update!(dast_profile_schedules: 50)
 
 ### Maximum size and depth of CI/CD configuration YAML files
 
-The default maximum size of a CI/CD configuration YAML file is 1 megabyte and the default depth is 100.
+The default maximum size of a CI/CD configuration YAML file is 1 megabyte and the
+default depth is 100.
 
-You can change these limits in the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session).
-Update `max_yaml_size_bytes` with the new value in megabytes:
+You can change these limits in the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
-```ruby
-ApplicationSetting.update!(max_yaml_size_bytes: 2.megabytes)
-```
+- To update the maximum YAML size, update `max_yaml_size_bytes` with the new value in megabytes:
 
-Update `max_yaml_depth` with the new value in megabytes:
+  ```ruby
+  ApplicationSetting.update!(max_yaml_size_bytes: 2.megabytes)
+  ```
 
-```ruby
-ApplicationSetting.update!(max_yaml_depth: 125)
-```
+  The `max_yaml_size_bytes` value is not directly tied to the size of the YAML file,
+  but rather the memory allocated for the relevant objects.
+
+- To update the maximum YAML depth, update `max_yaml_depth` with the new value in megabytes:
+
+  ```ruby
+  ApplicationSetting.update!(max_yaml_depth: 125)
+  ```
 
 To disable this limitation entirely, disable the feature flag in the console:
 
 ```ruby
 Feature.disable(:ci_yaml_limit_size)
+```
+
+### Limit dotenv variables
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321552) in GitLab 14.5.
+
+You can set a limit on the maximum number of variables inside of a dotenv artifact.
+This limit is checked every time a dotenv file is exported as an artifact.
+
+Set the limit to `0` to disable it. Defaults to `0` on self-managed instances.
+
+To set this limit to `100` on a self-managed instance, run the following command in the
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+Plan.default.actual_limits.update!(dotenv_variable_limit: 100)
+```
+
+This limit is [enabled on GitLab.com](../user/gitlab_com/index.md#gitlab-cicd).
+
+### Limit dotenv file size
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321552) in GitLab 14.5.
+
+You can set a limit on the maximum size of a dotenv artifact. This limit is checked
+every time a dotenv file is exported as an artifact.
+
+Set the limit to `0` to disable it. Defaults to 5KB.
+
+To set this limit to 5KB on a self-managed installation, run the following in the
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+Plan.default.actual_limits.update!(dotenv_size_limit: 5.kilobytes)
 ```
 
 ## Instance monitoring and metrics
@@ -679,7 +739,7 @@ See [Environment Dashboard](../ci/environments/environments_dashboard.md#adding-
 
 [Deploy boards](../user/project/deploy_boards.md) load information from Kubernetes about
 Pods and Deployments. However, data over 10 MB for a certain environment read from
-Kubernetes won't be shown.
+Kubernetes aren't shown.
 
 ## Merge requests
 
@@ -702,7 +762,7 @@ prevent any more changes from rendering. For more information about these limits
 
 ### Merge request reports size limit
 
-Reports that go over the 20 MB limit won't be loaded. Affected reports:
+Reports that go over the 20 MB limit aren't loaded. Affected reports:
 
 - [Merge request security reports](../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports)
 - [CI/CD parameter `artifacts:expose_as`](../ci/yaml/index.md#artifactsexpose_as)
@@ -766,7 +826,7 @@ See the [Design Management Limitations](../user/project/issues/design_management
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31009) in GitLab 12.4.
 
 Total number of changes (branches or tags) in a single push. If changes are more
-than the specified limit, hooks won't be executed.
+than the specified limit, hooks are not executed.
 
 More information can be found in these docs:
 
@@ -788,16 +848,20 @@ More information can be found in the [Push event activities limit and bulk push 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218017) in GitLab 13.4.
 
-On GitLab.com, the maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md) varies by format:
+The default maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md) varies by format:
 
-- Conan: 5 GB
+- Conan: 3 GB
 - Generic: 5 GB
-- Maven: 5 GB
-- npm: 5 GB
-- NuGet: 5 GB
-- PyPI: 5 GB
+- Helm: 5 MB
+- Maven: 3 GB
+- npm: 500 MB
+- NuGet: 500 MB
+- PyPI: 3 GB
+- Terraform: 1 GB
 
-To set this limit for a self-managed installation, run the following in the
+The [maximum file sizes on GitLab.com](../user/gitlab_com/index.md) might be different.
+
+To set these limits for a self-managed installation, run the following in the
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
@@ -820,6 +884,9 @@ Plan.default.actual_limits.update!(pypi_max_file_size: 100.megabytes)
 
 # For Debian Packages
 Plan.default.actual_limits.update!(debian_max_file_size: 100.megabytes)
+
+# For Helm Charts
+Plan.default.actual_limits.update!(helm_max_file_size: 100.megabytes)
 
 # For Generic Packages
 Plan.default.actual_limits.update!(generic_packages_max_file_size: 100.megabytes)

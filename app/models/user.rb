@@ -391,8 +391,10 @@ class User < ApplicationRecord
     # this state transition object in order to do a rollback.
     # For this reason the tradeoff is to disable this cop.
     after_transition any => :blocked do |user|
-      Ci::DropPipelineService.new.execute_async_for_all(user.pipelines, :user_blocked, user)
-      Ci::DisableUserPipelineSchedulesService.new.execute(user)
+      user.run_after_commit do
+        Ci::DropPipelineService.new.execute_async_for_all(user.pipelines, :user_blocked, user)
+        Ci::DisableUserPipelineSchedulesService.new.execute(user)
+      end
     end
 
     after_transition any => :deactivated do |user|
@@ -473,7 +475,11 @@ class User < ApplicationRecord
   end
 
   def active_for_authentication?
-    super && can?(:log_in)
+    return false unless super
+
+    check_ldap_if_ldap_blocked!
+
+    can?(:log_in)
   end
 
   # The messages for these keys are defined in `devise.en.yml`
@@ -911,6 +917,8 @@ class User < ApplicationRecord
   end
 
   def two_factor_u2f_enabled?
+    return false if Feature.enabled?(:webauthn)
+
     if u2f_registrations.loaded?
       u2f_registrations.any?
     else
@@ -985,11 +993,7 @@ class User < ApplicationRecord
 
   # Returns the groups a user is a member of, either directly or through a parent group
   def membership_groups
-    if Feature.enabled?(:linear_user_membership_groups, self, default_enabled: :yaml)
-      groups.self_and_descendants
-    else
-      Gitlab::ObjectHierarchy.new(groups).base_and_descendants
-    end
+    groups.self_and_descendants
   end
 
   # Returns a relation of groups the user has access to, including their parent
@@ -1016,8 +1020,10 @@ class User < ApplicationRecord
   end
   # rubocop: enable CodeReuse/ServiceClass
 
-  def remove_project_authorizations(project_ids)
-    project_authorizations.where(project_id: project_ids).delete_all
+  def remove_project_authorizations(project_ids, per_batch = 1000)
+    project_ids.each_slice(per_batch) do |project_ids_batch|
+      project_authorizations.where(project_id: project_ids_batch).delete_all
+    end
   end
 
   def authorized_projects(min_access_level = nil)
@@ -1609,7 +1615,7 @@ class User < ApplicationRecord
         .select('ci_runners.*')
 
       group_runners = Ci::RunnerNamespace
-        .where(namespace_id: Gitlab::ObjectHierarchy.new(owned_groups).base_and_descendants.select(:id))
+        .where(namespace_id: owned_groups.self_and_descendant_ids)
         .joins(:runner)
         .select('ci_runners.*')
 
@@ -1988,6 +1994,18 @@ class User < ApplicationRecord
     saved
   end
 
+  def user_project
+    strong_memoize(:user_project) do
+      personal_projects.find_by(path: username, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+    end
+  end
+
+  def user_readme
+    strong_memoize(:user_readme) do
+      user_project&.repository&.readme
+    end
+  end
+
   protected
 
   # override, from Devise::Validatable
@@ -2142,12 +2160,7 @@ class User < ApplicationRecord
       project_creation_levels << nil
     end
 
-    if Feature.enabled?(:linear_user_groups_with_developer_maintainer_project_access, self, default_enabled: :yaml)
-      developer_groups.self_and_descendants.where(project_creation_level: project_creation_levels)
-    else
-      developer_groups_hierarchy = ::Gitlab::ObjectHierarchy.new(developer_groups).base_and_descendants
-      ::Group.where(id: developer_groups_hierarchy.select(:id), project_creation_level: project_creation_levels)
-    end
+    developer_groups.self_and_descendants.where(project_creation_level: project_creation_levels)
   end
 
   def no_recent_activity?
@@ -2166,6 +2179,13 @@ class User < ApplicationRecord
 
   def ci_job_token_scope_cache_key
     "users:#{id}:ci:job_token_scope"
+  end
+
+  # An `ldap_blocked` user will be unblocked if LDAP indicates they are allowed.
+  def check_ldap_if_ldap_blocked!
+    return unless ::Gitlab::Auth::Ldap::Config.enabled? && ldap_blocked?
+
+    ::Gitlab::Auth::Ldap::Access.allowed?(self)
   end
 end
 

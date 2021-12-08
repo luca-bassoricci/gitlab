@@ -7,12 +7,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # License Compliance **(ULTIMATE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5483) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5483) in GitLab 11.0.
 
 If you're using [GitLab CI/CD](../../../ci/index.md), you can use License Compliance to search your
 project's dependencies for their licenses. You can then decide whether to allow or deny the use of
 each license. For example, if your application uses an external (open source) library whose license
 is incompatible with yours, then you can deny the use of that license.
+
+INFO:
+Try License Compliance scanning to search project dependencies in GitLab Ultimate.
+[It's free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-compliance-docs).
 
 You can take advantage of License Compliance by either:
 
@@ -47,6 +51,7 @@ When GitLab detects a **Denied** license, you can view it in the [license list](
 ![License List](img/license_list_v13_0.png)
 
 You can view and modify existing policies from the [policies](#policies) tab.
+
 ![Edit Policy](img/policies_maintainer_edit_v14_3.png)
 
 ## License expressions
@@ -126,7 +131,7 @@ the `license_management` job, so you must migrate to the `license_scanning` job 
 `License-Scanning.gitlab-ci.yml` template.
 
 The results are saved as a
-[License Compliance report artifact](../../../ci/yaml/index.md#artifactsreportslicense_scanning)
+[License Compliance report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportslicense_scanning)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest License Compliance artifact available. Behind the scenes, the
 [GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
@@ -162,7 +167,7 @@ License Compliance can be configured using CI/CD variables.
 
 ### Installing custom dependencies
 
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.4.
+> Introduced in GitLab 11.4.
 
 The `license_finder` image already embeds many auto-detection scripts, languages,
 and packages. Nevertheless, it's almost impossible to cover all cases for all projects.
@@ -172,7 +177,7 @@ For that, a `SETUP_CMD` CI/CD variable can be passed to the container,
 with the required commands to run before the license detection.
 
 If present, this variable overrides the setup step necessary to install all the packages
-of your application (e.g.: for a project with a `Gemfile`, the setup step could be
+of your application (for example: for a project with a `Gemfile`, the setup step could be
 `bundle install`).
 
 For example:
@@ -190,8 +195,8 @@ directory of your project.
 
 ### Working with Monorepos
 
-Depending on your language, you may need to specify the path to the individual 
-projects of a monorepo using the `LICENSE_FINDER_CLI_OPTS` variable. Passing in 
+Depending on your language, you may need to specify the path to the individual
+projects of a monorepo using the `LICENSE_FINDER_CLI_OPTS` variable. Passing in
 the project paths can significantly speed up builds over using the `--recursive`
 license_finder option.
 
@@ -277,7 +282,7 @@ License Compliance uses Java 8 by default. You can specify a different Java vers
 
 ### Selecting the version of Python
 
-> - [Introduced](https://gitlab.com/gitlab-org/security-products/license-management/-/merge_requests/36) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0.
+> - [Introduced](https://gitlab.com/gitlab-org/security-products/license-management/-/merge_requests/36) in GitLab 12.0.
 > - In [GitLab 12.2](https://gitlab.com/gitlab-org/gitlab/-/issues/12032), Python 3.5 became the default.
 > - In [GitLab 12.7](https://gitlab.com/gitlab-org/security-products/license-management/-/merge_requests/101), Python 3.8 became the default.
 
@@ -710,7 +715,7 @@ Additional configuration may be needed for connecting to private registries for:
 
 ### SPDX license list name matching
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212388) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212388) in GitLab 13.3.
 
 Prior to GitLab 13.3, offline environments required an exact name match for [project policies](#policies).
 In GitLab 13.3 and later, GitLab matches the name of [project policies](#policies)
@@ -720,7 +725,7 @@ instance's administrator can manually update it with a [Rake task](../../../rake
 
 ## License list
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13582) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13582) in GitLab 12.7.
 
 The License list allows you to see your project's licenses and key
 details about them.
@@ -744,7 +749,7 @@ The licenses are displayed, where:
 
 ## Policies
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22465) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22465) in GitLab 12.9.
 
 Policies allow you to specify licenses that are `allowed` or `denied` in a project. If a `denied`
 license is newly committed it blocks the merge request and instructs the developer to remove it.
@@ -767,7 +772,7 @@ Developers of the project can view the policies configured in a project.
 
 ## Enabling License Approvals within a project
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13067) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13067) in GitLab 12.3.
 
 Prerequisites:
 

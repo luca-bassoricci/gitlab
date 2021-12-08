@@ -41,7 +41,6 @@ export default {
         rows="7"
         @input="$emit('input', $event.target.value)"
       ></textarea>
-      <slot name="checkbox"></slot>
     </div>
   </li>
 </template>

@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 To connect clusters to GitLab, use the [GitLab Kubernetes Agent](../../clusters/agent/index.md).
 
-## Certificate-based Kubernetes integration (DEPRECATED) **(FREE)**
+## Certificate-based Kubernetes integration (DEPRECATED)
 
 WARNING:
 In GitLab 14.5, the certificate-based method to connect Kubernetes clusters
@@ -52,13 +52,12 @@ the Kubernetes Agent model on the [Agent's blueprint documentation](../../../arc
 - [Cluster integrations](../../clusters/integrations.md)
 - [Cluster cost management](../../clusters/cost_management.md)
 - [Cluster environments](../../clusters/environments.md)
-- [Canary Deployments](../../project/canary_deployments.md)
+- [Advanced traffic control with Canary Ingress](../../project/canary_deployments.md#advanced-traffic-control-with-canary-ingress-deprecated)
 - [Serverless](../../project/clusters/serverless/index.md)
 - [Deploy Boards](../../project/deploy_boards.md)
 - [Pod logs](../../project/clusters/kubernetes_pod_logs.md)
 - [Clusters health](manage/clusters_health.md)
 - [Crossplane integration](../../clusters/crossplane.md)
-- [Auto Deploy](../../../topics/autodevops/stages.md#auto-deploy)
 - [Web terminals](../../../administration/integration/terminal.md)
 
 ### Cluster levels

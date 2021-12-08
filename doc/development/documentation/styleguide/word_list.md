@@ -20,7 +20,7 @@ For guidance not on this page, we defer to these style guides:
 ## `@mention`
 
 Try to avoid **`@mention`**. Say **mention** instead, and consider linking to the
-[mentions topic](../../../user/project/issues/issue_data_and_actions.md#mentions).
+[mentions topic](../../../user/discussions/index.md#mentions).
 Don't use backticks.
 
 ## above
@@ -47,7 +47,7 @@ Capitalize these words when you refer to the UI. Otherwise use lowercase.
 Use **administrator** instead of **admin** when talking about a user's access level.
 Use lowercase unless you are referring to the **Admin** access level you select in the UI.
 
-To view the administrator access type, in the GitLab UI, go to the Admin Area and select
+To view the administrator access level, in the GitLab UI, go to the Admin Area and select
 **Users**. Then select **New user**.
 
 ![admin access level](img/admin_access_level.png)
@@ -147,6 +147,13 @@ If you must refer to the checkbox, you can say it is selected or cleared. For ex
 
 - Ensure the **Protect environment** checkbox is cleared.
 - Ensure the **Protect environment** checkbox is selected.
+
+## checkout, check out
+
+Use **check out** as a verb. For the Git command, use `checkout`.
+
+- Use `git checkout` to check out a branch locally.
+- Check out the files you want to edit.
 
 ## CI/CD
 
@@ -478,6 +485,19 @@ The word **once** means **one time**. Don't use it to mean **after** or **when**
 - Do: When the process is complete...
 - Do not: Once the process is complete...
 
+## only
+
+Put the word **only** next to the word it modifies.
+
+- You can create only private projects.
+
+In this example, **only** modifies the noun **projects**. The sentence means you can create one type of project--a private project.
+
+- You can only create private projects.
+
+In this example, **only** modifies the verb **create**. This sentence means that you can't perform other actions,
+like deleting private projects, or adding users to them.
+
 ## Owner
 
 When writing about the Owner role:
@@ -683,6 +703,14 @@ Do not use **type** if you can avoid it. Use **enter** instead.
 
 Do not use **useful**. If the user doesn't find the process to be useful, we lose their trust. ([Vale](../testing.md#vale) rule: [`Simplicity.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/Simplicity.yml))
 
+## user, users
+
+When possible, address the reader directly, instead of calling them **users**.
+Use the [second person](#you-your-yours), **you**, instead.
+
+- Do: You can configure a pipeline.
+- Do not: Users can configure a pipeline.
+
 ## utilize
 
 Do not use **utilize**. Use **use** instead. It's more succinct and easier for non-native English speakers to understand.
@@ -708,6 +736,14 @@ One exception: You can use **we recommend** instead of **it is recommended** or 
 ## whitelist
 
 Do not use **whitelist**. Another option is **allowlist**. ([Vale](../testing.md#vale) rule: [`InclusionCultural.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionCultural.yml))
+
+## you, your, yours
+
+Use **you**, **your**, and **yours** instead of [**the user** and **the user's**](#user-users).
+Documentation should be from the [point of view](https://design.gitlab.com/content/voice-tone#point-of-view) of the reader.
+
+- Do: You can configure a pipeline.
+- Do not: Users can configure a pipeline. 
 
 <!-- vale on -->
 <!-- markdownlint-enable -->

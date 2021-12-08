@@ -84,7 +84,11 @@ module Gitlab
           Sidekiq.redis do |redis|
             redis.multi do |multi|
               job_wal_locations.each do |connection_name, location|
-                multi.eval(LUA_SET_WAL_SCRIPT, keys: [wal_location_key(connection_name)], argv: [location, pg_wal_lsn_diff(connection_name).to_i, WAL_LOCATION_TTL])
+                multi.eval(
+                  LUA_SET_WAL_SCRIPT,
+                  keys: [wal_location_key(connection_name)],
+                  argv: [location, pg_wal_lsn_diff(connection_name).to_i, WAL_LOCATION_TTL]
+                )
               end
             end
           end
@@ -208,7 +212,12 @@ module Gitlab
         end
 
         def pg_wal_lsn_diff(connection_name)
-          Gitlab::Database.databases[connection_name].pg_wal_lsn_diff(job_wal_locations[connection_name], existing_wal_locations[connection_name])
+          model = Gitlab::Database.database_base_models[connection_name]
+
+          model.connection.load_balancer.wal_diff(
+            job_wal_locations[connection_name],
+            existing_wal_locations[connection_name]
+          )
         end
 
         def strategy

@@ -1092,7 +1092,7 @@ RSpec.describe ProjectsController do
 
           expect(forked_project.reload.forked?).to be_falsey
           expect(flash[:notice]).to eq(s_('The fork relationship has been removed.'))
-          expect(response).to render_template(:remove_fork)
+          expect(response).to redirect_to(edit_project_path(forked_project))
         end
       end
 
@@ -1108,7 +1108,7 @@ RSpec.describe ProjectsController do
               format: :js)
 
           expect(flash[:notice]).to be_nil
-          expect(response).to render_template(:remove_fork)
+          expect(response).to redirect_to(edit_project_path(unforked_project))
         end
       end
     end
@@ -1141,6 +1141,22 @@ RSpec.describe ProjectsController do
       expect(json_response["Branches"]).to include("master")
       expect(json_response["Tags"]).to include("v1.0.0")
       expect(json_response["Commits"]).to include("123456")
+    end
+
+    context 'when gitaly is unavailable' do
+      before do
+        expect_next_instance_of(TagsFinder) do |finder|
+          allow(finder).to receive(:execute).and_raise(Gitlab::Git::CommandError)
+        end
+      end
+
+      it 'gets an empty list of tags' do
+        get :refs, params: { namespace_id: project.namespace, id: project, ref: "123456" }
+
+        expect(json_response["Branches"]).to include("master")
+        expect(json_response["Tags"]).to eq([])
+        expect(json_response["Commits"]).to include("123456")
+      end
     end
 
     context "when preferred language is Japanese" do

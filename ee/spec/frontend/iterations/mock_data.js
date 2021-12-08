@@ -36,3 +36,132 @@ export const mockProjectIterations = {
     },
   },
 };
+
+export const manualIterationCadence = {
+  active: true,
+  id: `gid://gitlab/Iterations::Cadence/72`,
+  title: 'A manual iteration cadence',
+  automatic: true,
+  rollOver: false,
+  durationInWeeks: 3,
+  description: 'The words',
+  startDate: '2020-06-28',
+  iterationsInAdvance: 2,
+};
+
+export const createMutationSuccess = {
+  data: { iterationCreate: { iteration: mockIterationNode, errors: [] } },
+};
+
+export const createMutationFailure = {
+  data: {
+    iterationCreate: { iteration: mockIterationNode, errors: ['alas, your data is unchanged'] },
+  },
+};
+export const updateMutationSuccess = {
+  data: { updateIteration: { iteration: mockIterationNode, errors: [] } },
+};
+
+export const emptyGroupIterationsSuccess = {
+  data: {
+    workspace: {
+      id: 'gid://gitlab/Group/114',
+      iterations: {
+        nodes: [],
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: '',
+          endCursor: '',
+        },
+      },
+    },
+  },
+};
+
+export const nonEmptyGroupIterationsSuccess = {
+  data: {
+    workspace: {
+      id: 1,
+      iterations: {
+        nodes: [
+          {
+            ...mockIterationNode,
+            scopedPath: '/',
+          },
+        ],
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: '',
+          endCursor: '',
+        },
+      },
+    },
+  },
+};
+
+export const readCadenceSuccess = {
+  data: {
+    group: {
+      id: 'gid://gitlab/Group/114',
+      iterationCadences: {
+        nodes: [manualIterationCadence],
+      },
+    },
+  },
+};
+
+export const mockIterationsWithoutCadences = [
+  {
+    id: 1,
+    title: 'iteration 1',
+    startDate: '2021-11-23T12:34:56',
+    dueDate: '2021-11-30T12:34:56',
+  },
+  {
+    id: 2,
+    title: 'iteration 2',
+    startDate: '2021-11-23T12:34:56',
+    dueDate: '2021-11-30T12:34:56',
+  },
+];
+
+export const mockIterationsWithCadences = [
+  {
+    id: 1,
+    title: 'iteration 1',
+    startDate: '2021-11-23T12:34:56',
+    dueDate: '2021-11-30T12:34:56',
+    iterationCadence: {
+      title: 'cadence 1',
+    },
+  },
+  {
+    id: 2,
+    title: 'iteration 2',
+    startDate: '2021-11-23T12:34:56',
+    dueDate: '2021-11-30T12:34:56',
+    iterationCadence: {
+      title: 'cadence 2',
+    },
+  },
+  {
+    id: 3,
+    title: 'iteration 3',
+    startDate: '2021-11-23T12:34:56',
+    dueDate: '2021-11-30T12:34:56',
+    iterationCadence: {
+      title: 'cadence 2',
+    },
+  },
+  {
+    id: 4,
+    title: 'iteration 4',
+    startDate: '2021-11-23T12:34:56',
+    dueDate: '2021-11-30T12:34:56',
+    iterationCadence: {
+      title: 'cadence 1',
+    },
+  },
+];

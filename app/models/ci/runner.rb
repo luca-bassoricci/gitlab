@@ -12,7 +12,6 @@ module Ci
     include Gitlab::Utils::StrongMemoize
     include TaggableQueries
     include Presentable
-    include LooseForeignKey
 
     add_authentication_token_field :token, encrypted: :optional
 
@@ -40,9 +39,12 @@ module Ci
     # The `UPDATE_CONTACT_COLUMN_EVERY` defines how often the Runner DB entry can be updated
     UPDATE_CONTACT_COLUMN_EVERY = (40.minutes..55.minutes).freeze
 
+    # The `STALE_TIMEOUT` constant defines the how far past the last contact or creation date a runner will be considered stale
+    STALE_TIMEOUT = 3.months
+
     AVAILABLE_TYPES_LEGACY = %w[specific shared].freeze
     AVAILABLE_TYPES = runner_types.keys.freeze
-    AVAILABLE_STATUSES = %w[active paused online offline not_connected].freeze
+    AVAILABLE_STATUSES = %w[active paused online offline not_connected stale].freeze
     AVAILABLE_SCOPES = (AVAILABLE_TYPES_LEGACY + AVAILABLE_TYPES + AVAILABLE_STATUSES).freeze
 
     FORM_EDITABLE = %i[description tag_list active run_untagged locked access_level maximum_timeout_human_readable].freeze
@@ -61,7 +63,8 @@ module Ci
     scope :active, -> { where(active: true) }
     scope :paused, -> { where(active: false) }
     scope :online, -> { where('contacted_at > ?', online_contact_time_deadline) }
-    scope :recent, -> { where('ci_runners.created_at > :date OR ci_runners.contacted_at > :date', date: 3.months.ago) }
+    scope :recent, -> { where('ci_runners.created_at >= :date OR ci_runners.contacted_at >= :date', date: stale_deadline) }
+    scope :stale, -> { where('ci_runners.created_at < :date AND (ci_runners.contacted_at IS NULL OR ci_runners.contacted_at < :date)', date: stale_deadline) }
     scope :offline, -> { where(arel_table[:contacted_at].lteq(online_contact_time_deadline)) }
     scope :not_connected, -> { where(contacted_at: nil) }
     scope :ordered, -> { order(id: :desc) }
@@ -78,10 +81,7 @@ module Ci
 
     scope :belonging_to_group, -> (group_id, include_ancestors: false) {
       groups = ::Group.where(id: group_id)
-
-      if include_ancestors
-        groups = Gitlab::ObjectHierarchy.new(groups).base_and_ancestors
-      end
+      groups = groups.self_and_ancestors if include_ancestors
 
       joins(:runner_namespaces)
         .where(ci_runner_namespaces: { namespace_id: groups })
@@ -102,10 +102,9 @@ module Ci
 
     scope :belonging_to_parent_group_of_project, -> (project_id) {
       project_groups = ::Group.joins(:projects).where(projects: { id: project_id })
-      hierarchy_groups = Gitlab::ObjectHierarchy.new(project_groups).base_and_ancestors
 
       joins(:groups)
-        .where(namespaces: { id: hierarchy_groups })
+        .where(namespaces: { id: project_groups.self_and_ancestors.as_ids })
         .allow_cross_joins_across_databases(url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/336433')
     }
 
@@ -168,8 +167,6 @@ module Ci
 
     validates :config, json_schema: { filename: 'ci_runner_config' }
 
-    loose_foreign_key :clusters_applications_runners, :runner_id, on_delete: :async_nullify
-
     # Searches for runners matching the given query.
     #
     # This method uses ILIKE on PostgreSQL for the description field and performs a full match on tokens.
@@ -183,6 +180,10 @@ module Ci
 
     def self.online_contact_time_deadline
       ONLINE_CONTACT_TIMEOUT.ago
+    end
+
+    def self.stale_deadline
+      STALE_TIMEOUT.ago
     end
 
     def self.recent_queue_deadline
@@ -273,7 +274,16 @@ module Ci
       contacted_at && contacted_at > self.class.online_contact_time_deadline
     end
 
-    def status
+    def stale?
+      return false unless created_at
+
+      [created_at, contacted_at].compact.max < self.class.stale_deadline
+    end
+
+    def status(legacy_mode = nil)
+      return deprecated_rest_status if legacy_mode == '14.5'
+
+      return :stale if stale?
       return :not_connected unless contacted_at
 
       online? ? :online : :offline

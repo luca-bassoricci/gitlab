@@ -63,6 +63,10 @@ RSpec.describe ApplicationSetting do
     it { is_expected.to allow_value('a' * 255).for(:elasticsearch_username) }
     it { is_expected.not_to allow_value('a' * 256).for(:elasticsearch_username) }
 
+    it { is_expected.to allow_value([{}]).for(:future_subscriptions) }
+    it { is_expected.not_to allow_value({}).for(:future_subscriptions) }
+    it { is_expected.not_to allow_value(nil).for(:future_subscriptions) }
+
     it { is_expected.to allow_value(nil).for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("").for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("  ").for(:required_instance_ci_template) }
@@ -95,6 +99,8 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(-5).for(:git_two_factor_session_expiry) }
     it { is_expected.not_to allow_value(0).for(:git_two_factor_session_expiry) }
     it { is_expected.not_to allow_value(10081).for(:git_two_factor_session_expiry) }
+
+    it { is_expected.to validate_numericality_of(:max_ssh_key_lifetime).is_greater_than(0).is_less_than_or_equal_to(365).allow_nil }
 
     describe 'when additional email text is enabled' do
       before do
@@ -177,6 +183,42 @@ RSpec.describe ApplicationSetting do
       it { is_expected.to allow_value(max_active_user_count).for(:new_user_signups_cap) }
       it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
       it { is_expected.not_to allow_value(max_active_user_count + 1).for(:new_user_signups_cap) }
+    end
+
+    context 'Sentry validations' do
+      context 'when Sentry is enabled' do
+        before do
+          setting.sentry_enabled = true
+        end
+
+        it { is_expected.to allow_value(false).for(:sentry_enabled) }
+        it { is_expected.not_to allow_value(nil).for(:sentry_enabled) }
+
+        it { is_expected.to allow_value('http://example.com').for(:sentry_dsn) }
+        it { is_expected.not_to allow_value("http://#{'a' * 255}.com").for(:sentry_dsn) }
+        it { is_expected.not_to allow_value('example').for(:sentry_dsn) }
+        it { is_expected.not_to allow_value(nil).for(:sentry_dsn) }
+
+        it { is_expected.to allow_value('http://example.com').for(:sentry_clientside_dsn) }
+        it { is_expected.to allow_value(nil).for(:sentry_clientside_dsn) }
+        it { is_expected.not_to allow_value('example').for(:sentry_clientside_dsn) }
+        it { is_expected.not_to allow_value("http://#{'a' * 255}.com").for(:sentry_clientside_dsn) }
+
+        it { is_expected.to allow_value('production').for(:sentry_environment) }
+        it { is_expected.not_to allow_value(nil).for(:sentry_environment) }
+        it { is_expected.not_to allow_value('a' * 256).for(:sentry_environment) }
+      end
+
+      context 'when Sentry is disabled' do
+        before do
+          setting.sentry_enabled = false
+        end
+
+        it { is_expected.not_to allow_value(nil).for(:sentry_enabled) }
+        it { is_expected.to allow_value(nil).for(:sentry_dsn) }
+        it { is_expected.to allow_value(nil).for(:sentry_clientside_dsn) }
+        it { is_expected.to allow_value(nil).for(:sentry_environment) }
+      end
     end
   end
 
@@ -336,6 +378,17 @@ RSpec.describe ApplicationSetting do
 
       expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://username:password@example.com https://test:test@example2.com:9200])
     end
+
+    it 'encodes the credentials' do
+      setting.elasticsearch_url = 'http://username:password@example.com,https://test:test@example2.com:9200'
+      setting.elasticsearch_username = 'foo/admin'
+      setting.elasticsearch_password = 'b@r'
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[
+        http://foo%2Fadmin:b%40r@example.com
+        https://foo%2Fadmin:b%40r@example2.com:9200
+      ])
+    end
   end
 
   describe '#elasticsearch_password' do
@@ -404,25 +457,13 @@ RSpec.describe ApplicationSetting do
           let!(:child_group) { create(:group, parent: groups.first) }
           let!(:child_group_indexed_through_parent) { create(:group, parent: groups.last) }
 
-          shared_examples 'returns groups that are allowed to be indexed' do
-            specify do
-              create(:elasticsearch_indexed_namespace, namespace: child_group)
+          specify do
+            create(:elasticsearch_indexed_namespace, namespace: child_group)
 
-              expect(setting.elasticsearch_limited_namespaces).to match_array(
-                [groups.last, child_group, child_group_indexed_through_parent])
-              expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
-                [groups.last, child_group])
-            end
-          end
-
-          it_behaves_like 'returns groups that are allowed to be indexed'
-
-          context 'when feature flag :linear_application_settings_elasticsearch_limited_namespaces is disabled' do
-            before do
-              stub_feature_flags(linear_application_settings_elasticsearch_limited_namespaces: false)
-            end
-
-            it_behaves_like 'returns groups that are allowed to be indexed'
+            expect(setting.elasticsearch_limited_namespaces).to match_array(
+              [groups.last, child_group, child_group_indexed_through_parent])
+            expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
+              [groups.last, child_group])
           end
         end
 
@@ -457,14 +498,6 @@ RSpec.describe ApplicationSetting do
           end
 
           it_behaves_like 'whether the project is indexed'
-
-          context 'when feature flag :linear_application_setting_ancestor_scopes is disabled' do
-            before do
-              stub_feature_flags(linear_application_setting_ancestor_scopes: false)
-            end
-
-            it_behaves_like 'whether the project is indexed'
-          end
         end
       end
 
@@ -798,6 +831,38 @@ RSpec.describe ApplicationSetting do
   describe 'maintenance mode setting' do
     it 'defaults to false' do
       expect(subject.maintenance_mode).to be false
+    end
+  end
+
+  describe "#max_ssh_key_lifetime_from_now", :freeze_time do
+    subject { setting.max_ssh_key_lifetime_from_now }
+
+    let(:days_from_now) { nil }
+
+    before do
+      stub_application_setting(max_ssh_key_lifetime: days_from_now)
+    end
+
+    context 'when max_ssh_key_lifetime is defined' do
+      let(:days_from_now) { 30 }
+
+      it 'is a date time' do
+        expect(subject).to be_a Time
+      end
+
+      it 'is in the future' do
+        expect(subject).to be > Time.zone.now
+      end
+
+      it 'is in days_from_now' do
+        expect(subject.to_date - Date.today).to eq days_from_now
+      end
+    end
+
+    context 'when max_ssh_key_lifetime is nil' do
+      it 'is nil' do
+        expect(subject).to be_nil
+      end
     end
   end
 end

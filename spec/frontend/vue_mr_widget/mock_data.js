@@ -51,7 +51,7 @@ export default {
   target_branch: 'main',
   target_project_id: 19,
   target_project_full_path: '/group2/project2',
-  merge_request_add_ci_config_path: '/group2/project2/new/pipeline',
+  merge_request_add_ci_config_path: '/root/group2/project2/-/ci/editor',
   is_dismissed_suggest_pipeline: false,
   user_callouts_path: 'some/callout/path',
   suggest_pipeline_feature_id: 'suggest_pipeline',
@@ -271,8 +271,6 @@ export default {
   mr_troubleshooting_docs_path: 'help',
   ci_troubleshooting_docs_path: 'help2',
   merge_request_pipelines_docs_path: '/help/ci/pipelines/merge_request_pipelines.md',
-  merge_train_when_pipeline_succeeds_docs_path:
-    '/help/ci/pipelines/merge_trains.md#startadd-to-merge-train-when-pipeline-succeeds',
   squash: true,
   visual_review_app_available: true,
   merge_trains_enabled: true,

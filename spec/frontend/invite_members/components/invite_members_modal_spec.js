@@ -6,7 +6,6 @@ import {
   GlSprintf,
   GlLink,
   GlModal,
-  GlFormCheckboxGroup,
 } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import { stubComponent } from 'helpers/stub_component';
@@ -15,11 +14,19 @@ import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import ExperimentTracking from '~/experimentation/experiment_tracking';
 import InviteMembersModal from '~/invite_members/components/invite_members_modal.vue';
+import ModalConfetti from '~/invite_members/components/confetti.vue';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 import {
   INVITE_MEMBERS_IN_COMMENT,
-  MEMBER_AREAS_OF_FOCUS,
   INVITE_MEMBERS_FOR_TASK,
+  CANCEL_BUTTON_TEXT,
+  INVITE_BUTTON_TEXT,
+  MEMBERS_MODAL_CELEBRATE_INTRO,
+  MEMBERS_MODAL_CELEBRATE_TITLE,
+  MEMBERS_MODAL_DEFAULT_TITLE,
+  MEMBERS_PLACEHOLDER,
+  MEMBERS_TO_PROJECT_CELEBRATE_INTRO_TEXT,
+  LEARN_GITLAB,
 } from '~/invite_members/constants';
 import eventHub from '~/invite_members/event_hub';
 import axios from '~/lib/utils/axios_utils';
@@ -43,12 +50,7 @@ const inviteeType = 'members';
 const accessLevels = { Guest: 10, Reporter: 20, Developer: 30, Maintainer: 40, Owner: 50 };
 const defaultAccessLevel = 10;
 const inviteSource = 'unknown';
-const noSelectionAreasOfFocus = ['no_selection'];
 const helpLink = 'https://example.com';
-const areasOfFocusOptions = [
-  { text: 'area1', value: 'area1' },
-  { text: 'area2', value: 'area2' },
-];
 const tasksToBeDoneOptions = [
   { text: 'First task', value: 'first' },
   { text: 'Second task', value: 'second' },
@@ -74,6 +76,7 @@ const user4 = {
   avatar_url: '',
 };
 const sharedGroup = { id: '981' };
+const GlEmoji = { template: '<img/>' };
 
 const createComponent = (data = {}, props = {}) => {
   wrapper = shallowMountExtended(InviteMembersModal, {
@@ -86,9 +89,7 @@ const createComponent = (data = {}, props = {}) => {
       isProject,
       inviteeType,
       accessLevels,
-      areasOfFocusOptions,
       defaultAccessLevel,
-      noSelectionAreasOfFocus,
       tasksToBeDoneOptions,
       projects,
       helpLink,
@@ -104,6 +105,7 @@ const createComponent = (data = {}, props = {}) => {
       }),
       GlDropdown: true,
       GlDropdownItem: true,
+      GlEmoji,
       GlSprintf,
       GlFormGroup: stubComponent(GlFormGroup, {
         props: ['state', 'invalidFeedback', 'description'],
@@ -153,11 +155,11 @@ describe('InviteMembersModal', () => {
   const membersFormGroupInvalidFeedback = () => findMembersFormGroup().props('invalidFeedback');
   const membersFormGroupDescription = () => findMembersFormGroup().props('description');
   const findMembersSelect = () => wrapper.findComponent(MembersTokenSelect);
-  const findAreaofFocusCheckBoxGroup = () => wrapper.findComponent(GlFormCheckboxGroup);
   const findTasksToBeDone = () => wrapper.findByTestId('invite-members-modal-tasks-to-be-done');
   const findTasks = () => wrapper.findByTestId('invite-members-modal-tasks');
   const findProjectSelect = () => wrapper.findByTestId('invite-members-modal-project-select');
   const findNoProjectsAlert = () => wrapper.findByTestId('invite-members-modal-no-projects-alert');
+  const findCelebrationEmoji = () => wrapper.findComponent(GlModal).find(GlEmoji);
 
   describe('rendering the modal', () => {
     beforeEach(() => {
@@ -165,15 +167,15 @@ describe('InviteMembersModal', () => {
     });
 
     it('renders the modal with the correct title', () => {
-      expect(wrapper.findComponent(GlModal).props('title')).toBe('Invite members');
+      expect(wrapper.findComponent(GlModal).props('title')).toBe(MEMBERS_MODAL_DEFAULT_TITLE);
     });
 
     it('renders the Cancel button text correctly', () => {
-      expect(findCancelButton().text()).toBe('Cancel');
+      expect(findCancelButton().text()).toBe(CANCEL_BUTTON_TEXT);
     });
 
     it('renders the Invite button text correctly', () => {
-      expect(findInviteButton().text()).toBe('Invite');
+      expect(findInviteButton().text()).toBe(INVITE_BUTTON_TEXT);
     });
 
     it('renders the Invite button modal without isLoading', () => {
@@ -198,23 +200,8 @@ describe('InviteMembersModal', () => {
 
     describe('rendering the access expiration date field', () => {
       it('renders the datepicker', () => {
-        expect(findDatepicker()).toExist();
+        expect(findDatepicker().exists()).toBe(true);
       });
-    });
-  });
-
-  describe('rendering the areas_of_focus', () => {
-    it('renders the areas_of_focus checkboxes', () => {
-      createComponent();
-
-      expect(findAreaofFocusCheckBoxGroup().props('options')).toBe(areasOfFocusOptions);
-      expect(findAreaofFocusCheckBoxGroup().exists()).toBe(true);
-    });
-
-    it('does not render the areas_of_focus checkboxes', () => {
-      createComponent({}, { areasOfFocusOptions: [] });
-
-      expect(findAreaofFocusCheckBoxGroup().exists()).toBe(false);
     });
   });
 
@@ -256,6 +243,14 @@ describe('InviteMembersModal', () => {
         setupComponent({}, {}, []);
 
         expect(findTasksToBeDone().exists()).toBe(false);
+      });
+
+      describe('when opened from the Learn GitLab page', () => {
+        it('does render the tasks to be done', () => {
+          setupComponent({ source: LEARN_GITLAB }, {}, []);
+
+          expect(findTasksToBeDone().exists()).toBe(true);
+        });
       });
     });
 
@@ -342,11 +337,40 @@ describe('InviteMembersModal', () => {
   describe('displaying the correct introText and form group description', () => {
     describe('when inviting to a project', () => {
       describe('when inviting members', () => {
-        it('includes the correct invitee, type, and formatted name', () => {
+        beforeEach(() => {
           createInviteMembersToProjectWrapper();
+        });
 
+        it('renders the modal without confetti', () => {
+          expect(wrapper.findComponent(ModalConfetti).exists()).toBe(false);
+        });
+
+        it('includes the correct invitee, type, and formatted name', () => {
           expect(findIntroText()).toBe("You're inviting members to the test name project.");
-          expect(membersFormGroupDescription()).toBe('Select members or type email addresses');
+          expect(findCelebrationEmoji().exists()).toBe(false);
+          expect(membersFormGroupDescription()).toBe(MEMBERS_PLACEHOLDER);
+        });
+      });
+
+      describe('when inviting members with celebration', () => {
+        beforeEach(() => {
+          createComponent({ mode: 'celebrate', inviteeType: 'members' }, { isProject: true });
+        });
+
+        it('renders the modal with confetti', () => {
+          expect(wrapper.findComponent(ModalConfetti).exists()).toBe(true);
+        });
+
+        it('renders the modal with the correct title', () => {
+          expect(wrapper.findComponent(GlModal).props('title')).toBe(MEMBERS_MODAL_CELEBRATE_TITLE);
+        });
+
+        it('includes the correct celebration text and emoji', () => {
+          expect(findIntroText()).toBe(
+            `${MEMBERS_TO_PROJECT_CELEBRATE_INTRO_TEXT}  ${MEMBERS_MODAL_CELEBRATE_INTRO}`,
+          );
+          expect(findCelebrationEmoji().exists()).toBe(true);
+          expect(membersFormGroupDescription()).toBe(MEMBERS_PLACEHOLDER);
         });
       });
 
@@ -366,7 +390,7 @@ describe('InviteMembersModal', () => {
           createInviteMembersToGroupWrapper();
 
           expect(findIntroText()).toBe("You're inviting members to the test name group.");
-          expect(membersFormGroupDescription()).toBe('Select members or type email addresses');
+          expect(membersFormGroupDescription()).toBe(MEMBERS_PLACEHOLDER);
         });
       });
 
@@ -393,20 +417,6 @@ describe('InviteMembersModal', () => {
       "The member's email address is not allowed for this project. Go to the Admin area > Sign-up restrictions, and check Allowed domains for sign-ups.";
     const expectedSyntaxError = 'email contains an invalid email address';
 
-    it('calls the API with the expected focus data when an areas_of_focus checkbox is clicked', () => {
-      const spy = jest.spyOn(Api, 'addGroupMembersByUserId');
-      const expectedFocus = [areasOfFocusOptions[0].value];
-      createComponent({ newUsersToInvite: [user1] });
-
-      findAreaofFocusCheckBoxGroup().vm.$emit('input', expectedFocus);
-      clickInviteButton();
-
-      expect(spy).toHaveBeenCalledWith(
-        user1.id.toString(),
-        expect.objectContaining({ areas_of_focus: expectedFocus }),
-      );
-    });
-
     describe('when inviting an existing user to group by user ID', () => {
       const postData = {
         user_id: '1,2',
@@ -414,7 +424,6 @@ describe('InviteMembersModal', () => {
         expires_at: undefined,
         invite_source: inviteSource,
         format: 'json',
-        areas_of_focus: noSelectionAreasOfFocus,
         tasks_to_be_done: [],
         tasks_project_id: '',
       };
@@ -425,17 +434,6 @@ describe('InviteMembersModal', () => {
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
-          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
-        });
-
-        it('includes the non-default selected areas of focus', () => {
-          const focus = ['abc'];
-          const updatedPostData = { ...postData, areas_of_focus: focus };
-          wrapper.setData({ selectedAreasOfFocus: focus });
-
-          clickInviteButton();
-
-          expect(Api.addGroupMembersByUserId).toHaveBeenCalledWith(id, updatedPostData);
         });
 
         describe('when triggered from regular mounting', () => {
@@ -452,7 +450,23 @@ describe('InviteMembersModal', () => {
           });
 
           it('displays the successful toastMessage', () => {
-            expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+            expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Members were successfully added', {
+              onComplete: expect.any(Function),
+            });
+          });
+        });
+
+        describe('when opened from a Learn GitLab page', () => {
+          it('emits the `showSuccessfulInvitationsAlert` event', async () => {
+            eventHub.$emit('openModal', { inviteeType: 'members', source: LEARN_GITLAB });
+
+            jest.spyOn(eventHub, '$emit').mockImplementation();
+
+            clickInviteButton();
+
+            await waitForPromises();
+
+            expect(eventHub.$emit).toHaveBeenCalledWith('showSuccessfulInvitationsAlert');
           });
         });
       });
@@ -597,7 +611,6 @@ describe('InviteMembersModal', () => {
         expires_at: undefined,
         email: 'email@example.com',
         invite_source: inviteSource,
-        areas_of_focus: noSelectionAreasOfFocus,
         tasks_to_be_done: [],
         tasks_project_id: '',
         format: 'json',
@@ -609,17 +622,6 @@ describe('InviteMembersModal', () => {
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
-          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
-        });
-
-        it('includes the non-default selected areas of focus', () => {
-          const focus = ['abc'];
-          const updatedPostData = { ...postData, areas_of_focus: focus };
-          wrapper.setData({ selectedAreasOfFocus: focus });
-
-          clickInviteButton();
-
-          expect(Api.inviteGroupMembersByEmail).toHaveBeenCalledWith(id, updatedPostData);
         });
 
         describe('when triggered from regular mounting', () => {
@@ -632,7 +634,9 @@ describe('InviteMembersModal', () => {
           });
 
           it('displays the successful toastMessage', () => {
-            expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+            expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Members were successfully added', {
+              onComplete: expect.any(Function),
+            });
           });
         });
       });
@@ -671,13 +675,14 @@ describe('InviteMembersModal', () => {
         it('displays the successful toast message when email has already been invited', async () => {
           mockInvitationsApi(httpStatus.CREATED, invitationsApiResponse.EMAIL_TAKEN);
           wrapper.vm.$toast = { show: jest.fn() };
-          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
 
           clickInviteButton();
 
           await waitForPromises();
 
-          expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Members were successfully added', {
+            onComplete: expect.any(Function),
+          });
           expect(findMembersSelect().props('validationState')).toBe(null);
         });
 
@@ -726,7 +731,6 @@ describe('InviteMembersModal', () => {
         access_level: defaultAccessLevel,
         expires_at: undefined,
         invite_source: inviteSource,
-        areas_of_focus: noSelectionAreasOfFocus,
         format: 'json',
         tasks_to_be_done: [],
         tasks_project_id: '',
@@ -742,7 +746,6 @@ describe('InviteMembersModal', () => {
           wrapper.vm.$toast = { show: jest.fn() };
           jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
           jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
-          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
           jest.spyOn(wrapper.vm, 'trackInvite');
         });
 
@@ -760,7 +763,9 @@ describe('InviteMembersModal', () => {
           });
 
           it('displays the successful toastMessage', () => {
-            expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+            expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Members were successfully added', {
+              onComplete: expect.any(Function),
+            });
           });
         });
 
@@ -815,7 +820,6 @@ describe('InviteMembersModal', () => {
           wrapper.setData({ inviteeType: 'group' });
           wrapper.vm.$toast = { show: jest.fn() };
           jest.spyOn(Api, 'groupShareWithGroup').mockResolvedValue({ data: groupPostData });
-          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
 
           clickInviteButton();
         });
@@ -825,7 +829,9 @@ describe('InviteMembersModal', () => {
         });
 
         it('displays the successful toastMessage', () => {
-          expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Members were successfully added', {
+            onComplete: expect.any(Function),
+          });
         });
       });
 
@@ -883,22 +889,11 @@ describe('InviteMembersModal', () => {
         expect(ExperimentTracking).not.toHaveBeenCalledWith(INVITE_MEMBERS_IN_COMMENT);
       });
 
-      it('tracks the view for areas_of_focus', () => {
-        eventHub.$emit('openModal', { inviteeType: 'members' });
+      it('tracks the view for learn_gitlab source', () => {
+        eventHub.$emit('openModal', { inviteeType: 'members', source: LEARN_GITLAB });
 
-        expect(ExperimentTracking).toHaveBeenCalledWith(MEMBER_AREAS_OF_FOCUS.name);
-        expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith(MEMBER_AREAS_OF_FOCUS.view);
-      });
-
-      it('tracks the invite for areas_of_focus', () => {
-        eventHub.$emit('openModal', { inviteeType: 'members' });
-
-        clickInviteButton();
-
-        expect(ExperimentTracking).toHaveBeenCalledWith(MEMBER_AREAS_OF_FOCUS.name);
-        expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith(
-          MEMBER_AREAS_OF_FOCUS.submit,
-        );
+        expect(ExperimentTracking).toHaveBeenCalledWith(INVITE_MEMBERS_FOR_TASK.name);
+        expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith(LEARN_GITLAB);
       });
     });
   });

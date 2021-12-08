@@ -26,7 +26,7 @@ module Geo
     end
 
     def schedule_job(object_type, object_db_id)
-      job_id = FileDownloadWorker.perform_async(object_type.to_s, object_db_id)
+      job_id = FileDownloadWorker.with_status.perform_async(object_type.to_s, object_db_id)
 
       { id: object_db_id, type: object_type, job_id: job_id } if job_id
     end
@@ -71,13 +71,7 @@ module Geo
     end
 
     def job_finders
-      job_finders = [Geo::FileDownloadDispatchWorker::JobArtifactJobFinder.new(scheduled_file_ids(:job_artifact))]
-
-      if ::Geo::UploadReplicator.disabled?
-        job_finders << Geo::FileDownloadDispatchWorker::AttachmentJobFinder.new(scheduled_file_ids(Gitlab::Geo::Replication::USER_UPLOADS_OBJECT_TYPES))
-      end
-
-      job_finders
+      [Geo::FileDownloadDispatchWorker::JobArtifactJobFinder.new(scheduled_file_ids(:job_artifact))]
     end
 
     def scheduled_file_ids(file_types)

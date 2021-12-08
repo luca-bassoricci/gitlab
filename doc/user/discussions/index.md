@@ -10,7 +10,7 @@ type: reference, howto
 GitLab encourages communication through comments, threads, and
 [code suggestions](../project/merge_requests/reviews/suggestions.md).
 
-There are two types of comments:
+Two types of comments are available:
 
 - A standard comment.
 - A comment in a thread, which can be [resolved](#resolve-a-thread).
@@ -33,6 +33,20 @@ You can create comments in places like:
 - Snippets
 
 Each object can have as many as 5,000 comments.
+
+## Mentions
+
+You can mention a user or a group present in your GitLab instance with `@username` or
+`@groupname`. All mentioned users are notified with to-do items and emails.
+Users can change this setting for themselves in the
+[notification settings](../profile/notifications.md).
+
+You can quickly see which comments involve you, because
+mentions for yourself (the user currently signed in) are highlighted
+in a different color.
+
+Avoid mentioning `@all` in issues and merge requests, because it sends an email notification
+to all the members of that project's group. This might be interpreted as spam.
 
 ## Add a comment to a merge request diff
 
@@ -90,8 +104,10 @@ An icon is displayed on the image and a comment field is displayed.
 If you have ["reply by email"](../../administration/reply_by_email.md) configured,
 you can reply to comments by sending an email.
 
-- When you reply to a standard comment, another standard comment is created.
+- When you reply to a standard comment, it creates another standard comment.
 - When you reply to a threaded comment, it creates a reply in the thread.
+- When you [send an email to an issue email address](../project/issues/managing_issues.md#copy-issue-email-address),
+  it creates a standard comment.
 
 You can use [Markdown](../markdown.md) and [quick actions](../project/quick_actions.md) in your email replies.
 
@@ -141,13 +157,11 @@ You can also make an [entire issue confidential](../project/issues/confidential_
 
 ## Show only comments
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26723) in GitLab 11.5.
-
 For issues and merge requests with many comments, you can filter the page to show comments only.
 
 1. Open a merge request's **Discussion** tab, or epic or issue's **Overview** tab.
 1. On the right side of the page, select from the filter:
-   - **Show all activity**: Display all user comments and system notes
+   - **Show all activity**: Display all user comments and system notes.
      (issue updates, mentions from other issues, changes to the description, and so on).
    - **Show comments only**: Display only user comments.
    - **Show history only**: Display only activity notes.
@@ -156,6 +170,27 @@ For issues and merge requests with many comments, you can filter the page to sho
 
 GitLab saves your preference, so it persists when you visit the same page again
 from any device you're logged into.
+
+## View description change history **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) in GitLab 12.6.
+
+You can see changes to the description listed in the history.
+
+To compare the changes, select **Compare with previous version**.
+
+## Change activity sort order
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14588) in GitLab 12.10.
+
+You can reverse the default order and interact with the activity feed sorted by most recent items
+at the top. Your preference is saved in local storage and automatically applies to every issue,
+merge request, or epic you view.
+
+To change the activity sort order:
+
+1. Select the **Oldest first** (or **Newest first**) dropdown list.
+1. Select either oldest or newest items to be shown first.
 
 ## Assign an issue to the commenting user
 
@@ -170,8 +205,6 @@ You can assign an issue to a user who made a comment.
 
 ## Create a thread by replying to a standard comment
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30299) in GitLab 11.9.
-
 When you reply to a standard comment, you create a thread.
 
 Prerequisites:
@@ -185,7 +218,7 @@ To create a thread by replying to a comment:
 
    ![Reply to comment button](img/reply_to_comment_button.png)
 
-   The reply area is displayed.
+   The reply section is displayed.
 
 1. Enter your reply.
 1. Select **Comment** or **Add comment now** (depending on where in the UI you are replying).
@@ -214,8 +247,7 @@ A threaded comment is created.
 
 ## Resolve a thread
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5022) in GitLab 8.11.
-> - Resolving comments individually was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/28750) in GitLab 13.6.
+> Resolving comments individually was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/28750) in GitLab 13.6.
 
 In a merge request, you can resolve a thread when you want to finish a conversation.
 

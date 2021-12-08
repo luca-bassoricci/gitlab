@@ -86,10 +86,11 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
+  let(:maintainer) { true }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
   before do
-    project.add_maintainer(user)
+    project.add_maintainer(user) if maintainer
     sign_in(user)
   end
 
@@ -383,8 +384,9 @@ RSpec.describe Projects::MergeRequests::DiffsController do
       end
 
       context 'when the user cannot view the merge request' do
+        let(:maintainer) { false }
+
         before do
-          project.team.truncate
           diff_for_path(old_path: existing_path, new_path: existing_path)
         end
 
@@ -494,6 +496,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
       {
         environment: nil,
         merge_request: merge_request,
+        commit: nil,
         diff_view: :inline,
         merge_ref_head_diff: nil,
         allow_tree_conflicts: true,
@@ -550,7 +553,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
       it_behaves_like 'serializes diffs with expected arguments' do
         let(:collection) { Gitlab::Diff::FileCollection::Commit }
-        let(:expected_options) { collection_arguments }
+        let(:expected_options) { collection_arguments.merge(commit: merge_request.commits(limit: 1).first) }
       end
     end
 

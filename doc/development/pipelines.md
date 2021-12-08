@@ -68,6 +68,7 @@ In addition, there are a few circumstances where we would always run the full RS
 
 - when the `pipeline:run-all-rspec` label is set on the merge request
 - when the merge request is created by an automation (e.g. Gitaly update or MR targeting a stable branch)
+- when the merge request is created in a security mirror
 - when any CI config file is changed (i.e. `.gitlab-ci.yml` or `.gitlab/ci/**/*`)
 
 ### Jest minimal jobs
@@ -83,6 +84,7 @@ In addition, there are a few circumstances where we would always run the full Je
 
 - when the `pipeline:run-all-jest` label is set on the merge request
 - when the merge request is created by an automation (e.g. Gitaly update or MR targeting a stable branch)
+- when the merge request is created in a security mirror
 - when any CI config file is changed (i.e. `.gitlab-ci.yml` or `.gitlab/ci/**/*`)
 - when any frontend "core" file is changed (i.e. `package.json`, `yarn.lock`, `babel.config.js`, `jest.config.*.js`, `config/helpers/**/*.js`)
 - when any vendored JavaScript file is changed (i.e. `vendor/assets/javascripts/**/*`)
@@ -166,6 +168,13 @@ Our current RSpec tests parallelization setup is as follows:
 
 After that, the next pipeline uses the up-to-date `knapsack/report-master.json` file.
 
+### Flaky tests
+
+Tests that are [known to be flaky](testing_guide/flaky_tests.md#automatic-retries-and-flaky-tests-detection) are:
+
+- skipped if the `$SKIP_FLAKY_TESTS_AUTOMATICALLY` variable is set to `true` (`false` by default)
+- run if `$SKIP_FLAKY_TESTS_AUTOMATICALLY` variable is not set to `true` or if the `~"pipeline:run-flaky-tests"` label is set on the MR
+
 ### Monitoring
 
 The GitLab test suite is [monitored](performance.md#rspec-profiling) for the `main` branch, and any branch
@@ -212,6 +221,20 @@ The `* as-if-jh` jobs are run in addition to the regular EE-context jobs. The `j
 
 The intent is to ensure that a change doesn't introduce a failure after the `gitlab-org/gitlab` project is synced to
 the `gitlab-jh/gitlab` project.
+
+## `undercover` RSpec test
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/74859) in GitLab 14.6.
+
+The `rspec:undercoverage` job runs [`undercover`](https://rubygems.org/gems/undercover)
+to detect, and fail if any changes introduced in the merge request has zero coverage.
+
+The `rsepc:undercoverage` job obtains coverage data from the `rspec:coverage`
+job.
+
+In the event of an emergency, or false positive from this job, add the
+`pipeline:skip-undercoverage` label to the merge request to allow this job to
+fail.
 
 ## PostgreSQL versions testing
 
@@ -691,7 +714,7 @@ then included in individual jobs via [`extends`](../ci/yaml/index.md#extends).
 The `rules` definitions are composed of `if:` conditions and `changes:` patterns,
 which are also defined in
 [`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml)
-and included in `rules` definitions via [YAML anchors](../ci/yaml/yaml_specific_features.md#anchors)
+and included in `rules` definitions via [YAML anchors](../ci/yaml/yaml_optimization.md#anchors)
 
 #### `if:` conditions
 
@@ -723,7 +746,6 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/yaml_specific_
 | `if-dot-com-gitlab-org-and-security-merge-request`           | Limit jobs creation to merge requests for the `gitlab-org` and `gitlab-org/security` groups on GitLab.com. | |
 | `if-dot-com-gitlab-org-and-security-tag`                     | Limit jobs creation to tags for the `gitlab-org` and `gitlab-org/security` groups on GitLab.com. | |
 | `if-dot-com-ee-schedule`                                     | Limits jobs to scheduled pipelines for the `gitlab-org/gitlab` project on GitLab.com. | |
-| `if-cache-credentials-schedule`                              | Limits jobs to scheduled pipelines with the `$CI_REPO_CACHE_CREDENTIALS` variable set. | |
 | `if-security-pipeline-merge-result`                          | Matches if the pipeline is for a security merge request triggered by `@gitlab-release-tools-bot`. | |
 
 <!-- vale gitlab.Substitutions = YES -->
@@ -814,61 +836,7 @@ We no longer use this optimization for `gitlab-org/gitlab` because the [pack-obj
 allows Gitaly to serve the full CI/CD fetch traffic now. See [Git fetch caching](#git-fetch-caching).
 
 The pre-clone step works by using the `CI_PRE_CLONE_SCRIPT` variable
-[defined by GitLab.com shared runners](../ci/runners/build_cloud/linux_build_cloud.md#pre-clone-script).
-
-The `CI_PRE_CLONE_SCRIPT` is defined as a project CI/CD variable:
-
-```shell
-(
-  echo "Downloading archived master..."
-  wget -O /tmp/gitlab.tar.gz https://storage.googleapis.com/gitlab-ci-git-repo-cache/project-278964/gitlab-master-shallow.tar.gz
-
-  if [ ! -f /tmp/gitlab.tar.gz ]; then
-      echo "Repository cache not available, cloning a new directory..."
-      exit
-  fi
-
-  rm -rf $CI_PROJECT_DIR
-  echo "Extracting tarball into $CI_PROJECT_DIR..."
-  mkdir -p $CI_PROJECT_DIR
-  cd $CI_PROJECT_DIR
-  tar xzf /tmp/gitlab.tar.gz
-  rm -f /tmp/gitlab.tar.gz
-  chmod a+w $CI_PROJECT_DIR
-)
-```
-
-The first step of the script downloads `gitlab-master.tar.gz` from
-Google Cloud Storage. There is a [GitLab CI job named `cache-repo`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/cache-repo.gitlab-ci.yml#L5)
-that is responsible for keeping that archive up-to-date. Every two hours
-on a scheduled pipeline, it does the following:
-
-1. Creates a fresh clone of the `gitlab-org/gitlab` repository on GitLab.com.
-1. Saves the data as a `.tar.gz`.
-1. Uploads it into the Google Cloud Storage bucket.
-
-When a CI job runs with this configuration, the output looks something like this:
-
-```shell
-$ eval "$CI_PRE_CLONE_SCRIPT"
-Downloading archived master...
-Extracting tarball into /builds/group/project...
-Fetching changes...
-Reinitialized existing Git repository in /builds/group/project/.git/
-```
-
-Note that the `Reinitialized existing Git repository` message shows that
-the pre-clone step worked. The runner runs `git init`, which
-overwrites the Git configuration with the appropriate settings to fetch
-from the GitLab repository.
-
-`CI_REPO_CACHE_CREDENTIALS` contains the Google Cloud service account
-JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. (If you're a
-GitLab Team Member, find credentials in the
-[GitLab shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
-
-Note that this bucket should be located in the same continent as the
-runner, or [you can incur network egress charges](https://cloud.google.com/storage/pricing).
+[defined by GitLab.com shared runners](../ci/runners/saas/linux_saas_runner.md#pre-clone-script).
 
 ---
 

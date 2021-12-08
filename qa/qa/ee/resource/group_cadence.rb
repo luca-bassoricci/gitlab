@@ -6,11 +6,9 @@ module QA
       class GroupCadence < QA::Resource::Base
         include Support::Dates
 
-        attr_accessor :title, :group
-
         attribute :group do
           QA::Resource::Group.fabricate_via_api! do |group|
-            group.path = "group-to-test-iterations-#{SecureRandom.hex(8)}"
+            group.path = "group-to-test-iteration-cadences-#{SecureRandom.hex(8)}"
           end
         end
 
@@ -35,8 +33,8 @@ module QA
 
           QA::EE::Page::Group::Iteration::Cadence::New.perform do |new|
             new.fill_title(@title)
-            new.uncheck_automatic_scheduling
-            new.fill_start_date(@start_date)
+            new.uncheck_automatic_scheduling unless @automatic
+            new.fill_start_date(@start_date) if @automatic
             new.click_create_iteration_cadence_button
           end
         end

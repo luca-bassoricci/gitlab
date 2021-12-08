@@ -1,6 +1,7 @@
 export const apiFuzzingConfigurationQueryResponse = {
   data: {
     project: {
+      id: '1',
       apiFuzzingCiConfiguration: {
         scanModes: ['HAR', 'OPENAPI'],
         scanProfiles: [
@@ -36,23 +37,6 @@ export const apiFuzzingConfigurationQueryResponse = {
         __typename: 'ApiFuzzingCiConfiguration',
       },
       __typename: 'Project',
-    },
-  },
-};
-
-export const createApiFuzzingConfigurationMutationResponse = {
-  data: {
-    apiFuzzingCiConfigurationCreate: {
-      configurationYaml: `---
-stages:
-- fuzz
-include:
-- template: template.gitlab-ci.yml
-variables:
-- FOO: bar`,
-      gitlabCiYamlEditPath: '/ci/editor',
-      errors: [],
-      __typename: 'ApiFuzzingCiConfiguration',
     },
   },
 };

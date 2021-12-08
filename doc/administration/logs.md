@@ -296,7 +296,7 @@ Depending on your installation method, this file is located at:
 - Installations from source: `/home/git/gitlab/log/application.log`
 
 It helps you discover events happening in your instance such as user creation
-and project removal. For example:
+and project deletion. For example:
 
 ```plaintext
 October 06, 2014 11:56: User "Administrator" (admin@example.com) was created
@@ -830,7 +830,7 @@ are generated in a location based on your installation method:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/15442) in GitLab 12.3.
 
-Contains details of GitLab [Database Load Balancing](database_load_balancing.md).
+Contains details of GitLab [Database Load Balancing](postgresql/database_load_balancing.md).
 Depending on your installation method, this file is located at:
 
 - Omnibus GitLab: `/var/log/gitlab/gitlab-rails/database_load_balancing.log`

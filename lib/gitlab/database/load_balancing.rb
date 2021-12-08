@@ -26,8 +26,12 @@ module Gitlab
         return to_enum(__method__) unless block_given?
 
         base_models.each do |model|
-          yield model.connection.load_balancer
+          yield model.load_balancer
         end
+      end
+
+      def self.primary_only?
+        each_load_balancer.all?(&:primary_only?)
       end
 
       def self.release_hosts

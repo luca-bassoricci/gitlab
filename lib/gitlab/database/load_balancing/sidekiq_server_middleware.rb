@@ -6,6 +6,8 @@ module Gitlab
       class SidekiqServerMiddleware
         JobReplicaNotUpToDate = Class.new(StandardError)
 
+        MINIMUM_DELAY_INTERVAL = 1
+
         def call(worker, job, _queue)
           worker_class = worker.class
           strategy = select_load_balancing_strategy(worker_class, job)
@@ -13,7 +15,7 @@ module Gitlab
           job['load_balancing_strategy'] = strategy.to_s
 
           if use_primary?(strategy)
-            Session.current.use_primary!
+            ::Gitlab::Database::LoadBalancing::Session.current.use_primary!
           elsif strategy == :retry
             raise JobReplicaNotUpToDate, "Sidekiq job #{worker_class} JID-#{job['jid']} couldn't use the replica."\
               "  Replica was not up to date."
@@ -29,8 +31,8 @@ module Gitlab
         private
 
         def clear
-          LoadBalancing.release_hosts
-          Session.clear_session
+          ::Gitlab::Database::LoadBalancing.release_hosts
+          ::Gitlab::Database::LoadBalancing::Session.clear_session
         end
 
         def use_primary?(strategy)
@@ -42,7 +44,9 @@ module Gitlab
 
           wal_locations = get_wal_locations(job)
 
-          return :primary_no_wal unless wal_locations
+          return :primary_no_wal if wal_locations.blank?
+
+          sleep_if_needed(job)
 
           if databases_in_sync?(wal_locations)
             # Happy case: we can read from a replica.
@@ -56,6 +60,12 @@ module Gitlab
           end
         end
 
+        def sleep_if_needed(job)
+          remaining_delay = MINIMUM_DELAY_INTERVAL - (Time.current.to_f - job['created_at'].to_f)
+
+          sleep remaining_delay if remaining_delay > 0 && remaining_delay < MINIMUM_DELAY_INTERVAL
+        end
+
         def get_wal_locations(job)
           job['dedup_wal_locations'] || job['wal_locations'] || legacy_wal_location(job)
         end
@@ -66,7 +76,7 @@ module Gitlab
         def legacy_wal_location(job)
           wal_location = job['database_write_location'] || job['database_replica_location']
 
-          { Gitlab::Database::MAIN_DATABASE_NAME.to_sym => wal_location } if wal_location
+          { ::Gitlab::Database::MAIN_DATABASE_NAME.to_sym => wal_location } if wal_location
         end
 
         def load_balancing_available?(worker_class)
@@ -90,7 +100,7 @@ module Gitlab
         end
 
         def databases_in_sync?(wal_locations)
-          LoadBalancing.each_load_balancer.all? do |lb|
+          ::Gitlab::Database::LoadBalancing.each_load_balancer.all? do |lb|
             if (location = wal_locations[lb.name])
               lb.select_up_to_date_host(location)
             else

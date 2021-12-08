@@ -4,6 +4,8 @@ module Packages
     class CreatePackageService < ::Packages::CreatePackageService
       include Gitlab::Utils::StrongMemoize
 
+      PACKAGE_JSON_NOT_ALLOWED_FIELDS = %w[readme readmeFilename].freeze
+
       def execute
         return error('Version is empty.', 400) if version.blank?
         return error('Package already exists.', 403) if current_package_exists?
@@ -20,6 +22,8 @@ module Packages
         ::Packages::CreatePackageFileService.new(package, file_params).execute
         ::Packages::CreateDependencyService.new(package, package_dependencies).execute
         ::Packages::Npm::CreateTagService.new(package, dist_tag).execute
+
+        package.create_npm_metadatum!(package_json: package_json)
 
         package
       end
@@ -44,6 +48,10 @@ module Packages
 
       def version_data
         params[:versions][version]
+      end
+
+      def package_json
+        version_data.except(*PACKAGE_JSON_NOT_ALLOWED_FIELDS)
       end
 
       def dist_tag

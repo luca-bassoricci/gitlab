@@ -6,6 +6,7 @@ import {
 export const getIssuesQueryResponse = {
   data: {
     project: {
+      id: '1',
       issues: {
         pageInfo: {
           hasNextPage: true,
@@ -22,6 +23,7 @@ export const getIssuesQueryResponse = {
             createdAt: '2021-05-22T04:08:01Z',
             downvotes: 2,
             dueDate: '2021-05-29',
+            hidden: false,
             humanTimeEstimate: null,
             mergeRequestsCount: false,
             moved: false,
@@ -74,6 +76,7 @@ export const getIssuesQueryResponse = {
 export const getIssuesCountsQueryResponse = {
   data: {
     project: {
+      id: '1',
       openedIssues: {
         count: 1,
       },
@@ -262,6 +265,7 @@ export const urlParamsWithSpecialValues = {
 
 export const project1 = {
   id: 'gid://gitlab/Group/26',
+  issuesEnabled: true,
   name: 'Super Mario Project',
   nameWithNamespace: 'Mushroom Kingdom / Super Mario Project',
   webUrl: 'https://127.0.0.1:3000/mushroom-kingdom/super-mario-project',
@@ -269,16 +273,26 @@ export const project1 = {
 
 export const project2 = {
   id: 'gid://gitlab/Group/59',
+  issuesEnabled: false,
   name: 'Mario Kart Project',
   nameWithNamespace: 'Mushroom Kingdom / Mario Kart Project',
   webUrl: 'https://127.0.0.1:3000/mushroom-kingdom/mario-kart-project',
 };
 
+export const project3 = {
+  id: 'gid://gitlab/Group/103',
+  issuesEnabled: true,
+  name: 'Mario Party Project',
+  nameWithNamespace: 'Mushroom Kingdom / Mario Party Project',
+  webUrl: 'https://127.0.0.1:3000/mushroom-kingdom/mario-party-project',
+};
+
 export const searchProjectsQueryResponse = {
   data: {
     group: {
+      id: '1',
       projects: {
-        nodes: [project1, project2],
+        nodes: [project1, project2, project3],
       },
     },
   },
@@ -287,6 +301,7 @@ export const searchProjectsQueryResponse = {
 export const emptySearchProjectsQueryResponse = {
   data: {
     group: {
+      id: '1',
       projects: {
         nodes: [],
       },

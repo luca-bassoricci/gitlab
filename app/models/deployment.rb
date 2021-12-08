@@ -12,6 +12,8 @@ class Deployment < ApplicationRecord
   StatusUpdateError = Class.new(StandardError)
   StatusSyncError = Class.new(StandardError)
 
+  ARCHIVABLE_OFFSET = 50_000
+
   belongs_to :project, required: true
   belongs_to :environment, required: true
   belongs_to :cluster, class_name: 'Clusters::Cluster', optional: true
@@ -44,9 +46,10 @@ class Deployment < ApplicationRecord
   scope :for_project, -> (project_id) { where(project_id: project_id) }
   scope :for_projects, -> (projects) { where(project: projects) }
 
-  scope :visible, -> { where(status: %i[running success failed canceled]) }
+  scope :visible, -> { where(status: %i[running success failed canceled blocked]) }
   scope :stoppable, -> { where.not(on_stop: nil).where.not(deployable_id: nil).success }
   scope :active, -> { where(status: %i[created running]) }
+  scope :upcoming, -> { where(status: %i[blocked running]) }
   scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
   scope :with_api_entity_associations, -> { preload({ deployable: { runner: [], tags: [], user: [], job_artifacts_archive: [] } }) }
 
@@ -60,6 +63,10 @@ class Deployment < ApplicationRecord
   state_machine :status, initial: :created do
     event :run do
       transition created: :running
+    end
+
+    event :block do
+      transition created: :blocked
     end
 
     event :succeed do
@@ -100,6 +107,10 @@ class Deployment < ApplicationRecord
       deployment.run_after_commit do
         Deployments::UpdateEnvironmentWorker.perform_async(id)
         Deployments::LinkMergeRequestWorker.perform_async(id)
+
+        if ::Feature.enabled?(:deployments_archive, deployment.project, default_enabled: :yaml)
+          Deployments::ArchiveInProjectWorker.perform_async(deployment.project_id)
+        end
       end
     end
 
@@ -113,6 +124,8 @@ class Deployment < ApplicationRecord
       next if transition.loopback?
 
       deployment.run_after_commit do
+        next unless deployment.project.jira_subscription_exists?
+
         ::JiraConnect::SyncDeploymentsWorker.perform_async(id)
       end
     end
@@ -120,6 +133,8 @@ class Deployment < ApplicationRecord
 
   after_create unless: :importing? do |deployment|
     run_after_commit do
+      next unless deployment.project.jira_subscription_exists?
+
       ::JiraConnect::SyncDeploymentsWorker.perform_async(deployment.id)
     end
   end
@@ -130,8 +145,17 @@ class Deployment < ApplicationRecord
     success: 2,
     failed: 3,
     canceled: 4,
-    skipped: 5
+    skipped: 5,
+    blocked: 6
   }
+
+  def self.archivables_in(project, limit:)
+    start_iid = project.deployments.order(iid: :desc).limit(1)
+      .select("(iid - #{ARCHIVABLE_OFFSET}) AS start_iid")
+
+    project.deployments.preload(:environment).where('iid <= (?)', start_iid)
+      .where(archived: false).limit(limit)
+  end
 
   def self.last_for_environment(environment)
     ids = self
@@ -300,7 +324,7 @@ class Deployment < ApplicationRecord
                              "#{id} as deployment_id",
                              "#{environment_id} as environment_id").to_sql
 
-    # We don't use `Gitlab::Database.main.bulk_insert` here so that we don't need to
+    # We don't use `ApplicationRecord.legacy_bulk_insert` here so that we don't need to
     # first pluck lots of IDs into memory.
     #
     # We also ignore any duplicates so this method can be called multiple times
@@ -373,6 +397,8 @@ class Deployment < ApplicationRecord
       cancel!
     when 'skipped'
       skip!
+    when 'blocked'
+      block!
     else
       raise ArgumentError, "The status #{status.inspect} is invalid"
     end

@@ -139,7 +139,7 @@ RSpec.describe ApprovalProjectRule do
 
     context "when there is a project rule for each report type" do
       with_them do
-        subject { create(:approval_project_rule, report_type, :requires_approval, project: project) }
+        subject { create(:approval_project_rule, report_type, :requires_approval, project: project, orchestration_policy_idx: 1) }
 
         let!(:result) { subject.apply_report_approver_rules_to(merge_request) }
 
@@ -149,6 +149,7 @@ RSpec.describe ApprovalProjectRule do
         specify { expect(result.name).to be(:default_name) }
         specify { expect(result.rule_type).to be(:report_approver) }
         specify { expect(result.report_type).to be(:report_type) }
+        specify { expect(result.orchestration_policy_idx).to be 1 }
       end
     end
   end
@@ -157,11 +158,13 @@ RSpec.describe ApprovalProjectRule do
     let(:project_approval_rule) { create(:approval_project_rule) }
     let(:license_compliance_rule) { create(:approval_project_rule, :license_scanning) }
     let(:vulnerability_check_rule) { create(:approval_project_rule, :vulnerability) }
+    let(:coverage_check_rule) { create(:approval_project_rule, :code_coverage) }
 
     context "when creating a new rule" do
       specify { expect(project_approval_rule).to be_valid }
       specify { expect(license_compliance_rule).to be_valid }
       specify { expect(vulnerability_check_rule).to be_valid }
+      specify { expect(coverage_check_rule).to be_valid }
     end
 
     context "when attempting to edit the name of the rule" do
@@ -177,29 +180,45 @@ RSpec.describe ApprovalProjectRule do
         subject { license_compliance_rule }
 
         specify { expect(subject).not_to be_valid }
-        specify { expect { subject.valid? }.to change { subject.errors[:name].present? } }
+        specify { expect { subject.valid? }.to change { subject.errors[:report_type].present? } }
+      end
+
+      context "with a `Coverage-Check` rule" do
+        subject { coverage_check_rule }
+
+        specify { expect(subject).not_to be_valid }
+        specify { expect { subject.valid? }.to change { subject.errors[:report_type].present? } }
       end
 
       context "with a `Vulnerability-Check` rule" do
-        using RSpec::Parameterized::TableSyntax
+        context 'different combinations of specific attributes' do
+          using RSpec::Parameterized::TableSyntax
 
-        where(:is_valid, :scanners, :vulnerabilities_allowed, :severity_levels, :vulnerability_states) do
-          true  | []                                     | 0     | []                       | %w(newly_detected)
-          true  | %w(dast)                               | 1     | %w(critical high medium) | %w(newly_detected resolved)
-          true  | %w(dast sast)                          | 10    | %w(critical high)        | %w(resolved detected)
-          true  | %w(dast dast)                          | 100   | %w(critical)             | %w(detected dismissed)
-          false | %w(dast dast)                          | 100   | %w(critical)             | %w(dismissed unknown)
-          false | %w(dast dast)                          | 100   | %w(unknown_severity)     | %w(detected dismissed)
-          false | %w(dast unknown_scanner)               | 100   | %w(critical)             | %w(detected dismissed)
-          false | [described_class::UNSUPPORTED_SCANNER] | 100   | %w(critical)             | %w(detected dismissed)
-          false | %w(dast sast)                          | 1.1   | %w(critical)             | %w(detected dismissed)
-          false | %w(dast sast)                          | 'one' | %w(critical)             | %w(detected dismissed)
+          where(:is_valid, :scanners, :vulnerabilities_allowed, :severity_levels, :vulnerability_states) do
+            true  | []                                     | 0     | []                       | %w(newly_detected)
+            true  | %w(dast)                               | 1     | %w(critical high medium) | %w(newly_detected resolved)
+            true  | %w(dast sast)                          | 10    | %w(critical high)        | %w(resolved detected)
+            true  | %w(dast dast)                          | 100   | %w(critical)             | %w(detected dismissed)
+            false | %w(dast dast)                          | 100   | %w(critical)             | %w(dismissed unknown)
+            false | %w(dast dast)                          | 100   | %w(unknown_severity)     | %w(detected dismissed)
+            false | %w(dast unknown_scanner)               | 100   | %w(critical)             | %w(detected dismissed)
+            false | [described_class::UNSUPPORTED_SCANNER] | 100   | %w(critical)             | %w(detected dismissed)
+            false | %w(dast sast)                          | 1.1   | %w(critical)             | %w(detected dismissed)
+            false | %w(dast sast)                          | 'one' | %w(critical)             | %w(detected dismissed)
+          end
+
+          with_them do
+            let(:vulnerability_check_rule) { build(:approval_project_rule, :vulnerability, scanners: scanners, vulnerabilities_allowed: vulnerabilities_allowed, severity_levels: severity_levels, vulnerability_states: vulnerability_states) }
+
+            specify { expect(vulnerability_check_rule.valid?).to be(is_valid) }
+          end
         end
 
-        with_them do
-          let(:vulnerability_check_rule) { build(:approval_project_rule, :vulnerability, scanners: scanners, vulnerabilities_allowed: vulnerabilities_allowed, severity_levels: severity_levels, vulnerability_states: vulnerability_states) }
+        context 'with invalid name' do
+          subject { vulnerability_check_rule }
 
-          specify { expect(vulnerability_check_rule.valid?).to be(is_valid) }
+          specify { expect(subject).not_to be_valid }
+          specify { expect { subject.valid? }.to change { subject.errors[:report_type].present? } }
         end
       end
     end
@@ -301,6 +320,46 @@ RSpec.describe ApprovalProjectRule do
           expect(rule.vulnerability_states_for_branch).to contain_exactly('newly_detected')
         end
       end
+    end
+  end
+
+  describe '.distinct_scanners scope' do
+    subject { described_class.distinct_scanners }
+
+    before do
+      create(:approval_project_rule, type, scanners: ['dast'])
+    end
+
+    context 'with scan_finding approval rules' do
+      let(:type) { :scan_finding }
+
+      it { is_expected.to be_present }
+
+      context 'with duplicated scanners' do
+        before do
+          create(:approval_project_rule, :scan_finding, scanners: ['dast'])
+        end
+
+        it 'returns only one record' do
+          expect(subject.count).to be 1
+        end
+      end
+
+      context 'without duplicated scanners' do
+        before do
+          create(:approval_project_rule, :scan_finding, scanners: ['sast'])
+        end
+
+        it 'returns both records' do
+          expect(subject.count).to be 2
+        end
+      end
+    end
+
+    context 'without scan_finding approval rules' do
+      let(:type) { :vulnerability }
+
+      it { is_expected.to be_empty }
     end
   end
 end

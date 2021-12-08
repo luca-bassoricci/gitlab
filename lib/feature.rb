@@ -6,6 +6,8 @@ require 'flipper/adapters/active_support_cache_store'
 class Feature
   # Classes to override flipper table names
   class FlipperFeature < Flipper::Adapters::ActiveRecord::Feature
+    include DatabaseReflection
+
     # Using `self.table_name` won't work. ActiveRecord bug?
     superclass.table_name = 'features'
 
@@ -36,7 +38,7 @@ class Feature
     end
 
     def persisted_names
-      return [] unless Gitlab::Database.main.exists?
+      return [] unless ApplicationRecord.database.exists?
 
       # This loads names of all stored feature flags
       # and returns a stable Set in the following order:
@@ -73,7 +75,7 @@ class Feature
 
       # During setup the database does not exist yet. So we haven't stored a value
       # for the feature yet and return the default.
-      return default_enabled unless Gitlab::Database.main.exists?
+      return default_enabled unless ApplicationRecord.database.exists?
 
       feature = get(key)
 
@@ -81,7 +83,12 @@ class Feature
       # `persisted?` can potentially generate DB queries and also checks for inclusion
       # in an array of feature names (177 at last count), possibly reducing performance by half.
       # So we only perform the `persisted` check if `default_enabled: true`
-      !default_enabled || Feature.persisted_name?(feature.name) ? feature.enabled?(thing) : true
+      feature_value = !default_enabled || Feature.persisted_name?(feature.name) ? feature.enabled?(thing) : true
+
+      # If we don't filter out this flag here we will enter an infinite loop
+      log_feature_flag_state(key, feature_value) if log_feature_flag_states?(key)
+
+      feature_value
     end
 
     def disabled?(key, thing = nil, type: :development, default_enabled: false)
@@ -149,6 +156,18 @@ class Feature
 
     def logger
       @logger ||= Feature::Logger.build
+    end
+
+    def log_feature_flag_states?(key)
+      key != :feature_flag_state_logs && Feature.enabled?(:feature_flag_state_logs, type: :ops)
+    end
+
+    def log_feature_flag_state(key, feature_value)
+      logged_states[key] ||= feature_value
+    end
+
+    def logged_states
+      RequestStore.fetch(:feature_flag_events) { {} }
     end
 
     private

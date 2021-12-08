@@ -9,10 +9,11 @@ import {
   GlIntersectionObserver,
 } from '@gitlab/ui';
 import { once } from 'lodash';
+import * as Sentry from '@sentry/browser';
 import api from '~/api';
 import { sprintf, s__, __ } from '~/locale';
 import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
-import { EXTENSION_ICON_CLASS } from '../../constants';
+import { EXTENSION_ICON_CLASS, EXTENSION_ICONS } from '../../constants';
 import StatusIcon from './status_icon.vue';
 import Actions from './actions.vue';
 
@@ -20,6 +21,7 @@ export const LOADING_STATES = {
   collapsedLoading: 'collapsedLoading',
   collapsedError: 'collapsedError',
   expandedLoading: 'expandedLoading',
+  expandedError: 'expandedError',
 };
 
 export default {
@@ -40,8 +42,8 @@ export default {
   data() {
     return {
       loadingState: LOADING_STATES.collapsedLoading,
-      collapsedData: null,
-      fullData: null,
+      collapsedData: {},
+      fullData: [],
       isCollapsed: true,
       showFade: false,
     };
@@ -53,6 +55,9 @@ export default {
     widgetLoadingText() {
       return this.$options.i18n?.loading || __('Loading...');
     },
+    widgetErrorText() {
+      return this.$options.i18n?.error || __('Failed to load');
+    },
     isLoadingSummary() {
       return this.loadingState === LOADING_STATES.collapsedLoading;
     },
@@ -60,11 +65,16 @@ export default {
       return this.loadingState === LOADING_STATES.expandedLoading;
     },
     isCollapsible() {
-      if (this.isLoadingSummary) {
-        return false;
-      }
-
-      return true;
+      return !this.isLoadingSummary && this.loadingState !== LOADING_STATES.collapsedError;
+    },
+    hasFullData() {
+      return this.fullData.length > 0;
+    },
+    hasFetchError() {
+      return (
+        this.loadingState === LOADING_STATES.collapsedError ||
+        this.loadingState === LOADING_STATES.expandedError
+      );
     },
     collapseButtonLabel() {
       return sprintf(
@@ -75,6 +85,7 @@ export default {
       );
     },
     statusIconName() {
+      if (this.hasFetchError) return EXTENSION_ICONS.error;
       if (this.isLoadingSummary) return null;
 
       return this.statusIcon(this.collapsedData);
@@ -93,15 +104,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchCollapsedData(this.$props)
-      .then((data) => {
-        this.collapsedData = data;
-        this.loadingState = null;
-      })
-      .catch((e) => {
-        this.loadingState = LOADING_STATES.collapsedError;
-        throw e;
-      });
+    this.loadCollapsedData();
   },
   methods: {
     triggerRedisTracking: once(function triggerRedisTracking() {
@@ -114,8 +117,22 @@ export default {
 
       this.triggerRedisTracking();
     },
+    loadCollapsedData() {
+      this.loadingState = LOADING_STATES.collapsedLoading;
+
+      this.fetchCollapsedData(this.$props)
+        .then((data) => {
+          this.collapsedData = data;
+          this.loadingState = null;
+        })
+        .catch((e) => {
+          this.loadingState = LOADING_STATES.collapsedError;
+
+          Sentry.captureException(e);
+        });
+    },
     loadAllData() {
-      if (this.fullData) return;
+      if (this.hasFullData) return;
 
       this.loadingState = LOADING_STATES.expandedLoading;
 
@@ -125,8 +142,9 @@ export default {
           this.fullData = data;
         })
         .catch((e) => {
-          this.loadingState = null;
-          throw e;
+          this.loadingState = LOADING_STATES.expandedError;
+
+          Sentry.captureException(e);
         });
     },
     appear(index) {
@@ -153,20 +171,23 @@ export default {
         :icon-name="statusIconName"
       />
       <div
-        class="media-body gl-display-flex gl-flex-direction-row!"
+        class="media-body gl-display-flex gl-flex-direction-row! gl-align-self-center"
         data-testid="widget-extension-top-level"
       >
         <div class="gl-flex-grow-1">
           <template v-if="isLoadingSummary">{{ widgetLoadingText }}</template>
+          <template v-else-if="hasFetchError">{{ widgetErrorText }}</template>
           <div v-else v-safe-html="summary(collapsedData)"></div>
         </div>
         <actions
           :widget="$options.label || $options.name"
           :tertiary-buttons="tertiaryActionsButtons"
         />
-        <div class="gl-border-l-1 gl-border-l-solid gl-border-gray-100 gl-ml-3 gl-pl-3 gl-h-6">
+        <div
+          v-if="isCollapsible"
+          class="gl-border-l-1 gl-border-l-solid gl-border-gray-100 gl-ml-3 gl-pl-3 gl-h-6"
+        >
           <gl-button
-            v-if="isCollapsible"
             v-gl-tooltip
             :title="collapseButtonLabel"
             :aria-expanded="`${!isCollapsed}`"
@@ -189,7 +210,7 @@ export default {
         <gl-loading-icon size="sm" inline /> {{ __('Loading...') }}
       </div>
       <smart-virtual-list
-        v-else-if="fullData"
+        v-else-if="hasFullData"
         :length="fullData.length"
         :remain="20"
         :size="32"

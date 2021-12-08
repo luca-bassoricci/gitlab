@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module IssuesHelper
+  include Issues::IssueTypeHelpers
+
   def issue_css_classes(issue)
     classes = ["issue"]
     classes << "closed" if issue.closed?
@@ -190,6 +192,7 @@ module IssuesHelper
 
     {
       can_create_issue: show_new_issue_link?(project).to_s,
+      can_create_incident: create_issue_type_allowed?(project, :incident).to_s,
       can_reopen_issue: can?(current_user, :reopen_issue, issuable).to_s,
       can_report_spam: issuable.submittable_as_spam_by?(current_user).to_s,
       can_update_issue: can?(current_user, :update_issue, issuable).to_s,
@@ -209,6 +212,7 @@ module IssuesHelper
       calendar_path: url_for(safe_params.merge(calendar_url_options)),
       empty_state_svg_path: image_path('illustrations/issues.svg'),
       full_path: namespace.full_path,
+      is_issue_repositioning_disabled: issue_repositioning_disabled?.to_s,
       is_signed_in: current_user.present?.to_s,
       jira_integration_path: help_page_url('integration/jira/issues', anchor: 'view-jira-issues'),
       rss_path: url_for(safe_params.merge(rss_url_options)),

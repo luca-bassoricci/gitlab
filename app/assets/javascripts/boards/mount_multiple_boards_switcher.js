@@ -1,14 +1,27 @@
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import BoardsSelector from 'ee_else_ce/boards/components/boards_selector.vue';
 import store from '~/boards/stores';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 
 Vue.use(VueApollo);
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData,
+});
+
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      cacheConfig: {
+        fragmentMatcher,
+      },
+    },
+  ),
 });
 
 export default (params = {}) => {
@@ -32,7 +45,6 @@ export default (params = {}) => {
     data() {
       const boardsSelectorProps = {
         ...dataset,
-        currentBoard: JSON.parse(dataset.currentBoard),
         hasMissingBoards: parseBoolean(dataset.hasMissingBoards),
         canAdminBoard: parseBoolean(dataset.canAdminBoard),
         multipleIssueBoardsAvailable: parseBoolean(dataset.multipleIssueBoardsAvailable),

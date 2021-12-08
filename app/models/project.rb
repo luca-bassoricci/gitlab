@@ -19,7 +19,6 @@ class Project < ApplicationRecord
   include Presentable
   include HasRepository
   include HasWiki
-  include HasIntegrations
   include CanMoveRepositoryStorage
   include Routable
   include GroupDescendant
@@ -37,6 +36,7 @@ class Project < ApplicationRecord
   include Repositories::CanHousekeepRepository
   include EachBatch
   include GitlabRoutingHelper
+  include BulkMemberAccessLoad
 
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
@@ -98,7 +98,7 @@ class Project < ApplicationRecord
   before_validation :mark_remote_mirrors_for_removal, if: -> { RemoteMirror.table_exists? }
 
   before_save :ensure_runners_token
-  before_save :ensure_project_namespace_in_sync
+  before_validation :ensure_project_namespace_in_sync
 
   after_save :update_project_statistics, if: :saved_change_to_namespace_id?
 
@@ -147,7 +147,7 @@ class Project < ApplicationRecord
   belongs_to :namespace
   # Sync deletion via DB Trigger to ensure we do not have
   # a project without a project_namespace (or vice-versa)
-  belongs_to :project_namespace, autosave: true, class_name: 'Namespaces::ProjectNamespace', foreign_key: 'project_namespace_id', inverse_of: :project
+  belongs_to :project_namespace, autosave: true, class_name: 'Namespaces::ProjectNamespace', foreign_key: 'project_namespace_id'
   alias_method :parent, :namespace
   alias_attribute :parent_id, :namespace_id
 
@@ -189,6 +189,7 @@ class Project < ApplicationRecord
   has_one :prometheus_integration, class_name: 'Integrations::Prometheus', inverse_of: :project
   has_one :pushover_integration, class_name: 'Integrations::Pushover'
   has_one :redmine_integration, class_name: 'Integrations::Redmine'
+  has_one :shimo_integration, class_name: 'Integrations::Shimo'
   has_one :slack_integration, class_name: 'Integrations::Slack'
   has_one :slack_slash_commands_integration, class_name: 'Integrations::SlackSlashCommands'
   has_one :teamcity_integration, class_name: 'Integrations::Teamcity'
@@ -448,9 +449,11 @@ class Project < ApplicationRecord
   delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, to: :ci_cd_settings, allow_nil: true
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
-    :allow_merge_on_skipped_pipeline=, :has_confluence?,
+    :allow_merge_on_skipped_pipeline=, :has_confluence?, :has_shimo?,
     to: :project_setting
   delegate :active?, to: :prometheus_integration, allow_nil: true, prefix: true
+  delegate :merge_commit_template, :merge_commit_template=, to: :project_setting, allow_nil: true
+  delegate :squash_commit_template, :squash_commit_template=, to: :project_setting, allow_nil: true
 
   delegate :log_jira_dvcs_integration_usage, :jira_dvcs_server_last_sync_at, :jira_dvcs_cloud_last_sync_at, to: :feature_usage
 
@@ -475,6 +478,8 @@ class Project < ApplicationRecord
   validates :project_feature, presence: true
 
   validates :namespace, presence: true
+  validates :project_namespace, presence: true, on: :create, if: -> { self.namespace && self.root_namespace.project_namespace_creation_enabled? }
+  validates :project_namespace, presence: true, on: :update, if: -> { self.project_namespace_id_changed?(to: nil) }
   validates :name, uniqueness: { scope: :namespace_id }
   validates :import_url, public_url: { schemes: ->(project) { project.persisted? ? VALID_MIRROR_PROTOCOLS : VALID_IMPORT_PROTOCOLS },
                                        ports: ->(project) { project.persisted? ? VALID_MIRROR_PORTS : VALID_IMPORT_PORTS },
@@ -492,6 +497,7 @@ class Project < ApplicationRecord
   validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
+  validates :suggestion_commit_message, length: { maximum: 255 }
 
   # Scopes
   scope :pending_delete, -> { where(pending_delete: true) }
@@ -571,18 +577,12 @@ class Project < ApplicationRecord
       .where('rs.path LIKE ?', "#{sanitize_sql_like(path)}/%")
   end
 
-  # "enabled" here means "not disabled". It includes private features!
   scope :with_feature_enabled, ->(feature) {
-    access_level_attribute = ProjectFeature.arel_table[ProjectFeature.access_level_attribute(feature)]
-    enabled_feature = access_level_attribute.gt(ProjectFeature::DISABLED).or(access_level_attribute.eq(nil))
-
-    with_project_feature.where(enabled_feature)
+    with_project_feature.merge(ProjectFeature.with_feature_enabled(feature))
   }
 
-  # Picks a feature where the level is exactly that given.
   scope :with_feature_access_level, ->(feature, level) {
-    access_level_attribute = ProjectFeature.access_level_attribute(feature)
-    with_project_feature.where(project_features: { access_level_attribute => level })
+    with_project_feature.merge(ProjectFeature.with_feature_access_level(feature, level))
   }
 
   # Picks projects which use the given programming language
@@ -683,37 +683,8 @@ class Project < ApplicationRecord
     end
   end
 
-  # project features may be "disabled", "internal", "enabled" or "public". If "internal",
-  # they are only available to team members. This scope returns projects where
-  # the feature is either public, enabled, or internal with permission for the user.
-  # Note: this scope doesn't enforce that the user has access to the projects, it just checks
-  # that the user has access to the feature. It's important to use this scope with others
-  # that checks project authorizations first (e.g. `filter_by_feature_visibility`).
-  #
-  # This method uses an optimised version of `with_feature_access_level` for
-  # logged in users to more efficiently get private projects with the given
-  # feature.
   def self.with_feature_available_for_user(feature, user)
-    visible = [ProjectFeature::ENABLED, ProjectFeature::PUBLIC]
-
-    if user&.can_read_all_resources?
-      with_feature_enabled(feature)
-    elsif user
-      min_access_level = ProjectFeature.required_minimum_access_level(feature)
-      column = ProjectFeature.quoted_access_level_column(feature)
-
-      with_project_feature
-      .where("#{column} IS NULL OR #{column} IN (:public_visible) OR (#{column} = :private_visible AND EXISTS (:authorizations))",
-            {
-              public_visible: visible,
-              private_visible: ProjectFeature::PRIVATE,
-              authorizations: user.authorizations_for_projects(min_access_level: min_access_level)
-            })
-    else
-      # This has to be added to include features whose value is nil in the db
-      visible << nil
-      with_feature_access_level(feature, visible)
-    end
+    with_project_feature.merge(ProjectFeature.with_feature_available_for_user(feature, user))
   end
 
   def self.projects_user_can(projects, user, action)
@@ -856,6 +827,18 @@ class Project < ApplicationRecord
       find_by_full_path(match.values_at(:namespace_id, :id).join("/"))
     rescue ActionController::RoutingError, URI::InvalidURIError
       nil
+    end
+
+    def without_integration(integration)
+      integrations = Integration
+        .select('1')
+        .where("#{Integration.table_name}.project_id = projects.id")
+        .where(type: integration.type)
+
+      Project
+        .where('NOT EXISTS (?)', integrations)
+        .where(pending_delete: false)
+        .where(archived: false)
     end
   end
 
@@ -1453,7 +1436,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_integrations
-    []
+    disabled_integrations = []
+    disabled_integrations << 'shimo' unless Feature.enabled?(:shimo_integration, self)
+    disabled_integrations
   end
 
   def find_or_initialize_integration(name)
@@ -2731,6 +2716,12 @@ class Project < ApplicationRecord
     end
   end
 
+  def remove_project_authorizations(user_ids, per_batch = 1000)
+    user_ids.each_slice(per_batch) do |user_ids_batch|
+      project_authorizations.where(user_id: user_ids_batch).delete_all
+    end
+  end
+
   private
 
   # overridden in EE
@@ -2918,12 +2909,28 @@ class Project < ApplicationRecord
   end
 
   def ensure_project_namespace_in_sync
-    if changes.keys & [:name, :path, :namespace_id, :visibility_level] && project_namespace.present?
-      project_namespace.name = name
-      project_namespace.path = path
-      project_namespace.parent = namespace
-      project_namespace.visibility_level = visibility_level
-    end
+    # create project_namespace when project is created if create_project_namespace_on_project_create FF is enabled
+    build_project_namespace if project_namespace_creation_enabled?
+
+    # regardless of create_project_namespace_on_project_create FF we need
+    # to keep project and project namespace in sync if there is one
+    sync_attributes(project_namespace) if sync_project_namespace?
+  end
+
+  def project_namespace_creation_enabled?
+    new_record? && !project_namespace && self.namespace && self.root_namespace.project_namespace_creation_enabled?
+  end
+
+  def sync_project_namespace?
+    (changes.keys & %w(name path namespace_id namespace visibility_level shared_runners_enabled)).any? && project_namespace.present?
+  end
+
+  def sync_attributes(project_namespace)
+    project_namespace.name = name
+    project_namespace.path = path
+    project_namespace.parent = namespace
+    project_namespace.shared_runners_enabled = shared_runners_enabled
+    project_namespace.visibility_level = visibility_level
   end
 end
 

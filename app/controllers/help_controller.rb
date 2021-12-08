@@ -59,10 +59,6 @@ class HelpController < ApplicationController
     @instance_configuration = InstanceConfiguration.new
   end
 
-  def ui
-    @user = User.new(id: 0, name: 'John Doe', username: '@johndoe')
-  end
-
   private
 
   def path_params
@@ -122,3 +118,5 @@ class HelpController < ApplicationController
     end
   end
 end
+
+::HelpController.prepend_mod

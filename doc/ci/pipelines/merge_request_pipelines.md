@@ -45,7 +45,7 @@ To do this, you can use [`rules`](#use-rules-to-run-pipelines-for-merge-requests
 ### Use `rules` to run pipelines for merge requests
 
 GitLab recommends that you use the `rules` keyword, which is available in
-[`workflow:rules` templates](../yaml/index.md#workflowrules-templates).
+[`workflow:rules` templates](../yaml/workflow.md#workflowrules-templates).
 
 ### Use `only` or `except` to run pipelines for merge requests
 
@@ -112,11 +112,11 @@ C:
     - merge_requests
 ```
 
-- `A` and `B` always run, because they get the `only:` rule to execute in all cases.
+- `A` and `B` always run, because they get the `only` rule to execute in all cases.
 - `C` only runs for merge requests. It doesn't run for any pipeline
   except a merge request pipeline.
 
-In this example, you don't have to add the `only:` rule to all of your jobs to make
+In this example, you don't have to add the `only` rule to all of your jobs to make
 them always run. You can use this format to set up a Review App, which helps to
 save resources.
 
@@ -199,7 +199,7 @@ If you are seeing two pipelines when using `only/except`, please see the caveats
 related to using `only/except` above (or, consider moving to `rules`).
 
 In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/201845),
-you can add `workflow:rules` to [switch from branch pipelines to merge request pipelines](../yaml/index.md#switch-between-branch-pipelines-and-merge-request-pipelines).
+you can add `workflow:rules` to [switch from branch pipelines to merge request pipelines](../yaml/workflow.md#switch-between-branch-pipelines-and-merge-request-pipelines).
 After a merge request is open on the branch, the pipeline switches to a merge request pipeline.
 
 ### Two pipelines created when pushing an invalid CI configuration file

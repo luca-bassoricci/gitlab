@@ -85,7 +85,7 @@ Example response:
   "raw_blob_request_limit": 300,
   "wiki_page_max_content_bytes": 52428800,
   "require_admin_approval_after_user_signup": false,
-  "personal_access_token_prefix": "GL-",
+  "personal_access_token_prefix": "glpat-",
   "rate_limiting_response_text": null,
   "keep_latest_artifact": true,
   "admin_mode": false,
@@ -187,7 +187,7 @@ Example response:
   "raw_blob_request_limit": 300,
   "wiki_page_max_content_bytes": 52428800,
   "require_admin_approval_after_user_signup": false,
-  "personal_access_token_prefix": "GL-",
+  "personal_access_token_prefix": "glpat-",
   "rate_limiting_response_text": null,
   "keep_latest_artifact": true,
   "admin_mode": false,
@@ -248,7 +248,7 @@ listed in the descriptions of the relevant settings.
 | `deactivate_dormant_users`               | boolean          | no                                   | Enable [automatic deactivation of dormant users](../user/admin_area/moderate_users.md#automatically-deactivate-dormant-users). |
 | `default_artifacts_expire_in`            | string           | no                                   | Set the default expiration time for each job's artifacts. |
 | `default_branch_name`                    | string           | no                                   | [Instance-level custom initial branch name](../user/project/repository/branches/default.md#instance-level-custom-initial-branch-name) ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225258) in GitLab 13.2). |
-| `default_branch_protection`              | integer          | no                                   | Determine if developers can push to the default branch. Can take: `0` _(not protected, both developers and maintainers can push new commits and force push)_, `1` _(partially protected, developers and maintainers can push new commits, but cannot force push)_ or `2` _(fully protected, developers cannot push new commits, but maintainers can; no one can force push)_ as a parameter. Default is `2`. |
+| `default_branch_protection`              | integer          | no                                   | Determine if developers can push to the default branch. Can take: `0` _(not protected, both users with the Developer role or Maintainer role can push new commits and force push)_, `1` _(partially protected, users with the Developer role or Maintainer role can push new commits, but cannot force push)_ or `2` _(fully protected, users with the Developer or Maintainer role cannot push new commits, but users with the Developer or Maintainer role can; no one can force push)_ as a parameter. Default is `2`. |
 | `default_ci_config_path`                  | string           | no                                   | Default CI/CD configuration file and path for new projects (`.gitlab-ci.yml` if not set). |
 | `default_group_visibility`               | string           | no                                   | What visibility level new groups receive. Can take `private`, `internal` and `public` as a parameter. Default is `private`. |
 | `default_project_creation`               | integer          | no                                   | Default project creation protection. Can take: `0` _(No one)_, `1` _(Maintainers)_ or `2` _(Developers + Maintainers)_|
@@ -302,7 +302,7 @@ listed in the descriptions of the relevant settings.
 | `external_authorization_service_timeout` | float             | required by:<br>`external_authorization_service_enabled` | The timeout after which an authorization request is aborted, in seconds. When a request times out, access is denied to the user. (min: 0.001, max: 10, step: 0.001). |
 | `external_authorization_service_url`     | string           | required by:<br>`external_authorization_service_enabled` | URL to which authorization requests are directed. |
 | `external_pipeline_validation_service_url` | string         | no                                   | URL to use for pipeline validation requests. |
-| `external_pipeline_validation_service_token` | string       | no                                   | (Optional) Token to include as the `X-Gitlab-Token` header in requests to the URL in `external_pipeline_validation_service_url`. |
+| `external_pipeline_validation_service_token` | string       | no                                   | Optional. Token to include as the `X-Gitlab-Token` header in requests to the URL in `external_pipeline_validation_service_url`. |
 | `external_pipeline_validation_service_timeout` | integer    | no                                   | How long to wait for a response from the pipeline validation service. Assumes `OK` if it times out. |
 | `file_template_project_id`                | integer          | no                                   | **(PREMIUM)** The ID of a project to load custom file templates from. |
 | `first_day_of_week`                       | integer          | no                                   | Start day of the week for calendar views and date pickers. Valid values are `0` (default) for Sunday, `1` for Monday, and `6` for Saturday. |
@@ -343,6 +343,7 @@ listed in the descriptions of the relevant settings.
 | `max_import_size`                        | integer          | no                                   | Maximum import size in MB. 0 for unlimited. Default = 0 (unlimited) [Modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to 0 in GitLab 13.8. |
 | `max_pages_size`                         | integer          | no                                   | Maximum size of pages repositories in MB. |
 | `max_personal_access_token_lifetime`     | integer          | no                                   | **(ULTIMATE SELF)** Maximum allowable lifetime for personal access tokens in days. |
+| `max_ssh_key_lifetime`                   | integer          | no                                   | **(ULTIMATE SELF)** Maximum allowable lifetime for SSH keys in days. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1007) in GitLab 14.6. |
 | `metrics_method_call_threshold`          | integer          | no                                   | A method call is only tracked when it takes longer than the given amount of milliseconds. |
 | `mirror_available`                       | boolean          | no                                   | Allow repository mirroring to configured by project Maintainers. If disabled, only Administrators can configure repository mirroring. |
 | `mirror_capacity_threshold`              | integer          | no                                   | **(PREMIUM)** Minimum capacity to be available before scheduling more mirrors preemptively. |

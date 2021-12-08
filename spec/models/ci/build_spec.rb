@@ -215,6 +215,26 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '.license_management_jobs' do
+    subject { described_class.license_management_jobs }
+
+    let!(:management_build) { create(:ci_build, :success, name: :license_management) }
+    let!(:scanning_build) { create(:ci_build, :success, name: :license_scanning) }
+    let!(:another_build) { create(:ci_build, :success, name: :another_type) }
+
+    it 'returns license_scanning jobs' do
+      is_expected.to include(scanning_build)
+    end
+
+    it 'returns license_management jobs' do
+      is_expected.to include(management_build)
+    end
+
+    it 'doesnt return filtered out jobs' do
+      is_expected.not_to include(another_build)
+    end
+  end
+
   describe '.finished_before' do
     subject { described_class.finished_before(date) }
 
@@ -1974,6 +1994,14 @@ RSpec.describe Ci::Build do
 
           it { is_expected.not_to be_retryable }
         end
+
+        context 'when deployment is rejected' do
+          before do
+            build.drop!(:deployment_rejected)
+          end
+
+          it { is_expected.not_to be_retryable }
+        end
       end
     end
 
@@ -3398,38 +3426,9 @@ RSpec.describe Ci::Build do
 
       it { is_expected.to include(key: job_variable.key, value: job_variable.value, public: false, masked: false) }
     end
-
-    describe 'kubernetes variables' do
-      let(:service) { double(execute: template) }
-      let(:template) { double(to_yaml: 'example-kubeconfig', valid?: template_valid) }
-      let(:template_valid) { true }
-
-      before do
-        allow(Ci::GenerateKubeconfigService).to receive(:new).with(build).and_return(service)
-      end
-
-      it { is_expected.to include(key: 'KUBECONFIG', value: 'example-kubeconfig', public: false, file: true) }
-
-      context 'job is deploying to a cluster' do
-        let(:deployment) { create(:deployment, deployment_cluster: create(:deployment_cluster)) }
-        let(:build) { create(:ci_build, pipeline: pipeline, deployment: deployment) }
-
-        it { is_expected.not_to include(key: 'KUBECONFIG', value: 'example-kubeconfig', public: false, file: true) }
-      end
-
-      context 'generated config is invalid' do
-        let(:template_valid) { false }
-
-        it { is_expected.not_to include(key: 'KUBECONFIG', value: 'example-kubeconfig', public: false, file: true) }
-      end
-    end
   end
 
   describe '#scoped_variables' do
-    before do
-      pipeline.clear_memoization(:predefined_vars_in_builder_enabled)
-    end
-
     it 'records a prometheus metric' do
       histogram = double(:histogram)
       expect(::Gitlab::Ci::Pipeline::Metrics).to receive(:pipeline_builder_scoped_variables_histogram)
@@ -3527,22 +3526,6 @@ RSpec.describe Ci::Build do
 
       build.scoped_variables
     end
-
-    context 'when ci builder feature flag is disabled' do
-      before do
-        stub_feature_flags(ci_predefined_vars_in_builder: false)
-      end
-
-      it 'does not delegate to the variable builders' do
-        expect_next_instance_of(Gitlab::Ci::Variables::Builder) do |builder|
-          expect(builder).not_to receive(:predefined_variables)
-        end
-
-        build.scoped_variables
-      end
-
-      it_behaves_like 'calculates scoped_variables'
-    end
   end
 
   describe '#simple_variables_without_dependencies' do
@@ -3629,6 +3612,27 @@ RSpec.describe Ci::Build do
     let_it_be(:variable) { create(:ci_variable, protected: true, project: project) }
 
     include_examples "secret CI variables"
+  end
+
+  describe '#kubernetes_variables' do
+    let(:build) { create(:ci_build) }
+    let(:service) { double(execute: template) }
+    let(:template) { double(to_yaml: 'example-kubeconfig', valid?: template_valid) }
+    let(:template_valid) { true }
+
+    subject { build.kubernetes_variables }
+
+    before do
+      allow(Ci::GenerateKubeconfigService).to receive(:new).with(build).and_return(service)
+    end
+
+    it { is_expected.to include(key: 'KUBECONFIG', value: 'example-kubeconfig', public: false, file: true) }
+
+    context 'generated config is invalid' do
+      let(:template_valid) { false }
+
+      it { is_expected.not_to include(key: 'KUBECONFIG', value: 'example-kubeconfig', public: false, file: true) }
+    end
   end
 
   describe '#deployment_variables' do
@@ -3766,6 +3770,12 @@ RSpec.describe Ci::Build do
 
       build.enqueue
     end
+
+    it 'queues BuildHooksWorker' do
+      expect(BuildHooksWorker).to receive(:perform_async).with(build.id)
+
+      build.enqueue
+    end
   end
 
   describe 'state transition: pending: :running' do
@@ -3790,7 +3800,7 @@ RSpec.describe Ci::Build do
 
       it 'ensures that it is not run in database transaction' do
         expect(job.pipeline.persistent_ref).to receive(:create) do
-          expect(Gitlab::Database.main).not_to be_inside_transaction
+          expect(ApplicationRecord).not_to be_inside_transaction
         end
 
         run_job_without_exception
@@ -4458,7 +4468,7 @@ RSpec.describe Ci::Build do
                 'create' => 0,
                 'update' => 1,
                 'delete' => 0,
-                'job_name' => build.options.dig(:artifacts, :name).to_s
+                'job_name' => build.name
               )
             )
           )
@@ -5406,5 +5416,9 @@ RSpec.describe Ci::Build do
 
       expect(subject).to be true
     end
+  end
+
+  it_behaves_like 'it has loose foreign keys' do
+    let(:factory_name) { :ci_build }
   end
 end

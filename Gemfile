@@ -17,14 +17,14 @@ gem 'default_value_for', '~> 3.4.0'
 # Supported DBs
 gem 'pg', '~> 1.1'
 
-gem 'rugged', '~> 1.1'
+gem 'rugged', '~> 1.2'
 gem 'grape-path-helpers', '~> 1.7.0'
 
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.10.0'
 
 # Authorization
-gem 'declarative_policy', '~> 1.0.0'
+gem 'declarative_policy', '~> 1.1.0'
 
 # Authentication libraries
 gem 'devise', '~> 4.7.2'
@@ -38,6 +38,7 @@ gem 'omniauth-auth0', '~> 2.0.0'
 gem 'omniauth-azure-activedirectory-v2', '~> 1.0'
 gem 'omniauth-azure-oauth2', '~> 0.0.9' # Deprecated v1 version
 gem 'omniauth-cas3', '~> 1.1.4'
+gem 'omniauth-dingtalk-oauth2', '~> 1.0'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-github', '~> 1.4'
 gem 'omniauth-gitlab', '~> 1.0.2'
@@ -96,7 +97,7 @@ gem 'grape-entity', '~> 0.10.0'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
-gem 'graphql', '~> 1.11.8'
+gem 'graphql', '~> 1.11.10'
 # NOTE: graphiql-rails v1.5+ doesn't work: https://gitlab.com/gitlab-org/gitlab/issues/31771
 # TODO: remove app/views/graphiql/rails/editors/show.html.erb when https://github.com/rmosolgo/graphiql-rails/pull/71 is released:
 # https://gitlab.com/gitlab-org/gitlab/issues/31747
@@ -184,7 +185,7 @@ gem 'rack', '~> 2.2.3'
 gem 'rack-timeout', '~> 0.5.1', require: 'rack/timeout/base'
 
 group :puma do
-  gem 'puma', '~> 5.3.1', require: false
+  gem 'puma', '~> 5.5.2', require: false
   gem 'puma_worker_killer', '~> 0.3.1', require: false
   gem 'sd_notify', '~> 0.1.0', require: false
 end
@@ -196,7 +197,7 @@ gem 'state_machines-activerecord', '~> 0.8.0'
 gem 'acts-as-taggable-on', '~> 7.0'
 
 # Background jobs
-gem 'sidekiq', '~> 6.2.2'
+gem 'sidekiq', '~> 6.3'
 gem 'sidekiq-cron', '~> 1.0'
 gem 'redis-namespace', '~> 1.8.1'
 gem 'gitlab-sidekiq-fetcher', '0.8.0', require: 'sidekiq-reliable-fetch'
@@ -342,7 +343,7 @@ group :development do
   gem 'lefthook', '~> 0.7.0', require: false
   gem 'solargraph', '~> 0.43', require: false
 
-  gem 'letter_opener_web', '~> 1.4.1'
+  gem 'letter_opener_web', '~> 2.0.0'
 
   # Better errors handler
   gem 'better_errors', '~> 2.9.0'
@@ -375,7 +376,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 6.4.0', require: false
+  gem 'gitlab-styles', '~> 6.6.0', require: false
 
   gem 'haml_lint', '~> 0.36.0', require: false
   gem 'bundler-audit', '~> 0.7.0.1', require: false
@@ -399,17 +400,22 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.4.0', require: false
+  gem 'gitlab-dangerfiles', '~> 2.6.1', require: false
 end
 
 group :development, :test, :coverage do
   gem 'simplecov', '~> 0.18.5', require: false
+  gem 'simplecov-lcov', '~> 0.8.0', require: false
   gem 'simplecov-cobertura', '~> 1.3.1', require: false
+  gem 'undercover', '~> 0.4.4', require: false
 end
 
 # Gems required in omnibus-gitlab pipeline
 group :development, :test, :omnibus do
-  gem 'license_finder', '~> 6.0', require: false
+  # Using a fork until https://github.com/pivotal/LicenseFinder/pull/816 is
+  # resolved. For details, check discussion in
+  # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/74881
+  gem 'gitlab-license_finder', '~> 6.0', require: false
 end
 
 group :test do
@@ -493,7 +499,7 @@ gem 'flipper', '~> 0.21.0'
 gem 'flipper-active_record', '~> 0.21.0'
 gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 3.2.2'
-gem 'gitlab-experiment', '~> 0.6.4'
+gem 'gitlab-experiment', '~> 0.6.5'
 
 # Structured logging
 gem 'lograge', '~> 0.5'
@@ -538,4 +544,4 @@ gem 'ipaddress', '~> 0.8.3'
 
 gem 'parslet', '~> 1.8'
 
-gem 'ipynbdiff', '0.3.7'
+gem 'ipynbdiff', '0.3.8'

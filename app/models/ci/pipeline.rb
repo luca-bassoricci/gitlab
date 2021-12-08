@@ -82,8 +82,6 @@ module Ci
     # Merge requests for which the current pipeline is running against
     # the merge request's latest commit.
     has_many :merge_requests_as_head_pipeline, foreign_key: "head_pipeline_id", class_name: 'MergeRequest'
-    has_many :package_build_infos, class_name: 'Packages::BuildInfo', dependent: :nullify, inverse_of: :pipeline # rubocop:disable Cop/ActiveRecordDependent
-    has_many :package_file_build_infos, class_name: 'Packages::PackageFileBuildInfo', dependent: :nullify, inverse_of: :pipeline # rubocop:disable Cop/ActiveRecordDependent
     has_many :pending_builds, -> { pending }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :failed_builds, -> { latest.failed }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :retryable_builds, -> { latest.failed_or_canceled.includes(:project) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
@@ -236,7 +234,18 @@ module Ci
 
         pipeline.run_after_commit do
           PipelineHooksWorker.perform_async(pipeline.id)
-          ExpirePipelineCacheWorker.perform_async(pipeline.id)
+
+          if pipeline.project.jira_subscription_exists?
+            # Passing the seq-id ensures this is idempotent
+            seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
+            ::JiraConnect::SyncBuildsWorker.perform_async(pipeline.id, seq_id)
+          end
+
+          if Feature.enabled?(:expire_job_and_pipeline_cache_synchronously, pipeline.project, default_enabled: :yaml)
+            Ci::ExpirePipelineCacheService.new.execute(pipeline) # rubocop: disable CodeReuse/ServiceClass
+          else
+            ExpirePipelineCacheWorker.perform_async(pipeline.id)
+          end
         end
       end
 
@@ -268,14 +277,6 @@ module Ci
 
         pipeline.run_after_commit do
           ::Ci::PipelineBridgeStatusWorker.perform_async(pipeline.id)
-        end
-      end
-
-      after_transition any => any do |pipeline|
-        pipeline.run_after_commit do
-          # Passing the seq-id ensures this is idempotent
-          seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
-          ::JiraConnect::SyncBuildsWorker.perform_async(pipeline.id, seq_id)
         end
       end
 
@@ -643,7 +644,7 @@ module Ci
     def coverage
       coverage_array = latest_statuses.map(&:coverage).compact
       if coverage_array.size >= 1
-        '%.2f' % (coverage_array.reduce(:+) / coverage_array.size)
+        coverage_array.reduce(:+) / coverage_array.size
       end
     end
 
@@ -652,8 +653,15 @@ module Ci
     end
 
     def batch_lookup_report_artifact_for_file_type(file_type)
+      batch_lookup_report_artifact_for_file_types([file_type])
+    end
+
+    def batch_lookup_report_artifact_for_file_types(file_types)
+      file_types_to_search = []
+      file_types.each { |file_type| file_types_to_search.append(*::Ci::JobArtifact.associated_file_types_for(file_type.to_s)) }
+
       latest_report_artifacts
-        .values_at(*::Ci::JobArtifact.associated_file_types_for(file_type.to_s))
+        .values_at(*file_types_to_search.uniq)
         .flatten
         .compact
         .last
@@ -950,7 +958,7 @@ module Ci
                                         .limit(100)
                                         .pluck(:expanded_environment_name)
 
-        Environment.where(project: project, name: expanded_environment_names)
+        Environment.where(project: project, name: expanded_environment_names).with_deployments
       else
         environment_ids = self_and_descendants.joins(:deployments).select(:'deployments.environment_id')
 
@@ -1269,15 +1277,15 @@ module Ci
       self.builds.latest.build_matchers(project)
     end
 
-    def predefined_vars_in_builder_enabled?
-      strong_memoize(:predefined_vars_in_builder_enabled) do
-        Feature.enabled?(:ci_predefined_vars_in_builder, project, default_enabled: :yaml)
-      end
-    end
-
     def authorized_cluster_agents
       strong_memoize(:authorized_cluster_agents) do
         ::Clusters::AgentAuthorizationsFinder.new(project).execute.map(&:agent)
+      end
+    end
+
+    def create_deployment_in_separate_transaction?
+      strong_memoize(:create_deployment_in_separate_transaction) do
+        ::Feature.enabled?(:create_deployment_in_separate_transaction, project, default_enabled: :yaml)
       end
     end
 

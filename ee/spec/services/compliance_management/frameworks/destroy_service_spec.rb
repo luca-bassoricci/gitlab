@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ComplianceManagement::Frameworks::DestroyService do
-  let_it_be_with_refind(:namespace) { create(:namespace) }
+  let_it_be_with_refind(:namespace) { create(:user_namespace) }
   let_it_be_with_refind(:framework) { create(:compliance_framework, namespace: namespace) }
 
   context 'when feature is disabled' do
@@ -36,6 +36,10 @@ RSpec.describe ComplianceManagement::Frameworks::DestroyService do
 
       it 'is successful' do
         expect(subject.execute.success?).to be true
+      end
+
+      it 'audits the destruction' do
+        expect { subject.execute }.to change { AuditEvent.count }.by(1)
       end
     end
 

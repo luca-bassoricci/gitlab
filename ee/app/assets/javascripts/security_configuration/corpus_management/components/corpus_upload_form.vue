@@ -9,8 +9,6 @@ import {
 } from '@gitlab/ui';
 import { s__, __, sprintf } from '~/locale';
 import { VALID_CORPUS_MIMETYPE } from '../constants';
-import resetCorpus from '../graphql/mutations/reset_corpus.mutation.graphql';
-import uploadCorpus from '../graphql/mutations/upload_corpus.mutation.graphql';
 
 export default {
   components: {
@@ -32,7 +30,7 @@ export default {
     corpusName: s__('CorpusManagement|Corpus name'),
     uploadButtonText: __('Choose File...'),
     uploadMessage: s__(
-      'CorpusManagement|New corpus needs to be a upload in *.zip format. Maximum 10GB',
+      'CorpusManagement|New corpus needs to be a upload in *.zip format. Maximum 5GB',
     ),
   },
   data() {
@@ -40,7 +38,6 @@ export default {
       attachmentName: '',
       corpusName: '',
       files: [],
-      uploadTimeout: null,
     };
   },
   computed: {
@@ -86,29 +83,13 @@ export default {
       this.files = [];
     },
     cancelUpload() {
-      clearTimeout(this.uploadTimeout);
-      this.$apollo.mutate({
-        mutation: resetCorpus,
-        variables: { name: this.corpusName, projectPath: this.projectFullPath },
-      });
+      this.$emit('resetCorpus');
     },
     openFileUpload() {
       this.$refs.fileUpload.click();
     },
     beginFileUpload() {
-      // Simulate incrementing file upload progress
-      return this.$apollo
-        .mutate({
-          mutation: uploadCorpus,
-          variables: { name: this.corpusName, projectPath: this.projectFullPath },
-        })
-        .then(({ data }) => {
-          if (data.uploadCorpus < 100) {
-            this.uploadTimeout = setTimeout(() => {
-              this.beginFileUpload();
-            }, 500);
-          }
-        });
+      this.$emit('beginFileUpload', { name: this.corpusName, files: this.files });
     },
     onFileUploadChange(e) {
       this.attachmentName = e.target.files[0].name;
@@ -189,7 +170,9 @@ export default {
     <div v-if="isUploading" data-testid="upload-status" class="gl-mt-2">
       <gl-loading-icon inline size="sm" />
       {{ progressText }}
-      <gl-button size="small" @click="cancelUpload"> {{ __('Cancel') }} </gl-button>
+      <gl-button size="small" data-testid="cancel-upload" @click="cancelUpload">
+        {{ __('Cancel') }}
+      </gl-button>
     </div>
   </gl-form>
 </template>

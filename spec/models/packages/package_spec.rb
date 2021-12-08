@@ -20,6 +20,7 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to have_one(:debian_distribution).through(:debian_publication).source(:distribution).inverse_of(:packages).class_name('Packages::Debian::ProjectDistribution') }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:rubygems_metadatum).inverse_of(:package) }
+    it { is_expected.to have_one(:npm_metadatum).inverse_of(:package) }
   end
 
   describe '.with_debian_codename' do
@@ -288,7 +289,6 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.to allow_value('1.1-beta-2').for(:version) }
         it { is_expected.to allow_value('1.2-SNAPSHOT').for(:version) }
         it { is_expected.to allow_value('12.1.2-2-1').for(:version) }
-        it { is_expected.to allow_value('1.2.3..beta').for(:version) }
         it { is_expected.to allow_value('1.2.3-beta').for(:version) }
         it { is_expected.to allow_value('10.2.3-beta').for(:version) }
         it { is_expected.to allow_value('2.0.0.v200706041905-7C78EK9E_EkMNfNOd2d8qq').for(:version) }
@@ -296,6 +296,7 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.to allow_value('703220b4e2cea9592caeb9f3013f6b1e5335c293').for(:version) }
         it { is_expected.to allow_value('RELEASE').for(:version) }
         it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3..beta').for(:version) }
         it { is_expected.not_to allow_value('  1.2.3').for(:version) }
         it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
         it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
@@ -961,33 +962,6 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
-  describe '.load_pipelines' do
-    let_it_be(:package) { create(:maven_package) }
-    let_it_be(:build_info) { create(:package_build_info, :with_pipeline, package: package) }
-
-    subject { described_class.load_pipelines }
-
-    it 'uses preload', :aggregate_failures do
-      expect(described_class).to receive(:preload_pipelines).and_call_original
-      expect(described_class).not_to receive(:including_build_info)
-
-      subject
-    end
-
-    context 'with packages_remove_cross_joins_to_pipelines disabled' do
-      before do
-        stub_feature_flags(packages_remove_cross_joins_to_pipelines: false)
-      end
-
-      it 'uses includes', :aggregate_failures do
-        expect(described_class).to receive(:including_build_info).and_call_original
-        expect(described_class).not_to receive(:preload_pipelines)
-
-        subject
-      end
-    end
-  end
-
   describe '#versions' do
     let_it_be(:project) { create(:project) }
     let_it_be(:package) { create(:maven_package, project: project) }
@@ -1000,30 +974,6 @@ RSpec.describe Packages::Package, type: :model do
 
     it 'does not return different packages' do
       expect(package.versions).not_to include(package3)
-    end
-
-    context 'with pipelines' do
-      let_it_be(:build_info) { create(:package_build_info, :with_pipeline, package: package2) }
-
-      it 'preloads the pipelines' do
-        expect(::Packages::Package).to receive(:preload_pipelines).and_call_original
-        expect(::Packages::Package).not_to receive(:including_build_info)
-
-        expect(package.versions).to contain_exactly(package2)
-      end
-
-      context 'with packages_remove_cross_joins_to_pipelines disabled' do
-        before do
-          stub_feature_flags(packages_remove_cross_joins_to_pipelines: false)
-        end
-
-        it 'includes the pipelines' do
-          expect(::Packages::Package).to receive(:including_build_info).and_call_original
-          expect(::Packages::Package).not_to receive(:preload_pipelines)
-
-          expect(package.versions).to contain_exactly(package2)
-        end
-      end
     end
   end
 

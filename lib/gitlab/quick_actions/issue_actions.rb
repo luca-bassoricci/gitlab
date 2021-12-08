@@ -19,7 +19,7 @@ module Gitlab
         types Issue
         condition do
           quick_action_target.respond_to?(:due_date) &&
-            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+            current_user.can?(:"set_#{quick_action_target.to_ability_name}_metadata", quick_action_target)
         end
         parse_params do |due_date_param|
           Chronic.parse(due_date_param).try(:to_date)
@@ -40,7 +40,7 @@ module Gitlab
           quick_action_target.persisted? &&
             quick_action_target.respond_to?(:due_date) &&
             quick_action_target.due_date? &&
-            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+            current_user.can?(:"set_#{quick_action_target.to_ability_name}_metadata", quick_action_target)
         end
         command :remove_due_date do
           @updates[:due_date] = nil
@@ -54,7 +54,7 @@ module Gitlab
         params '~"Target column"'
         types Issue
         condition do
-          current_user.can?(:"update_#{quick_action_target.to_ability_name}", quick_action_target) &&
+          current_user.can?(:"set_#{quick_action_target.to_ability_name}_metadata", quick_action_target) &&
             quick_action_target.project.boards.count == 1
         end
         command :board_move do |target_list_name|
@@ -86,7 +86,7 @@ module Gitlab
         types Issue
         condition do
           quick_action_target.persisted? &&
-            current_user.can?(:"update_#{quick_action_target.to_ability_name}", quick_action_target)
+            current_user.can?(:"set_#{quick_action_target.to_ability_name}_metadata", quick_action_target)
         end
         command :duplicate do |duplicate_param|
           canonical_issue = extract_references(duplicate_param, :issue).first
@@ -206,7 +206,7 @@ module Gitlab
         end
 
         desc _('Add Zoom meeting')
-        explanation _('Adds a Zoom meeting')
+        explanation _('Adds a Zoom meeting.')
         params '<Zoom URL>'
         types Issue
         condition do
@@ -223,7 +223,7 @@ module Gitlab
         end
 
         desc _('Remove Zoom meeting')
-        explanation _('Remove Zoom meeting')
+        explanation _('Remove Zoom meeting.')
         execution_message _('Zoom meeting removed')
         types Issue
         condition do
@@ -236,7 +236,7 @@ module Gitlab
         end
 
         desc _('Add email participant(s)')
-        explanation _('Adds email participant(s)')
+        explanation _('Adds email participant(s).')
         params 'email1@example.com email2@example.com (up to 6 emails)'
         types Issue
         condition do
@@ -262,6 +262,67 @@ module Gitlab
           else
             @execution_message[:invite_email] = _("No email participants were added. Either none were provided, or they already exist.")
           end
+        end
+
+        desc _('Promote issue to incident')
+        explanation _('Promotes issue to incident')
+        types Issue
+        condition do
+          quick_action_target.persisted? &&
+            !quick_action_target.incident? &&
+            current_user.can?(:update_issue, quick_action_target)
+        end
+        command :promote_to_incident do
+          issue = ::Issues::UpdateService
+            .new(project: quick_action_target.project, current_user: current_user, params: { issue_type: 'incident' })
+            .execute(quick_action_target)
+
+          @execution_message[:promote_to_incident] =
+            if issue.incident?
+              _('Issue has been promoted to incident')
+            else
+              _('Failed to promote issue to incident')
+            end
+        end
+
+        desc _('Add customer relation contacts')
+        explanation _('Add customer relation contact(s).')
+        params 'contact@example.com person@example.org'
+        types Issue
+        condition do
+          current_user.can?(:set_issue_crm_contacts, quick_action_target)
+        end
+        command :add_contacts do |contact_emails|
+          result = ::Issues::SetCrmContactsService
+            .new(project: project, current_user: current_user, params: { add_emails: contact_emails.split(' ') })
+            .execute(quick_action_target)
+
+          @execution_message[:add_contacts] =
+            if result.success?
+              _('One or more contacts were successfully added.')
+            else
+              result.message
+            end
+        end
+
+        desc _('Remove customer relation contacts')
+        explanation _('Remove customer relation contact(s).')
+        params 'contact@example.com person@example.org'
+        types Issue
+        condition do
+          current_user.can?(:set_issue_crm_contacts, quick_action_target)
+        end
+        command :remove_contacts do |contact_emails|
+          result = ::Issues::SetCrmContactsService
+            .new(project: project, current_user: current_user, params: { remove_emails: contact_emails.split(' ') })
+            .execute(quick_action_target)
+
+          @execution_message[:remove_contacts] =
+            if result.success?
+              _('One or more contacts were successfully removed.')
+            else
+              result.message
+            end
         end
 
         private

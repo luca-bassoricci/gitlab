@@ -7,6 +7,7 @@ class MergeRequestDiffCommit < ApplicationRecord
   include ShaAttribute
   include CachedCommit
   include IgnorableColumns
+  include FromUnion
 
   ignore_column %i[author_name author_email committer_name committer_email],
     remove_with: '14.6',
@@ -73,7 +74,7 @@ class MergeRequestDiffCommit < ApplicationRecord
       )
     end
 
-    Gitlab::Database.main.bulk_insert(self.table_name, rows) # rubocop:disable Gitlab/BulkInsert
+    ApplicationRecord.legacy_bulk_insert(self.table_name, rows) # rubocop:disable Gitlab/BulkInsert
   end
 
   def self.prepare_commits_for_bulk_insert(commits)

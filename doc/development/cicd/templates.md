@@ -60,7 +60,7 @@ don't have any other `.gitlab-ci.yml` files.
 When authoring pipeline templates:
 
 - Place any [global keywords](../../ci/yaml/index.md#global-keywords) like `image`
-  or `before_script` in a [`default`](../../ci/yaml/index.md#custom-default-keyword-values)
+  or `before_script` in a [`default`](../../ci/yaml/index.md#default)
   section at the top of the template.
 - Note clearly in the [code comments](#explain-the-template-with-comments) if the
   template is designed to be used with the `includes` keyword in an existing
@@ -77,7 +77,7 @@ other pipeline configuration.
 
 When authoring job templates:
 
-- Do not use [global](../../ci/yaml/index.md#global-keywords) or [`default`](../../ci/yaml/index.md#custom-default-keyword-values)
+- Do not use [global](../../ci/yaml/index.md#global-keywords) or [`default`](../../ci/yaml/index.md#default)
   keywords. When a root `.gitlab-ci.yml` includes a template, global or default keywords
   might be overridden and cause unexpected behavior. If a job template requires a
   specific stage, explain in the code comments that users must manually add the stage
@@ -392,6 +392,6 @@ If you're unsure if it's secure or not, you must ask security experts for cross-
 
 After your CI/CD template MR is created and labeled with `ci::templates`, DangerBot
 suggests one reviewer and one maintainer that can review your code. When your merge
-request is ready for review, please [mention](../../user/project/issues/issue_data_and_actions.md#mentions)
+request is ready for review, please [mention](../../user/discussions/index.md#mentions)
 the reviewer and ask them to review your CI/CD template changes. See details in the merge request that added
 [a DangerBot task for CI/CD template MRs](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44688).

@@ -204,17 +204,6 @@ module Gitlab
         Gitlab::Git::Commit.new(@repository, gitaly_commit)
       end
 
-      def between(from, to)
-        request = Gitaly::CommitsBetweenRequest.new(
-          repository: @gitaly_repo,
-          from: from,
-          to: to
-        )
-
-        response = GitalyClient.call(@repository.storage, :commit_service, :commits_between, request, timeout: GitalyClient.medium_timeout)
-        consume_commits_response(response)
-      end
-
       def diff_stats(left_commit_sha, right_commit_sha)
         request = Gitaly::DiffStatsRequest.new(
           repository: @gitaly_repo,

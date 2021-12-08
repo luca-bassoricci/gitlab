@@ -63,6 +63,7 @@ class Issue < ApplicationRecord
 
   has_many :issue_assignees
   has_many :issue_email_participants
+  has_one :email
   has_many :assignees, class_name: "User", through: :issue_assignees
   has_many :zoom_meetings
   has_many :user_mentions, class_name: "IssueUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
@@ -204,6 +205,8 @@ class Issue < ApplicationRecord
     before_transition closed: :opened do |issue|
       issue.closed_at = nil
       issue.closed_by = nil
+
+      issue.clear_closure_reason_references
     end
   end
 
@@ -379,6 +382,11 @@ class Issue < ApplicationRecord
     !duplicated_to_id.nil?
   end
 
+  def clear_closure_reason_references
+    self.moved_to_id = nil
+    self.duplicated_to_id = nil
+  end
+
   def can_move?(user, to_project = nil)
     if to_project
       return false unless user.can?(:admin_issue, to_project)
@@ -426,8 +434,6 @@ class Issue < ApplicationRecord
   # Returns `true` if the current issue can be viewed by either a logged in User
   # or an anonymous user.
   def visible_to_user?(user = nil)
-    return false unless project && project.feature_available?(:issues, user)
-
     return publicly_visible? unless user
 
     return false unless readable_by?(user)
@@ -555,10 +561,10 @@ class Issue < ApplicationRecord
       project.team.member?(user, Gitlab::Access::REPORTER)
     elsif hidden?
       false
+    elsif project.public? || (project.internal? && !user.external?)
+      project.feature_available?(:issues, user)
     else
-      project.public? ||
-        project.internal? && !user.external? ||
-        project.team.member?(user)
+      project.team.member?(user)
     end
   end
 
@@ -597,7 +603,7 @@ class Issue < ApplicationRecord
 
   def could_not_move(exception)
     # Symptom of running out of space - schedule rebalancing
-    IssueRebalancingWorker.perform_async(nil, *project.self_or_root_group_ids)
+    Issues::RebalancingWorker.perform_async(nil, *project.self_or_root_group_ids)
   end
 end
 

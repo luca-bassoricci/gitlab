@@ -9,7 +9,7 @@ import {
 } from '@gitlab/ui';
 import $ from 'jquery';
 import { isEmpty } from 'lodash';
-import IssuableBody from '~/issuable_show/components/issuable_body.vue';
+import IssuableBody from '~/vue_shared/issuable/show/components/issuable_body.vue';
 import { TAB_KEY_CODE } from '~/lib/utils/keycodes';
 import { __, sprintf } from '~/locale';
 import ZenMode from '~/zen_mode';
@@ -230,7 +230,7 @@ export default {
     :open="drawerOpen"
     :header-height="getDrawerHeaderHeight()"
     :class="{ 'zen-mode gl-absolute': zenModeEnabled }"
-    class="requirement-form-drawer"
+    class="requirement-form-drawer gl-drawer-responsive"
     @close="handleDrawerClose"
   >
     <template #title>

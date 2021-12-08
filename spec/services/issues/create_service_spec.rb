@@ -80,7 +80,7 @@ RSpec.describe Issues::CreateService do
 
       it_behaves_like 'not an incident issue'
 
-      context 'issue is incident type' do
+      context 'when issue is incident type' do
         before do
           opts.merge!(issue_type: 'incident')
         end
@@ -90,22 +90,36 @@ RSpec.describe Issues::CreateService do
 
         subject { issue }
 
-        it_behaves_like 'incident issue'
-        it_behaves_like 'has incident label'
+        context 'as reporter' do
+          let_it_be(:reporter) { create(:user) }
 
-        it 'does create an incident label' do
-          expect { subject }
-            .to change { Label.where(incident_label_attributes).count }.by(1)
+          let(:user) { reporter }
+
+          before_all do
+            project.add_reporter(reporter)
+          end
+
+          it_behaves_like 'incident issue'
+          it_behaves_like 'has incident label'
+
+          it 'does create an incident label' do
+            expect { subject }
+              .to change { Label.where(incident_label_attributes).count }.by(1)
+          end
+
+          context 'when invalid' do
+            before do
+              opts.merge!(title: '')
+            end
+
+            it 'does not apply an incident label prematurely' do
+              expect { subject }.to not_change(LabelLink, :count).and not_change(Issue, :count)
+            end
+          end
         end
 
-        context 'when invalid' do
-          before do
-            opts.merge!(title: '')
-          end
-
-          it 'does not apply an incident label prematurely' do
-            expect { subject }.to not_change(LabelLink, :count).and not_change(Issue, :count)
-          end
+        context 'as guest' do
+          it_behaves_like 'not an incident issue'
         end
       end
 
@@ -140,7 +154,7 @@ RSpec.describe Issues::CreateService do
       end
 
       it 'moves the issue to the end, in an asynchronous worker' do
-        expect(IssuePlacementWorker).to receive(:perform_async).with(be_nil, Integer)
+        expect(Issues::PlacementWorker).to receive(:perform_async).with(be_nil, Integer)
 
         described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
       end
@@ -288,7 +302,7 @@ RSpec.describe Issues::CreateService do
         described_class.new(project: project, current_user: user, params: opts, spam_params: spam_params).execute
       end
 
-      context 'when rate limiting is in effect', :clean_gitlab_redis_cache do
+      context 'when rate limiting is in effect', :freeze_time, :clean_gitlab_redis_rate_limiting do
         let(:user) { create(:user) }
 
         before do
@@ -302,32 +316,26 @@ RSpec.describe Issues::CreateService do
 
         context 'when too many requests are sent by one user' do
           it 'raises an error' do
-            freeze_time do
-              expect do
-                subject
-              end.to raise_error(RateLimitedService::RateLimitedError)
-            end
+            expect do
+              subject
+            end.to raise_error(RateLimitedService::RateLimitedError)
           end
 
           it 'creates 1 issue' do
-            freeze_time do
-              expect do
-                subject
-              rescue RateLimitedService::RateLimitedError
-              end.to change { Issue.count }.by(1)
-            end
+            expect do
+              subject
+            rescue RateLimitedService::RateLimitedError
+            end.to change { Issue.count }.by(1)
           end
         end
 
-        context 'when limit is higher than counf of issues being created' do
+        context 'when limit is higher than count of issues being created' do
           before do
-            stub_application_setting(issues_create_limit: 3)
+            stub_application_setting(issues_create_limit: 2)
           end
 
           it 'creates 2 issues' do
-            freeze_time do
-              expect { subject }.to change { Issue.count }.by(2)
-            end
+            expect { subject }.to change { Issue.count }.by(2)
           end
         end
       end

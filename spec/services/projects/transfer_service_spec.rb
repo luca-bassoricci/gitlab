@@ -7,7 +7,7 @@ RSpec.describe Projects::TransferService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:group_integration) { create(:integrations_slack, group: group, project: nil, webhook: 'http://group.slack.com') }
+  let_it_be(:group_integration) { create(:integrations_slack, :group, group: group, webhook: 'http://group.slack.com') }
 
   let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
 
@@ -66,8 +66,6 @@ RSpec.describe Projects::TransferService do
     end
 
     context 'when project has an associated project namespace' do
-      let!(:project_namespace) { create(:project_namespace, project: project) }
-
       it 'keeps project namespace in sync with project' do
         transfer_result = execute_transfer
 
@@ -171,7 +169,7 @@ RSpec.describe Projects::TransferService do
       end
     end
 
-    context 'when project has pending builds' do
+    context 'when project has pending builds', :sidekiq_inline do
       let!(:other_project) { create(:project) }
       let!(:pending_build) { create(:ci_pending_build, project: project.reload) }
       let!(:unrelated_pending_build) { create(:ci_pending_build, project: other_project) }
@@ -253,7 +251,7 @@ RSpec.describe Projects::TransferService do
       )
     end
 
-    context 'when project has pending builds' do
+    context 'when project has pending builds', :sidekiq_inline do
       let!(:other_project) { create(:project) }
       let!(:pending_build) { create(:ci_pending_build, project: project.reload) }
       let!(:unrelated_pending_build) { create(:ci_pending_build, project: other_project) }
@@ -272,8 +270,6 @@ RSpec.describe Projects::TransferService do
     end
 
     context 'when project has an associated project namespace' do
-      let!(:project_namespace) { create(:project_namespace, project: project) }
-
       it 'keeps project namespace in sync with project' do
         attempt_project_transfer
 
@@ -294,8 +290,6 @@ RSpec.describe Projects::TransferService do
     end
 
     context 'when project has an associated project namespace' do
-      let!(:project_namespace) { create(:project_namespace, project: project) }
-
       it 'keeps project namespace in sync with project' do
         transfer_result = execute_transfer
 

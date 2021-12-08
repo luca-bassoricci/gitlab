@@ -25,6 +25,7 @@ The following aspects of a project are imported:
 - Pull request "merged by" information (GitLab.com & 13.7+)
 - Regular issue and pull request comments
 - [Git Large File Storage (LFS) Objects](../../../topics/git/lfs/index.md)
+- Pull request comments replies in discussions ([GitLab.com & 14.5+](https://gitlab.com/gitlab-org/gitlab/-/issues/336596))
 
 References to pull requests and issues are preserved (GitLab.com & 8.7+), and
 each imported repository maintains visibility level unless that [visibility
@@ -51,9 +52,12 @@ self-managed GitLab instance.
 - If you're importing to a self-managed GitLab instance, you can alternatively use the
   [GitHub Rake task](../../../administration/raketasks/github_import.md) to import
   projects without the constraints of a [Sidekiq](../../../development/sidekiq_style_guide.md) worker.
-- If you're importing from GitHub Enterprise to your self-managed GitLab instance, you must first enable
-  [GitHub integration](../../../integration/github.md).
+- If you're importing from GitHub Enterprise to your self-managed GitLab instance:
+  - You must first enable [GitHub integration](../../../integration/github.md).
   - To import projects from GitHub Enterprise to GitLab.com, use the [Import API](../../../api/import.md).
+  - If GitLab is behind a HTTP/HTTPS proxy you must populate the [allowlist for local requests](../../../security/webhooks.md#allowlist-for-local-requests)
+    with `github.com` and `api.github.com` to solve the hostname. For more information, read the issue
+    [Importing a GitHub project requires DNS resolution even when behind a proxy](https://gitlab.com/gitlab-org/gitlab/-/issues/37941)
 - If you're importing from GitHub.com to your self-managed GitLab instance,
   setting up GitHub integration is not required. You can use the [Import API](../../../api/import.md).
 
@@ -240,3 +244,8 @@ To disable the feature, run this command:
 # Disable
 Feature.disable(:github_importer_lower_per_page_limit, group)
 ```
+
+## Automate group and project import **(PREMIUM)**
+
+For information on automating user, group, and project import API calls, see
+[Automate group and project import](index.md#automate-group-and-project-import).

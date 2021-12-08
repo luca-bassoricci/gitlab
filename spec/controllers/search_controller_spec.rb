@@ -172,6 +172,12 @@ RSpec.describe SearchController do
 
               expect(response).to redirect_to new_user_session_path
             end
+
+            it 'redirects to login page when trying to circumvent the restriction' do
+              get :show, params: { scope: 'projects', project_id: non_existing_record_id, search: '*' }
+
+              expect(response).to redirect_to new_user_session_path
+            end
           end
 
           context 'for authenticated user' do
@@ -322,6 +328,7 @@ RSpec.describe SearchController do
     describe 'GET #autocomplete' do
       it_behaves_like 'when the user cannot read cross project', :autocomplete, { term: 'hello' }
       it_behaves_like 'with external authorization service enabled', :autocomplete, { term: 'hello' }
+      it_behaves_like 'support for active record query timeouts', :autocomplete, { term: 'hello' }, :project, :json
     end
 
     describe '#append_info_to_payload' do

@@ -52,7 +52,7 @@ You can create snippets in multiple ways, depending on whether you want to creat
    Filenames with appropriate extensions display [syntax highlighting](#filenames).
    Failure to add a filename can cause a known
    [copy-pasting bug](https://gitlab.com/gitlab-org/gitlab/-/issues/22870). If you don't provide a filename, GitLab [creates a name for you](#filenames).
-1. (Optional) Add [multiple files](#add-or-remove-multiple-files) to your snippet.
+1. Optional. Add [multiple files](#add-or-remove-multiple-files) to your snippet.
 1. Select a visibility level, and select **Create snippet**.
 
 After you create a snippet, you can still [add more files to it](#add-or-remove-multiple-files).
@@ -210,6 +210,24 @@ snippet was created using the GitLab web interface the original line ending is W
 
 With snippets, you engage in a conversation about that piece of code,
 which can encourage user collaboration.
+
+## Mark snippet as spam **(FREE SELF)**
+
+Administrators on self-managed GitLab instances can mark snippets as spam.
+
+Prerequisites:
+
+- You must be the administrator for your instance.
+- [Akismet](../integration/akismet.md) spam protection must be enabled on the instance.
+
+To do this task:
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Snippets**.
+1. Select the snippet you want to report as spam.
+1. Select **Submit as spam**.
+
+GitLab forwards the spam to Akismet.
 
 ## Troubleshooting
 

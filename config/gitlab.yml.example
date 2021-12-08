@@ -1024,6 +1024,9 @@ production: &base
       # - { name: 'bitbucket',
       #     app_id: 'YOUR_APP_ID',
       #     app_secret: 'YOUR_APP_SECRET' }
+      # - { name: 'dingtalk',
+      #     app_id: 'YOUR_APP_ID',
+      #     app_secret: 'YOUR_APP_SECRET' }
       # - { name: 'gitlab',
       #     app_id: 'YOUR_APP_ID',
       #     app_secret: 'YOUR_APP_SECRET',
@@ -1252,6 +1255,12 @@ production: &base
 
     # Sidekiq exporter is webserver built in to Sidekiq to expose Prometheus metrics
     sidekiq_exporter:
+    #  enabled: true
+    #  log_enabled: false
+    #  address: localhost
+    #  port: 8082
+
+    sidekiq_health_checks:
     #  enabled: true
     #  log_enabled: false
     #  address: localhost
@@ -1513,6 +1522,9 @@ test:
           verify_ssl: false,
           args: { scope: 'user:email' } }
       - { name: 'bitbucket',
+          app_id: 'YOUR_APP_ID',
+          app_secret: 'YOUR_APP_SECRET' }
+      - { name: 'dingtalk',
           app_id: 'YOUR_APP_ID',
           app_secret: 'YOUR_APP_SECRET' }
       - { name: 'gitlab',

@@ -39,6 +39,8 @@ module EE
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
       scope :not_in_iterations, ->(iterations) { where(sprint_id: nil).or(where.not(sprint_id: iterations)) }
+      scope :in_iteration_scope, ->(iteration_scope) { joins(:iteration).merge(iteration_scope) }
+      scope :in_iteration_cadences, ->(iteration_cadences) { joins(:iteration).where(sprints: { iterations_cadence_id: iteration_cadences }) }
       scope :with_iteration_title, ->(iteration_title) { joins(:iteration).where(sprints: { title: iteration_title }) }
       scope :without_iteration_title, ->(iteration_title) { left_outer_joins(:iteration).where('sprints.title != ? OR sprints.id IS NULL', iteration_title) }
       scope :on_status_page, -> do
@@ -150,7 +152,7 @@ module EE
     end
 
     def can_assign_epic?(user)
-      user&.can?(:admin_epic, project.group)
+      user&.can?(:read_epic, project.group) && user&.can?(:admin_issue, project)
     end
 
     def can_be_promoted_to_epic?(user, group = nil)
@@ -165,6 +167,13 @@ module EE
 
     def promoted?
       !!promoted_to_epic_id
+    end
+
+    override :clear_closure_reason_references
+    def clear_closure_reason_references
+      super
+
+      self.promoted_to_epic_id = nil
     end
 
     class_methods do

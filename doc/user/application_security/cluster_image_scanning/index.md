@@ -153,7 +153,7 @@ The included template:
   fetches vulnerabilities found by [Starboard Operator](https://aquasecurity.github.io/starboard/v0.10.3/operator/).
 
 GitLab saves the results as a
-[Cluster Image Scanning report artifact](../../../ci/yaml/index.md#artifactsreportscluster_image_scanning)
+[Cluster Image Scanning report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportscluster_image_scanning)
 that you can download and analyze later. When downloading, you always receive the most recent
 artifact.
 
@@ -176,6 +176,7 @@ You can [configure](#customize-the-cluster-image-scanning-settings) analyzers by
 | `CIS_RESOURCE_NAME` | `""` | Name of the Kubernetes resource you want to filter vulnerabilities for. For example, `nginx`.   |
 | `CIS_RESOURCE_NAMESPACE` | `""` | Namespace of the Kubernetes resource you want to filter vulnerabilities for. For example, `production`.   |
 | `CIS_RESOURCE_KIND` | `""` | Kind of the Kubernetes resource you want to filter vulnerabilities for. For example, `deployment`.  |
+| `CIS_CLUSTER_IDENTIFIER` | `""` | ID of the Kubernetes cluster integrated with GitLab. This is used to map vulnerabilities to the cluster so they can be filtered in the Vulnerability Report page. |
 
 #### Override the cluster image scanning template
 

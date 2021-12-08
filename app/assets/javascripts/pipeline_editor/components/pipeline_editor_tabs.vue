@@ -4,10 +4,10 @@ import { s__ } from '~/locale';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { getParameterValues, setUrlParams, updateHistory } from '~/lib/utils/url_utility';
+import GitlabExperiment from '~/experimentation/components/gitlab_experiment.vue';
 import {
   CREATE_TAB,
   EDITOR_APP_STATUS_EMPTY,
-  EDITOR_APP_STATUS_ERROR,
   EDITOR_APP_STATUS_INVALID,
   EDITOR_APP_STATUS_LOADING,
   EDITOR_APP_STATUS_VALID,
@@ -23,6 +23,7 @@ import CiEditorHeader from './editor/ci_editor_header.vue';
 import TextEditor from './editor/text_editor.vue';
 import CiLint from './lint/ci_lint.vue';
 import EditorTab from './ui/editor_tab.vue';
+import WalkthroughPopover from './walkthrough_popover.vue';
 
 export default {
   i18n: {
@@ -64,6 +65,8 @@ export default {
     GlTabs,
     PipelineGraph,
     TextEditor,
+    GitlabExperiment,
+    WalkthroughPopover,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -80,6 +83,10 @@ export default {
       required: false,
       default: '',
     },
+    isNewCiConfigFile: {
+      type: Boolean,
+      required: true,
+    },
   },
   apollo: {
     appStatus: {
@@ -87,9 +94,8 @@ export default {
     },
   },
   computed: {
-    hasAppError() {
-      // Not an invalid config and with `mergedYaml` data missing
-      return this.appStatus === EDITOR_APP_STATUS_ERROR;
+    isMergedYamlAvailable() {
+      return this.ciConfigData?.mergedYaml;
     },
     isEmpty() {
       return this.appStatus === EDITOR_APP_STATUS_EMPTY;
@@ -138,11 +144,17 @@ export default {
   >
     <editor-tab
       class="gl-mb-3"
+      title-link-class="js-walkthrough-popover-target"
       :title="$options.i18n.tabEdit"
       lazy
       data-testid="editor-tab"
       @click="setCurrentTab($options.tabConstants.CREATE_TAB)"
     >
+      <gitlab-experiment name="pipeline_editor_walkthrough">
+        <template #candidate>
+          <walkthrough-popover v-if="isNewCiConfigFile" v-on="$listeners" />
+        </template>
+      </gitlab-experiment>
       <ci-editor-header />
       <text-editor :commit-sha="commitSha" :value="ciFileContent" v-on="$listeners" />
     </editor-tab>
@@ -183,7 +195,7 @@ export default {
       @click="setCurrentTab($options.tabConstants.MERGED_TAB)"
     >
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
-      <gl-alert v-else-if="hasAppError" variant="danger" :dismissible="false">
+      <gl-alert v-else-if="!isMergedYamlAvailable" variant="danger" :dismissible="false">
         {{ $options.errorTexts.loadMergedYaml }}
       </gl-alert>
       <ci-config-merged-preview v-else :ci-config-data="ciConfigData" v-on="$listeners" />

@@ -1,4 +1,4 @@
-mutation($environment: Environment) {
+mutation stopEnvironment($environment: LocalEnvironment) {
   stopEnvironment(environment: $environment) @client {
     errors
   }

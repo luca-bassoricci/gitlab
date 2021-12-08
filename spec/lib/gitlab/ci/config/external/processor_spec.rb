@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Ci::Config::External::Processor do
   include StubRequests
 
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:another_project) { create(:project, :repository) }
+  let_it_be_with_reload(:another_project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
 
   let(:sha) { '12345' }
@@ -251,6 +251,17 @@ RSpec.describe Gitlab::Ci::Config::External::Processor do
         it 'properly expands all includes' do
           is_expected.to include(:my_build, :remote_build, :rspec)
         end
+
+        it 'propagates the pipeline logger' do
+          processor.perform
+
+          process_obs_count = processor
+            .logger
+            .observations_hash
+            .dig('config_mapper_process_duration_s', 'count')
+
+          expect(process_obs_count).to eq(3)
+        end
       end
 
       context 'when user is reporter of another project' do
@@ -406,7 +417,7 @@ RSpec.describe Gitlab::Ci::Config::External::Processor do
     context 'when rules defined' do
       context 'when a rule is invalid' do
         let(:values) do
-          { include: [{ local: 'builds.yml', rules: [{ exists: ['$MY_VAR'] }] }] }
+          { include: [{ local: 'builds.yml', rules: [{ changes: ['$MY_VAR'] }] }] }
         end
 
         it 'raises IncludeError' do

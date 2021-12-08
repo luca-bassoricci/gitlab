@@ -268,7 +268,7 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe '#link_to_set_password' do
+  describe '#no_password_message' do
     let(:user) { create(:user, password_automatically_set: true) }
 
     before do
@@ -276,18 +276,18 @@ RSpec.describe ProjectsHelper do
     end
 
     context 'password authentication is enabled for Git' do
-      it 'returns link to set a password' do
+      it 'returns message prompting user to set password or set up a PAT' do
         stub_application_setting(password_authentication_enabled_for_git?: true)
 
-        expect(helper.link_to_set_password).to match %r{<a href="#{edit_profile_password_path}">set a password</a>}
+        expect(helper.no_password_message).to eq('Your account is authenticated with SSO or SAML. To <a href="/help/gitlab-basics/start-using-git#pull-and-push" target="_blank" rel="noopener noreferrer">push and pull</a> over HTTP with Git using this account, you must <a href="/-/profile/password/edit">set a password</a> or <a href="/-/profile/personal_access_tokens">set up a Personal Access Token</a> to use instead of a password. For more information, see <a href="/help/gitlab-basics/start-using-git#clone-with-https" target="_blank" rel="noopener noreferrer">Clone with HTTPS</a>.')
       end
     end
 
     context 'password authentication is disabled for Git' do
-      it 'returns link to create a personal access token' do
+      it 'returns message prompting user to set up a PAT' do
         stub_application_setting(password_authentication_enabled_for_git?: false)
 
-        expect(helper.link_to_set_password).to match %r{<a href="#{profile_personal_access_tokens_path}">create a personal access token</a>}
+        expect(helper.no_password_message).to eq('Your account is authenticated with SSO or SAML. To <a href="/help/gitlab-basics/start-using-git#pull-and-push" target="_blank" rel="noopener noreferrer">push and pull</a> over HTTP with Git using this account, you must <a href="/-/profile/personal_access_tokens">set up a Personal Access Token</a> to use instead of a password. For more information, see <a href="/help/gitlab-basics/start-using-git#clone-with-https" target="_blank" rel="noopener noreferrer">Clone with HTTPS</a>.')
       end
     end
   end
@@ -987,8 +987,35 @@ RSpec.describe ProjectsHelper do
   describe "#delete_confirm_phrase" do
     subject { helper.delete_confirm_phrase(project) }
 
-    it 'includes the project full name' do
-      expect(subject).to eq("Delete #{project.full_name}")
+    it 'includes the project path with namespace' do
+      expect(subject).to eq(project.path_with_namespace)
+    end
+  end
+
+  describe '#fork_button_disabled_tooltip' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { helper.fork_button_disabled_tooltip(project) }
+
+    where(:has_user, :can_fork_project, :can_create_fork, :expected) do
+      false | false | false | nil
+      true | true | true | nil
+      true | false | true | 'You don\'t have permission to fork this project'
+      true | true | false | 'You have reached your project limit'
+    end
+
+    with_them do
+      before do
+        current_user = user if has_user
+
+        allow(helper).to receive(:current_user).and_return(current_user)
+        allow(user).to receive(:can?).with(:fork_project, project).and_return(can_fork_project)
+        allow(user).to receive(:can?).with(:create_fork).and_return(can_create_fork)
+      end
+
+      it 'returns tooltip text when user lacks privilege' do
+        expect(subject).to eq(expected)
+      end
     end
   end
 end

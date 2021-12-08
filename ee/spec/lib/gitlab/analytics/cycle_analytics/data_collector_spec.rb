@@ -7,12 +7,30 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
   let(:current_time) { Time.new(2019, 6, 1) }
 
+  before do
+    stub_licensed_features(cycle_analytics_for_groups: true)
+  end
+
   around do |example|
     Timecop.freeze(current_time) { example.run }
   end
 
   def round_to_days(seconds)
     seconds.fdiv(1.day.to_i).round
+  end
+
+  def aggregate_vsa_data(group)
+    Analytics::CycleAnalytics::DataLoaderService.new(
+      group: group,
+      model: Issue,
+      updated_at_before: Time.now
+    ).execute
+
+    Analytics::CycleAnalytics::DataLoaderService.new(
+      group: group,
+      model: MergeRequest,
+      updated_at_before: Time.now
+    ).execute
   end
 
   # Setting up test data for a stage depends on the `start_event_identifier` and
@@ -23,7 +41,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
   shared_examples 'custom Value Stream Analytics Stage' do
     let(:params) { { from: Time.new(2019), to: Time.new(2020), current_user: user } }
     let(:data_collector) { described_class.new(stage: stage, params: params) }
-    let(:aggregated_data_collector) { described_class.new(stage: stage, params: params.merge(use_vsa_aggregated_tables: true)) }
+    let(:aggregated_data_collector) { described_class.new(stage: stage, params: params.merge(use_aggregated_data_collector: true)) }
 
     let_it_be(:resource_1_end_time) { Time.new(2019, 3, 15) }
     let_it_be(:resource_2_end_time) { Time.new(2019, 3, 10) }
@@ -86,6 +104,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
     it 'loads serialized records' do
       items = data_collector.serialized_records
       expect(items.size).to eq(3)
+
+      expect(aggregated_data_collector.serialized_records.size).to eq(3) if aggregated_data_collector_enabled
     end
 
     context 'when sorting by duration' do
@@ -118,6 +138,15 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource_2_end_time.utc.to_date => 5,
           resource_3_end_time.utc.to_date => 15
         })
+
+        if aggregated_data_collector_enabled
+          data = aggregated_data_collector.duration_chart_average_data.map { |item| [item.date, round_to_days(item.average_duration_in_seconds)] }
+          expect(Hash[data]).to eq({
+            resource_1_end_time.utc.to_date => 10,
+            resource_2_end_time.utc.to_date => 5,
+            resource_3_end_time.utc.to_date => 15
+          })
+        end
       end
     end
 
@@ -149,7 +178,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         expected_median = (duration_1 + duration_2).fdiv(2)
 
         expect(round_to_days(data_collector.median.seconds)).to eq(round_to_days(expected_median))
-        expect(round_to_days(aggregated_data_collector.median.seconds)).to eq(round_to_days(expected_median))
+        expect(round_to_days(aggregated_data_collector.median.seconds)).to eq(round_to_days(expected_median)) if aggregated_data_collector_enabled
       end
 
       it 'loads serialized records' do
@@ -528,19 +557,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
       end
 
       before do
-        stub_licensed_features(cycle_analytics_for_groups: true)
-
-        Analytics::CycleAnalytics::DataLoaderService.new(
-          group: group,
-          model: Issue,
-          updated_at_before: Time.now
-        ).execute
-
-        Analytics::CycleAnalytics::DataLoaderService.new(
-          group: group,
-          model: MergeRequest,
-          updated_at_before: Time.now
-        ).execute
+        aggregate_vsa_data(group)
       end
 
       before_all do
@@ -552,17 +569,16 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
       let_it_be(:group) { create(:group) }
       let_it_be(:project1) { create(:project, :repository, group: group) }
       let_it_be(:project2) { create(:project, :repository, group: group) }
+      let_it_be(:stage) do
+        create(:cycle_analytics_group_stage,
+               name: 'My Stage',
+               group: group,
+               start_event_identifier: :merge_request_created,
+               end_event_identifier: :merge_request_merged
+              )
+      end
 
       let(:merge_request) { project2.merge_requests.first }
-
-      let(:stage) do
-        Analytics::CycleAnalytics::GroupStage.new(
-          name: 'My Stage',
-          group: group,
-          start_event_identifier: :merge_request_created,
-          end_event_identifier: :merge_request_merged
-        )
-      end
 
       let(:data_collector_params) do
         {
@@ -601,6 +617,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
       context 'when `project_ids` parameter is given' do
         before do
           data_collector_params[:project_ids] = [project2.id]
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'
@@ -613,6 +631,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           merge_request.assignees << assignee
 
           data_collector_params[:assignee_username] = [assignee.username]
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'
@@ -625,6 +645,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           merge_request.update!(author: author)
 
           data_collector_params[:author_username] = author.username
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'
@@ -641,6 +663,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(merge_request)
 
           data_collector_params[:label_name] = [label.name]
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'
@@ -657,6 +681,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(merge_request)
 
           data_collector_params[:label_name] = ['Any']
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'
@@ -674,6 +700,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(merge_request)
 
           data_collector_params[:label_name] = [label1.name, label2.name]
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'
@@ -686,6 +714,8 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           merge_request.update!(milestone: milestone)
 
           data_collector_params[:milestone_title] = milestone.title
+
+          aggregate_vsa_data(group)
         end
 
         it_behaves_like 'filter examples'

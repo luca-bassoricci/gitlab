@@ -3,6 +3,8 @@
 module Ci
   module Minutes
     class RefreshCachedDataService
+      BATCH_SIZE = 1_000
+
       def initialize(root_namespace)
         @root_namespace = root_namespace
       end
@@ -13,7 +15,7 @@ module Ci
         reset_ci_minutes_cache!
         update_pending_builds!
       rescue StandardError => e
-        ::Gitlab::ErrorTracking.track_exception(
+        ::Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
           e,
           root_namespace_id: @root_namespace.id
         )
@@ -25,12 +27,14 @@ module Ci
 
       # rubocop: disable CodeReuse/ActiveRecord
       def update_pending_builds!
-        return unless ::Feature.enabled?(:ci_pending_builds_maintain_ci_minutes_data, @root_namespace, type: :development, default_enabled: :yaml)
+        return unless ::Ci::PendingBuild.maintain_denormalized_data?
 
         minutes_exceeded = @root_namespace.ci_minutes_quota.minutes_used_up?
-        all_namespaces = @root_namespace.self_and_descendant_ids
+        all_namespace_ids = @root_namespace.self_and_descendant_ids.ids
 
-        ::Ci::PendingBuild.where(namespace: all_namespaces).update_all(minutes_exceeded: minutes_exceeded)
+        all_namespace_ids.in_groups_of(BATCH_SIZE, minutes_exceeded) do |namespace_ids|
+          ::Ci::PendingBuild.where(namespace: namespace_ids).update_all(minutes_exceeded: minutes_exceeded)
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
     end

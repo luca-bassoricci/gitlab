@@ -4,6 +4,7 @@ import { decimalBytes } from '~/lib/utils/unit_format';
 import { s__, __ } from '~/locale';
 import addCorpusMutation from '../graphql/mutations/add_corpus.mutation.graphql';
 import resetCorpus from '../graphql/mutations/reset_corpus.mutation.graphql';
+import uploadCorpus from '../graphql/mutations/upload_corpus.mutation.graphql';
 import getCorpusesQuery from '../graphql/queries/get_corpuses.query.graphql';
 import CorpusUploadForm from './corpus_upload_form.vue';
 
@@ -27,9 +28,7 @@ export default {
     states: {
       query: getCorpusesQuery,
       variables() {
-        return {
-          projectPath: this.projectFullPath,
-        };
+        return this.queryVariables;
       },
       update(data) {
         return data;
@@ -45,10 +44,16 @@ export default {
   props: {
     totalSize: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   computed: {
+    queryVariables() {
+      return {
+        projectPath: this.projectFullPath,
+      };
+    },
     formattedFileSize() {
       return decimalBytes(this.totalSize);
     },
@@ -73,13 +78,29 @@ export default {
     addCorpus() {
       this.$apollo.mutate({
         mutation: addCorpusMutation,
-        variables: { name: this.$options.i18n.newCorpus, projectPath: this.projectFullPath },
+        refetchQueries: [
+          {
+            query: getCorpusesQuery,
+            variables: this.queryVariables,
+          },
+        ],
+        variables: {
+          name: this.$options.i18n.newCorpus,
+          projectPath: this.projectFullPath,
+          packageId: this.states.uploadState.uploadedPackageId,
+        },
       });
     },
     resetCorpus() {
       this.$apollo.mutate({
         mutation: resetCorpus,
-        variables: { name: '', projectPath: this.projectFullPath },
+        variables: { projectPath: this.projectFullPath },
+      });
+    },
+    beginFileUpload({ name, files }) {
+      this.$apollo.mutate({
+        mutation: uploadCorpus,
+        variables: { name, projectPath: this.projectFullPath, files },
       });
     },
   },
@@ -89,7 +110,7 @@ export default {
   <div
     class="gl-h-11 gl-bg-gray-10 gl-display-flex gl-justify-content-space-between gl-align-items-center"
   >
-    <div class="gl-ml-5">
+    <div v-if="totalSize" class="gl-ml-5">
       <gl-sprintf :message="$options.i18n.totalSize">
         <template #totalSize>
           <span class="gl-font-weight-bold">{{ formattedFileSize }}</span>
@@ -97,7 +118,11 @@ export default {
       </gl-sprintf>
     </div>
 
-    <gl-button v-gl-modal-directive="$options.modal.modalId" class="gl-mr-5" variant="confirm">
+    <gl-button
+      v-gl-modal-directive="$options.modal.modalId"
+      class="gl-mr-5 gl-ml-auto"
+      variant="confirm"
+    >
       {{ $options.i18n.newCorpus }}
     </gl-button>
 
@@ -110,7 +135,11 @@ export default {
       @primary="addCorpus"
       @canceled="resetCorpus"
     >
-      <corpus-upload-form :states="states" />
+      <corpus-upload-form
+        :states="states"
+        @beginFileUpload="beginFileUpload"
+        @resetCorpus="resetCorpus"
+      />
     </gl-modal>
   </div>
 </template>

@@ -12,6 +12,10 @@ parameters to unexpected values in an effort to cause unexpected behavior and er
 backend. This helps you discover bugs and potential security issues that other QA processes may
 miss.
 
+INFO:
+Try fuzz testing in GitLab Ultimate.
+[It's free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-api-fuzzing-docs).
+
 We recommend that you use fuzz testing in addition to [GitLab Secure](../index.md)'s
 other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/index.md),
 you can run fuzz tests as part your CI/CD workflow.
@@ -1174,6 +1178,19 @@ Setting `SECURE_ANALYZERS_PREFIX` changes the Docker image registry location for
 For more information, see [Offline environments](../offline_deployments/index.md).
 
 ## Troubleshooting
+
+### Error waiting for API Security 'http://127.0.0.1:5000' to become available
+
+A bug exists in versions of the API Fuzzing analyzer prior to v1.6.196 that can cause a background process to fail under certain conditions. The solution is to update to a newer version of the DAST API analyzer.
+
+The version information can be found in the job details for the `apifuzzer_fuzz` job.
+
+If the issue is occurring with versions v1.6.196 or greater, please contact Support and provide the following information:
+
+1. Reference this troubleshooting section and ask for the issue to be escalated to the Dynamic Analysis Team.
+1. The full console output of the job.
+1. The `gl-api-security-scanner.log` file available as a job artifact. In the right-hand panel of the job details page, select the **Browse** button.
+1. The `apifuzzer_fuzz` job definition from your `.gitlab-ci.yml` file.
 
 ### Error, the OpenAPI document is not valid. Errors were found during validation of the document using the published OpenAPI schema
 

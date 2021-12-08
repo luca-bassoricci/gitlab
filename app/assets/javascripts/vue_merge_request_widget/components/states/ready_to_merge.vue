@@ -18,9 +18,10 @@ import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests
 import createFlash from '~/flash';
 import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import simplePoll from '~/lib/utils/simple_poll';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 import SmartInterval from '~/smart_interval';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import MergeRequest from '../../../merge_request';
 import {
   AUTO_MERGE_STRATEGIES,
@@ -179,6 +180,18 @@ export default {
 
       return this.mr.canRemoveSourceBranch;
     },
+    commitTemplateHelpPage() {
+      return helpPagePath('user/project/merge_requests/commit_templates.md');
+    },
+    commitTemplateHintText() {
+      if (this.shouldShowSquashEdit && this.shouldShowMergeEdit) {
+        return this.$options.i18n.mergeAndSquashCommitTemplatesHintText;
+      }
+      if (this.shouldShowSquashEdit) {
+        return this.$options.i18n.squashCommitTemplateHintText;
+      }
+      return this.$options.i18n.mergeCommitTemplateHintText;
+    },
     commits() {
       if (this.glFeatures.mergeRequestWidgetGraphql) {
         return this.state.commitsWithoutMergeCommits.nodes;
@@ -281,7 +294,7 @@ export default {
         return false;
       }
 
-      return enableSquashBeforeMerge && this.commitsCount > 1;
+      return enableSquashBeforeMerge;
     },
     shouldShowMergeControls() {
       if (this.glFeatures.restructuredMrWidget) {
@@ -346,15 +359,6 @@ export default {
     },
     updateGraphqlState() {
       return this.$apollo.queries.state.refetch();
-    },
-    updateMergeCommitMessage(includeDescription) {
-      const commitMessage = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.state.defaultMergeCommitMessage
-        : this.mr.commitMessage;
-      const commitMessageWithDescription = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.state.defaultMergeCommitMessageWithDescription
-        : this.mr.commitMessageWithDescription;
-      this.commitMessage = includeDescription ? commitMessageWithDescription : commitMessage;
     },
     handleMergeButtonClick(useAutoMerge, mergeImmediately = false, confirmationClicked = false) {
       if (this.showFailedPipelineModal && !confirmationClicked) {
@@ -508,6 +512,17 @@ export default {
         });
     },
   },
+  i18n: {
+    mergeCommitTemplateHintText: s__(
+      'mrWidget|To change this default message, edit the template for merge commit messages. %{linkStart}Learn more.%{linkEnd}',
+    ),
+    squashCommitTemplateHintText: s__(
+      'mrWidget|To change this default message, edit the template for squash commit messages. %{linkStart}Learn more.%{linkEnd}',
+    ),
+    mergeAndSquashCommitTemplatesHintText: s__(
+      'mrWidget|To change these default messages, edit the templates for both the merge and squash commit messages. %{linkStart}Learn more.%{linkEnd}',
+    ),
+  },
 };
 </script>
 
@@ -588,13 +603,7 @@ export default {
               :class="{ 'gl-w-full gl-order-n1 gl-mb-5': glFeatures.restructuredMrWidget }"
               class="gl-display-flex gl-align-items-center gl-flex-wrap"
             >
-              <merge-train-helper-icon
-                v-if="shouldRenderMergeTrainHelperIcon"
-                :merge-train-when-pipeline-succeeds-docs-path="
-                  mr.mergeTrainWhenPipelineSucceedsDocsPath
-                "
-                class="gl-mx-3"
-              />
+              <merge-train-helper-icon v-if="shouldRenderMergeTrainHelperIcon" class="gl-mx-3" />
 
               <gl-form-checkbox
                 v-if="canRemoveSourceBranch"
@@ -678,18 +687,22 @@ export default {
                     :label="__('Merge commit message')"
                     input-id="merge-message-edit"
                     class="gl-m-0! gl-p-0!"
-                  >
-                    <template #checkbox>
-                      <label>
-                        <input
-                          id="include-description"
-                          type="checkbox"
-                          @change="updateMergeCommitMessage($event.target.checked)"
-                        />
-                        {{ __('Include merge request description') }}
-                      </label>
-                    </template>
-                  </commit-edit>
+                  />
+                  <li class="gl-m-0! gl-p-0!">
+                    <p class="form-text text-muted">
+                      <gl-sprintf :message="commitTemplateHintText">
+                        <template #link="{ content }">
+                          <gl-link
+                            :href="commitTemplateHelpPage"
+                            class="inline-link"
+                            target="_blank"
+                          >
+                            {{ content }}
+                          </gl-link>
+                        </template>
+                      </gl-sprintf>
+                    </p>
+                  </li>
                 </ul>
               </div>
               <div
@@ -710,10 +723,10 @@ export default {
                   </li>
                   <li class="gl-line-height-normal">
                     <template v-if="removeSourceBranch">
-                      {{ __('Source branch will be deleted.') }}
+                      {{ __('Deletes the source branch.') }}
                     </template>
                     <template v-else>
-                      {{ __('Source branch will not be deleted.') }}
+                      {{ __('Does not delete the source branch.') }}
                     </template>
                   </li>
                   <li v-if="mr.relatedLinks" class="gl-line-height-normal">
@@ -791,18 +804,18 @@ export default {
               v-model="commitMessage"
               :label="__('Merge commit message')"
               input-id="merge-message-edit"
-            >
-              <template #checkbox>
-                <label>
-                  <input
-                    id="include-description"
-                    type="checkbox"
-                    @change="updateMergeCommitMessage($event.target.checked)"
-                  />
-                  {{ __('Include merge request description') }}
-                </label>
-              </template>
-            </commit-edit>
+            />
+            <li>
+              <p class="form-text text-muted">
+                <gl-sprintf :message="commitTemplateHintText">
+                  <template #link="{ content }">
+                    <gl-link :href="commitTemplateHelpPage" class="inline-link" target="_blank">
+                      {{ content }}
+                    </gl-link>
+                  </template>
+                </gl-sprintf>
+              </p>
+            </li>
           </ul>
         </commits-header>
       </template>

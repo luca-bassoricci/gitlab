@@ -1,5 +1,6 @@
 import { PROJECT_BADGE } from '~/badges/constants';
 import initLegacyConfirmDangerModal from '~/confirm_danger_modal';
+import initConfirmDanger from '~/init_confirm_danger';
 import dirtySubmitFactory from '~/dirty_submit/dirty_submit_factory';
 import initFilePickers from '~/file_pickers';
 import mountBadgeSettings from '~/pages/shared/mount_badge_settings';
@@ -9,11 +10,13 @@ import initSearchSettings from '~/search_settings';
 import initSettingsPanels from '~/settings_panels';
 import setupTransferEdit from '~/transfer_edit';
 import UserCallout from '~/user_callout';
+import initTopicsTokenSelector from '~/projects/settings/topics';
 import initProjectPermissionsSettings from '../shared/permissions';
 import initProjectLoadingSpinner from '../shared/save_project_loader';
 
 initFilePickers();
 initLegacyConfirmDangerModal();
+initConfirmDanger();
 initSettingsPanels();
 initProjectDeleteButton();
 mountBadgeSettings(PROJECT_BADGE);
@@ -28,3 +31,4 @@ setupTransferEdit('.js-project-transfer-form', 'select.select2');
 dirtySubmitFactory(document.querySelectorAll('.js-general-settings-form, .js-mr-settings-form'));
 
 initSearchSettings();
+initTopicsTokenSelector();

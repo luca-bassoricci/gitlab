@@ -2,7 +2,6 @@
 stage: Verify
 group: Pipeline Authoring
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
-type: reference
 ---
 
 # GitLab CI/CD script syntax **(FREE)**
@@ -14,7 +13,7 @@ You can use special syntax in [`script`](index.md#script) sections to:
 - [Create custom collapsible sections](../jobs/index.md#custom-collapsible-sections)
   to simplify job log output.
 
-## Use special characters with `script:`
+## Use special characters with `script`
 
 Sometimes, `script` commands must be wrapped in single or double quotes.
 For example, commands that contain a colon (`:`) must be wrapped in single quotes (`'`).
@@ -62,7 +61,7 @@ job:
 ## Set a default `before_script` or `after_script` for all jobs
 
 You can use [`before_script`](index.md#before_script) and [`after_script`](index.md#after_script)
-with [`default`](index.md#custom-default-keyword-values):
+with [`default`](index.md#default):
 
 - Use `before_script` with `default` to define a default array of commands that
   should run before the `script` commands in all jobs.
@@ -102,7 +101,7 @@ WARNING:
 If multiple commands are combined into one command string, only the last command's
 failure or success is reported.
 [Failures from earlier commands are ignored due to a bug](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/25394).
-To work around this, run each command as a separate `script:` item, or add an `exit 1`
+To work around this, run each command as a separate `script` item, or add an `exit 1`
 command to each command string.
 
 You can use the `|` (literal) YAML multiline block scalar indicator to write

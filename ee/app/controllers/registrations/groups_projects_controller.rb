@@ -4,6 +4,7 @@ module Registrations
   class GroupsProjectsController < ApplicationController
     include Registrations::CreateProject
     include Registrations::CreateGroup
+    include OneTrustCSP
 
     layout 'minimal'
 
@@ -42,9 +43,14 @@ module Registrations
 
             redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
           else
-            success_url = current_user.setup_for_company ? new_trial_path : nil
+            success_url = continuous_onboarding_getting_started_users_sign_up_welcome_path(project_id: @project.id)
 
-            redirect_to success_url || continuous_onboarding_getting_started_users_sign_up_welcome_path(project_id: @project.id)
+            if current_user.setup_for_company
+              store_location_for(:user, success_url)
+              success_url = new_trial_path
+            end
+
+            redirect_to success_url
           end
         else
           render :new
@@ -85,7 +91,7 @@ module Registrations
         modifed_group_params = modifed_group_params.compact_blank.with_defaults(path: Namespace.clean_path(group_name))
       end
 
-      modifed_group_params.merge(create_event: true)
+      modifed_group_params
     end
   end
 end

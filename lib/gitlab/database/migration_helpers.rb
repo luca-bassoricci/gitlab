@@ -4,14 +4,13 @@ module Gitlab
   module Database
     module MigrationHelpers
       include Migrations::BackgroundMigrationHelpers
+      include Migrations::BatchedBackgroundMigrationHelpers
       include DynamicModelHelpers
       include RenameTableHelpers
       include AsyncIndexes::MigrationHelpers
 
       # https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
       MAX_IDENTIFIER_NAME_LENGTH = 63
-
-      PERMITTED_TIMESTAMP_COLUMNS = %i[created_at updated_at deleted_at].to_set.freeze
       DEFAULT_TIMESTAMP_COLUMNS = %i[created_at updated_at].freeze
 
       # Adds `created_at` and `updated_at` columns with timezone information.
@@ -28,33 +27,23 @@ module Gitlab
       #  :default - The default value for the column.
       #  :null - When set to `true` the column will allow NULL values.
       #        The default is to not allow NULL values.
-      #  :columns - the column names to create. Must be one
-      #             of `Gitlab::Database::MigrationHelpers::PERMITTED_TIMESTAMP_COLUMNS`.
+      #  :columns - the column names to create. Must end with `_at`.
       #             Default value: `DEFAULT_TIMESTAMP_COLUMNS`
       #
       # All options are optional.
       def add_timestamps_with_timezone(table_name, options = {})
-        options[:null] = false if options[:null].nil?
         columns = options.fetch(:columns, DEFAULT_TIMESTAMP_COLUMNS)
-        default_value = options[:default]
-
-        validate_not_in_transaction!(:add_timestamps_with_timezone, 'with default value') if default_value
 
         columns.each do |column_name|
           validate_timestamp_column_name!(column_name)
 
-          # If default value is presented, use `add_column_with_default` method instead.
-          if default_value
-            add_column_with_default(
-              table_name,
-              column_name,
-              :datetime_with_timezone,
-              default: default_value,
-              allow_null: options[:null]
-            )
-          else
-            add_column(table_name, column_name, :datetime_with_timezone, **options)
-          end
+          add_column(
+            table_name,
+            column_name,
+            :datetime_with_timezone,
+            default: options[:default],
+            null: options[:null] || false
+          )
         end
       end
 
@@ -1272,8 +1261,8 @@ module Gitlab
 
       def check_trigger_permissions!(table)
         unless Grant.create_and_execute_trigger?(table)
-          dbname = Database.main.database_name
-          user = Database.main.username
+          dbname = ApplicationRecord.database.database_name
+          user = ApplicationRecord.database.username
 
           raise <<-EOF
 Your database user is not allowed to create, drop, or execute triggers on the
@@ -1595,8 +1584,8 @@ into similar problems in the future (e.g. when new tables are created).
       def create_extension(extension)
         execute('CREATE EXTENSION IF NOT EXISTS %s' % extension)
       rescue ActiveRecord::StatementInvalid => e
-        dbname = Database.main.database_name
-        user = Database.main.username
+        dbname = ApplicationRecord.database.database_name
+        user = ApplicationRecord.database.username
 
         warn(<<~MSG) if e.to_s =~ /permission denied/
           GitLab requires the PostgreSQL extension '#{extension}' installed in database '#{dbname}', but
@@ -1623,8 +1612,8 @@ into similar problems in the future (e.g. when new tables are created).
       def drop_extension(extension)
         execute('DROP EXTENSION IF EXISTS %s' % extension)
       rescue ActiveRecord::StatementInvalid => e
-        dbname = Database.main.database_name
-        user = Database.main.username
+        dbname = ApplicationRecord.database.database_name
+        user = ApplicationRecord.database.username
 
         warn(<<~MSG) if e.to_s =~ /permission denied/
           This migration attempts to drop the PostgreSQL extension '#{extension}'
@@ -1818,11 +1807,11 @@ into similar problems in the future (e.g. when new tables are created).
       end
 
       def validate_timestamp_column_name!(column_name)
-        return if PERMITTED_TIMESTAMP_COLUMNS.member?(column_name)
+        return if column_name.to_s.end_with?('_at')
 
         raise <<~MESSAGE
           Illegal timestamp column name! Got #{column_name}.
-          Must be one of: #{PERMITTED_TIMESTAMP_COLUMNS.to_a}
+          Must end with `_at`}
         MESSAGE
       end
 

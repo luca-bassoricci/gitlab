@@ -2,11 +2,8 @@
 
 module EE
   module MergeRequestPresenter
-    include ::VisibleApprovable
     extend ::Gitlab::Utils::Override
     extend ::Gitlab::Utils::DelegatorOverride
-
-    delegator_override_with ::VisibleApprovable # TODO: Remove `::VisibleApprovable` inclusion as it's duplicate
 
     APPROVALS_WIDGET_FULL_TYPE = 'full'
 
@@ -26,10 +23,6 @@ module EE
       if expose_mr_status_checks?
         expose_path(api_v4_projects_merge_requests_status_checks_path(id: project.id, merge_request_iid: merge_request.iid))
       end
-    end
-
-    def merge_train_when_pipeline_succeeds_docs_path
-      help_page_path('ci/pipelines/merge_trains.md', anchor: 'add-a-merge-request-to-a-merge-train')
     end
 
     def merge_immediately_docs_path

@@ -120,6 +120,76 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
         expect(described_class.secondary?).to be_falsey
       end
     end
+
+    context 'when current node is a primary node' do
+      it 'returns false' do
+        expect(described_class.secondary?).to be_falsey
+      end
+    end
+  end
+
+  describe '.secondary_with_primary?' do
+    context 'when current node is a primary node' do
+      it 'returns false' do
+        expect(described_class.secondary_with_primary?).to be_falsey
+      end
+    end
+
+    context 'when current node is a secondary node' do
+      before do
+        stub_current_geo_node(secondary_node)
+      end
+
+      it 'returns true' do
+        expect(described_class.secondary_with_primary?).to be_truthy
+      end
+
+      context 'when a primary does not exist' do
+        it 'returns false' do
+          allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
+
+          expect(described_class.secondary_with_primary?).to be_falsey
+        end
+      end
+    end
+  end
+
+  describe '.secondary_with_unified_url?' do
+    context 'when current node is a primary node' do
+      it 'returns false' do
+        expect(described_class.secondary_with_unified_url?).to be_falsey
+      end
+    end
+
+    context 'when current node is a secondary node' do
+      before do
+        stub_current_geo_node(secondary_node)
+      end
+
+      context 'when a primary does not exist' do
+        it 'returns false' do
+          allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
+
+          expect(described_class.secondary_with_unified_url?).to be_falsey
+        end
+      end
+
+      context 'when the secondary node has different URLs' do
+        it 'returns false' do
+          expect(described_class.secondary_with_unified_url?).to be_falsey
+        end
+      end
+
+      context 'when the secondary node has unified URL' do
+        before do
+          stub_current_geo_node(create(:geo_node, url: primary_node.url))
+        end
+
+        it 'returns true' do
+          expect(described_class.secondary_with_unified_url?).to be_truthy
+        end
+      end
+    end
   end
 
   describe '.enabled?' do
@@ -175,21 +245,6 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
         allow(GeoNode).to receive(:table_exists?) { false }
 
         expect(described_class.connected?).to be_falsey
-      end
-    end
-  end
-
-  describe '.secondary?' do
-    context 'when current node is secondary' do
-      it 'returns true' do
-        stub_current_geo_node(secondary_node)
-        expect(described_class.secondary?).to be_truthy
-      end
-    end
-
-    context 'current node is primary' do
-      it 'returns false' do
-        expect(described_class.secondary?).to be_falsey
       end
     end
   end
@@ -423,6 +478,53 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
 
       it 'returns 1' do
         expect(described_class.verification_max_capacity_per_replicator_class).to eq(1)
+      end
+    end
+  end
+
+  describe '.uncached_queries' do
+    context 'when no block is given' do
+      it 'raises error' do
+        expect do
+          described_class.uncached_queries
+        end.to raise_error('No block given')
+      end
+    end
+
+    context 'when the current node is a primary' do
+      it 'wraps the block in an ApplicationRecord.uncached block' do
+        stub_current_geo_node(primary_node)
+
+        expect(Geo::TrackingBase).not_to receive(:uncached)
+        expect(ApplicationRecord).to receive(:uncached).and_call_original
+
+        expect do |b|
+          described_class.uncached_queries(&b)
+        end.to yield_control
+      end
+    end
+
+    context 'when the current node is a secondary' do
+      it 'wraps the block in a Geo::TrackingBase.uncached block and an ApplicationRecord.uncached block' do
+        stub_current_geo_node(secondary_node)
+
+        expect(Geo::TrackingBase).to receive(:uncached).and_call_original
+        expect(ApplicationRecord).to receive(:uncached).and_call_original
+
+        expect do |b|
+          described_class.uncached_queries(&b)
+        end.to yield_control
+      end
+    end
+
+    context 'when there is no current node' do
+      it 'wraps the block in an ApplicationRecord.uncached block' do
+        expect(Geo::TrackingBase).not_to receive(:uncached)
+        expect(ApplicationRecord).to receive(:uncached).and_call_original
+
+        expect do |b|
+          described_class.uncached_queries(&b)
+        end.to yield_control
       end
     end
   end

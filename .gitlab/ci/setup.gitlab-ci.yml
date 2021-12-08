@@ -41,13 +41,21 @@ gitlab_git_test:
   script:
     - spec/support/prepare-gitlab-git-test-for-commit --check-for-changes
 
-no_ee_check:
+no-ee-check:
   extends:
     - .minimal-job
-    - .setup:rules:no_ee_check
+    - .setup:rules:no-ee-check
   stage: test
   script:
-    - scripts/no-ee-check
+    - scripts/no-dir-check ee
+
+no-jh-check:
+  extends:
+    - .minimal-job
+    - .setup:rules:no-jh-check
+  stage: test
+  script:
+    - scripts/no-dir-check jh
 
 verify-tests-yml:
   extends:
@@ -60,6 +68,24 @@ verify-tests-yml:
     - install_tff_gem
     - scripts/verify-tff-mapping
 
+generate-frontend-fixtures-mapping:
+  extends:
+    - .setup:rules:generate-frontend-fixtures-mapping
+    - .use-pg12
+    - .rails-cache
+  needs: ["setup-test-env"]
+  stage: prepare
+  before_script:
+    - !reference [.default-before_script, before_script]
+    - source ./scripts/rspec_helpers.sh
+    - run_timed_command "scripts/gitaly-test-spawn"
+  script:
+    - generate_frontend_fixtures_mapping
+  artifacts:
+    expire_in: 7d
+    paths:
+      - ${FRONTEND_FIXTURES_MAPPING_PATH}
+
 .detect-test-base:
   image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7
   needs: []
@@ -70,17 +96,21 @@ verify-tests-yml:
     - install_gitlab_gem
     - install_tff_gem
     - retrieve_tests_mapping
+    - retrieve_frontend_fixtures_mapping
     - |
       if [ -n "$CI_MERGE_REQUEST_IID" ]; then
         tooling/bin/find_changes ${CHANGES_FILE};
         tooling/bin/find_tests ${CHANGES_FILE} ${MATCHED_TESTS_FILE};
-        echo "related rspec tests: $(cat $MATCHED_TESTS_FILE)";
+        tooling/bin/find_changes ${CHANGES_FILE} ${MATCHED_TESTS_FILE} ${FRONTEND_FIXTURES_MAPPING_PATH};
+        echo "Changed files: $(cat $CHANGES_FILE)";
+        echo "Related rspec tests: $(cat $MATCHED_TESTS_FILE)";
       fi
   artifacts:
     expire_in: 7d
     paths:
       - ${CHANGES_FILE}
       - ${MATCHED_TESTS_FILE}
+      - ${FRONTEND_FIXTURES_MAPPING_PATH}
 
 detect-tests:
   extends:
@@ -129,6 +159,7 @@ add-jh-folder:
     - curl --location -o "jh-folder.tar.gz" "https://gitlab.com/gitlab-jh/gitlab/-/archive/main-jh/gitlab-main-jh.tar.gz?path=jh"
     - tar -xf "jh-folder.tar.gz"
     - mv gitlab-main-jh-jh/jh/ ./
+    - cp Gemfile.lock jh/
     - ls -l jh/
   artifacts:
     expire_in: 2d

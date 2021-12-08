@@ -98,8 +98,11 @@ RSpec.describe Security::SecurityOrchestrationPolicies::CiConfigurationService d
             stage: 'test',
             allow_failure: true,
             artifacts: {
-              reports: { container_scanning: 'gl-container-scanning-report.json' },
-              paths: ['gl-container-scanning-report.json']
+              reports: {
+                container_scanning: 'gl-container-scanning-report.json',
+                dependency_scanning: 'gl-dependency-scanning-report.json'
+              },
+              paths: ['gl-container-scanning-report.json', 'gl-dependency-scanning-report.json']
             },
             dependencies: [],
             script: ['gtcs scan'],
@@ -110,6 +113,21 @@ RSpec.describe Security::SecurityOrchestrationPolicies::CiConfigurationService d
           }
 
           expect(subject.deep_symbolize_keys).to eq(expected_configuration)
+        end
+      end
+
+      context 'when scan type is sast' do
+        let_it_be(:action) { { scan: 'sast' } }
+        let_it_be(:ci_variables) { { 'SAST_EXCLUDED_ANALYZERS' => 'semgrep', 'SAST_DISABLED' => nil } }
+
+        it 'returns prepared CI configuration for SAST' do
+          expected_configuration = {
+            inherit: { variables: false },
+            variables: { 'SAST_EXCLUDED_ANALYZERS' => 'semgrep' },
+            trigger: { include: [{ template: 'Security/SAST.gitlab-ci.yml' }] }
+          }
+
+          expect(subject).to eq(expected_configuration)
         end
       end
     end

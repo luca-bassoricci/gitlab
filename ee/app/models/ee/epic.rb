@@ -193,14 +193,10 @@ module EE
 
       def set_fixed_start_date
         self.start_date = start_date_fixed
-        self.start_date_sourcing_milestone = nil
-        self.due_date_sourcing_epic = nil
       end
 
       def set_fixed_due_date
         self.end_date = due_date_fixed
-        self.due_date_sourcing_milestone = nil
-        self.due_date_sourcing_epic = nil
       end
 
       def usage_ping_record_epic_creation
@@ -225,7 +221,7 @@ module EE
           }x
           %r{
             (#{group_regexp})?
-            (?:#{combined_prefix})(?<epic>\d+)
+            (?:#{combined_prefix})#{::Gitlab::Regex.epic}
           }x
         end
       end
@@ -240,7 +236,7 @@ module EE
             #{Regexp.escape(::Gitlab.config.gitlab.url)}
             \/groups\/(?<group>#{::Gitlab::PathRegex::FULL_NAMESPACE_FORMAT_REGEX})
             \/-\/epics
-            \/(?<epic>\d+)
+            \/#{::Gitlab::Regex.epic}
             (?<path>
               (\/[a-z0-9_=-]+)*\/*
             )?

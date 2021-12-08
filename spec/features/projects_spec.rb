@@ -257,7 +257,7 @@ RSpec.describe 'Project' do
     end
 
     it 'deletes a project', :sidekiq_inline do
-      expect { remove_with_confirm('Delete project', "Delete #{project.full_name}", 'Yes, delete project') }.to change { Project.count }.by(-1)
+      expect { remove_with_confirm('Delete project', project.path_with_namespace, 'Yes, delete project') }.to change { Project.count }.by(-1)
       expect(page).to have_content "Project '#{project.full_name}' is in the process of being deleted."
       expect(Project.all.count).to be_zero
       expect(project.issues).to be_empty
@@ -381,6 +381,24 @@ RSpec.describe 'Project' do
 
     it_behaves_like 'dirty submit form', [{ form: '.js-general-settings-form', input: 'input[name="project[name]"]' },
                                           { form: '.rspec-merge-request-settings', input: '#project_printing_merge_request_link_enabled' }]
+  end
+
+  describe 'view for a user without an access to a repo' do
+    let(:project) { create(:project, :repository) }
+    let(:user) { create(:user) }
+
+    it 'does not contain default branch information in its content' do
+      default_branch = 'merge-commit-analyze-side-branch'
+
+      project.add_guest(user)
+      project.change_head(default_branch)
+
+      sign_in(user)
+      visit project_path(project)
+
+      lines_with_default_branch = page.html.lines.select { |line| line.include?(default_branch) }
+      expect(lines_with_default_branch).to eq([])
+    end
   end
 
   def remove_with_confirm(button_text, confirm_with, confirm_button_text = 'Confirm')

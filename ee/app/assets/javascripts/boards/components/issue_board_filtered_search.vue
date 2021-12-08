@@ -2,17 +2,25 @@
 // This is a false violation of @gitlab/no-runtime-template-compiler, since it
 // extends a valid Vue single file component.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
+import { mapActions } from 'vuex';
 import IssueBoardFilteredSearchFoss from '~/boards/components/issue_board_filtered_search.vue';
 import { BoardType } from '~/boards/constants';
 import { __ } from '~/locale';
-import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import { OPERATOR_IS_AND_IS_NOT } from '~/vue_shared/components/filtered_search_bar/constants';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import EpicToken from 'ee/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import IterationToken from 'ee/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
+import WeightToken from 'ee/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
 
 export default {
   extends: IssueBoardFilteredSearchFoss,
   i18n: {
     ...IssueBoardFilteredSearchFoss.i18n,
     epic: __('Epic'),
+    iteration: __('Iteration'),
+    weight: __('Weight'),
   },
+  mixins: [glFeatureFlagMixin()],
   computed: {
     isGroupBoard() {
       return this.boardType === BoardType.group;
@@ -23,12 +31,12 @@ export default {
         : this.fullPath.slice(0, this.fullPath.lastIndexOf('/'));
     },
     tokens() {
-      const { epic } = this.$options.i18n;
+      const { epic, iteration, weight } = this.$options.i18n;
 
       return [
         ...this.tokensCE,
         {
-          type: 'epic_id',
+          type: 'epic',
           title: epic,
           icon: 'epic',
           token: EpicToken,
@@ -38,8 +46,31 @@ export default {
           useIdValue: true,
           fullPath: this.epicsGroupPath,
         },
+        ...(this.glFeatures.iterationCadences
+          ? [
+              {
+                icon: 'iteration',
+                title: iteration,
+                type: 'iteration',
+                operators: OPERATOR_IS_AND_IS_NOT,
+                token: IterationToken,
+                unique: true,
+                fetchIterations: this.fetchIterations,
+              },
+            ]
+          : []),
+        {
+          type: 'weight',
+          title: weight,
+          icon: 'weight',
+          token: WeightToken,
+          unique: true,
+        },
       ];
     },
+  },
+  methods: {
+    ...mapActions(['fetchIterations']),
   },
 };
 </script>

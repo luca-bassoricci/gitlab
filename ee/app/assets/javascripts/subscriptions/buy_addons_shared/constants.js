@@ -8,20 +8,28 @@ export const planTags = {
 /* eslint-enable @gitlab/require-i18n-strings */
 export const CUSTOMERSDOT_CLIENT = 'customersDotClient';
 export const GITLAB_CLIENT = 'gitlabClient';
+export const CUSTOMER_TYPE = 'Customer';
+export const SUBSCRIPTION_TYPE = 'Subscription';
+export const NAMESPACE_TYPE = 'Namespace';
+export const PAYMENT_METHOD_TYPE = 'PaymentMethod';
+export const PLAN_TYPE = 'Plan';
+export const STEP_TYPE = 'Step';
+export const COUNTRY_TYPE = 'Country';
+export const STATE_TYPE = 'State';
 
 export const CI_MINUTES_PER_PACK = 1000;
 export const STORAGE_PER_PACK = 10;
 
 export const I18N_CI_MINUTES_PRODUCT_LABEL = s__('Checkout|CI minute pack');
 export const I18N_CI_MINUTES_PRODUCT_UNIT = s__('Checkout|minutes');
-export const I18N_CI_MINUTES_FORMULA_TOTAL = s__('Checkout|%{totalCiMinutes} CI minutes');
+export const I18N_CI_MINUTES_FORMULA_TOTAL = s__('Checkout|%{quantity} CI minutes');
 export const i18nCIMinutesSummaryTitle = (quantity) =>
   n__('Checkout|%d CI minute pack', 'Checkout|%d CI minute packs', quantity);
 export const I18N_CI_MINUTES_SUMMARY_TOTAL = s__('Checkout|Total minutes: %{quantity}');
 export const I18N_CI_MINUTES_ALERT_TEXT = s__(
   "Checkout|CI minute packs are only used after you've used your subscription's monthly quota. The additional minutes will roll over month to month and are valid for one year.",
 );
-export const I18N_CI_MINUTES_PRICE_PRE_UNIT = s__(
+export const I18N_CI_MINUTES_PRICE_PER_UNIT = s__(
   'Checkout|$%{selectedPlanPrice} per pack of 1,000 minutes',
 );
 export const I18N_CI_MINUTES_TITLE = s__("Checkout|%{name}'s CI minutes");
@@ -32,7 +40,7 @@ export const I18N_STORAGE_FORMULA_TOTAL = s__('Checkout|%{quantity} GB of storag
 export const i18nStorageSummaryTitle = (quantity) =>
   n__('Checkout|%{quantity} storage pack', 'Checkout|%{quantity} storage packs', quantity);
 export const I18N_STORAGE_SUMMARY_TOTAL = s__('Checkout|Total storage: %{quantity} GB');
-export const I18N_STORAGE_PRICE_PRE_UNIT = s__(
+export const I18N_STORAGE_PRICE_PER_UNIT = s__(
   'Checkout|$%{selectedPlanPrice} per 10 GB storage per pack',
 );
 export const I18N_STORAGE_TITLE = s__("Checkout|%{name}'s storage subscription");

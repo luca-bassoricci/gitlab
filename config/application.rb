@@ -16,6 +16,38 @@ Bundler.require(*Rails.groups)
 
 module Gitlab
   class Application < Rails::Application
+    config.load_defaults 6.1
+
+    # This section contains configuration from Rails upgrades to override the new defaults so that we
+    # keep existing behavior.
+    #
+    # For boolean values, the new default is the opposite of the value being set in this section.
+    # For other types, the new default is noted in the comments. These are also documented in
+    # https://guides.rubyonrails.org/configuring.html#results-of-config-load-defaults
+    #
+    # To switch a setting to the new default value, we just need to delete the specific line here.
+
+    # Rails 6.1
+    config.action_dispatch.cookies_same_site_protection = nil # New default is :lax
+    ActiveSupport.utc_to_local_returns_utc_offset_times = false
+    config.action_controller.urlsafe_csrf_tokens = false
+    config.action_view.preload_links_header = false
+
+    # Rails 5.2
+    config.action_dispatch.use_authenticated_cookie_encryption = false
+    config.active_support.use_authenticated_message_encryption = false
+    config.active_support.hash_digest_class = ::Digest::MD5 # New default is ::Digest::SHA1
+    config.action_controller.default_protect_from_forgery = false
+    config.action_view.form_with_generates_ids = false
+
+    # Rails 5.1
+    config.assets.unknown_asset_fallback = true
+
+    # Rails 5.0
+    config.action_controller.per_form_csrf_tokens = false
+    config.action_controller.forgery_protection_origin_check = false
+    ActiveSupport.to_time_preserves_timezone = false
+
     require_dependency Rails.root.join('lib/gitlab')
     require_dependency Rails.root.join('lib/gitlab/utils')
     require_dependency Rails.root.join('lib/gitlab/action_cable/config')
@@ -36,8 +68,6 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/rack_multipart_tempfile_factory')
     require_dependency Rails.root.join('lib/gitlab/runtime')
     require_dependency Rails.root.join('lib/gitlab/patch/legacy_database_config')
-
-    config.autoloader = :zeitwerk
 
     # To be removed in 15.0
     # This preload is needed to convert legacy `database.yml`
@@ -190,11 +220,12 @@ module Gitlab
     # regardless if schema_search_path is set, or not.
     config.active_record.dump_schemas = :all
 
-    # Use new connection handling so that we can use Rails 6.1+ multiple
-    # database support.
-    config.active_record.legacy_connection_handling = false
-
-    config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
+    # Override default Active Record settings
+    # We cannot do this in an initializer because some models are already loaded by then
+    config.active_record.cache_versioning = false
+    config.active_record.collection_cache_versioning = false
+    config.active_record.has_many_inversing = false
+    config.active_record.belongs_to_required_by_default = false
 
     # Enable the asset pipeline
     config.assets.enabled = true
@@ -223,7 +254,7 @@ module Gitlab
     config.assets.precompile << "page_bundles/build.css"
     config.assets.precompile << "page_bundles/ci_status.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
-    config.assets.precompile << "page_bundles/dev_ops_report.css"
+    config.assets.precompile << "page_bundles/dev_ops_reports.css"
     config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/epics.css"
     config.assets.precompile << "page_bundles/error_tracking_details.css"
@@ -380,6 +411,8 @@ module Gitlab
     config.cache_store = :redis_cache_store, Gitlab::Redis::Cache.active_support_config
 
     config.active_job.queue_adapter = :sidekiq
+    config.active_job.logger = nil
+    config.action_mailer.deliver_later_queue_name = :mailers
 
     # This is needed for gitlab-shell
     ENV['GITLAB_PATH_OUTSIDE_HOOK'] = ENV['PATH']

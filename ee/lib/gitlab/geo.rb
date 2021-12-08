@@ -86,6 +86,10 @@ module Gitlab
       self.secondary? && self.primary_node_configured?
     end
 
+    def self.secondary_with_unified_url?
+      self.secondary_with_primary? && self.primary_node.url == self.current_node.url
+    end
+
     def self.license_allows?
       ::License.feature_available?(:geo)
     end
@@ -212,6 +216,18 @@ module Gitlab
       capacity = current_node.verification_max_capacity / num_verifiable_replicator_classes
 
       [1, capacity].max # at least 1
+    end
+
+    def self.uncached_queries(&block)
+      raise 'No block given' unless block_given?
+
+      ApplicationRecord.uncached do
+        if ::Gitlab::Geo.secondary?
+          ::Geo::TrackingBase.uncached(&block)
+        else
+          yield
+        end
+      end
     end
   end
 end

@@ -1,8 +1,8 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
 import { queryToObject } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 
@@ -12,7 +12,7 @@ import PipelineEditorMessages from './components/ui/pipeline_editor_messages.vue
 import {
   COMMIT_SHA_POLL_INTERVAL,
   EDITOR_APP_STATUS_EMPTY,
-  EDITOR_APP_STATUS_ERROR,
+  EDITOR_APP_VALID_STATUSES,
   EDITOR_APP_STATUS_LOADING,
   LOAD_FAILURE_UNKNOWN,
   STARTER_TEMPLATE_NAME,
@@ -30,6 +30,7 @@ export default {
   components: {
     ConfirmUnsavedChangesDialog,
     GlLoadingIcon,
+    GlModal,
     PipelineEditorEmptyState,
     PipelineEditorHome,
     PipelineEditorMessages,
@@ -52,7 +53,9 @@ export default {
       isFetchingCommitSha: false,
       isNewCiConfigFile: false,
       lastCommittedContent: '',
+      shouldSkipStartScreen: false,
       showFailure: false,
+      showResetComfirmationModal: false,
       showStartScreen: false,
       showSuccess: false,
       starterTemplate: '',
@@ -60,7 +63,6 @@ export default {
       successType: null,
     };
   },
-
   apollo: {
     initialCiFileContent: {
       fetchPolicy: fetchPolicies.NETWORK_ONLY,
@@ -103,7 +105,11 @@ export default {
           }
 
           if (!hasCIFile) {
-            this.showStartScreen = true;
+            if (this.shouldSkipStartScreen) {
+              this.setNewEmptyCiConfigFile();
+            } else {
+              this.showStartScreen = true;
+            }
           } else if (fileContent.length) {
             // If the file content is > 0, then we make sure to reset the
             // start screen flag during a refetch
@@ -141,10 +147,10 @@ export default {
         return { ...ciConfig, stages };
       },
       result({ data }) {
-        this.setAppStatus(data?.ciConfig?.status || EDITOR_APP_STATUS_ERROR);
+        this.setAppStatus(data?.ciConfig?.status);
       },
-      error() {
-        this.reportFailure(LOAD_FAILURE_UNKNOWN);
+      error(err) {
+        this.reportFailure(LOAD_FAILURE_UNKNOWN, [String(err)]);
       },
       watchLoading(isLoading) {
         if (isLoading) {
@@ -216,9 +222,18 @@ export default {
     },
   },
   i18n: {
-    tabEdit: s__('Pipelines|Edit'),
-    tabGraph: s__('Pipelines|Visualize'),
-    tabLint: s__('Pipelines|Lint'),
+    resetModal: {
+      actionPrimary: {
+        text: __('Reset file'),
+      },
+      actionCancel: {
+        text: __('Cancel'),
+      },
+      body: s__(
+        'Pipeline Editor|Are you sure you want to reset the file to its last committed version?',
+      ),
+      title: __('Discard changes'),
+    },
   },
   watch: {
     isEmpty(flag) {
@@ -229,6 +244,7 @@ export default {
   },
   mounted() {
     this.loadTemplateFromURL();
+    this.checkShouldSkipStartScreen();
   },
   methods: {
     hideFailure() {
@@ -237,17 +253,24 @@ export default {
     hideSuccess() {
       this.showSuccess = false;
     },
+    confirmReset() {
+      if (this.hasUnsavedChanges) {
+        this.showResetComfirmationModal = true;
+      }
+    },
     async refetchContent() {
       this.$apollo.queries.initialCiFileContent.skip = false;
       await this.$apollo.queries.initialCiFileContent.refetch();
     },
     reportFailure(type, reasons = []) {
-      this.setAppStatus(EDITOR_APP_STATUS_ERROR);
+      const isCurrentFailure = this.failureType === type && this.failureReasons[0] === reasons[0];
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      this.showFailure = true;
-      this.failureType = type;
-      this.failureReasons = reasons;
+      if (!isCurrentFailure) {
+        this.showFailure = true;
+        this.failureType = type;
+        this.failureReasons = reasons;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     },
     reportSuccess(type) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -255,10 +278,13 @@ export default {
       this.successType = type;
     },
     resetContent() {
+      this.showResetComfirmationModal = false;
       this.currentCiFileContent = this.lastCommittedContent;
     },
     setAppStatus(appStatus) {
-      this.$apollo.mutate({ mutation: updateAppStatus, variables: { appStatus } });
+      if (EDITOR_APP_VALID_STATUSES.includes(appStatus)) {
+        this.$apollo.mutate({ mutation: updateAppStatus, variables: { appStatus } });
+      }
     },
     setNewEmptyCiConfigFile() {
       this.isNewCiConfigFile = true;
@@ -293,6 +319,10 @@ export default {
         this.setNewEmptyCiConfigFile();
       }
     },
+    checkShouldSkipStartScreen() {
+      const params = queryToObject(window.location.search);
+      this.shouldSkipStartScreen = Boolean(params?.add_new_config_file);
+    },
   },
 };
 </script>
@@ -322,12 +352,22 @@ export default {
         :has-unsaved-changes="hasUnsavedChanges"
         :is-new-ci-config-file="isNewCiConfigFile"
         @commit="updateOnCommit"
-        @resetContent="resetContent"
+        @resetContent="confirmReset"
         @showError="showErrorAlert"
         @refetchContent="refetchContent"
         @updateCiConfig="updateCiConfig"
         @updateCommitSha="updateCommitSha"
       />
+      <gl-modal
+        v-model="showResetComfirmationModal"
+        modal-id="reset-content"
+        :title="$options.i18n.resetModal.title"
+        :action-cancel="$options.i18n.resetModal.actionCancel"
+        :action-primary="$options.i18n.resetModal.actionPrimary"
+        @primary="resetContent"
+      >
+        {{ $options.i18n.resetModal.body }}
+      </gl-modal>
       <confirm-unsaved-changes-dialog :has-unsaved-changes="hasUnsavedChanges" />
     </div>
   </div>

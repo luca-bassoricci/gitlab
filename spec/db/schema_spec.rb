@@ -48,11 +48,11 @@ RSpec.describe 'Database schema' do
     geo_node_statuses: %w[last_event_id cursor_last_event_id],
     geo_nodes: %w[oauth_application_id],
     geo_repository_deleted_events: %w[project_id],
-    geo_upload_deleted_events: %w[upload_id model_id],
     gitlab_subscription_histories: %w[gitlab_subscription_id hosted_plan_id namespace_id],
     identities: %w[user_id],
     import_failures: %w[project_id],
     issues: %w[last_edited_by_id state_id],
+    issue_emails: %w[email_message_id],
     jira_tracker_data: %w[jira_issue_transition_id],
     keys: %w[user_id],
     label_links: %w[target_id],
@@ -66,9 +66,6 @@ RSpec.describe 'Database schema' do
     oauth_access_grants: %w[resource_owner_id application_id],
     oauth_access_tokens: %w[resource_owner_id application_id],
     oauth_applications: %w[owner_id],
-    open_project_tracker_data: %w[closed_status_id],
-    packages_build_infos: %w[pipeline_id],
-    packages_package_file_build_infos: %w[pipeline_id],
     product_analytics_events_experimental: %w[event_id txn_id user_id],
     project_group_links: %w[group_id],
     project_statistics: %w[namespace_id],
@@ -102,6 +99,8 @@ RSpec.describe 'Database schema' do
         let(:indexes) { connection.indexes(table) }
         let(:columns) { connection.columns(table) }
         let(:foreign_keys) { connection.foreign_keys(table) }
+        let(:loose_foreign_keys) { Gitlab::Database::LooseForeignKeys.definitions.group_by(&:from_table).fetch(table, []) }
+        let(:all_foreign_keys) { foreign_keys + loose_foreign_keys }
         # take the first column in case we're using a composite primary key
         let(:primary_key_column) { Array(connection.primary_key(table)).first }
 
@@ -114,7 +113,7 @@ RSpec.describe 'Database schema' do
               columns = columns.split(',') if columns.is_a?(String)
               columns.first.chomp
             end
-            foreign_keys_columns = foreign_keys.map(&:column)
+            foreign_keys_columns = all_foreign_keys.map(&:column)
 
             # Add the primary key column to the list of indexed columns because
             # postgres and mysql both automatically create an index on the primary
@@ -129,7 +128,7 @@ RSpec.describe 'Database schema' do
         context 'columns ending with _id' do
           let(:column_names) { columns.map(&:name) }
           let(:column_names_with_id) { column_names.select { |column_name| column_name.ends_with?('_id') } }
-          let(:foreign_keys_columns) { foreign_keys.map(&:column) }
+          let(:foreign_keys_columns) { all_foreign_keys.map(&:column).uniq } # we can have FK and loose FK present at the same time
           let(:ignored_columns) { ignored_fk_columns(table) }
 
           it 'do have the foreign keys' do

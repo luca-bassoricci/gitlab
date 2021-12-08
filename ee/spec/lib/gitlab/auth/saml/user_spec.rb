@@ -144,6 +144,10 @@ RSpec.describe Gitlab::Auth::Saml::User do
             expect(saml_user.find_user).to be_ldap_blocked
           end
         end
+
+        it_behaves_like 'finding user when user cap is set' do
+          let(:o_auth_user) { saml_user }
+        end
       end
     end
   end

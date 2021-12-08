@@ -24,7 +24,7 @@ import {
   coverageFuzzingDiffSuccessMock,
   apiFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
-import { assignGitlabExperiment } from 'helpers/experimentation_helper';
+import { stubExperiments } from 'helpers/experimentation_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
@@ -221,7 +221,9 @@ describe('ee merge request widget options', () => {
       });
 
       describe('security_reports_mr_widget_prompt experiment', () => {
-        assignGitlabExperiment('security_reports_mr_widget_prompt', 'candidate');
+        beforeEach(() => {
+          stubExperiments({ security_reports_mr_widget_prompt: 'candidate' });
+        });
 
         it('prompts to enable the feature', () => {
           createComponent({ propsData: { mrData: mockData } });
@@ -1097,7 +1099,7 @@ describe('ee merge request widget options', () => {
       nextTick(() => {
         const tooltip = wrapper.find('[data-testid="question-o-icon"]');
 
-        expect(wrapper.text()).toContain('The source branch will be deleted');
+        expect(wrapper.text()).toContain('Deletes the source branch');
         expect(tooltip.attributes('title')).toBe(
           'A user with write access to the source branch selected this option',
         );

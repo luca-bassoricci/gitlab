@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings do
+RSpec.describe ::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings, schema: 20211108211434 do
   let(:users) { table(:users) }
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
@@ -23,7 +23,7 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings d
   let(:fingerprint_4) { Digest::SHA1.hexdigest(SecureRandom.uuid) }
 
   let(:user) { users.create!(email: 'test@gitlab.com', projects_limit: 5) }
-  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
+  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org', type: Namespaces::UserNamespace.sti_name) }
   let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
   let(:ci_pipeline) { ci_pipelines.create!(project_id: project.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
   let(:ci_build_1) { ci_builds.create!(commit_id: ci_pipeline.id, retried: false, type: 'Ci::Build') }

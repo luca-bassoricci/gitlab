@@ -41,7 +41,7 @@ To enable the Atlassian OmniAuth provider for passwordless authentication you mu
    sudo -u git -H editor /home/git/gitlab/config/gitlab.yml
    ```
 
-1. See [Initial OmniAuth Configuration](../../integration/omniauth.md#initial-omniauth-configuration) for initial settings to enable single sign-on and add `atlassian_oauth2` as an OAuth provider.
+1. See [Configure initial settings](../../integration/omniauth.md#configure-initial-settings) for initial settings to enable single sign-on and add `atlassian_oauth2` as an OAuth provider.
 1. Add the provider configuration for Atlassian:
 
    For Omnibus GitLab installations:
@@ -50,9 +50,10 @@ To enable the Atlassian OmniAuth provider for passwordless authentication you mu
    gitlab_rails['omniauth_providers'] = [
      {
        name: "atlassian_oauth2",
+       # label: "Provider name", # optional label for login button, defaults to "Atlassian"
        app_id: "YOUR_CLIENT_ID",
        app_secret: "YOUR_CLIENT_SECRET",
-       args: { scope: 'offline_access read:jira-user read:jira-work', prompt: 'consent' }
+       args: { scope: "offline_access read:jira-user read:jira-work", prompt: "consent" }
      }
    ]
    ```
@@ -60,10 +61,12 @@ To enable the Atlassian OmniAuth provider for passwordless authentication you mu
    For installations from source:
 
    ```yaml
-   - name: "atlassian_oauth2",
-     app_id: "YOUR_CLIENT_ID",
-     app_secret: "YOUR_CLIENT_SECRET",
-     args: { scope: 'offline_access read:jira-user read:jira-work', prompt: 'consent' }
+   - { name: "atlassian_oauth2",
+       # label: "Provider name", # optional label for login button, defaults to "Atlassian"
+       app_id: "YOUR_CLIENT_ID",
+       app_secret: "YOUR_CLIENT_SECRET",
+       args: { scope: "offline_access read:jira-user read:jira-work", prompt: "consent" }
+    }
    ```
 
 1. Change `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` to the Client credentials you received in [application registration](#atlassian-application-registration) steps.

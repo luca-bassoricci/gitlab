@@ -34,6 +34,18 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  props: {
+    isChildComponent: {
+      default: false,
+      required: false,
+      type: Boolean,
+    },
+    limit: {
+      default: null,
+      required: false,
+      type: Number,
+    },
+  },
   computed: {
     ...mapState([
       'clusters',
@@ -57,30 +69,37 @@ export default {
       },
     },
     fields() {
+      const tdClass = 'gl-py-5!';
       return [
         {
           key: 'name',
           label: __('Kubernetes cluster'),
+          tdClass,
         },
         {
           key: 'environment_scope',
           label: __('Environment scope'),
+          tdClass,
         },
         {
           key: 'node_size',
           label: __('Nodes'),
+          tdClass,
         },
         {
           key: 'total_cpu',
           label: __('Total cores (CPUs)'),
+          tdClass,
         },
         {
           key: 'total_memory',
           label: __('Total memory (GB)'),
+          tdClass,
         },
         {
           key: 'cluster_type',
           label: __('Cluster level'),
+          tdClass,
           formatter: (value) => CLUSTER_TYPES[value],
         },
       ];
@@ -93,10 +112,14 @@ export default {
     },
   },
   mounted() {
+    if (this.limit) {
+      this.setClustersPerPage(this.limit);
+    }
+
     this.fetchClusters();
   },
   methods: {
-    ...mapActions(['fetchClusters', 'reportSentryError', 'setPage']),
+    ...mapActions(['fetchClusters', 'reportSentryError', 'setPage', 'setClustersPerPage']),
     k8sQuantityToGb(quantity) {
       if (!quantity) {
         return 0;
@@ -201,7 +224,7 @@ export default {
 </script>
 
 <template>
-  <gl-loading-icon v-if="loadingClusters" size="md" class="gl-mt-3" />
+  <gl-loading-icon v-if="loadingClusters" size="md" />
 
   <section v-else>
     <ancestor-notice />
@@ -210,10 +233,11 @@ export default {
       v-if="hasClusters"
       :items="clusters"
       :fields="fields"
+      fixed
       stacked="md"
       head-variant="white"
-      thead-class="gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
-      class="qa-clusters-table"
+      thead-class="gl-border-b-solid gl-border-b-2 gl-border-b-gray-100"
+      class="qa-clusters-table gl-mb-4!"
       data-testid="cluster_list_table"
     >
       <template #cell(name)="{ item }">
@@ -304,10 +328,10 @@ export default {
       </template>
     </gl-table>
 
-    <clusters-empty-state v-else />
+    <clusters-empty-state v-else :is-child-component="isChildComponent" />
 
     <gl-pagination
-      v-if="hasClustersPerPage"
+      v-if="hasClustersPerPage && !limit"
       v-model="currentPage"
       :per-page="clustersPerPage"
       :total-items="totalClusters"

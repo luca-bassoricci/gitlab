@@ -9,10 +9,11 @@ import RegistrationDropdown from '../components/registration/registration_dropdo
 import RunnerFilteredSearchBar from '../components/runner_filtered_search_bar.vue';
 import RunnerList from '../components/runner_list.vue';
 import RunnerName from '../components/runner_name.vue';
+import RunnerOnlineStat from '../components/stat/runner_online_stat.vue';
 import RunnerPagination from '../components/runner_pagination.vue';
+import RunnerTypeTabs from '../components/runner_type_tabs.vue';
 
 import { statusTokenConfig } from '../components/search_tokens/status_token_config';
-import { typeTokenConfig } from '../components/search_tokens/type_token_config';
 import {
   I18N_FETCH_ERROR,
   GROUP_FILTERED_SEARCH_NAMESPACE,
@@ -35,7 +36,9 @@ export default {
     RunnerFilteredSearchBar,
     RunnerList,
     RunnerName,
+    RunnerOnlineStat,
     RunnerPagination,
+    RunnerTypeTabs,
   },
   props: {
     registrationToken: {
@@ -112,7 +115,7 @@ export default {
       });
     },
     searchTokens() {
-      return [statusTokenConfig, typeTokenConfig];
+      return [statusTokenConfig];
     },
     filteredSearchNamespace() {
       return `${GROUP_FILTERED_SEARCH_NAMESPACE}/${this.groupFullPath}`;
@@ -144,7 +147,15 @@ export default {
 
 <template>
   <div>
-    <div class="gl-py-3 gl-display-flex">
+    <runner-online-stat class="gl-py-6 gl-px-5" :value="groupRunnersCount" />
+
+    <div class="gl-display-flex gl-align-items-center">
+      <runner-type-tabs
+        v-model="search"
+        content-class="gl-display-none"
+        nav-class="gl-border-none!"
+      />
+
       <registration-dropdown
         class="gl-ml-auto"
         :registration-token="registrationToken"
@@ -157,11 +168,7 @@ export default {
       v-model="search"
       :tokens="searchTokens"
       :namespace="filteredSearchNamespace"
-    >
-      <template #runner-count>
-        {{ runnerCountMessage }}
-      </template>
-    </runner-filtered-search-bar>
+    />
 
     <div v-if="noRunnersFound" class="gl-text-center gl-p-5">
       {{ __('No runners found') }}

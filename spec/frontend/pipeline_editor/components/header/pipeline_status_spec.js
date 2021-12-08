@@ -16,7 +16,7 @@ describe('Pipeline Status', () => {
   let mockApollo;
   let mockPipelineQuery;
 
-  const createComponentWithApollo = (glFeatures = {}) => {
+  const createComponentWithApollo = () => {
     const handlers = [[getPipelineQuery, mockPipelineQuery]];
     mockApollo = createMockApollo(handlers);
 
@@ -27,7 +27,6 @@ describe('Pipeline Status', () => {
         commitSha: mockCommitSha,
       },
       provide: {
-        glFeatures,
         projectFullPath: mockProjectFullPath,
       },
       stubs: { GlLink, GlSprintf },
@@ -97,17 +96,18 @@ describe('Pipeline Status', () => {
       it('renders pipeline data', () => {
         const {
           id,
+          commit: { title },
           detailedStatus: { detailsPath },
         } = mockProjectPipeline().pipeline;
 
         expect(findStatusIcon().exists()).toBe(true);
         expect(findPipelineId().text()).toBe(`#${id.match(/\d+/g)[0]}`);
-        expect(findPipelineCommit().text()).toBe(mockCommitSha);
+        expect(findPipelineCommit().text()).toBe(`${mockCommitSha}: ${title}`);
         expect(findPipelineViewBtn().attributes('href')).toBe(detailsPath);
       });
 
-      it('does not render the pipeline mini graph', () => {
-        expect(findPipelineEditorMiniGraph().exists()).toBe(false);
+      it('renders the pipeline mini graph', () => {
+        expect(findPipelineEditorMiniGraph().exists()).toBe(true);
       });
     });
 
@@ -136,7 +136,7 @@ describe('Pipeline Status', () => {
     describe('when pipeline is null', () => {
       beforeEach(() => {
         mockPipelineQuery.mockResolvedValue({
-          data: { project: { pipeline: null } },
+          data: { project: { id: '1', pipeline: null } },
         });
 
         createComponentWithApollo();
@@ -148,21 +148,6 @@ describe('Pipeline Status', () => {
         expect(findIcon().attributes('name')).toBe('information-o');
         expect(findPipelineNotTriggeredErrorMsg().text()).toBe(i18n.pipelineNotTriggeredMsg);
       });
-    });
-  });
-
-  describe('when feature flag for pipeline mini graph is enabled', () => {
-    beforeEach(() => {
-      mockPipelineQuery.mockResolvedValue({
-        data: { project: mockProjectPipeline() },
-      });
-
-      createComponentWithApollo({ pipelineEditorMiniGraph: true });
-      waitForPromises();
-    });
-
-    it('renders the pipeline mini graph', () => {
-      expect(findPipelineEditorMiniGraph().exists()).toBe(true);
     });
   });
 });

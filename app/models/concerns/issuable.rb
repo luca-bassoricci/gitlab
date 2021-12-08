@@ -43,7 +43,7 @@ module Issuable
 
   included do
     cache_markdown_field :title, pipeline: :single_line
-    cache_markdown_field :description, issuable_state_filter_enabled: true
+    cache_markdown_field :description, issuable_reference_expansion_enabled: true
 
     redact_field :description
 
@@ -92,7 +92,6 @@ module Issuable
     scope :recent, -> { reorder(id: :desc) }
     scope :of_projects, ->(ids) { where(project_id: ids) }
     scope :opened, -> { with_state(:opened) }
-    scope :only_opened, -> { with_state(:opened) }
     scope :closed, -> { with_state(:closed) }
 
     # rubocop:disable GitlabSecurity/SqlInjection

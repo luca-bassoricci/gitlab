@@ -68,6 +68,13 @@ module Types
       field :replace_path, GraphQL::Types::String, null: true,
             description: 'Web path to replace the blob content.'
 
+      field :pipeline_editor_path, GraphQL::Types::String, null: true,
+            description: 'Web path to edit .gitlab-ci.yml file.'
+
+      field :code_owners, [Types::UserType], null: true,
+            description: 'List of code owners for the blob.',
+            calls_gitaly: true
+
       field :file_type, GraphQL::Types::String, null: true,
             description: 'Expected format of the blob based on the extension.'
 
@@ -88,6 +95,9 @@ module Types
             calls_gitaly: true,
             description: 'Whether the current user can modify the blob.'
 
+      field :can_current_user_push_to_branch, GraphQL::Types::Boolean, null: true, method: :can_current_user_push_to_branch?,
+            description: 'Whether the current user can push to the branch.'
+
       def raw_text_blob
         object.data unless object.binary?
       end
@@ -98,3 +108,5 @@ module Types
     end
   end
 end
+
+Types::Repository::BlobType.prepend_mod_with('Types::Repository::BlobType')

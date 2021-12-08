@@ -55,7 +55,9 @@ module API
       expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
       expose(:container_registry_enabled) { |project, options| project.feature_available?(:container_registry, options[:current_user]) }
       expose :service_desk_enabled
-      expose :service_desk_address
+      expose :service_desk_address, if: -> (project, options) do
+        Ability.allowed?(options[:current_user], :admin_issue, project)
+      end
 
       expose(:can_create_merge_request_in) do |project, options|
         Ability.allowed?(options[:current_user], :create_merge_request_in, project)
@@ -114,6 +116,8 @@ module API
       expose :merge_method
       expose :squash_option
       expose :suggestion_commit_message
+      expose :merge_commit_template
+      expose :squash_commit_template
       expose :statistics, using: 'API::Entities::ProjectStatistics', if: -> (project, options) {
         options[:statistics] && Ability.allowed?(options[:current_user], :read_statistics, project)
       }

@@ -3,7 +3,7 @@ export const loadViewer = (type) => {
     case 'empty':
       return () => import(/* webpackChunkName: 'blob_empty_viewer' */ './empty_viewer.vue');
     case 'text':
-      return gon.features.refactorTextViewer
+      return gon.features.highlightJs
         ? () => import(/* webpackChunkName: 'blob_text_viewer' */ './text_viewer.vue')
         : null;
     case 'download':
@@ -12,6 +12,8 @@ export const loadViewer = (type) => {
       return () => import(/* webpackChunkName: 'blob_image_viewer' */ './image_viewer.vue');
     case 'video':
       return () => import(/* webpackChunkName: 'blob_video_viewer' */ './video_viewer.vue');
+    case 'pdf':
+      return () => import(/* webpackChunkName: 'blob_pdf_viewer' */ './pdf_viewer.vue');
     default:
       return null;
   }
@@ -35,6 +37,10 @@ export const viewerProps = (type, blob) => {
     },
     video: {
       url: blob.rawPath,
+    },
+    pdf: {
+      url: blob.rawPath,
+      fileSize: blob.rawSize,
     },
   }[type];
 };

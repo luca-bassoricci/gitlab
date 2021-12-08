@@ -1,6 +1,7 @@
 <script>
-import { __, s__ } from '~/locale';
+import { __ } from '~/locale';
 import onDemandScansQuery from '../../graphql/on_demand_scans.query.graphql';
+import { BASE_TABS_TABLE_FIELDS } from '../../constants';
 import BaseTab from './base_tab.vue';
 
 export default {
@@ -8,32 +9,7 @@ export default {
   components: {
     BaseTab,
   },
-  tableFields: [
-    {
-      label: __('Status'),
-      key: 'detailedStatus',
-    },
-    {
-      label: __('Name'),
-      key: 'dastProfile.name',
-    },
-    {
-      label: s__('OnDemandScans|Scan type'),
-      key: 'scanType',
-    },
-    {
-      label: s__('OnDemandScans|Target'),
-      key: 'dastProfile.dastSiteProfile.targetUrl',
-    },
-    {
-      label: __('Start date'),
-      key: 'createdAt',
-    },
-    {
-      label: __('Pipeline'),
-      key: 'id',
-    },
-  ],
+  tableFields: BASE_TABS_TABLE_FIELDS,
   i18n: {
     title: __('All'),
   },

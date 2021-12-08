@@ -10,6 +10,7 @@ module Ci
     include Presentable
     include Importable
     include Ci::HasRef
+    extend ::Gitlab::Utils::Override
 
     BuildArchivedError = Class.new(StandardError)
 
@@ -164,6 +165,7 @@ module Ci
 
     scope :with_artifacts_not_expired, -> { with_downloadable_artifacts.where('artifacts_expire_at IS NULL OR artifacts_expire_at > ?', Time.current) }
     scope :with_expired_artifacts, -> { with_downloadable_artifacts.where('artifacts_expire_at < ?', Time.current) }
+    scope :with_pipeline_locked_artifacts, -> { joins(:pipeline).where('pipeline.locked': Ci::Pipeline.lockeds[:artifacts_locked]) }
     scope :last_month, -> { where('created_at > ?', Date.today - 1.month) }
     scope :manual_actions, -> { where(when: :manual, status: COMPLETED_STATUSES + %i[manual]) }
     scope :scheduled_actions, -> { where(when: :delayed, status: COMPLETED_STATUSES + %i[scheduled]) }
@@ -171,6 +173,7 @@ module Ci
     scope :with_live_trace, -> { where('EXISTS (?)', Ci::BuildTraceChunk.where('ci_builds.id = ci_build_trace_chunks.build_id').select(1)) }
     scope :with_stale_live_trace, -> { with_live_trace.finished_before(12.hours.ago) }
     scope :finished_before, -> (date) { finished.where('finished_at < ?', date) }
+    scope :license_management_jobs, -> { where(name: %i(license_management license_scanning)) } # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
 
     scope :with_secure_reports_from_config_options, -> (job_types) do
       joins(:metadata).where("ci_builds_metadata.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
@@ -186,8 +189,6 @@ module Ci
     scope :with_coverage, -> { where.not(coverage: nil) }
     scope :without_coverage, -> { where(coverage: nil) }
     scope :with_coverage_regex, -> { where.not(coverage_regex: nil) }
-
-    scope :for_project, -> (project_id) { where(project_id: project_id) }
 
     acts_as_taggable
 
@@ -285,6 +286,7 @@ module Ci
 
         build.run_after_commit do
           BuildQueueWorker.perform_async(id)
+          BuildHooksWorker.perform_async(id)
         end
       end
 
@@ -450,7 +452,7 @@ module Ci
     end
 
     def retryable?
-      return false if retried? || archived?
+      return false if retried? || archived? || deployment_rejected?
 
       success? || failed? || canceled?
     end
@@ -539,7 +541,6 @@ module Ci
           .concat(persisted_variables)
           .concat(dependency_proxy_variables)
           .concat(job_jwt_variables)
-          .concat(kubernetes_variables)
           .concat(scoped_variables)
           .concat(job_variables)
           .concat(persisted_environment_variables)
@@ -720,6 +721,14 @@ module Ci
 
     def valid_token?(token)
       self.token && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
+    end
+
+    # acts_as_taggable uses this method create/remove tags with contexts
+    # defined by taggings and to get those contexts it executes a query.
+    # We don't use any other contexts except `tags`, so we don't need it.
+    override :custom_contexts
+    def custom_contexts
+      []
     end
 
     def tag_list
@@ -1074,6 +1083,16 @@ module Ci
       runner&.instance_type?
     end
 
+    def job_variables_attributes
+      strong_memoize(:job_variables_attributes) do
+        job_variables.internal_source.map do |variable|
+          variable.attributes.except('id', 'job_id', 'encrypted_value', 'encrypted_value_iv').tap do |attrs|
+            attrs[:value] = variable.value
+          end
+        end
+      end
+    end
+
     protected
 
     def run_status_commit_hooks!
@@ -1158,22 +1177,6 @@ module Ci
         variables.append(key: 'CI_JOB_JWT', value: jwt, public: false, masked: true)
       rescue OpenSSL::PKey::RSAError, Gitlab::Ci::Jwt::NoSigningKeyError => e
         Gitlab::ErrorTracking.track_exception(e)
-      end
-    end
-
-    def kubernetes_variables
-      ::Gitlab::Ci::Variables::Collection.new.tap do |collection|
-        # A cluster deployemnt may also define a KUBECONFIG variable, so to keep existing
-        # configurations working we shouldn't overwrite it here.
-        # This check will be removed when Cluster and Agent configurations are
-        # merged in https://gitlab.com/gitlab-org/gitlab/-/issues/335089
-        break collection if deployment&.deployment_cluster
-
-        template = ::Ci::GenerateKubeconfigService.new(self).execute # rubocop: disable CodeReuse/ServiceClass
-
-        if template.valid?
-          collection.append(key: 'KUBECONFIG', value: template.to_yaml, public: false, file: true)
-        end
       end
     end
 

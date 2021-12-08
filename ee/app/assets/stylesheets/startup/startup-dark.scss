@@ -912,9 +912,9 @@ input {
   background-color: #9e5400;
   height: 12px;
   width: 12px;
-  margin-top: -15px;
   pointer-events: none;
   visibility: hidden;
+  top: 3px;
 }
 .top-nav-toggle .dropdown-icon {
   margin-right: 0.5rem;
@@ -1138,6 +1138,11 @@ input {
   border-bottom: 0.25rem solid transparent;
   border-right: 0.25rem solid #fff;
   border-right-color: var(--black, #fff);
+}
+@media (min-width: 576px) {
+  .nav-sidebar a.has-sub-items + .sidebar-sub-level-items {
+    min-width: 150px;
+  }
 }
 .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item {
   display: none;
@@ -1947,6 +1952,9 @@ body.gl-dark {
   .gl-sm-display-block {
     display: block;
   }
+}
+.gl-relative {
+  position: relative;
 }
 .gl-absolute {
   position: absolute;

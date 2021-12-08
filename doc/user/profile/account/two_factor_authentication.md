@@ -84,7 +84,7 @@ in a safe place.
 > - It's deployed behind a feature flag, disabled by default.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-fortiauthenticator-integration).
 
-You can use FortiAuthenticator as an OTP provider in GitLab. Users must exist in
+You can use FortiAuthenticator as a one-time password (OTP) provider in GitLab. Users must exist in
 both FortiAuthenticator and GitLab with the exact same username, and users must
 have FortiToken configured in FortiAuthenticator.
 
@@ -163,7 +163,7 @@ Feature.enable(:forti_authenticator, User.find(<user ID>))
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-You can use FortiToken Cloud as an OTP provider in GitLab. Users must exist in
+You can use FortiToken Cloud as a one-time password (OTP) provider in GitLab. Users must exist in
 both FortiToken Cloud and GitLab with the exact same username, and users must
 have FortiToken configured in FortiToken Cloud.
 
@@ -237,6 +237,9 @@ Feature.disable(:forti_token_cloud, User.find(<user ID>))
 GitLab officially only supports [YubiKey](https://www.yubico.com/products/)
 U2F devices, but users have successfully used [SoloKeys](https://solokeys.com/)
 or [Google Titan Security Key](https://cloud.google.com/titan-security-key).
+
+NOTE:
+2FA must be configured before U2F.
 
 The U2F workflow is [supported by](https://caniuse.com/#search=U2F) the
 following desktop browsers:
@@ -347,7 +350,7 @@ request, and you're automatically signed in.
 ### Sign in by using a WebAuthn device
 
 In supported browsers you should be automatically prompted to activate your WebAuthn device
-(e.g. by touching/pressing its button) after entering your credentials.
+(for example, by touching/pressing its button) after entering your credentials.
 
 A message displays, indicating that your device responded to the authentication
 request and you're automatically signed in.
@@ -462,13 +465,20 @@ If you regenerate 2FA recovery codes, save them. You can't use any previously cr
 
 ### Have 2FA disabled on your account
 
-If you cannot use a saved recovery code or generate new recovery codes then please submit a [support ticket](https://support.gitlab.com/hc/en-us/requests/new) requesting that a GitLab global administrator disables two-factor authentication for your account. Please note that only the actual owner of the account can make this request and that disabling this setting will temporarily leave your account in a less secure state. You should therefore sign in and re-enable two-factor authentication as soon as possible.
+If you can't use a saved recovery code or generate new recovery codes, submit a [support ticket](https://support.gitlab.com/hc/en-us/requests/new) to
+request a GitLab global administrator disable two-factor authentication for your account. Note that:
+
+- Only the owner of the account can make this request.
+- This service is only available for accounts that have a GitLab.com subscription. For more information, see our
+  [blog post](https://about.gitlab.com/blog/2020/08/04/gitlab-support-no-longer-processing-mfa-resets-for-free-users/).
+- Disabling this setting temporarily leaves your account in a less secure state. You should sign in and re-enable two-factor authentication
+  as soon as possible.
 
 ## Note to GitLab administrators
 
 - You need to take special care to that 2FA keeps working after
   [restoring a GitLab backup](../../../raketasks/backup_restore.md).
-- To ensure 2FA authorizes correctly with TOTP server, you may want to ensure
+- To ensure 2FA authorizes correctly with time-based one time passwords (TOTP) server, you may want to ensure
   your GitLab server's time is synchronized via a service like NTP. Otherwise,
   you may have cases where authorization always fails because of time differences.
 - The GitLab U2F implementation does _not_ work when the GitLab instance is accessed from

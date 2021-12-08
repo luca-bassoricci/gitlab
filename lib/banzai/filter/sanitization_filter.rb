@@ -28,6 +28,13 @@ module Banzai
         allowlist[:attributes]['li'] = %w[id]
         allowlist[:transformers].push(self.class.remove_non_footnote_ids)
 
+        if Feature.enabled?(:use_cmark_renderer)
+          # Allow section elements with data-footnotes attribute
+          allowlist[:elements].push('section')
+          allowlist[:attributes]['section'] = %w(data-footnotes)
+          allowlist[:attributes]['a'].push('data-footnote-ref', 'data-footnote-backref')
+        end
+
         allowlist
       end
 
@@ -54,8 +61,13 @@ module Banzai
             return unless node.name == 'a' || node.name == 'li'
             return unless node.has_attribute?('id')
 
-            return if node.name == 'a' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LINK_REFERENCE_PATTERN
-            return if node.name == 'li' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LI_REFERENCE_PATTERN
+            if Feature.enabled?(:use_cmark_renderer)
+              return if node.name == 'a' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LINK_REFERENCE_PATTERN
+              return if node.name == 'li' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LI_REFERENCE_PATTERN
+            else
+              return if node.name == 'a' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LINK_REFERENCE_PATTERN_OLD
+              return if node.name == 'li' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LI_REFERENCE_PATTERN_OLD
+            end
 
             node.remove_attribute('id')
           end

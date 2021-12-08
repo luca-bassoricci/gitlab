@@ -7,11 +7,15 @@ module Gitlab
   # To check if a job has been completed, simply pass the job ID to the
   # `completed?` method:
   #
-  #     job_id = SomeWorker.perform_async(...)
+  #     job_id = SomeWorker.with_status.perform_async(...)
   #
   #     if Gitlab::SidekiqStatus.completed?(job_id)
   #       ...
   #     end
+  #
+  # If you do not use `with_status`, and the worker class does not declare
+  # `status_expiration` in its `sidekiq_options`, then this status will not be
+  # stored.
   #
   # For each job ID registered a separate key is stored in Redis, making lookups
   # much faster than using Sidekiq's built-in job finding/status API. These keys
@@ -25,13 +29,16 @@ module Gitlab
     # for most jobs.
     DEFAULT_EXPIRATION = 30.minutes.to_i
 
+    DEFAULT_VALUE = 1
+    DEFAULT_VALUE_MESSAGE = 'Keys using the default value for SidekiqStatus detected'
+
     # Starts tracking of the given job.
     #
     # jid - The Sidekiq job ID
     # expire - The expiration time of the Redis key.
-    def self.set(jid, expire = DEFAULT_EXPIRATION)
+    def self.set(jid, expire = DEFAULT_EXPIRATION, value: DEFAULT_VALUE)
       Sidekiq.redis do |redis|
-        redis.set(key_for(jid), 1, ex: expire)
+        redis.set(key_for(jid), value, ex: expire)
       end
     end
 
@@ -84,13 +91,20 @@ module Gitlab
     # true = job is still running or enqueued
     # false = job completed
     def self.job_status(job_ids)
-      keys = job_ids.map { |jid| key_for(jid) }
+      return [] if job_ids.empty?
 
-      Sidekiq.redis do |redis|
-        redis.pipelined do
-          keys.each { |key| redis.exists(key) }
-        end
+      keys = job_ids.map { |jid| key_for(jid) }
+      results = Sidekiq.redis { |redis| redis.mget(*keys) }
+
+      if Feature.enabled?(:log_implicit_sidekiq_status_calls, default_enabled: :yaml)
+        to_log = keys.zip(results).select do |_key, result|
+          result == DEFAULT_VALUE.to_s
+        end.map(&:first)
+
+        Sidekiq.logger.info(message: DEFAULT_VALUE_MESSAGE, keys: to_log) if to_log.any?
       end
+
+      results.map { |result| !result.nil? }
     end
 
     # Returns the JIDs that are completed

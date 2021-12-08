@@ -11,11 +11,12 @@ describe('IssueBoardFilter', () => {
 
   const findBoardsFilteredSearch = () => wrapper.findComponent(BoardFilteredSearch);
 
-  const createComponent = ({ epicFeatureAvailable = false } = {}) => {
+  const createComponent = ({ isSignedIn = false } = {}) => {
     wrapper = shallowMount(IssueBoardFilteredSpec, {
       propsData: { fullPath: 'gitlab-org', boardType: 'group' },
       provide: {
-        epicFeatureAvailable,
+        isSignedIn,
+        releasesFetchPath: '/releases',
       },
     });
   };
@@ -45,10 +46,24 @@ describe('IssueBoardFilter', () => {
       expect(findBoardsFilteredSearch().exists()).toBe(true);
     });
 
-    it('passes the correct tokens to BoardFilteredSearch', () => {
-      const tokens = mockTokens(fetchLabelsSpy, fetchAuthorsSpy, wrapper.vm.fetchMilestones);
+    it.each`
+      isSignedIn
+      ${true}
+      ${false}
+    `(
+      'passes the correct tokens to BoardFilteredSearch when user sign in is $isSignedIn',
+      ({ isSignedIn }) => {
+        createComponent({ isSignedIn });
 
-      expect(findBoardsFilteredSearch().props('tokens')).toEqual(tokens);
-    });
+        const tokens = mockTokens(
+          fetchLabelsSpy,
+          fetchAuthorsSpy,
+          wrapper.vm.fetchMilestones,
+          isSignedIn,
+        );
+
+        expect(findBoardsFilteredSearch().props('tokens')).toEqual(tokens);
+      },
+    );
   });
 });

@@ -76,7 +76,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
           resources :scanned_resources, only: [:index]
 
-          resources :vulnerabilities, only: [:show] do
+          resources :vulnerabilities, only: [:show, :new] do
             member do
               get :discussions, format: :json
             end
@@ -112,11 +112,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         namespace :integrations do
           namespace :jira do
-            resources :issues, only: [:index, :show] do
-              member do
-                get :labels
-              end
-            end
+            resources :issues, only: [:index, :show]
           end
 
           namespace :zentao do

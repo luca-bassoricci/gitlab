@@ -66,7 +66,7 @@ module Gitlab
                 # times before using the primary instead.
                 will_retry = conflict_retried < @host_list.length * 3
 
-                LoadBalancing::Logger.warn(
+                ::Gitlab::Database::LoadBalancing::Logger.warn(
                   event: :host_query_conflict,
                   message: 'Query conflict on host',
                   conflict_retried: conflict_retried,
@@ -91,7 +91,7 @@ module Gitlab
             end
           end
 
-          LoadBalancing::Logger.warn(
+          ::Gitlab::Database::LoadBalancing::Logger.warn(
             event: :no_secondaries_available,
             message: 'No secondaries were available, using primary instead',
             conflict_retried: conflict_retried,
@@ -263,10 +263,28 @@ module Gitlab
           ) || raise(::ActiveRecord::ConnectionNotEstablished)
         end
 
+        def wal_diff(location1, location2)
+          read_write do |connection|
+            lsn1 = connection.quote(location1)
+            lsn2 = connection.quote(location2)
+
+            query = <<-SQL.squish
+            SELECT pg_wal_lsn_diff(#{lsn1}, #{lsn2})
+              AS result
+            SQL
+
+            row = connection.select_all(query).first
+            row['result'] if row
+          end
+        end
+
         private
 
         def ensure_caching!
-          host.enable_query_cache! unless host.query_cache_enabled
+          return unless Rails.application.executor.active?
+          return if host.query_cache_enabled
+
+          host.enable_query_cache!
         end
 
         def request_cache

@@ -16,33 +16,30 @@ import {
   ListTypeTitles,
   DraggableItemTypes,
 } from 'ee_else_ce/boards/constants';
+import {
+  formatIssueInput,
+  formatBoardLists,
+  formatListIssues,
+  formatListsPageInfo,
+  formatIssue,
+  updateListPosition,
+  moveItemListHelper,
+  getMoveData,
+  FiltersInfo,
+  filterVariables,
+} from 'ee_else_ce/boards/boards_util';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import {
-  formatBoardLists,
-  formatListIssues,
-  formatListsPageInfo,
-  formatIssue,
-  formatIssueInput,
-  updateListPosition,
-  moveItemListHelper,
-  getMoveData,
-  FiltersInfo,
-  filterVariables,
-} from '../boards_util';
 import { gqlClient } from '../graphql';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
-import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
 import issueCreateMutation from '../graphql/issue_create.mutation.graphql';
-import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
-import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 
 import * as types from './mutation_types';
@@ -199,52 +196,6 @@ export default {
       })
       .catch((e) => {
         commit(types.RECEIVE_LABELS_FAILURE);
-        throw e;
-      });
-  },
-
-  fetchIterations({ state, commit }, title) {
-    commit(types.RECEIVE_ITERATIONS_REQUEST);
-
-    const { fullPath, boardType } = state;
-
-    const variables = {
-      fullPath,
-      title,
-    };
-
-    let query;
-    if (boardType === BoardType.project) {
-      query = projectBoardIterationsQuery;
-    }
-    if (boardType === BoardType.group) {
-      query = groupBoardIterationsQuery;
-    }
-
-    if (!query) {
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      throw new Error('Unknown board type');
-    }
-
-    return gqlClient
-      .query({
-        query,
-        variables,
-      })
-      .then(({ data }) => {
-        const errors = data[boardType]?.errors;
-        const iterations = data[boardType]?.iterations.nodes;
-
-        if (errors?.[0]) {
-          throw new Error(errors[0]);
-        }
-
-        commit(types.RECEIVE_ITERATIONS_SUCCESS, iterations);
-
-        return iterations;
-      })
-      .catch((e) => {
-        commit(types.RECEIVE_ITERATIONS_FAILURE);
         throw e;
       });
   },
@@ -421,7 +372,6 @@ export default {
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { fullPath, fullBoardId, boardType, filterParams } = state;
-
     const variables = {
       fullPath,
       boardId: fullBoardId,
@@ -657,33 +607,6 @@ export default {
 
   setActiveIssueLabels: async ({ commit, getters }, input) => {
     const { activeBoardItem } = getters;
-
-    if (!gon.features?.labelsWidget) {
-      const { data } = await gqlClient.mutate({
-        mutation: issueSetLabelsMutation,
-        variables: {
-          input: {
-            iid: input.iid || String(activeBoardItem.iid),
-            labelIds: input.labelsId ?? undefined,
-            addLabelIds: input.addLabelIds ?? [],
-            removeLabelIds: input.removeLabelIds ?? [],
-            projectPath: input.projectPath,
-          },
-        },
-      });
-
-      if (data.updateIssue?.errors?.length > 0) {
-        throw new Error(data.updateIssue.errors);
-      }
-
-      commit(types.UPDATE_BOARD_ITEM_BY_ID, {
-        itemId: data.updateIssue?.issue?.id || activeBoardItem.id,
-        prop: 'labels',
-        value: data.updateIssue?.issue?.labels.nodes,
-      });
-
-      return;
-    }
 
     let labels = input?.labels || [];
     if (input.removeLabelIds) {

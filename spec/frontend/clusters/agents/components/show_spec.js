@@ -1,6 +1,8 @@
 import { GlAlert, GlKeysetPagination, GlLoadingIcon, GlSprintf, GlTab } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import ClusterAgentShow from '~/clusters/agents/components/show.vue';
 import TokenTable from '~/clusters/agents/components/token_table.vue';
 import getAgentQuery from '~/clusters/agents/graphql/queries/get_cluster_agent.query.graphql';
@@ -25,6 +27,7 @@ describe('ClusterAgentShow', () => {
     id: '1',
     createdAt: '2021-02-13T00:00:00Z',
     createdByUser: {
+      id: 'user-1',
       name: 'user-1',
     },
     name: 'token-1',
@@ -37,31 +40,38 @@ describe('ClusterAgentShow', () => {
 
   const createWrapper = ({ clusterAgent, queryResponse = null }) => {
     const agentQueryResponse =
-      queryResponse || jest.fn().mockResolvedValue({ data: { project: { clusterAgent } } });
+      queryResponse ||
+      jest.fn().mockResolvedValue({ data: { project: { id: 'project-1', clusterAgent } } });
     const apolloProvider = createMockApollo([[getAgentQuery, agentQueryResponse]]);
 
-    wrapper = shallowMount(ClusterAgentShow, {
-      localVue,
-      apolloProvider,
-      propsData,
-      stubs: { GlSprintf, TimeAgoTooltip, GlTab },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(ClusterAgentShow, {
+        localVue,
+        apolloProvider,
+        propsData,
+        stubs: { GlSprintf, TimeAgoTooltip, GlTab },
+      }),
+    );
   };
 
-  const createWrapperWithoutApollo = ({ clusterAgent, loading = false }) => {
+  const createWrapperWithoutApollo = ({ clusterAgent, loading = false, slots = {} }) => {
     const $apollo = { queries: { clusterAgent: { loading } } };
 
-    wrapper = shallowMount(ClusterAgentShow, {
-      propsData,
-      mocks: { $apollo, clusterAgent },
-      stubs: { GlTab },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(ClusterAgentShow, {
+        propsData,
+        mocks: { $apollo, clusterAgent },
+        slots,
+        stubs: { GlTab },
+      }),
+    );
   };
 
-  const findCreatedText = () => wrapper.find('[data-testid="cluster-agent-create-info"]').text();
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findPaginationButtons = () => wrapper.find(GlKeysetPagination);
-  const findTokenCount = () => wrapper.find('[data-testid="cluster-agent-token-count"]').text();
+  const findCreatedText = () => wrapper.findByTestId('cluster-agent-create-info').text();
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findPaginationButtons = () => wrapper.findComponent(GlKeysetPagination);
+  const findTokenCount = () => wrapper.findByTestId('cluster-agent-token-count').text();
+  const findEESecurityTabSlot = () => wrapper.findByTestId('ee-security-tab');
 
   afterEach(() => {
     wrapper.destroy();
@@ -87,7 +97,7 @@ describe('ClusterAgentShow', () => {
     });
 
     it('renders token table', () => {
-      expect(wrapper.find(TokenTable).exists()).toBe(true);
+      expect(wrapper.findComponent(TokenTable).exists()).toBe(true);
     });
 
     it('should not render pagination buttons when there are no additional pages', () => {
@@ -188,8 +198,27 @@ describe('ClusterAgentShow', () => {
     });
 
     it('displays an alert message', () => {
-      expect(wrapper.find(GlAlert).exists()).toBe(true);
+      expect(wrapper.findComponent(GlAlert).exists()).toBe(true);
       expect(wrapper.text()).toContain(ClusterAgentShow.i18n.loadingError);
+    });
+  });
+
+  describe('ee-security-tab slot', () => {
+    it('does not display when a slot is not passed in', async () => {
+      createWrapperWithoutApollo({ clusterAgent: defaultClusterAgent });
+      await nextTick();
+      expect(findEESecurityTabSlot().exists()).toBe(false);
+    });
+
+    it('does display when a slot is passed in', async () => {
+      createWrapperWithoutApollo({
+        clusterAgent: defaultClusterAgent,
+        slots: {
+          'ee-security-tab': `<gl-tab data-testid="ee-security-tab">Security Tab!</gl-tab>`,
+        },
+      });
+      await nextTick();
+      expect(findEESecurityTabSlot().exists()).toBe(true);
     });
   });
 });

@@ -181,6 +181,7 @@ product_group: group::product intelligence
 value_type: string
 status: active
 milestone: 9.1
+instrumentation_class: UuidMetric
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1521
 time_frame: none
 data_source: database
@@ -197,23 +198,34 @@ tier:
 
 The GitLab codebase provides a dedicated [generator](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/generators/gitlab/usage_metric_definition_generator.rb) to create new metric definitions.
 
-For uniqueness, the generated file includes a timestamp prefix, in ISO 8601 format.
+For uniqueness, the generated files include a timestamp prefix in ISO 8601 format.
 
-The generator takes the key path argument and 2 options and creates the metric YAML definition in corresponding location:
+The generator takes a list of key paths and 3 options as arguments. It creates metric YAML definitions in the corresponding location:
 
 - `--ee`, `--no-ee` Indicates if metric is for EE.
-- `--dir=DIR` indicates the metric directory. It must be one of: `counts_7d`, `7d`, `counts_28d`, `28d`, `counts_all`, `all`, `settings`, `license`.
+- `--dir=DIR` Indicates the metric directory. It must be one of: `counts_7d`, `7d`, `counts_28d`, `28d`, `counts_all`, `all`, `settings`, `license`.
+- `--class_name=CLASS_NAME` Indicates the instrumentation class. For example `UsersCreatingIssuesMetric`, `UuidMetric`
+
+**Single metric example**
 
 ```shell
-bundle exec rails generate gitlab:usage_metric_definition counts.issues --dir=7d
+bundle exec rails generate gitlab:usage_metric_definition counts.issues --dir=7d --class_name=CountIssues
 create  config/metrics/counts_7d/issues.yml
+```
+
+**Multiple metrics example**
+
+```shell
+bundle exec rails generate gitlab:usage_metric_definition counts.issues counts.users --dir=7d --class_name=CountUsersCreatingIssues
+create  config/metrics/counts_7d/issues.yml
+create  config/metrics/counts_7d/users.yml
 ```
 
 NOTE:
 To create a metric definition used in EE, add the `--ee` flag.
 
 ```shell
-bundle exec rails generate gitlab:usage_metric_definition counts.issues --ee --dir=7d
+bundle exec rails generate gitlab:usage_metric_definition counts.issues --ee --dir=7d --class_name=CountUsersCreatingIssues
 create  ee/config/metrics/counts_7d/issues.yml
 ```
 
@@ -226,9 +238,9 @@ A YAML metric definition is required for each metric. A dedicated generator is p
 The generator takes `category` and `event` arguments, as the root key is `redis_hll_counters`, and creates two metric definitions for weekly and monthly time frames:
 
 ```shell
-bundle exec rails generate gitlab:usage_metric_definition:redis_hll issues i_closed
-create  config/metrics/counts_7d/i_closed_weekly.yml
-create  config/metrics/counts_28d/i_closed_monthly.yml
+bundle exec rails generate gitlab:usage_metric_definition:redis_hll issues count_users_closing_issues
+create  config/metrics/counts_7d/count_users_closing_issues_weekly.yml
+create  config/metrics/counts_28d/count_users_closing_issues_monthly.yml
 ```
 
 To create a metric definition used in EE, add the `--ee` flag.

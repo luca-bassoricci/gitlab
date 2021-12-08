@@ -35,7 +35,7 @@ RSpec.describe Gitlab::GitAccess do
       allow(Gitlab::Database).to receive(:read_only?) { true }
     end
 
-    let(:primary_repo_url) { geo_primary_http_url_to_repo(project) }
+    let(:primary_repo_url) { geo_primary_http_internal_url_to_repo(project) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project) }
 
     it_behaves_like 'git access for a read-only GitLab instance'
@@ -331,6 +331,20 @@ RSpec.describe Gitlab::GitAccess do
     context 'git pull' do
       it { expect { pull_changes }.not_to raise_error }
 
+      context 'for non-Geo with maintenance mode' do
+        before do
+          stub_maintenance_mode_setting(true)
+        end
+
+        it 'does not return a replication lag message nor call the lag check' do
+          allow_next_instance_of(Gitlab::Geo::HealthCheck) do |instance|
+            expect(instance).not_to receive(:db_replication_lag_seconds)
+          end
+
+          expect(pull_changes.console_messages).to be_empty
+        end
+      end
+
       context 'for a secondary' do
         let(:current_replication_lag) { nil }
 
@@ -370,7 +384,7 @@ RSpec.describe Gitlab::GitAccess do
           end
 
           it 'returns a custom action' do
-            expected_payload = { "action" => "geo_proxy_to_primary", "data" => { "api_endpoints" => ["/api/v4/geo/proxy_git_ssh/info_refs_upload_pack", "/api/v4/geo/proxy_git_ssh/upload_pack"], "primary_repo" => geo_primary_http_url_to_repo(project) } }
+            expected_payload = { "action" => "geo_proxy_to_primary", "data" => { "api_endpoints" => ["/api/v4/geo/proxy_git_ssh/info_refs_upload_pack", "/api/v4/geo/proxy_git_ssh/upload_pack"], "primary_repo" => geo_primary_http_internal_url_to_repo(project) } }
             expected_console_messages = ["This request to a Geo secondary node will be forwarded to the", "Geo primary node:", "", "  #{geo_primary_ssh_url_to_repo(project)}"]
 
             response = pull_changes
@@ -394,7 +408,7 @@ RSpec.describe Gitlab::GitAccess do
         end
 
         it 'returns a custom action' do
-          expected_payload = { "action" => "geo_proxy_to_primary", "data" => { "api_endpoints" => ["/api/v4/geo/proxy_git_ssh/info_refs_receive_pack", "/api/v4/geo/proxy_git_ssh/receive_pack"], "primary_repo" => geo_primary_http_url_to_repo(project) } }
+          expected_payload = { "action" => "geo_proxy_to_primary", "data" => { "api_endpoints" => ["/api/v4/geo/proxy_git_ssh/info_refs_receive_pack", "/api/v4/geo/proxy_git_ssh/receive_pack"], "primary_repo" => geo_primary_http_internal_url_to_repo(project) } }
           expected_console_messages = ["This request to a Geo secondary node will be forwarded to the", "Geo primary node:", "", "  #{geo_primary_ssh_url_to_repo(project)}"]
 
           response = push_changes
@@ -698,14 +712,14 @@ RSpec.describe Gitlab::GitAccess do
       project.add_developer(user)
     end
 
-    context 'user with a smartcard session', :clean_gitlab_redis_shared_state do
+    context 'user with a smartcard session', :clean_gitlab_redis_sessions do
       let(:session_id) { '42' }
       let(:stored_session) do
         { 'smartcard_signins' => { 'last_signin_at' => 5.minutes.ago } }
       end
 
       before do
-        Gitlab::Redis::SharedState.with do |redis|
+        Gitlab::Redis::Sessions.with do |redis|
           redis.set("session:gitlab:#{session_id}", Marshal.dump(stored_session))
           redis.sadd("session:lookup:user:gitlab:#{user.id}", [session_id])
         end
@@ -758,10 +772,10 @@ RSpec.describe Gitlab::GitAccess do
       stub_licensed_features(git_two_factor_enforcement: true)
     end
 
-    context 'with an OTP session', :clean_gitlab_redis_shared_state do
+    context 'with an OTP session', :clean_gitlab_redis_sessions do
       before do
-        Gitlab::Redis::SharedState.with do |redis|
-          redis.set("#{Gitlab::Auth::Otp::SessionEnforcer::OTP_SESSIONS_NAMESPACE}:#{key.id}", true)
+        Gitlab::Redis::Sessions.with do |redis|
+          redis.set("#{Gitlab::Redis::Sessions::OTP_SESSIONS_NAMESPACE}:#{key.id}", true)
         end
       end
 
@@ -789,11 +803,11 @@ RSpec.describe Gitlab::GitAccess do
 
         def stub_redis
           redis = double(:redis)
-          expect(Gitlab::Redis::SharedState).to receive(:with).at_most(:twice).and_yield(redis)
+          expect(Gitlab::Redis::Sessions).to receive(:with).at_most(:twice).and_yield(redis)
 
           expect(redis).to(
             receive(:get)
-              .with("#{Gitlab::Auth::Otp::SessionEnforcer::OTP_SESSIONS_NAMESPACE}:#{key.id}"))
+              .with("#{Gitlab::Redis::Sessions::OTP_SESSIONS_NAMESPACE}:#{key.id}"))
                        .at_most(:twice)
                        .and_return(value_of_key)
         end

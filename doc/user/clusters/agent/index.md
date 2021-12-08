@@ -17,6 +17,10 @@ is an active in-cluster component for connecting Kubernetes clusters to GitLab s
 
 The Agent is installed into the cluster through code, providing you with a fast, safe, stable, and scalable solution.
 
+INFO:
+Get Network Security Alerts in GitLab by upgrading to Ultimate.
+[Try a free 30-day trial now](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=p-cluster-agent-docs).
+
 With GitOps, you can manage containerized clusters and applications from a Git repository that:
 
 - Is the single source of truth of your system.
@@ -103,7 +107,7 @@ configuration and manifest files, as follows:
   manifest files and another for configuration files), the manifests project must
   be public, while the configuration project can be either private or public.
 
-Support for private manifest repositories is tracked in this [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+Support for separated private manifest and configuration repositories is tracked in this [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
 
 ## Kubernetes Network Security Alerts **(ULTIMATE)**
 
@@ -130,6 +134,27 @@ with the following differences:
 - You do not need to specify the `gitops` configuration section.
 
 ## Remove the GitLab Kubernetes Agent
+
+1. Get the `<cluster-agent-id>` and the `<cluster-agent-token-id>` from a query in the interactive GraphQL explorer.
+For GitLab.com, go to <https://gitlab.com/-/graphql-explorer> to open GraphQL Explorer.
+For self-managed GitLab instances, go to `https://gitlab.example.com/-/graphql-explorer`, replacing `gitlab.example.com` with your own instance's URL.
+
+   ```graphql
+   query{
+     project(fullPath: "<full-path-to-agent-configuration-project>") {
+       clusterAgent(name: "<agent-name>") {
+         id
+         tokens {
+           edges {
+             node {
+               id
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
 
 1. Remove an Agent record with GraphQL by deleting the `clusterAgent` and the `clusterAgentToken`.
 

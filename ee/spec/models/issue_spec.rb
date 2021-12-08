@@ -22,7 +22,7 @@ RSpec.describe Issue do
     context 'for an issue with associated test report' do
       let_it_be(:requirement_issue) do
         ri = create(:requirement_issue)
-        create(:test_report, requirement_issue: ri, requirement: nil)
+        create(:test_report, requirement_issue: ri, requirement: create(:requirement))
         ri
       end
 
@@ -492,6 +492,15 @@ RSpec.describe Issue do
     end
   end
 
+  describe '#reopen' do
+    let(:promoted_to_epic) { create(:epic) }
+    let(:issue) { create(:issue, :closed, promoted_to_epic: promoted_to_epic) }
+
+    it 'clears promoted_to_epic_id for promoted issues' do
+      expect { issue.reopen }.to change { issue.promoted_to_epic_id }.from(promoted_to_epic.id).to(nil)
+    end
+  end
+
   context 'ES related specs', :elastic do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
@@ -813,19 +822,11 @@ RSpec.describe Issue do
       end
 
       context 'when a user is a project member' do
-        it 'returns false' do
-          project.add_developer(user)
-
-          expect(subject).to be_falsey
+        before do
+          project.add_reporter(user)
         end
-      end
 
-      context 'when a user is a group member' do
-        it 'returns true' do
-          group.add_developer(user)
-
-          expect(subject).to be_truthy
-        end
+        it { is_expected.to be_truthy }
       end
     end
 

@@ -317,11 +317,6 @@ RSpec.describe API::Geo do
           design_repositories_count: 100,
           design_repositories_synced_count: 50,
           design_repositories_failed_count: 12,
-          attachments_count: 30,
-          attachments_synced_count: 30,
-          attachments_failed_count: 25,
-          attachments_synced_missing_on_primary_count: 6,
-          attachments_replication_enabled: false,
           container_repositories_replication_enabled: true,
           design_repositories_replication_enabled: false,
           job_artifacts_replication_enabled: true,
@@ -676,9 +671,11 @@ RSpec.describe API::Geo do
         end
       end
 
-      context 'when this is a secondary site' do
+      context 'when this is a secondary site with unified URL' do
+        let_it_be(:unified_url_secondary_node) { create(:geo_node, url: primary_node.url) }
+
         before do
-          stub_current_geo_node(secondary_node)
+          stub_current_geo_node(unified_url_secondary_node)
         end
 
         context 'when a primary exists' do
@@ -702,16 +699,42 @@ RSpec.describe API::Geo do
         end
       end
 
-      context 'when geo_secondary_proxy feature flag is disabled' do
+      context 'when this is a secondary site with separate URLs' do
         before do
-          stub_feature_flags(geo_secondary_proxy: false)
+          stub_current_geo_node(secondary_node)
         end
 
-        it 'returns empty data' do
-          subject
+        context 'when a primary does not exist' do
+          it 'returns empty data' do
+            allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_empty
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_empty
+          end
+        end
+
+        context 'when geo_secondary_proxy_separate_urls feature flag is disabled' do
+          before do
+            stub_feature_flags(geo_secondary_proxy_separate_urls: false)
+          end
+
+          it 'returns empty data' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_empty
+          end
+        end
+
+        context 'when geo_secondary_proxy_separate_urls feature flag is enabled' do
+          it 'returns the primary internal URL' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['geo_proxy_url']).to match(primary_node.internal_url)
+          end
         end
       end
     end

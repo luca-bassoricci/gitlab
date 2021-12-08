@@ -19,6 +19,8 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
       stub_exclusive_lease(renew: true)
 
       Gitlab::ShardHealthCache.update([shard_name])
+
+      allow(Geo::ProjectSyncWorker).to receive(:with_status).and_return(Geo::ProjectSyncWorker)
     end
 
     it 'does not perform Geo::ProjectSyncWorker when shard becomes unhealthy' do
@@ -61,7 +63,7 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
 
     context 'number of scheduled jobs exceeds capacity' do
       it 'schedules 0 jobs' do
-        is_expected.to receive(:scheduled_job_ids).and_return(1..1000).at_least(:once)
+        is_expected.to receive(:scheduled_job_ids).and_return((1..1000).to_a).at_least(:once)
         is_expected.not_to receive(:schedule_job)
 
         Sidekiq::Testing.inline! { subject.perform(shard_name) }

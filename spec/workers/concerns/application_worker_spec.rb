@@ -248,39 +248,40 @@ RSpec.describe ApplicationWorker do
   end
 
   describe '.perform_async' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:primary_only?, :skip_scheduling_ff, :data_consistency, :schedules_job?) do
+      true  | false | :sticky  | false
+      true  | false | :delayed | false
+      true  | false | :always  | false
+      true  | true  | :sticky  | false
+      true  | true  | :delayed | false
+      true  | true  | :always  | false
+      false | false | :sticky  | true
+      false | false | :delayed | true
+      false | false | :always  | false
+      false | true  | :sticky  | false
+      false | true  | :delayed | false
+      false | true  | :always  | false
+    end
+
     before do
       stub_const(worker.name, worker)
+      worker.data_consistency(data_consistency)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:primary_only?).and_return(primary_only?)
+      stub_feature_flags(skip_scheduling_workers_for_replicas: skip_scheduling_ff)
     end
 
-    shared_examples_for 'worker utilizes load balancing capabilities' do |data_consistency|
-      before do
-        worker.data_consistency(data_consistency)
-      end
-
-      it 'call perform_in' do
-        expect(worker).to receive(:perform_in).with(described_class::DEFAULT_DELAY_INTERVAL.seconds, 123)
+    with_them do
+      it 'schedules or enqueues the job correctly' do
+        if schedules_job?
+          expect(worker).to receive(:perform_in).with(described_class::DEFAULT_DELAY_INTERVAL.seconds, 123)
+        else
+          expect(worker).not_to receive(:perform_in)
+        end
 
         worker.perform_async(123)
-      end
-    end
-
-    context 'when workers data consistency is :sticky' do
-      it_behaves_like 'worker utilizes load balancing capabilities', :sticky
-    end
-
-    context 'when workers data consistency is :delayed' do
-      it_behaves_like 'worker utilizes load balancing capabilities', :delayed
-    end
-
-    context 'when workers data consistency is :always' do
-      before do
-        worker.data_consistency(:always)
-      end
-
-      it 'does not call perform_in' do
-        expect(worker).not_to receive(:perform_in)
-
-        worker.perform_async
       end
     end
   end
@@ -595,6 +596,50 @@ RSpec.describe ApplicationWorker do
             end
           end
         end
+      end
+    end
+  end
+
+  describe '.with_status' do
+    around do |example|
+      Sidekiq::Testing.fake!(&example)
+    end
+
+    context 'when the worker does have status_expiration set' do
+      let(:status_expiration_worker) do
+        Class.new(worker) do
+          sidekiq_options status_expiration: 3
+        end
+      end
+
+      it 'uses status_expiration from the worker' do
+        status_expiration_worker.with_status.perform_async
+
+        expect(Sidekiq::Queues[status_expiration_worker.queue].first).to include('status_expiration' => 3)
+        expect(Sidekiq::Queues[status_expiration_worker.queue].length).to eq(1)
+      end
+
+      it 'uses status_expiration from the worker without with_status' do
+        status_expiration_worker.perform_async
+
+        expect(Sidekiq::Queues[status_expiration_worker.queue].first).to include('status_expiration' => 3)
+        expect(Sidekiq::Queues[status_expiration_worker.queue].length).to eq(1)
+      end
+    end
+
+    context 'when the worker does not have status_expiration set' do
+      it 'uses the default status_expiration' do
+        worker.with_status.perform_async
+
+        expect(Sidekiq::Queues[worker.queue].first).to include('status_expiration' => Gitlab::SidekiqStatus::DEFAULT_EXPIRATION)
+        expect(Sidekiq::Queues[worker.queue].length).to eq(1)
+      end
+
+      it 'does not set status_expiration without with_status' do
+        worker.perform_async
+
+        expect(Sidekiq::Queues[worker.queue].first).not_to include('status_expiration')
+        expect(Sidekiq::Queues[worker.queue].length).to eq(1)
       end
     end
   end

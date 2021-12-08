@@ -191,7 +191,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
 
     it 'drops extra schemas' do
       Gitlab::Database::EXTRA_SCHEMAS.each do |schema|
-        expect(connection).to receive(:execute).with("DROP SCHEMA IF EXISTS \"#{schema}\"")
+        expect(connection).to receive(:execute).with("DROP SCHEMA IF EXISTS \"#{schema}\" CASCADE")
       end
 
       subject
@@ -201,7 +201,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
   describe 'reindex' do
     let(:reindex) { double('reindex') }
     let(:indexes) { double('indexes') }
-    let(:databases) { Gitlab::Database.databases }
+    let(:databases) { Gitlab::Database.database_base_models }
     let(:databases_count) { databases.count }
 
     it 'cleans up any leftover indexes' do
@@ -215,7 +215,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
         stub_feature_flags(database_async_index_creation: true)
 
         expect(Gitlab::Database::AsyncIndexes).to receive(:create_pending_indexes!).ordered.exactly(databases_count).times
-        expect(Gitlab::Database::Reindexing).to receive(:automatic_reindexing).ordered.once
+        expect(Gitlab::Database::Reindexing).to receive(:automatic_reindexing).ordered.exactly(databases_count).times
 
         run_rake_task('gitlab:db:reindex')
       end
@@ -233,7 +233,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
 
     context 'calls automatic reindexing' do
       it 'uses all candidate indexes' do
-        expect(Gitlab::Database::Reindexing).to receive(:automatic_reindexing).once
+        expect(Gitlab::Database::Reindexing).to receive(:automatic_reindexing).exactly(databases_count).times
 
         run_rake_task('gitlab:db:reindex')
       end
@@ -250,7 +250,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout do
     end
 
     it 'defaults to main database' do
-      expect(Gitlab::Database::SharedModel).to receive(:using_connection).with(Gitlab::Database.main.scope.connection).and_call_original
+      expect(Gitlab::Database::SharedModel).to receive(:using_connection).with(ActiveRecord::Base.connection).and_call_original
 
       expect do
         run_rake_task('gitlab:db:enqueue_reindexing_action', "[#{index_name}]")

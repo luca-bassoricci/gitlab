@@ -32,8 +32,8 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     subject = value[:namespace] || value[:group] || value[:project] || value[:user] || value[:actor]
     return unless ExperimentSubject.valid_subject?(subject)
 
-    variant = :experimental if @variant_name != :control
-    Experiment.add_subject(name, variant: variant || :control, subject: subject)
+    variant_name = :experimental if variant&.name != 'control'
+    Experiment.add_subject(name, variant: variant_name || :control, subject: subject)
   end
 
   def record!
@@ -55,6 +55,10 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     ingredients.unshift(seed)
 
     Digest::MD5.hexdigest(ingredients.join('|'))
+  end
+
+  def nest_experiment(other)
+    instance_exec(:nested, { label: other.name }, &Configuration.tracking_behavior)
   end
 
   private

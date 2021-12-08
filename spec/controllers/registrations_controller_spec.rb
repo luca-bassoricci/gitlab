@@ -227,40 +227,6 @@ RSpec.describe RegistrationsController do
                   end
                 end
               end
-
-              context 'with the invite_email_preview_text experiment', :experiment do
-                let(:extra_session_params) { { invite_email_experiment_name: 'invite_email_from' } }
-
-                context 'when member and invite_email_experiment_name exists from the session key value' do
-                  it 'tracks the invite acceptance' do
-                    expect(experiment(:invite_email_from)).to track(:accepted)
-                                                                .with_context(actor: member)
-                                                                .on_next_instance
-
-                    subject
-                  end
-                end
-
-                context 'when member does not exist from the session key value' do
-                  let(:originating_member_id) { -1 }
-
-                  it 'does not track invite acceptance' do
-                    expect(experiment(:invite_email_from)).not_to track(:accepted)
-
-                    subject
-                  end
-                end
-
-                context 'when invite_email_experiment_name does not exist from the session key value' do
-                  let(:extra_session_params) { {} }
-
-                  it 'does not track invite acceptance' do
-                    expect(experiment(:invite_email_from)).not_to track(:accepted)
-
-                    subject
-                  end
-                end
-              end
             end
 
             context 'when invite email matches email used on registration' do
@@ -499,13 +465,12 @@ RSpec.describe RegistrationsController do
       expect(User.last.name).to eq("#{base_user_params[:first_name]} #{base_user_params[:last_name]}")
     end
 
-    it 'sets the username and caller_id in the context' do
+    it 'sets the caller_id in the context' do
       expect(controller).to receive(:create).and_wrap_original do |m, *args|
         m.call(*args)
 
         expect(Gitlab::ApplicationContext.current)
-          .to include('meta.user' => base_user_params[:username],
-                      'meta.caller_id' => 'RegistrationsController#create')
+          .to include('meta.caller_id' => 'RegistrationsController#create')
       end
 
       subject

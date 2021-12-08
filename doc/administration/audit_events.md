@@ -12,7 +12,10 @@ on a [paid plan](https://about.gitlab.com/pricing/).
 GitLab system administrators can also take advantage of the logs located on the
 file system. See [the logs system documentation](logs.md#audit_jsonlog) for more details.
 
-You can generate an [Audit report](audit_reports.md) of audit events.
+You can:
+
+- Generate an [audit report](audit_reports.md) of audit events.
+- [Stream audit events](audit_event_streaming.md) to an external endpoint.
 
 ## Overview
 
@@ -27,6 +30,11 @@ permission level, who added a new user, or who removed a user.
   user for a GitLab project.
 - Track which users have access to a certain group of projects
   in GitLab, and who gave them that permission level.
+
+## Retention policy
+
+There is no retention policy in place for audit events.
+See the [Specify a retention period for audit events](https://gitlab.com/gitlab-org/gitlab/-/issues/8137) for more information.
 
 ## List of events
 
@@ -70,6 +78,17 @@ From there, you can see the following actions:
 - Group changed visibility.
 - User was added to group and with which [permissions](../user/permissions.md).
 - User sign-in via [Group SAML](../user/group/saml_sso/index.md).
+- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8071) in GitLab 14.5, changes to the following
+  [group SAML](../user/group/saml_sso/index.md) configuration:
+  - Enabled status.
+  - Enforcing SSO-only authentication for web activity.
+  - Enforcing SSO-only authentication for Git and Dependency Proxy activity.
+  - Enforcing users to have dedicated group-managed accounts.
+  - Prohibiting outer forks.
+  - Identity provider SSO URL.
+  - Certificate fingerprint.
+  - Default membership role.
+  - SSO-SAML group sync configuration.
 - Permissions changes of a user assigned to a group.
 - Removed user from group.
 - Project repository imported into group.
@@ -83,6 +102,8 @@ From there, you can see the following actions:
 - 2FA enforcement or grace period changed.
 - Roles allowed to create project changed.
 - Group CI/CD variable added, removed, or protected status changed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.3.
+- Compliance framework created, updated, or deleted. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340649) in GitLab 14.5.
+- Event streaming destination created, updated, or deleted. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/344664) in GitLab 14.6.
 
 Group events can also be accessed via the [Group Audit Events API](../api/audit_events.md#group-audit-events)
 
@@ -113,6 +134,10 @@ From there, you can see the following actions:
 - Release was updated
 - Release milestone associations changed
 - Permission to approve merge requests by committers was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
+- Permission to approve merge requests by committers was updated.
+  - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9.
+  - Message for event [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/72623/diffs) in GitLab 14.6.
+
 - Permission to approve merge requests by authors was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Number of required approvals was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Added or removed users and groups from project approval groups ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213603) in GitLab 13.2)
@@ -188,7 +213,7 @@ Events visible in Audit Events views until more events are logged.
 
 ### "Deleted User" events
 
-Audit events can be created for a user after the user is deleted. The user name associated with the event is set to 
+Audit events can be created for a user after the user is deleted. The user name associated with the event is set to
 "Deleted User" because the actual user name is unknowable. For example, if a deleted user's access to a project is
 removed automatically due to expiration, the audit event is created for "Deleted User". We are [investigating](https://gitlab.com/gitlab-org/gitlab/-/issues/343933)
 whether this is avoidable.

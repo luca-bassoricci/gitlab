@@ -1,32 +1,36 @@
 import { GlTabs, GlTab } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import Component from '~/projects/pipelines/charts/components/app.vue';
 import PipelineCharts from '~/projects/pipelines/charts/components/pipeline_charts.vue';
+import API from '~/api';
 
 jest.mock('~/lib/utils/url_utility');
 
 const DeploymentFrequencyChartsStub = { name: 'DeploymentFrequencyCharts', render: () => {} };
 const LeadTimeChartsStub = { name: 'LeadTimeCharts', render: () => {} };
+const ProjectQualitySummaryStub = { name: 'ProjectQualitySummary', render: () => {} };
 
 describe('ProjectsPipelinesChartsApp', () => {
   let wrapper;
 
   function createComponent(mountOptions = {}) {
-    wrapper = shallowMount(
+    wrapper = shallowMountExtended(
       Component,
       merge(
         {},
         {
           provide: {
             shouldRenderDoraCharts: true,
+            shouldRenderQualitySummary: true,
           },
           stubs: {
             DeploymentFrequencyCharts: DeploymentFrequencyChartsStub,
             LeadTimeCharts: LeadTimeChartsStub,
+            ProjectQualitySummary: ProjectQualitySummaryStub,
           },
         },
         mountOptions,
@@ -44,6 +48,7 @@ describe('ProjectsPipelinesChartsApp', () => {
   const findLeadTimeCharts = () => wrapper.find(LeadTimeChartsStub);
   const findDeploymentFrequencyCharts = () => wrapper.find(DeploymentFrequencyChartsStub);
   const findPipelineCharts = () => wrapper.find(PipelineCharts);
+  const findProjectQualitySummary = () => wrapper.find(ProjectQualitySummaryStub);
 
   describe('when all charts are available', () => {
     beforeEach(() => {
@@ -68,6 +73,10 @@ describe('ProjectsPipelinesChartsApp', () => {
 
     it('renders the lead time charts', () => {
       expect(findLeadTimeCharts().exists()).toBe(true);
+    });
+
+    it('renders the project quality summary', () => {
+      expect(findProjectQualitySummary().exists()).toBe(true);
     });
 
     it('sets the tab and url when a tab is clicked', async () => {
@@ -109,6 +118,23 @@ describe('ProjectsPipelinesChartsApp', () => {
       await wrapper.vm.$nextTick();
 
       expect(updateHistory).not.toHaveBeenCalled();
+    });
+
+    describe('event tracking', () => {
+      it.each`
+        testId                        | event
+        ${'pipelines-tab'}            | ${'p_analytics_ci_cd_pipelines'}
+        ${'deployment-frequency-tab'} | ${'p_analytics_ci_cd_deployment_frequency'}
+        ${'lead-time-tab'}            | ${'p_analytics_ci_cd_lead_time'}
+      `('tracks the $event event when clicked', ({ testId, event }) => {
+        jest.spyOn(API, 'trackRedisHllUserEvent');
+
+        expect(API.trackRedisHllUserEvent).not.toHaveBeenCalled();
+
+        wrapper.findByTestId(testId).vm.$emit('click');
+
+        expect(API.trackRedisHllUserEvent).toHaveBeenCalledWith(event);
+      });
     });
   });
 
@@ -163,9 +189,11 @@ describe('ProjectsPipelinesChartsApp', () => {
     });
   });
 
-  describe('when the dora charts are not available', () => {
+  describe('when the dora charts are not available and project quality summary is not available', () => {
     beforeEach(() => {
-      createComponent({ provide: { shouldRenderDoraCharts: false } });
+      createComponent({
+        provide: { shouldRenderDoraCharts: false, shouldRenderQualitySummary: false },
+      });
     });
 
     it('does not render tabs', () => {
@@ -174,6 +202,16 @@ describe('ProjectsPipelinesChartsApp', () => {
 
     it('renders the pipeline charts', () => {
       expect(findPipelineCharts().exists()).toBe(true);
+    });
+  });
+
+  describe('when the project quality summary is not available', () => {
+    beforeEach(() => {
+      createComponent({ provide: { shouldRenderQualitySummary: false } });
+    });
+
+    it('does not render the tab', () => {
+      expect(findProjectQualitySummary().exists()).toBe(false);
     });
   });
 });

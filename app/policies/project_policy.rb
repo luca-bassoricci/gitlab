@@ -47,6 +47,9 @@ class ProjectPolicy < BasePolicy
   desc "Project is archived"
   condition(:archived, scope: :subject, score: 0) { project.archived? }
 
+  desc "Project is in the process of being deleted"
+  condition(:pending_delete) { project.pending_delete? }
+
   condition(:default_issues_tracker, scope: :subject) { project.default_issues_tracker? }
 
   desc "Container registry is disabled"
@@ -88,6 +91,11 @@ class ProjectPolicy < BasePolicy
   desc "Deploy token with write_package_registry scope"
   condition(:write_package_registry_deploy_token) do
     user.is_a?(DeployToken) && user.has_access_to?(project) && user.write_package_registry
+  end
+
+  desc "Deploy token with read access"
+  condition(:download_code_deploy_token) do
+    user.is_a?(DeployToken) && user.has_access_to?(project)
   end
 
   desc "If user is authenticated via CI job token then the target project should be in scope"
@@ -248,7 +256,7 @@ class ProjectPolicy < BasePolicy
     enable :read_insights
   end
 
-  rule { can?(:guest_access) & can?(:create_issue) }.enable :create_incident
+  rule { can?(:reporter_access) & can?(:create_issue) }.enable :create_incident
 
   # These abilities are not allowed to admins that are not members of the project,
   # that's why they are defined separately.
@@ -439,7 +447,7 @@ class ProjectPolicy < BasePolicy
     enable :destroy_freeze_period
     enable :admin_feature_flags_client
     enable :update_runners_registration_token
-    enable :manage_project_google_cloud
+    enable :admin_project_google_cloud
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do
@@ -457,7 +465,13 @@ class ProjectPolicy < BasePolicy
     prevent(*readonly_abilities)
 
     readonly_features.each do |feature|
-      prevent(*create_update_admin_destroy(feature))
+      prevent(*create_update_admin(feature))
+    end
+  end
+
+  rule { archived & ~pending_delete }.policy do
+    readonly_features.each do |feature|
+      prevent(:"destroy_#{feature}")
     end
   end
 
@@ -495,6 +509,10 @@ class ProjectPolicy < BasePolicy
   rule { wiki_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:wiki))
     prevent(:download_wiki_code)
+  end
+
+  rule { download_code_deploy_token }.policy do
+    enable :download_wiki_code
   end
 
   rule { builds_disabled | repository_disabled }.policy do
@@ -678,12 +696,14 @@ class ProjectPolicy < BasePolicy
 
   rule { project_bot }.enable :project_bot_access
 
+  rule { can?(:read_all_resources) }.enable :read_resource_access_tokens
+
   rule { can?(:admin_project) & resource_access_token_feature_available }.policy do
     enable :read_resource_access_tokens
     enable :destroy_resource_access_tokens
   end
 
-  rule { can?(:read_resource_access_tokens) & resource_access_token_creation_allowed }.policy do
+  rule { can?(:admin_project) & resource_access_token_feature_available & resource_access_token_creation_allowed }.policy do
     enable :create_resource_access_tokens
   end
 

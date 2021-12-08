@@ -8,7 +8,7 @@ module Gitlab
       end
 
       def signup_limited?
-        domain_allowlist.present? || email_restrictions_enabled? || require_admin_approval_after_user_signup?
+        domain_allowlist.present? || email_restrictions_enabled? || require_admin_approval_after_user_signup? || user_default_external?
       end
 
       def current_application_settings
@@ -85,7 +85,7 @@ module Gitlab
         active_db_connection = ActiveRecord::Base.connection.active? rescue false
 
         active_db_connection &&
-          Gitlab::Database.main.cached_table_exists?('application_settings')
+          ApplicationSetting.database.cached_table_exists?
       rescue ActiveRecord::NoDatabaseError
         false
       end

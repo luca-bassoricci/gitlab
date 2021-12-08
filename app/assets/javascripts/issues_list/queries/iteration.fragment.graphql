@@ -1,8 +1,0 @@
-fragment Iteration on Iteration {
-  id
-  title
-  iterationCadence {
-    id
-    title
-  }
-}

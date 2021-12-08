@@ -1,11 +1,17 @@
 query getPipeline($fullPath: ID!, $sha: String!) {
   project(fullPath: $fullPath) {
+    id
     pipeline(sha: $sha) {
-      commitPath
       id
       iid
       status
+      commit {
+        id
+        title
+        webPath
+      }
       detailedStatus {
+        id
         detailsPath
         icon
         group

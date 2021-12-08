@@ -34,19 +34,13 @@ module Geo
       ::Geo::BatchEventCreateWorker.perform_async(events)
     end
 
-    def carrierwave_uploader
-      model_record.retrieve_uploader
+    override :verification_feature_flag_enabled?
+    def self.verification_feature_flag_enabled?
+      Feature.enabled?(:geo_upload_verification, default_enabled: :yaml)
     end
 
-    # TODO: This method can be removed as part of
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/340617
-    override :registry
-    def registry
-      super.tap do |record|
-        # We don't really need this value for SSF, it's only needed to make
-        # new registry records valid for legacy code in case of disabling the feature.
-        record.file_type ||= model_record.uploader.delete_suffix("Uploader").underscore
-      end
+    def carrierwave_uploader
+      model_record.retrieve_uploader
     end
   end
 end

@@ -1,8 +1,13 @@
 import '~/pages/groups/edit';
 import initAccessRestrictionField from 'ee/groups/settings/access_restriction_field';
 import validateRestrictedIpAddress from 'ee/groups/settings/access_restriction_field/validate_ip_address';
+import { initGroupPermissionsFormSubmit } from 'ee/groups/settings/permissions';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
+
+if (gon.features.saasUserCapsAutoApprovePendingUsersOnCapIncrease) {
+  initGroupPermissionsFormSubmit();
+}
 
 initAccessRestrictionField({
   selector: '.js-allowed-email-domains',

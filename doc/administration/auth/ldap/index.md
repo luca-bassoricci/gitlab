@@ -23,7 +23,7 @@ Users added through LDAP:
 
 - Take a [licensed seat](../../../subscriptions/self_managed/index.md#billable-users).
 - Can authenticate with Git using either their GitLab username or their email and LDAP password,
-  even if password authentication for Git 
+  even if password authentication for Git
   [is disabled](../../../user/admin_area/settings/sign_in_restrictions.md#password-authentication-enabled).
 
 The LDAP DN is associated with existing GitLab users when:
@@ -37,7 +37,28 @@ If an existing GitLab user wants to enable LDAP sign-in for themselves, they sho
 1. Check that their GitLab email address matches their LDAP email address.
 1. Sign in to GitLab by using their LDAP credentials.
 
-## Security risks
+## Security
+
+GitLab has multiple mechanisms to verify a user is still active in LDAP. If the user is no longer active in
+LDAP, they are placed in an `ldap_blocked` status and are signed out. They are unable to sign in using any authentication provider until they are
+reactivated in LDAP.
+
+Users are considered inactive in LDAP when they:
+
+- Are removed from the directory completely.
+- Reside outside the configured `base` DN or `user_filter` search.
+- Are marked as disabled or deactivated in Active Directory through the user account control attribute. This means attribute
+  `userAccountControl:1.2.840.113556.1.4.803` has bit 2 set.
+
+Status is checked for all LDAP users:
+
+- When signing in using any authentication provider. [In GitLab 14.4 and earlier](https://gitlab.com/gitlab-org/gitlab/-/issues/343298), status was
+  checked only when signing in using LDAP directly.
+- Once per hour for active web sessions or Git requests using tokens or SSH keys.
+- When performing Git over HTTP requests using LDAP username and password.
+- Once per day during [User Sync](ldap_synchronization.md#user-sync).
+
+### Security risks
 
 You should only use LDAP integration if your LDAP users cannot:
 
@@ -83,7 +104,6 @@ gitlab_rails['ldap_servers'] = {
   'verify_certificates' => true,
   'bind_dn' => '_the_full_dn_of_the_user_you_will_bind_with',
   'password' => '_the_password_of_the_bind_user',
-  'verify_certificates' => true,
   'tls_options' => {
     'ca_file' => '',
     'ssl_version' => '',
@@ -201,6 +221,51 @@ These LDAP sync configuration settings are available:
 | `admin_group`     | The CN of a group containing GitLab administrators. Not `cn=administrators` or the full DN. | **{dotted-circle}** No | `'administrators'` |
 | `external_groups` | An array of CNs of groups containing users that should be considered external. Not `cn=interns` or the full DN. | **{dotted-circle}** No | `['interns', 'contractors']` |
 | `sync_ssh_keys`   | The LDAP attribute containing a user's public SSH key. | **{dotted-circle}** No | `'sshPublicKey'` or false if not set |
+
+### Use multiple LDAP servers **(PREMIUM SELF)**
+
+If you have users on multiple LDAP servers, you can configure GitLab to use them. To add additional LDAP servers:
+
+1. Duplicate the [`main` LDAP configuration](#configure-ldap).
+1. Edit each duplicate configuration with the details of the additional servers.
+   - For each additional server, choose a different provider ID, like `main`, `secondary`, or `tertiary`. Use lowercase
+     alphanumeric characters. GitLab uses the provider ID to associate each user with a specific LDAP server.
+   - For each entry, use a unique `label` value. These values are used for the tab names on the sign-in page.
+
+#### Example of multiple LDAP servers
+
+The following example shows how to configure three LDAP servers in `gitlab.rb`:
+
+```ruby
+gitlab_rails['ldap_enabled'] = true
+gitlab_rails['ldap_servers'] = {
+'main' => {
+  'label' => 'GitLab AD',
+  'host' =>  'ad.example.org',
+  'port' => 636,
+  ...
+  },
+
+'secondary' => {
+  'label' => 'GitLab Secondary AD',
+  'host' =>  'ad-secondary.example.net',
+  'port' => 636,
+  ...
+  },
+
+'tertiary' => {
+  'label' => 'GitLab Tertiary AD',
+  'host' =>  'ad-tertiary.example.net',
+  'port' => 636,
+  ...
+  }
+
+}
+```
+
+This example results in the following sign-in page:
+
+![Multiple LDAP servers sign in](img/multi_login.gif)
 
 ### Set up LDAP user filter
 
@@ -431,56 +496,6 @@ If initially your LDAP configuration looked like:
 1. Edit `config/gitlab.yaml` and remove the settings for `user_bn` and `password`.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
-
-## Multiple LDAP servers **(PREMIUM SELF)**
-
-With GitLab, you can configure multiple LDAP servers that your GitLab instance
-connects to.
-
-To add another LDAP server:
-
-1. Duplicate the settings under [the main configuration](#configure-ldap).
-1. Edit them to match the additional LDAP server.
-
-Be sure to choose a different provider ID made of letters a-z and numbers 0-9.
-This ID is stored in the database so that GitLab can remember which LDAP
-server a user belongs to.
-
-![Multiple LDAP Servers Sign in](img/multi_login.gif)
-
-Based on the example illustrated on the image above,
-our `gitlab.rb` configuration would look like:
-
-```ruby
-gitlab_rails['ldap_enabled'] = true
-gitlab_rails['ldap_servers'] = {
-'main' => {
-  'label' => 'GitLab AD',
-  'host' =>  'ad.example.org',
-  'port' => 636,
-  ...
-  },
-
-'secondary' => {
-  'label' => 'GitLab Secondary AD',
-  'host' =>  'ad-secondary.example.net',
-  'port' => 636,
-  ...
-  },
-
-'tertiary' => {
-  'label' => 'GitLab Tertiary AD',
-  'host' =>  'ad-tertiary.example.net',
-  'port' => 636,
-  ...
-  }
-
-}
-```
-
-If you configure multiple LDAP servers, use a unique naming convention for the
-`label` section of each entry. That label is used as the display name of the tab
-shown on the sign-in page.
 
 ## Disable anonymous LDAP authentication
 

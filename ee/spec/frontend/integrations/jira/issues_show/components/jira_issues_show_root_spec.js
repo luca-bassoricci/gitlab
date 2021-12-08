@@ -2,14 +2,13 @@ import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 
-import * as JiraIssuesShowApi from 'ee/integrations/jira/issues_show/api';
 import JiraIssuesShow from 'ee/integrations/jira/issues_show/components/jira_issues_show_root.vue';
 import JiraIssueSidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
-import { IssuableStatus } from '~/issue_show/constants';
+import { IssuableStatus } from '~/issues/show/constants';
 import waitForPromises from 'helpers/wait_for_promises';
-import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
-import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
-import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
+import IssuableHeader from '~/vue_shared/issuable/show/components/issuable_header.vue';
+import IssuableShow from '~/vue_shared/issuable/show/components/issuable_show_root.vue';
+import IssuableSidebar from '~/vue_shared/issuable/sidebar/components/issuable_sidebar_root.vue';
 import axios from '~/lib/utils/axios_utils';
 import { mockJiraIssue } from '../mock_data';
 
@@ -118,54 +117,6 @@ describe('JiraIssuesShow', () => {
       createComponent();
 
       await waitForPromises();
-    });
-
-    it('updates issue labels on issue-labels-updated', async () => {
-      const updateIssueSpy = jest.spyOn(JiraIssuesShowApi, 'updateIssue').mockResolvedValue();
-
-      const labels = [{ id: 'ecosystem' }];
-
-      findJiraIssueSidebar().vm.$emit('issue-labels-updated', labels);
-      await wrapper.vm.$nextTick();
-
-      expect(updateIssueSpy).toHaveBeenCalledWith(expect.any(Object), { labels });
-      expect(findJiraIssueSidebar().props('isUpdatingLabels')).toBe(true);
-
-      await waitForPromises();
-
-      expect(findJiraIssueSidebar().props('isUpdatingLabels')).toBe(false);
-    });
-
-    it('fetches issue statuses on issue-status-fetch', async () => {
-      const fetchIssueStatusesSpy = jest
-        .spyOn(JiraIssuesShowApi, 'fetchIssueStatuses')
-        .mockResolvedValue();
-
-      findJiraIssueSidebar().vm.$emit('issue-status-fetch');
-      await wrapper.vm.$nextTick();
-
-      expect(fetchIssueStatusesSpy).toHaveBeenCalled();
-      expect(findJiraIssueSidebar().props('isLoadingStatus')).toBe(true);
-
-      await waitForPromises();
-
-      expect(findJiraIssueSidebar().props('isLoadingStatus')).toBe(false);
-    });
-
-    it('updates issue status on issue-status-updated', async () => {
-      const updateIssueSpy = jest.spyOn(JiraIssuesShowApi, 'updateIssue').mockResolvedValue();
-
-      const status = 'In Review';
-
-      findJiraIssueSidebar().vm.$emit('issue-status-updated', status);
-      await wrapper.vm.$nextTick();
-
-      expect(updateIssueSpy).toHaveBeenCalledWith(expect.any(Object), { status });
-      expect(findJiraIssueSidebar().props('isUpdatingStatus')).toBe(true);
-
-      await waitForPromises();
-
-      expect(findJiraIssueSidebar().props('isUpdatingStatus')).toBe(false);
     });
 
     it('updates `sidebarExpanded` prop on `sidebar-toggle` event', async () => {

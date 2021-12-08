@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlDatepicker, GlTooltipDirective, GlLink, GlPopover } from '@gitlab/ui';
 import createFlash from '~/flash';
-import { IssuableType } from '~/issue_show/constants';
+import { IssuableType } from '~/issues/show/constants';
 import { dateInWords, formatDate, parsePikadayDate } from '~/lib/utils/datetime_utility';
 import { __, sprintf } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
@@ -123,6 +123,9 @@ export default {
     },
     isLoading() {
       return this.$apollo.queries.issuable.loading || this.loading;
+    },
+    initialLoading() {
+      return this.$apollo.queries.issuable.loading;
     },
     hasDate() {
       return this.dateValue !== null;
@@ -266,15 +269,15 @@ export default {
       </gl-popover>
     </template>
     <template #collapsed>
-      <div v-gl-tooltip :title="dateLabel" class="sidebar-collapsed-icon">
+      <div v-gl-tooltip.viewport.left :title="dateLabel" class="sidebar-collapsed-icon">
         <gl-icon :size="16" name="calendar" />
         <span class="collapse-truncated-title">{{ formattedDate }}</span>
       </div>
       <sidebar-inherit-date
-        v-if="canInherit"
+        v-if="canInherit && !initialLoading"
         :issuable="issuable"
-        :is-loading="isLoading"
         :date-type="dateType"
+        :is-loading="isLoading"
         @reset-date="setDate(null)"
         @set-date="setFixedDate"
       />

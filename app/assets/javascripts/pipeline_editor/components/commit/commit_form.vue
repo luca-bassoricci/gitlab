@@ -36,6 +36,11 @@ export default {
       required: false,
       default: false,
     },
+    scrollToCommitForm: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -52,6 +57,13 @@ export default {
       return !(this.message && this.targetBranch);
     },
   },
+  watch: {
+    scrollToCommitForm(flag) {
+      if (flag) {
+        this.scrollIntoView();
+      }
+    },
+  },
   methods: {
     onSubmit() {
       this.$emit('submit', {
@@ -61,7 +73,11 @@ export default {
       });
     },
     onReset() {
-      this.$emit('cancel');
+      this.$emit('resetContent');
+    },
+    scrollIntoView() {
+      this.$el.scrollIntoView({ behavior: 'smooth' });
+      this.$emit('scrolled-to-commit-form');
     },
   },
   i18n: {
@@ -70,7 +86,7 @@ export default {
     startMergeRequest: __('Start a %{new_merge_request} with these changes'),
     newMergeRequest: __('new merge request'),
     commitChanges: __('Commit changes'),
-    cancel: __('Cancel'),
+    resetContent: __('Reset'),
   },
 };
 </script>
@@ -132,7 +148,7 @@ export default {
           {{ $options.i18n.commitChanges }}
         </gl-button>
         <gl-button type="reset" category="secondary" class="gl-mr-3">
-          {{ $options.i18n.cancel }}
+          {{ $options.i18n.resetContent }}
         </gl-button>
       </div>
     </gl-form>

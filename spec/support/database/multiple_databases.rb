@@ -6,6 +6,22 @@ module Database
       skip 'Skipping because multiple databases not set up' unless Gitlab::Database.has_config?(:ci)
     end
 
+    def skip_if_multiple_databases_are_setup
+      skip 'Skipping because multiple databases are set up' if Gitlab::Database.has_config?(:ci)
+    end
+
+    def reconfigure_db_connection(name: nil, config_hash: {}, model: ActiveRecord::Base, config_model: nil)
+      db_config = (config_model || model).connection_db_config
+
+      new_db_config = ActiveRecord::DatabaseConfigurations::HashConfig.new(
+        db_config.env_name,
+        name ? name.to_s : db_config.name,
+        db_config.configuration_hash.merge(config_hash)
+      )
+
+      model.establish_connection(new_db_config)
+    end
+
     # The usage of this method switches temporarily used `connection_handler`
     # allowing full manipulation of ActiveRecord::Base connections without
     # having side effects like:
@@ -34,6 +50,26 @@ module Database
       new_handler&.clear_all_connections!
     end
     # rubocop:enable Database/MultipleDatabases
+
+    def with_added_ci_connection
+      if Gitlab::Database.has_config?(:ci)
+        # No need to add a ci: connection if we already have one
+        yield
+      else
+        with_reestablished_active_record_base(reconnect: true) do
+          reconfigure_db_connection(
+            name: :ci,
+            model: Ci::ApplicationRecord,
+            config_model: ActiveRecord::Base
+          )
+
+          yield
+
+          # Cleanup connection_specification_name for Ci::ApplicationRecord
+          Ci::ApplicationRecord.remove_connection
+        end
+      end
+    end
   end
 
   module ActiveRecordBaseEstablishConnection
@@ -53,6 +89,12 @@ end
 RSpec.configure do |config|
   config.around(:each, :reestablished_active_record_base) do |example|
     with_reestablished_active_record_base(reconnect: example.metadata.fetch(:reconnect, true)) do
+      example.run
+    end
+  end
+
+  config.around(:each, :add_ci_connection) do |example|
+    with_added_ci_connection do
       example.run
     end
   end

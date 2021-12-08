@@ -48,7 +48,7 @@ As you go through the Microsoft procedure, keep the following in mind:
    sudo -u git -H editor config/gitlab.yml
    ```
 
-1. Refer to [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration)
+1. Refer to [Configure initial settings](omniauth.md#configure-initial-settings)
    for initial settings.
 
 1. Add the provider configuration:
@@ -58,11 +58,12 @@ As you go through the Microsoft procedure, keep the following in mind:
    ```ruby
    gitlab_rails['omniauth_providers'] = [
      {
-       "name" => "azure_oauth2",
-       "args" => {
-         "client_id" => "CLIENT ID",
-         "client_secret" => "CLIENT SECRET",
-         "tenant_id" => "TENANT ID",
+       name: "azure_oauth2",
+       # label: "Provider name", # optional label for login button, defaults to "Azure AD"
+       args: {
+         client_id: "CLIENT ID",
+         client_secret: "CLIENT SECRET",
+         tenant_id: "TENANT ID",
        }
      }
    ]
@@ -72,9 +73,10 @@ As you go through the Microsoft procedure, keep the following in mind:
 
    ```yaml
    - { name: 'azure_oauth2',
-     args: { client_id: "CLIENT ID",
-     client_secret: "CLIENT SECRET",
-     tenant_id: "TENANT ID" } }
+       # label: 'Provider name', # optional label for login button, defaults to "Azure AD"
+       args: { client_id: 'CLIENT ID',
+       client_secret: 'CLIENT SECRET',
+       tenant_id: 'TENANT ID' } }
    ```
 
    The `base_azure_url` is optional and can be added for different locales;
@@ -136,6 +138,8 @@ After you have created an application, follow the [Microsoft Quickstart document
 - `openid`
 - `profile`
 
+Alternatively, add the `User.Read.All` application permission.
+
 ### Configuring GitLab
 
 1. On your GitLab server, open the configuration file.
@@ -154,7 +158,7 @@ After you have created an application, follow the [Microsoft Quickstart document
    sudo -u git -H editor config/gitlab.yml
    ```
 
-1. Refer to [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration)
+1. Refer to [Configure initial settings](omniauth.md#configure-initial-settings)
    for initial settings.
 
 1. Add the provider configuration:
@@ -165,6 +169,7 @@ After you have created an application, follow the [Microsoft Quickstart document
    gitlab_rails['omniauth_providers'] = [
      {
        "name" => "azure_activedirectory_v2",
+       "label" => "Provider name", # optional label for login button, defaults to "Azure AD v2"
        "args" => {
          "client_id" => "CLIENT ID",
          "client_secret" => "CLIENT SECRET",
@@ -178,9 +183,10 @@ After you have created an application, follow the [Microsoft Quickstart document
 
    ```yaml
    - { name: 'azure_activedirectory_v2',
-     args: { client_id: "CLIENT ID",
-     client_secret: "CLIENT SECRET",
-     tenant_id: "TENANT ID" } }
+       label: 'Provider name', # optional label for login button, defaults to "Azure AD v2"
+       args: { client_id: "CLIENT ID",
+       client_secret: "CLIENT SECRET",
+       tenant_id: "TENANT ID" } }
    ```
 
    The `base_azure_url` is optional and can be added for different locales;

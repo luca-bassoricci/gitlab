@@ -3,18 +3,18 @@ import { shallowMount } from '@vue/test-utils';
 
 import TestCaseShowRoot from 'ee/test_case_show/components/test_case_show_root.vue';
 import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
-import { mockCurrentUserTodo } from 'jest/issuable_list/mock_data';
+import { mockCurrentUserTodo } from 'jest/vue_shared/issuable/list/mock_data';
 
-import IssuableBody from '~/issuable_show/components/issuable_body.vue';
-import IssuableEditForm from '~/issuable_show/components/issuable_edit_form.vue';
-import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
-import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
-import IssuableEventHub from '~/issuable_show/event_hub';
-import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
+import IssuableBody from '~/vue_shared/issuable/show/components/issuable_body.vue';
+import IssuableEditForm from '~/vue_shared/issuable/show/components/issuable_edit_form.vue';
+import IssuableHeader from '~/vue_shared/issuable/show/components/issuable_header.vue';
+import IssuableShow from '~/vue_shared/issuable/show/components/issuable_show_root.vue';
+import IssuableEventHub from '~/vue_shared/issuable/show/event_hub';
+import IssuableSidebar from '~/vue_shared/issuable/sidebar/components/issuable_sidebar_root.vue';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 
-jest.mock('~/issuable_show/event_hub');
+jest.mock('~/vue_shared/issuable/show/event_hub');
 
 const createComponent = ({ testCase, testCaseQueryLoading = false } = {}) =>
   shallowMount(TestCaseShowRoot, {

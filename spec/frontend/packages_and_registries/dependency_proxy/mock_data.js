@@ -8,8 +8,8 @@ export const proxyData = () => ({
 export const proxySettings = (extend = {}) => ({ enabled: true, ...extend });
 
 export const proxyManifests = () => [
-  { createdAt: '2021-09-22T09:45:28Z', imageName: 'alpine:latest' },
-  { createdAt: '2021-09-21T09:45:28Z', imageName: 'alpine:stable' },
+  { id: 'proxy-1', createdAt: '2021-09-22T09:45:28Z', imageName: 'alpine:latest' },
+  { id: 'proxy-2', createdAt: '2021-09-21T09:45:28Z', imageName: 'alpine:stable' },
 ];
 
 export const pagination = (extend) => ({
@@ -21,11 +21,12 @@ export const pagination = (extend) => ({
   ...extend,
 });
 
-export const proxyDetailsQuery = ({ extendSettings = {} } = {}) => ({
+export const proxyDetailsQuery = ({ extendSettings = {}, extend } = {}) => ({
   data: {
     group: {
       ...proxyData(),
       __typename: 'Group',
+      id: '1',
       dependencyProxySetting: {
         ...proxySettings(extendSettings),
         __typename: 'DependencyProxySetting',
@@ -34,6 +35,7 @@ export const proxyDetailsQuery = ({ extendSettings = {} } = {}) => ({
         nodes: proxyManifests(),
         pageInfo: pagination(),
       },
+      ...extend,
     },
   },
 });

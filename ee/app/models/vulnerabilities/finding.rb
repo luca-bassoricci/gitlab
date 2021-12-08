@@ -86,8 +86,10 @@ module Vulnerabilities
     scope :by_scanners, -> (values) { where(scanner_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
+    scope :by_location_fingerprints, -> (values) { where(location_fingerprint: values) }
     scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }
     scope :by_uuid, -> (uuids) { where(uuid: uuids) }
+    scope :eager_load_comparison_entities, -> { includes(:scanner, :primary_identifier) }
 
     scope :all_preloaded, -> do
       preload(:scanner, :identifiers, project: [:namespace, :project_feature])
@@ -98,6 +100,10 @@ module Vulnerabilities
     scope :by_location_image, -> (images) do
       where(report_type: REPORT_TYPES_WITH_LOCATION_IMAGE)
         .where("vulnerability_occurrences.location -> 'image' ?| array[:images]", images: images)
+    end
+    scope :by_location_cluster, -> (cluster_ids) do
+      where(report_type: 'cluster_image_scanning')
+        .where("vulnerability_occurrences.location -> 'cluster_id' ?| array[:cluster_ids]", cluster_ids: cluster_ids)
     end
 
     def self.counted_by_severity

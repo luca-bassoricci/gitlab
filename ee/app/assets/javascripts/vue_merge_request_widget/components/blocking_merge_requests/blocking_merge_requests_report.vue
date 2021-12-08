@@ -82,7 +82,11 @@ export default {
       );
 
       return this.closedCount > 0
-        ? `${mainText} <strong>${n__('(%d closed)', '(%d closed)', this.closedCount)}</strong>`
+        ? `${mainText} %{strongStart}${n__(
+            '(%d closed)',
+            '(%d closed)',
+            this.closedCount,
+          )}%{strongEnd}`
         : mainText;
     },
     status() {
@@ -109,7 +113,7 @@ export default {
   >
     <template #success>
       {{ __('All merge request dependencies have been merged') }}
-      <span class="text-secondary">
+      <span class="text-secondary gl-ml-1">
         {{
           sprintf(__('(%{mrCount} merged)'), {
             mrCount: blockingMergeRequests.total_count - unmergedBlockingMergeRequests.length,

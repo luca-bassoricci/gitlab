@@ -194,7 +194,7 @@ module Types
     field :jobs,
           type: Types::Ci::JobType.connection_type,
           null: true,
-          authorize: :read_commit_status,
+          authorize: :read_build,
           description: 'Jobs of a project. This field can only be resolved for one project in any single request.',
           resolver: Resolvers::ProjectJobsResolver
 
@@ -306,7 +306,7 @@ module Types
           null: true,
           description: 'A single release of the project.',
           resolver: Resolvers::ReleasesResolver.single,
-          authorize: :download_code
+          authorize: :read_release
 
     field :container_expiration_policy,
           Types::ContainerExpirationPolicyType,
@@ -380,6 +380,16 @@ module Types
           null: true,
           description: 'Cluster agents associated with the project.',
           resolver: ::Resolvers::Clusters::AgentsResolver
+
+    field :merge_commit_template,
+          GraphQL::Types::String,
+          null: true,
+          description: 'Template used to create merge commit message in merge requests.'
+
+    field :squash_commit_template,
+          GraphQL::Types::String,
+          null: true,
+          description: 'Template used to create squash commit message in merge requests.'
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|

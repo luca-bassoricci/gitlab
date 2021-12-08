@@ -42,7 +42,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:restructured_mr_widget, project, default_enabled: :yaml)
     push_frontend_feature_flag(:mr_changes_fluid_layout, project, default_enabled: :yaml)
     push_frontend_feature_flag(:mr_attention_requests, project, default_enabled: :yaml)
-    push_frontend_feature_flag(:labels_widget, project, default_enabled: :yaml)
 
     # Usage data feature flags
     push_frontend_feature_flag(:users_expanding_widgets_usage_data, @project, default_enabled: :yaml)
@@ -74,14 +73,13 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
                      :show, :toggle_award_emoji, :toggle_subscription, :update
                    ]
 
-  feature_category :code_testing, [
-                     :test_reports, :coverage_reports, :codequality_reports,
-                     :codequality_mr_diff_reports
-                   ]
-
+  feature_category :code_testing, [:test_reports, :coverage_reports]
+  feature_category :code_quality, [:codequality_reports, :codequality_mr_diff_reports]
   feature_category :accessibility_testing, [:accessibility_reports]
   feature_category :infrastructure_as_code, [:terraform_reports]
   feature_category :continuous_integration, [:pipeline_status, :pipelines, :exposed_artifacts]
+
+  urgency :high, [:export_csv]
 
   def index
     @merge_requests = @issuables
@@ -142,8 +140,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
           cache_context = [
             params[:serializer],
             current_user&.cache_key,
-            @merge_request.assignees.map(&:cache_key),
-            @merge_request.reviewers.map(&:cache_key)
+            @merge_request.merge_request_assignees.map(&:cache_key),
+            @merge_request.merge_request_reviewers.map(&:cache_key)
           ]
 
           render_cached(@merge_request,
@@ -286,7 +284,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
         if merge_request.errors.present?
           render json: @merge_request.errors, status: :bad_request
         else
-          render json: serializer.represent(@merge_request, serializer: 'basic')
+          render json: serializer.represent(@merge_request, serializer: params[:serializer] || 'basic')
         end
       end
     end

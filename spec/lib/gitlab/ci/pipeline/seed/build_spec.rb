@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be_with_reload(:project) { create(:project, :repository) }
   let_it_be(:head_sha) { project.repository.head_commit.id }
 
   let(:pipeline) { build(:ci_empty_pipeline, project: project, sha: head_sha) }
@@ -393,6 +393,10 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
   describe '#to_resource' do
     subject { seed_build.to_resource }
 
+    before do
+      stub_feature_flags(create_deployment_in_separate_transaction: false)
+    end
+
     context 'when job is Ci::Build' do
       it { is_expected.to be_a(::Ci::Build) }
       it { is_expected.to be_valid }
@@ -443,6 +447,18 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         it_behaves_like 'deployment job'
         it_behaves_like 'ensures environment existence'
 
+        context 'when create_deployment_in_separate_transaction feature flag is enabled' do
+          before do
+            stub_feature_flags(create_deployment_in_separate_transaction: true)
+          end
+
+          it 'does not create any deployments nor environments' do
+            expect(subject.deployment).to be_nil
+            expect(Environment.count).to eq(0)
+            expect(Deployment.count).to eq(0)
+          end
+        end
+
         context 'when the environment name is invalid' do
           let(:attributes) { { name: 'deploy', ref: 'master', environment: '!!!' } }
 
@@ -451,25 +467,6 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
             expect(subject).to be_environment_creation_failure
             expect(subject.metadata.expanded_environment_name).to be_nil
             expect(Environment.exists?(name: expected_environment_name)).to eq(false)
-          end
-
-          context 'when surface_environment_creation_failure feature flag is disabled' do
-            before do
-              stub_feature_flags(surface_environment_creation_failure: false)
-            end
-
-            it_behaves_like 'non-deployment job'
-            it_behaves_like 'ensures environment inexistence'
-
-            it 'tracks an exception' do
-              expect(Gitlab::ErrorTracking).to receive(:track_exception)
-                .with(an_instance_of(described_class::EnvironmentCreationFailure),
-                      project_id: project.id,
-                      reason: %q{Name can contain only letters, digits, '-', '_', '/', '$', '{', '}', '.', and spaces, but it cannot start or end with '/'})
-                .once
-
-              subject
-            end
           end
         end
       end
@@ -515,6 +512,18 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         it 'returns a job with resource group' do
           expect(subject.resource_group).not_to be_nil
           expect(subject.resource_group.key).to eq('iOS')
+          expect(Ci::ResourceGroup.count).to eq(1)
+        end
+
+        context 'when create_deployment_in_separate_transaction feature flag is enabled' do
+          before do
+            stub_feature_flags(create_deployment_in_separate_transaction: true)
+          end
+
+          it 'does not create any resource groups' do
+            expect(subject.resource_group).to be_nil
+            expect(Ci::ResourceGroup.count).to eq(0)
+          end
         end
 
         context 'when resource group has $CI_ENVIRONMENT_NAME in it' do
@@ -1218,14 +1227,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         ]
       end
 
-      context 'when FF :variable_inside_variable is enabled' do
-        before do
-          stub_feature_flags(variable_inside_variable: [project])
-        end
-
-        it "does not have errors" do
-          expect(subject.errors).to be_empty
-        end
+      it "does not have errors" do
+        expect(subject.errors).to be_empty
       end
     end
 
@@ -1238,36 +1241,20 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         ]
       end
 
-      context 'when FF :variable_inside_variable is disabled' do
-        before do
-          stub_feature_flags(variable_inside_variable: false)
-        end
-
-        it "does not have errors" do
-          expect(subject.errors).to be_empty
-        end
+      it "returns an error" do
+        expect(subject.errors).to contain_exactly(
+          'rspec: circular variable reference detected: ["A", "B", "C"]')
       end
 
-      context 'when FF :variable_inside_variable is enabled' do
-        before do
-          stub_feature_flags(variable_inside_variable: [project])
+      context 'with job:rules:[if:]' do
+        let(:attributes) { { name: 'rspec', ref: 'master', rules: [{ if: '$C != null', when: 'always' }] } }
+
+        it "included? does not raise" do
+          expect { subject.included? }.not_to raise_error
         end
 
-        it "returns an error" do
-          expect(subject.errors).to contain_exactly(
-            'rspec: circular variable reference detected: ["A", "B", "C"]')
-        end
-
-        context 'with job:rules:[if:]' do
-          let(:attributes) { { name: 'rspec', ref: 'master', rules: [{ if: '$C != null', when: 'always' }] } }
-
-          it "included? does not raise" do
-            expect { subject.included? }.not_to raise_error
-          end
-
-          it "included? returns true" do
-            expect(subject.included?).to eq(true)
-          end
+        it "included? returns true" do
+          expect(subject.included?).to eq(true)
         end
       end
     end

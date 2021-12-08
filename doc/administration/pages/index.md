@@ -56,11 +56,11 @@ Before proceeding with the Pages configuration, you must:
    | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
 
 1. Configure a **wildcard DNS record**.
-1. (Optional) Have a **wildcard certificate** for that domain if you decide to
+1. Optional. Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
-1. (Optional but recommended) Enable [Shared runners](../../ci/runners/index.md)
+1. Optional but recommended. Enable [Shared runners](../../ci/runners/index.md)
    so that your users don't have to bring their own.
-1. (Only for custom domains) Have a **secondary IP**.
+1. For custom domains, have a **secondary IP**.
 
 NOTE:
 If your GitLab instance and the Pages daemon are deployed in a private network or behind a firewall, your GitLab Pages websites are only accessible to devices/users that have access to the private network.
@@ -144,7 +144,8 @@ The Pages daemon doesn't listen to the outside world.
 1. Set the external URL for GitLab Pages in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   pages_external_url 'http://example.io'
+   external_url "http://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "http://pages.example.com" # not a subdomain of external_url
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -169,7 +170,8 @@ outside world.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
-   pages_external_url 'https://example.io'
+   external_url "https://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "https://pages.example.com" # not a subdomain of external_url
 
    pages_nginx['redirect_http_to_https'] = true
    ```
@@ -237,6 +239,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `log_verbose`                           | Verbose logging, true/false. |
 | `propagate_correlation_id`              | Set to true (false by default) to re-use existing Correlation ID from the incoming request header `X-Request-ID` if present. If a reverse proxy sets this header, the value is propagated in the request chain. |
 | `max_connections`                       | Limit on the number of concurrent connections to the HTTP, HTTPS or proxy listeners. |
+| `max_uri_length`                        | The maximum length of URIs accepted by GitLab Pages. Set to 0 for unlimited length. [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/659) in GitLab 14.5.
 | `metrics_address`                       | The address to listen on for metrics requests. |
 | `redirect_http`                         | Redirect pages from HTTP to HTTPS, true/false. |
 | `sentry_dsn`                            | The address for sending Sentry crash reporting to. |
@@ -258,8 +261,8 @@ control over how the Pages daemon runs and serves content in your environment.
 | `FF_ENABLE_REDIRECTS`                   | Feature flag to enable/disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#feature-flag-for-redirects) for more information. |
 | `FF_ENABLE_PLACEHOLDERS`                | Feature flag to enable/disable rewrites (disabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#feature-flag-for-rewrites) for more information.  |
 | `use_legacy_storage`                    | Temporarily-introduced parameter allowing to use legacy domain configuration source and storage. [Removed in 14.3](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6166). |
-
----
+| `rate_limit_source_ip`                  | Rate limit per source IP in number of requests per second. Set to `0` to disable this feature. |
+| `rate_limit_source_ip_burst`            | Rate limit per source IP maximum burst allowed per second. |
 
 ## Advanced configuration
 
@@ -287,7 +290,8 @@ world. Custom domains are supported, but no TLS.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
-   pages_external_url "http://example.io"
+   external_url "http://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "http://pages.example.com" # not a subdomain of external_url
    nginx['listen_addresses'] = ['192.0.2.1'] # The primary IP of the GitLab instance
    pages_nginx['enable'] = false
    gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80'] # The secondary IPs for the GitLab Pages daemon
@@ -317,7 +321,8 @@ world. Custom domains and TLS are supported.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
-   pages_external_url "https://example.io"
+   external_url "https://gitlab.example.com" # external_url here is only for reference
+   pages_external_url "https://pages.example.com" # not a subdomain of external_url
    nginx['listen_addresses'] = ['192.0.2.1'] # The primary IP of the GitLab instance
    pages_nginx['enable'] = false
    gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80'] # The secondary IPs for the GitLab Pages daemon
@@ -647,7 +652,7 @@ To override the global maximum pages size for a specific group:
 ## Running GitLab Pages on a separate server
 
 You can run the GitLab Pages daemon on a separate server to decrease the load on
-your main application server.
+your main application server. This configuration does not support mutual TLS (mTLS). See the [corresponding feature proposal](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/548) for more information.
 
 To configure GitLab Pages on a separate server:
 
@@ -1031,6 +1036,38 @@ GitLab Pages are part of the [regular backup](../../raketasks/backup_restore.md)
 You should strongly consider running GitLab Pages under a different hostname
 than GitLab to prevent XSS attacks.
 
+### Rate limits
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/631) in GitLab 14.5.
+
+You can enforce source-IP rate limits to help minimize the risk of a Denial of Service (DoS) attack. GitLab Pages
+uses a [token bucket algorithm](https://en.wikipedia.org/wiki/Token_bucket) to enforce rate limiting. By default,
+requests that exceed the specified limits are reported but not rejected.
+
+Source-IP rate limits are enforced using the following:
+
+- `rate_limit_source_ip`: Set the maximum threshold in number of requests per second. Set to 0 to disable this feature.
+- `rate_limit_source_ip_burst`: Sets the maximum threshold of number of requests allowed in an initial outburst of requests.
+  For example, when you load a web page that loads a number of resources at the same time.
+
+#### Enable source-IP rate limits
+
+1. Set rate limits in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['rate_limit_source_ip'] = 20.0
+   gitlab_pages['rate_limit_source_ip_burst'] = 600
+   ```
+
+1. To reject requests that exceed the specified limits, enable the `FF_ENABLE_RATE_LIMITER` feature flag in
+   `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['env'] = {'FF_ENABLE_RATE_LIMITER' => 'true'}
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
@@ -1248,7 +1285,7 @@ in all of your GitLab Pages instances.
 
 ### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
 
-This problem most likely results from an [out-dated operating system](../package_information/deprecated_os.md).
+This problem most likely results from an [out-dated operating system](../package_information/supported_os.md#os-versions-that-are-no-longer-supported).
 The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [`crypto/rand` in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
 This requires the `getrandom` system call or `/dev/urandom` to be available on the host OS.
 Upgrading to an [officially supported operating system](https://about.gitlab.com/install/) is recommended.

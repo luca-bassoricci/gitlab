@@ -31,6 +31,7 @@
     RUBY_GC_MALLOC_LIMIT: 67108864
     RUBY_GC_MALLOC_LIMIT_MAX: 134217728
     RECORD_DEPRECATIONS: "true"
+    GEO_SECONDARY_PROXY: 0
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
     - !reference [.base-script, script]
@@ -151,16 +152,16 @@
   parallel: 3
 
 .rspec-unit-parallel:
-  parallel: 20
+  parallel: 22
 
 .rspec-ee-unit-parallel:
-  parallel: 12
+  parallel: 14
 
 .rspec-ee-unit-geo-parallel:
   parallel: 2
 
 .rspec-integration-parallel:
-  parallel: 8
+  parallel: 10
 
 .rspec-ee-integration-parallel:
   parallel: 4
@@ -338,17 +339,46 @@ rspec fast_spec_helper minimal:
     - .minimal-rspec-tests
     - .rails:rules:ee-and-foss-fast_spec_helper:minimal
 
+db:rollback:
+  extends: .db-job-base
+  script:
+    - bundle exec rake db:migrate VERSION=20181228175414
+    - bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
+
 db:migrate:reset:
   extends: .db-job-base
   script:
     - bundle exec rake db:migrate:reset
 
+db:migrate-from-previous-major-version:
+  extends: .db-job-base
+  variables:
+    USE_BUNDLE_INSTALL: "false"
+    SETUP_DB: "false"
+    PROJECT_TO_CHECKOUT: "gitlab-foss"
+    TAG_TO_CHECKOUT: "v13.12.9"
+  before_script:
+    - !reference [.default-before_script, before_script]
+    - '[[ -d "ee/" ]] || export PROJECT_TO_CHECKOUT="gitlab"'
+    - '[[ -d "ee/" ]] || export TAG_TO_CHECKOUT="${TAG_TO_CHECKOUT}-ee"'
+    - retry 'git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT'
+    - git checkout -f FETCH_HEAD
+    - SETUP_DB=false USE_BUNDLE_INSTALL=true bash scripts/prepare_build.sh
+    - run_timed_command "bundle exec rake db:drop db:create db:structure:load db:migrate db:seed_fu"
+    - git checkout -f $CI_COMMIT_SHA
+    - SETUP_DB=false USE_BUNDLE_INSTALL=true bash scripts/prepare_build.sh
+  script:
+    - run_timed_command "bundle exec rake db:migrate"
+
 db:check-schema:
   extends:
-    - .db-job-base
+    - db:migrate-from-previous-major-version
     - .rails:rules:ee-mr-and-default-branch-only
+  variables:
+    TAG_TO_CHECKOUT: "v14.4.0"
   script:
-    - source scripts/schema_changed.sh
+    - run_timed_command "bundle exec rake db:migrate"
+    - scripts/schema_changed.sh
     - scripts/validate_migration_timestamps
 
 db:check-migrations:
@@ -359,30 +389,6 @@ db:check-migrations:
     - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME:$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --depth 20
     - scripts/validate_migration_schema
   allow_failure: true
-
-db:migrate-from-previous-major-version:
-  extends: .db-job-base
-  variables:
-    USE_BUNDLE_INSTALL: "false"
-    SETUP_DB: "false"
-    PROJECT_TO_CHECKOUT: "gitlab-foss"
-    TAG_TO_CHECKOUT: "v13.12.9"
-  script:
-    - '[[ -d "ee/" ]] || export PROJECT_TO_CHECKOUT="gitlab"'
-    - '[[ -d "ee/" ]] || export TAG_TO_CHECKOUT="${TAG_TO_CHECKOUT}-ee"'
-    - retry 'git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT'
-    - git checkout -f FETCH_HEAD
-    - SETUP_DB=false USE_BUNDLE_INSTALL=true bash scripts/prepare_build.sh
-    - run_timed_command "bundle exec rake db:drop db:create db:structure:load db:migrate db:seed_fu"
-    - git checkout -f $CI_COMMIT_SHA
-    - SETUP_DB=false USE_BUNDLE_INSTALL=true bash scripts/prepare_build.sh
-    - run_timed_command "bundle exec rake db:migrate"
-
-db:rollback:
-  extends: .db-job-base
-  script:
-    - bundle exec rake db:migrate VERSION=20181228175414
-    - bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
 
 db:gitlabcom-database-testing:
   extends: .rails:rules:db:gitlabcom-database-testing
@@ -513,9 +519,27 @@ rspec:coverage:
     paths:
       - coverage/index.html
       - coverage/assets/
+      - coverage/lcov/
       - tmp/memory_test/
     reports:
       cobertura: coverage/coverage.xml
+
+rspec:undercoverage:
+  extends:
+    - .coverage-base
+    - .rails:rules:rspec-undercoverage
+  stage: post-test
+  needs: ["rspec:coverage"]
+  script:
+    - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
+        echo "Checking out \$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA ($CI_MERGE_REQUEST_SOURCE_BRANCH_SHA) instead of \$CI_COMMIT_SHA (merge result commit $CI_COMMIT_SHA) so we can use $CI_MERGE_REQUEST_DIFF_BASE_SHA for undercoverage in this merged result pipeline";
+        git checkout -f ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA};
+      else
+        echo "Using \$CI_COMMIT_SHA ($CI_COMMIT_SHA) for this non-merge result pipeline.";
+      fi;
+    - if [ -f scripts/undercoverage ]; then
+        run_timed_command "scripts/undercoverage";
+      fi;
 
 rspec:feature-flags:
   extends:
@@ -533,6 +557,55 @@ rspec:feature-flags:
       else
         run_timed_command "bundle exec scripts/used-feature-flags";
       fi
+
+rspec:skipped-flaky-tests-report:
+  extends:
+    - .default-retry
+    - .rails:rules:skipped-flaky-tests-report
+  image: ruby:2.7-alpine
+  stage: post-test
+  # We cannot use needs since it would mean needing 84 jobs (since most are parallelized)
+  # so we use `dependencies` here.
+  dependencies:
+    # FOSS/EE jobs
+    - rspec migration pg12
+    - rspec unit pg12
+    - rspec integration pg12
+    - rspec system pg12
+    # FOSS/EE minimal jobs
+    - rspec migration pg12 minimal
+    - rspec unit pg12 minimal
+    - rspec integration pg12 minimal
+    - rspec system pg12 minimal
+    # EE jobs
+    - rspec-ee migration pg12
+    - rspec-ee unit pg12
+    - rspec-ee integration pg12
+    - rspec-ee system pg12
+    # EE minimal jobs
+    - rspec-ee migration pg12 minimal
+    - rspec-ee unit pg12 minimal
+    - rspec-ee integration pg12 minimal
+    - rspec-ee system pg12 minimal
+    # Geo jobs
+    - rspec-ee unit pg12 geo
+    - rspec-ee integration pg12 geo
+    - rspec-ee system pg12 geo
+    # Geo minimal jobs
+    - rspec-ee unit pg12 geo minimal
+    - rspec-ee integration pg12 geo minimal
+    - rspec-ee system pg12 geo minimal
+  variables:
+    SKIPPED_FLAKY_TESTS_REPORT: skipped_flaky_tests_report.txt
+  before_script:
+    - 'echo "SKIP_FLAKY_TESTS_AUTOMATICALLY: $SKIP_FLAKY_TESTS_AUTOMATICALLY"'
+    - mkdir -p rspec_flaky
+  script:
+    - find rspec_flaky/ -type f -name 'skipped_flaky_tests_*_report.txt' -exec cat {} + >> "${SKIPPED_FLAKY_TESTS_REPORT}"
+  artifacts:
+    expire_in: 31d
+    paths:
+      - ${SKIPPED_FLAKY_TESTS_REPORT}
 
 # EE/FOSS: default refs (MRs, default branch, schedules) jobs #
 #######################################################

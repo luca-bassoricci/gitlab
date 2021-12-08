@@ -4,8 +4,10 @@ require 'spec_helper'
 RSpec.describe Ci::Minutes::RefreshCachedDataService do
   include AfterNextHelpers
 
-  let_it_be(:project_1) { create(:project) }
-  let_it_be(:root_namespace) { project_1.root_namespace }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:subgroup) { create(:group, parent: group) }
+  let_it_be(:project_1) { create(:project, group: group) }
+  let_it_be(:root_namespace) { group }
   let_it_be(:build_1) { create(:ci_build, :pending, project: project_1) }
   let_it_be(:build_2) { create(:ci_build, :pending) }
   let_it_be(:pending_build_1) { create(:ci_pending_build, build: build_1, project: build_1.project, minutes_exceeded: true) }
@@ -41,9 +43,27 @@ RSpec.describe Ci::Minutes::RefreshCachedDataService do
         expect(pending_build_2.reload.minutes_exceeded).to be_truthy
       end
 
-      context 'when ci_pending_builds_maintain_ci_minutes_data is disabled' do
+      context 'when running multiple updates' do
         before do
-          stub_feature_flags(ci_pending_builds_maintain_ci_minutes_data: false)
+          stub_const("#{described_class}::BATCH_SIZE", 1)
+        end
+
+        it 'runs 2 SQL update queries' do
+          sql_queries = ActiveRecord::QueryRecorder.new { subject }.log
+          update_queries_number = sql_queries.inject(0) do |result, query|
+            result += 1 if query.start_with?("UPDATE")
+            result
+          end
+
+          expect(update_queries_number).to eq(2)
+          expect(pending_build_1.reload.minutes_exceeded).to be_falsey
+          expect(pending_build_2.reload.minutes_exceeded).to be_truthy
+        end
+      end
+
+      context 'when ci_pending_builds_maintain_denormalized_data is disabled' do
+        before do
+          stub_feature_flags(ci_pending_builds_maintain_denormalized_data: false)
         end
 
         it 'does not update pending builds' do

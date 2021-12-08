@@ -44,8 +44,9 @@ Note the following:
   a maintainer or administrator role in the group where the exported project lives.
 - Project members with the [Owner role](../../permissions.md) are imported as Maintainers.
 - Imported users can be mapped by their public email on self-managed instances, if an administrative user (not an owner) does the import.
-  Additionally, the user must be an existing member of the namespace, or the user can be added as a
-member of the project for contributions to be mapped.
+  The public email is not set by default. Users must [set it in their profiles](../../profile/index.md#set-your-public-email)
+  for mapping to work correctly. Additionally, the user must be an existing member of the namespace,
+  or the user can be added as a member of the project for contributions to be mapped.
   Otherwise, a supplementary comment is left to mention that the original author and
   the MRs, notes, or issues are owned by the importer.
   - For project migration imports performed over GitLab.com Groups, preserving author information is
@@ -160,6 +161,8 @@ To export a project and its data, follow these steps:
 
 1. Select **Settings** in the sidebar.
 
+1. Scroll down and expand the **Advanced** section.
+
 1. Scroll down to find the **Export project** button:
 
    ![Export button](img/import_export_export_button.png)
@@ -224,6 +227,11 @@ To help avoid abuse, by default, users are rate limited to:
 
 GitLab.com may have [different settings](../../gitlab_com/index.md#importexport) from the defaults.
 
+## Automate group and project import **(PREMIUM)**
+
+For information on automating user, group, and project import API calls, see
+[Automate group and project import](../import/index.md#automate-group-and-project-import).
+
 ## Troubleshooting
 
 ### Project fails to import due to mismatch
@@ -233,7 +241,7 @@ does not match between the exported project, and the project import, the project
 Review [issue 276930](https://gitlab.com/gitlab-org/gitlab/-/issues/276930), and either:
 
 - Ensure shared runners are enabled in both the source and destination projects.
-- Disable shared runners on the parent group when you import the project. 
+- Disable shared runners on the parent group when you import the project.
 
 ### Import workarounds for large repositories
 

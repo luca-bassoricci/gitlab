@@ -11,6 +11,10 @@ type: reference
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233479) in GitLab 13.6.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/241983) in GitLab 13.7.
 
+INFO:
+Create test cases in GitLab Ultimate.
+[Try it free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-test-cases-docs).
+
 Test cases in GitLab can help your teams create testing scenarios in their existing development platform.
 
 Now your Implementation and Testing teams can collaborate better, as they no longer have to
@@ -18,7 +22,9 @@ use external test planning tools, which require additional overhead, context swi
 
 ## Create a test case
 
-Users with Reporter or higher [permissions](../../user/permissions.md) can create test cases.
+Prerequisite:
+
+- You must have at least the Reporter [role](../../user/permissions.md).
 
 To create a test case in a GitLab project:
 
@@ -32,7 +38,9 @@ To create a test case in a GitLab project:
 You can view all test cases in the project in the Test Cases list. Filter the
 issue list with a search query, including labels or the test case's title.
 
-Users with Guest or higher [permissions](../../user/permissions.md) can view test cases.
+Prerequisite:
+
+- You must have at least the Guest [role](../../user/permissions.md).
 
 To view a test case:
 
@@ -45,8 +53,10 @@ To view a test case:
 
 You can edit a test case's title and description.
 
-Users with Reporter or higher [permissions](../../user/permissions.md) can edit test cases.
-Users demoted to the Guest role can continue to edit the test cases they created
+Prerequisite:
+
+- You must have at least the Reporter [role](../../user/permissions.md).
+- Users demoted to the Guest role can continue to edit the test cases they created
 when they were in the higher role.
 
 To edit a test case:
@@ -60,7 +70,9 @@ To edit a test case:
 
 When you want to stop using a test case, you can archive it. You can [reopen an archived test case](#reopen-an-archived-test-case) later.
 
-Users with Reporter or higher [permissions](../../user/permissions.md) can archive test cases.
+Prerequisite:
+
+- You must have at least the Reporter [role](../../user/permissions.md).
 
 To archive a test case, on the test case's page, select the **Archive test case** button.
 
@@ -73,6 +85,6 @@ To view archived test cases:
 
 If you decide to start using an archived test case again, you can reopen it.
 
-Users with Reporter or higher [permissions](../../user/permissions.md) can reopen test cases.
+You must have at least the Reporter [role](../../user/permissions.md).
 
 To reopen an archived test case, on the test case's page, select **Reopen test case**.

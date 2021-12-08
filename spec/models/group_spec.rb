@@ -37,6 +37,8 @@ RSpec.describe Group do
     it { is_expected.to have_many(:daily_build_group_report_results).class_name('Ci::DailyBuildGroupReportResult') }
     it { is_expected.to have_many(:group_callouts).class_name('Users::GroupCallout').with_foreign_key(:group_id) }
     it { is_expected.to have_many(:bulk_import_exports).class_name('BulkImports::Export') }
+    it { is_expected.to have_many(:contacts).class_name('CustomerRelations::Contact') }
+    it { is_expected.to have_many(:organizations).class_name('CustomerRelations::Organization') }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
@@ -90,34 +92,6 @@ RSpec.describe Group do
           group = build(:group, parent: build(:group))
 
           expect(group).to be_valid
-        end
-      end
-
-      context 'when the feature flag `validate_namespace_parent_type` is disabled' do
-        before do
-          stub_feature_flags(validate_namespace_parent_type: false)
-        end
-
-        context 'when the group has no parent' do
-          it 'allows a group to have no parent associated with it' do
-            group = build(:group)
-
-            expect(group).to be_valid
-          end
-        end
-
-        context 'when the group has a parent' do
-          it 'allows a group to have a namespace as its parent' do
-            group = build(:group, parent: build(:namespace))
-
-            expect(group).to be_valid
-          end
-
-          it 'allows a group to have another group as its parent' do
-            group = build(:group, parent: build(:group))
-
-            expect(group).to be_valid
-          end
         end
       end
     end
@@ -531,6 +505,10 @@ RSpec.describe Group do
       describe '#ancestors' do
         it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
       end
+
+      describe '#ancestors_upto' do
+        it { expect(group.ancestors_upto.to_sql).not_to include "WITH ORDINALITY" }
+      end
     end
 
     context 'linear' do
@@ -564,22 +542,16 @@ RSpec.describe Group do
         end
       end
 
+      describe '#ancestors_upto' do
+        it { expect(group.ancestors_upto.to_sql).to include "WITH ORDINALITY" }
+      end
+
       context 'when project namespace exists in the group' do
         let!(:project) { create(:project, group: group) }
-        let!(:project_namespace) { create(:project_namespace, project: project) }
+        let!(:project_namespace) { project.project_namespace }
 
         it 'filters out project namespace' do
           expect(group.descendants.find_by_id(project_namespace.id)).to be_nil
-        end
-
-        context 'when include_sti_condition is disabled' do
-          before do
-            stub_feature_flags(include_sti_condition: false)
-          end
-
-          it 'raises an exception' do
-            expect { group.descendants.find_by_id(project_namespace.id)}.to raise_error(ActiveRecord::SubclassNotFound)
-          end
         end
       end
     end
@@ -590,8 +562,8 @@ RSpec.describe Group do
     let(:instance_integration) { build(:jira_integration, :instance) }
 
     before do
-      create(:jira_integration, group: group, project: nil)
-      create(:integrations_slack, group: another_group, project: nil)
+      create(:jira_integration, :group, group: group)
+      create(:integrations_slack, :group, group: another_group)
     end
 
     it 'returns groups without integration' do
@@ -742,7 +714,6 @@ RSpec.describe Group do
       let!(:project) { create(:project, group: group) }
 
       before do
-        stub_experiments(invite_members_for_task: true)
         group.add_users([create(:user)], :developer, tasks_to_be_done: %w(ci code), tasks_project_id: project.id)
       end
 
@@ -2325,14 +2296,6 @@ RSpec.describe Group do
     end
 
     it_behaves_like 'returns the expected groups for a group and its descendants'
-
-    context 'when :linear_group_including_descendants_by feature flag is disabled' do
-      before do
-        stub_feature_flags(linear_group_including_descendants_by: false)
-      end
-
-      it_behaves_like 'returns the expected groups for a group and its descendants'
-    end
   end
 
   describe '.preset_root_ancestor_for' do
@@ -2658,14 +2621,6 @@ RSpec.describe Group do
     end
 
     it_behaves_like 'returns namespaces with disabled email'
-
-    context 'when feature flag :linear_group_ancestor_scopes is disabled' do
-      before do
-        stub_feature_flags(linear_group_ancestor_scopes: false)
-      end
-
-      it_behaves_like 'returns namespaces with disabled email'
-    end
   end
 
   describe '.timelogs' do

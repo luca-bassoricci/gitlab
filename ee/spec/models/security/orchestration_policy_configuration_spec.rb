@@ -102,6 +102,14 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
       it { expect(subject.dig(:scan_execution_policy, 0, :name)).to eq('Run DAST in every pipeline') }
     end
 
+    context 'when policy has invalid YAML format' do
+      let(:policy_yaml) do
+        'cadence: * 1 2 3'
+      end
+
+      it { expect(subject).to be_nil }
+    end
+
     context 'when policy is nil' do
       let(:policy_yaml) { nil }
 
@@ -378,6 +386,25 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
 
     it 'returns all scan result policies' do
       expect(scan_result_policies.pluck(:enabled)).to contain_exactly(true, true, false, true, true, true, true, true)
+    end
+  end
+
+  describe '#uniq_scanners' do
+    let(:project) { security_orchestration_policy_configuration.project }
+
+    subject { security_orchestration_policy_configuration.uniq_scanners }
+
+    context 'with approval rules' do
+      before do
+        create(:approval_project_rule, :scan_finding, scanners: %w(dast sast), project: project)
+        create(:approval_project_rule, :scan_finding, scanners: %w(dast container_scanning), project: project)
+      end
+
+      it { is_expected.to contain_exactly('dast', 'sast', 'container_scanning') }
+    end
+
+    context 'without approval rules' do
+      it { is_expected.to be_empty }
     end
   end
 end

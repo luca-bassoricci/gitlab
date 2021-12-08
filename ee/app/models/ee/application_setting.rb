@@ -90,6 +90,8 @@ module EE
                 allow_blank: true,
                 length: { maximum: EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT }
 
+      validates :future_subscriptions, json_schema: { filename: 'future_subscriptions' }
+
       validates :geo_node_allowed_ips, length: { maximum: 255 }, presence: true
 
       validates :required_instance_ci_template, presence: true, allow_nil: true
@@ -116,10 +118,16 @@ module EE
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 10080 }
 
+      validates :max_ssh_key_lifetime,
+                allow_blank: true,
+                numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 365 }
+
       alias_attribute :delayed_project_deletion, :delayed_project_removal
 
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
       after_commit :resume_elasticsearch_indexing
+
+      serialize :future_subscriptions, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
     end
 
     class_methods do
@@ -150,11 +158,13 @@ module EE
           email_additional_text: nil,
           enforce_namespace_storage_limit: false,
           enforce_pat_expiration: true,
+          future_subscriptions: [],
           geo_node_allowed_ips: '0.0.0.0/0, ::/0',
           git_two_factor_session_expiry: 15,
           lock_memberships_to_ldap: false,
           maintenance_mode: false,
           max_personal_access_token_lifetime: nil,
+          max_ssh_key_lifetime: nil,
           mirror_capacity_threshold: Settings.gitlab['mirror_capacity_threshold'],
           mirror_max_capacity: Settings.gitlab['mirror_max_capacity'],
           mirror_max_delay: Settings.gitlab['mirror_max_delay'],
@@ -235,11 +245,7 @@ module EE
 
       return namespaces if ignore_descendants
 
-      if ::Feature.enabled?(:linear_application_settings_elasticsearch_limited_namespaces, default_enabled: :yaml)
-        namespaces.self_and_descendants
-      else
-        ::Gitlab::ObjectHierarchy.new(namespaces).base_and_descendants
-      end
+      namespaces.self_and_descendants
     end
 
     def pseudonymizer_available?
@@ -315,8 +321,8 @@ module EE
       elasticsearch_url.map do |url|
         uri = URI.parse(url)
 
-        uri.user = elasticsearch_username
-        uri.password = elasticsearch_password.presence || ''
+        uri.user = URI.encode_www_form_component(elasticsearch_username)
+        uri.password = URI.encode_www_form_component(elasticsearch_password)
         uri.to_s
       end
     end
@@ -371,6 +377,10 @@ module EE
       max_personal_access_token_lifetime&.days&.from_now
     end
 
+    def max_ssh_key_lifetime_from_now
+      max_ssh_key_lifetime&.days&.from_now
+    end
+
     def compliance_frameworks=(values)
       cleaned = Array.wrap(values).reject(&:blank?).sort.uniq
 
@@ -385,14 +395,9 @@ module EE
 
     def elasticsearch_limited_project_exists?(project)
       project_namespaces = ::Namespace.where(id: project.namespace_id)
-      indexed_namespaces = if ::Feature.enabled?(:linear_application_setting_ancestor_scopes, default_enabled: :yaml)
-                             project_namespaces.self_and_ancestors
-                           else
-                             ::Gitlab::ObjectHierarchy.new(project_namespaces).base_and_ancestors
-                           end
+      self_and_ancestors_namespaces = project_namespaces.self_and_ancestors.joins(:elasticsearch_indexed_namespace)
 
-      indexed_namespaces = indexed_namespaces.joins(:elasticsearch_indexed_namespace)
-      indexed_namespaces = ::Project.where('EXISTS (?)', indexed_namespaces)
+      indexed_namespaces = ::Project.where('EXISTS (?)', self_and_ancestors_namespaces)
       indexed_projects = ::Project.where('EXISTS (?)', ElasticsearchIndexedProject.where(project_id: project.id))
 
       ::Project
@@ -426,19 +431,19 @@ module EE
     end
 
     def elasticsearch_indexing_column_exists?
-      ::Gitlab::Database.main.cached_column_exists?(:application_settings, :elasticsearch_indexing)
+      self.class.database.cached_column_exists?(:elasticsearch_indexing)
     end
 
     def elasticsearch_pause_indexing_column_exists?
-      ::Gitlab::Database.main.cached_column_exists?(:application_settings, :elasticsearch_pause_indexing)
+      self.class.database.cached_column_exists?(:elasticsearch_pause_indexing)
     end
 
     def elasticsearch_search_column_exists?
-      ::Gitlab::Database.main.cached_column_exists?(:application_settings, :elasticsearch_search)
+      self.class.database.cached_column_exists?(:elasticsearch_search)
     end
 
     def email_additional_text_column_exists?
-      ::Gitlab::Database.main.cached_column_exists?(:application_settings, :email_additional_text)
+      self.class.database.cached_column_exists?(:email_additional_text)
     end
 
     def check_geo_node_allowed_ips

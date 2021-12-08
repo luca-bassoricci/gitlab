@@ -20,11 +20,21 @@ module Gitlab
 
       class << self
         def register_models(models)
-          registered_models.merge(models)
+          models.each do |model|
+            raise "#{model} should have partitioning strategy defined" unless model.respond_to?(:partitioning_strategy)
+
+            registered_models << model
+          end
         end
 
         def register_tables(tables)
           registered_tables.merge(tables)
+        end
+
+        def sync_partitions_ignore_db_error
+          sync_partitions unless ENV['DISABLE_POSTGRES_PARTITION_CREATION_ON_STARTUP']
+        rescue ActiveRecord::ActiveRecordError, PG::Error
+          # ignore - happens when Rake tasks yet have to create a database, e.g. for testing
         end
 
         def sync_partitions(models_to_sync = registered_for_sync)
@@ -55,8 +65,6 @@ module Gitlab
           Gitlab::AppLogger.info(message: 'Finished dropping detached postgres partitions')
         end
 
-        private
-
         def registered_models
           @registered_models ||= Set.new
         end
@@ -64,6 +72,8 @@ module Gitlab
         def registered_tables
           @registered_tables ||= Set.new
         end
+
+        private
 
         def registered_for_sync
           registered_models + registered_tables.map do |table|

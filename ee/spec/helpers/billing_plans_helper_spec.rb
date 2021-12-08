@@ -14,7 +14,7 @@ RSpec.describe BillingPlansHelper, :saas do
     let(:refresh_seats_href) { helper.refresh_seats_group_billings_url(group) }
 
     let(:plan) do
-      OpenStruct.new(id: 'external-paid-plan-hash-code', name: 'Bronze Plan')
+      double('plan', id: 'external-paid-plan-hash-code', name: 'Bronze Plan')
     end
 
     context 'when group and plan with ID present' do
@@ -92,7 +92,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
 
     context 'when plan with ID not present' do
-      let(:plan) { OpenStruct.new(id: nil, name: 'Bronze Plan') }
+      let(:plan) { double('plan', id: nil, name: 'Bronze Plan') }
 
       let(:base_attrs) do
         {
@@ -167,7 +167,7 @@ RSpec.describe BillingPlansHelper, :saas do
   end
 
   describe '#use_new_purchase_flow?' do
-    where type: [Group.sti_name, nil],
+    where type: [Group.sti_name, Namespaces::UserNamespace.sti_name],
       plan: Plan.all_plans,
       trial_active: [true, false]
 
@@ -217,7 +217,7 @@ RSpec.describe BillingPlansHelper, :saas do
   describe '#upgrade_offer_type' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:plan) { OpenStruct.new({ id: '123456789' }) }
+    let(:plan) { double('plan', { id: '123456789' }) }
 
     context 'when plan has a valid property' do
       where(:plan_name, :for_free, :plan_id, :result) do
@@ -233,7 +233,7 @@ RSpec.describe BillingPlansHelper, :saas do
 
       with_them do
         let(:namespace) do
-          OpenStruct.new(
+          double('plan',
             {
               actual_plan_name: plan_name,
               id: '000000000'
@@ -345,7 +345,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
   end
 
-  describe "#plan_purchase_or_upgrade_url" do
+  describe '#plan_purchase_or_upgrade_url' do
     let(:plan) { double('Plan') }
 
     it 'is upgradable' do
@@ -364,7 +364,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
   end
 
-  describe "#plan_purchase_url" do
+  describe '#plan_purchase_url' do
     let_it_be(:group) { create(:group) }
     let_it_be(:user) { create(:user) }
 
@@ -390,7 +390,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
   end
 
-  describe "#hand_raise_props" do
+  describe '#hand_raise_props' do
     let_it_be(:namespace) { create(:namespace) }
     let_it_be(:user) { create(:user, username: 'Joe', first_name: 'Joe', last_name: 'Doe', organization: 'ACME') }
 
@@ -462,7 +462,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
 
     context 'when namespace is on an active plan' do
-      let(:current_plan) { OpenStruct.new(code: 'premium') }
+      let(:current_plan) { double('plan', code: 'premium') }
 
       it 'returns plans without deprecated' do
         expect(helper.billing_available_plans(plans_data, nil)).to eq([plan])
@@ -470,7 +470,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
 
     context 'when namespace is on a deprecated plan' do
-      let(:current_plan) { OpenStruct.new(code: 'bronze') }
+      let(:current_plan) { double('plan', code: 'bronze') }
 
       it 'returns plans with a deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq(plans_data)
@@ -478,7 +478,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
 
     context 'when namespace is on a deprecated plan that has hide_deprecated_card set to true' do
-      let(:current_plan) { OpenStruct.new(code: 'bronze') }
+      let(:current_plan) { double('plan', code: 'bronze') }
       let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: true) }
 
       it 'returns plans without the deprecated plan' do
@@ -487,7 +487,7 @@ RSpec.describe BillingPlansHelper, :saas do
     end
 
     context 'when namespace is on a plan that has hide_deprecated_card set to true, but deprecated? is false' do
-      let(:current_plan) { OpenStruct.new(code: 'premium') }
+      let(:current_plan) { double('plan', code: 'premium') }
       let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: true) }
 
       it 'returns plans with the deprecated plan' do
@@ -584,6 +584,89 @@ RSpec.describe BillingPlansHelper, :saas do
       it 'returns correct boolean value' do
         expect(helper.show_start_free_trial_messages?(namespace)).to eql(expected)
       end
+    end
+  end
+
+  describe '#contact_sales_button_data' do
+    let(:plan) { double('Plan', code: '_code_') }
+    let(:data) do
+      {
+        track_action: 'click_button',
+        track_label: 'contact_sales',
+        track_property: plan.code
+      }
+    end
+
+    it 'has experiment attribute' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.contact_sales_button_data(plan)).to eq data.merge(track_experiment: :billing_in_side_nav)
+    end
+
+    it 'does not have experiment attribute' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.contact_sales_button_data(plan)).to eq data
+    end
+  end
+
+  describe '#billing_upgrade_button_data' do
+    let(:plan) { double('Plan', code: '_code_') }
+    let(:data) do
+      {
+        track_action: 'click_button',
+        track_label: 'upgrade',
+        track_property: plan.code,
+        qa_selector: "upgrade_to_#{plan.code}"
+      }
+    end
+
+    it 'has experiment attribute' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.billing_upgrade_button_data(plan)).to eq data.merge(track_experiment: :billing_in_side_nav)
+    end
+
+    it 'does not have experiment attribute' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.billing_upgrade_button_data(plan)).to eq data
+    end
+  end
+
+  describe '#start_free_trial_data' do
+    let(:data) do
+      {
+        track_action: 'click_button',
+        track_label: 'start_trial',
+        qa_selector: 'start_your_free_trial'
+      }
+    end
+
+    it 'has experiment attribute' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.start_free_trial_data).to eq data.merge(track_experiment: :billing_in_side_nav)
+    end
+
+    it 'does not have experiment attribute' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.start_free_trial_data).to eq data
+    end
+  end
+
+  describe '#accessed_billing_from_side_nav?' do
+    it 'comes from billing side nav link click' do
+      allow(helper).to receive(:params).and_return({ from: 'side_nav' })
+
+      expect(helper.accessed_billing_from_side_nav?).to eq(true)
+    end
+
+    it 'does not come from side nav link click' do
+      allow(helper).to receive(:params).and_return({})
+
+      expect(helper.accessed_billing_from_side_nav?).to eq(false)
     end
   end
 end

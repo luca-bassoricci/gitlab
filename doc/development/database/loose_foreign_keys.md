@@ -52,25 +52,40 @@ For this procedure to work, we must register which tables to clean up asynchrono
 
 ## Example migration and configuration
 
-### Configure the model
+### Configure the loose foreign key
 
-First, tell the application that the `projects` table has a new loose foreign key.
-You can do this in the `Project` model:
+Loose foreign keys are defined in a YAML file. The configuration requires the
+following information:
 
-```ruby
-class Project < ApplicationRecord
-  # ...
+- Parent table name (`projects`)
+- Child table name (`ci_pipelines`)
+- The data cleanup method (`async_delete` or `async_nullify`)
 
-  include LooseForeignKey
+The YAML file is located at `lib/gitlab/database/gitlab_loose_foreign_keys.yml`. The file groups
+foreign key definitions by the name of the child table. The child table can have multiple loose
+foreign key definitions, therefore we store them as an array.
 
-  loose_foreign_key :ci_pipelines, :project_id, on_delete: :async_delete # or async_nullify
+Example definition:
 
-  # ...
-end
+```yaml
+ci_pipelines:
+  - table: projects
+    column: project_id
+    on_delete: async_delete
 ```
 
-This instruction ensures the asynchronous cleanup process knows about the association, and the
-how to do the cleanup. In this case, the associated `ci_pipelines` records are deleted.
+If the `ci_pipelines` key is already present in the YAML file, then a new entry can be added
+to the array:
+
+```yaml
+ci_pipelines:
+  - table: projects
+    column: project_id
+    on_delete: async_delete
+  - table: another_table
+    column: another_id
+    on_delete: :async_nullify
+```
 
 ### Track record changes
 
@@ -127,6 +142,19 @@ end
 At this point, the setup phase is concluded. The deleted `projects` records should be automatically
 picked up by the scheduled cleanup worker job.
 
+## Testing
+
+The "`it has loose foreign keys`" shared example can be used to test the presence of the `ON DELETE` trigger and the
+loose foreign key definitions.
+
+Simply add to the model test file:
+
+```ruby
+it_behaves_like 'it has loose foreign keys' do
+  let(:factory_name) { :project }
+end
+```
+
 ## Caveats of loose foreign keys
 
 ### Record creation
@@ -180,3 +208,11 @@ end
 NOTE:
 This example is unlikely in GitLab, because we usually look up the parent models to perform
 permission checks.
+
+## A note on `dependent: :destroy` and `dependent: :nullify`
+
+We considered using these Rails features as an alternative to foreign keys but there are several problems which include:
+
+1. These run on a different connection in the context of a transaction [which we do not allow](multiple_databases.md#removing-cross-database-transactions).
+1. These can lead to severe performance degradation as we load all records from PostgreSQL, loop over them in Ruby, and call individual `DELETE` queries.
+1. These can miss data as they only cover the case when the `destroy` method is called directly on the model. There are other cases including `delete_all` and cascading deletes from another parent table that could mean these are missed.

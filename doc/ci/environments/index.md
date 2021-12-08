@@ -27,7 +27,7 @@ You can even access a [web terminal](#web-terminals-deprecated) for your environ
 
 Prerequisites:
 
-- You must have a minimum of [Reporter permission](../../user/permissions.md#project-members-permissions).
+- You must have at least the Reporter [role](../../user/permissions.md#project-members-permissions).
 
 To view a list of environments and deployments:
 
@@ -159,9 +159,9 @@ deploy_prod:
   environment:
     name: production
     url: https://example.com
-  when: manual
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
 ```
 
 The `when: manual` action:
@@ -256,7 +256,7 @@ GitLab supports the [dotenv (`.env`)](https://github.com/bkeepers/dotenv) file f
 and expands the `environment:url` value with variables defined in the `.env` file.
 
 To use this feature, specify the
-[`artifacts:reports:dotenv`](../yaml/index.md#artifactsreportsdotenv) keyword in `.gitlab-ci.yml`.
+[`artifacts:reports:dotenv`](../yaml/artifacts_reports.md#artifactsreportsdotenv) keyword in `.gitlab-ci.yml`.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Set dynamic URLs after a job finished](https://youtu.be/70jDXtOf4Ig).
@@ -294,7 +294,7 @@ As soon as the `review` job finishes, GitLab updates the `review/your-branch-nam
 environment's URL.
 It parses the `deploy.env` report artifact, registers a list of variables as runtime-created,
 uses it for expanding `environment:url: $DYNAMIC_ENVIRONMENT_URL` and sets it to the environment URL.
-You can also specify a static part of the URL at `environment:url:`, such as
+You can also specify a static part of the URL at `environment:url`, such as
 `https://$DYNAMIC_ENVIRONMENT_URL`. If the value of `DYNAMIC_ENVIRONMENT_URL` is
 `example.com`, the final result is `https://example.com`.
 
@@ -303,7 +303,7 @@ The assigned URL for the `review/your-branch-name` environment is visible in the
 Note the following:
 
 - `stop_review` doesn't generate a dotenv report artifact, so it doesn't recognize the
-  `DYNAMIC_ENVIRONMENT_URL` environment variable. Therefore you shouldn't set `environment:url:` in the
+  `DYNAMIC_ENVIRONMENT_URL` environment variable. Therefore you shouldn't set `environment:url` in the
   `stop_review` job.
 - If the environment URL isn't valid (for example, the URL is malformed), the system doesn't update
   the environment URL.
@@ -446,6 +446,63 @@ set the [`GIT_STRATEGY`](../runners/configure_runners.md#git-strategy) to `none`
 try to check out the code after the branch is deleted.
 
 Read more in the [`.gitlab-ci.yml` reference](../yaml/index.md#environmenton_stop).
+
+#### Stop an environment when another job is finished
+
+You can set an environment to stop when another job is finished.
+
+In your `.gitlab-ci.yml` file, specify in the [`on_stop`](../yaml/index.md#environmenton_stop)
+keyword the name of the job that stops the environment.
+
+The following example shows a `review_app` job that calls a `stop_review_app` job after the first
+job is finished. The `stop_review_app` is triggered based on what is defined under `when`. In this
+case, it is set to `manual`, so it needs a
+[manual action](../jobs/job_control.md#create-a-job-that-must-be-run-manually)
+from the GitLab UI to run.
+
+Both jobs must have the same rules or only/except configuration.
+In this example, if the configuration is not identical:
+
+- The `stop_review_app` job might not be included in all pipelines that include the `review_app` job.
+- It is not possible to trigger the `action: stop` to stop the environment automatically.
+
+Also in the example, `GIT_STRATEGY` is set to `none`. If the
+`stop_review_app` job is [automatically triggered](../environments/index.md#stop-an-environment),
+the runner won't try to check out the code after the branch is deleted.
+
+The example also overwrites global variables. If your `stop` `environment` job depends
+on global variables, use [anchor variables](../yaml/yaml_optimization.md#yaml-anchors-for-variables) when you set the `GIT_STRATEGY`
+to change the job without overriding the global variables.
+
+The `stop_review_app` job **must** have the following keywords defined:
+
+- `when`, defined at either:
+  - [The job level](../yaml/index.md#when).
+  - [In a rules clause](../yaml/index.md#rules). If you use `rules` and `when: manual`, you should
+    also set [`allow_failure: true`](../yaml/index.md#allow_failure) so the pipeline can complete
+    even if the job doesn't run.
+- `environment:name`
+- `environment:action`
+
+```yaml
+review_app:
+  stage: deploy
+  script: make deploy-app
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: https://$CI_ENVIRONMENT_SLUG.example.com
+    on_stop: stop_review_app
+
+stop_review_app:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script: make delete-app
+  when: manual
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+```
 
 #### Stop an environment after a certain time period
 
@@ -714,6 +771,29 @@ fetch line:
 fetch = +refs/environments/*:refs/remotes/origin/environments/*
 ```
 
+### Archive Old Deployments
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/73628) in GitLab 14.5.
+
+FLAG:
+On self-managed GitLab, by default this feature is not available. To make it available per project or for your entire instance, ask an administrator to [enable the feature flag](../../administration/feature_flags.md) named `deployments_archive`. On GitLab.com, this feature will be rolled out gradually.
+
+When a new deployment happens in your project,
+GitLab creates [a special Git-ref to the deployment](#check-out-deployments-locally).
+Since these Git-refs are populated from the remote GitLab repository,
+you could find that some Git operations, such as `git-fetch` and `git-pull`,
+become slower as the number of deployments in your project increases.
+
+To maintain the efficiency of your Git operations, GitLab keeps
+only recent deployment refs (up to 50,000) and deletes the rest of the old deployment refs.
+Archived deployments are still available, in the UI or by using the API, for auditing purposes.
+Also, you can still fetch the deployed commit from the repository
+with specifying the commit SHA (for example, `git checkout <deployment-sha>`), even after archive.
+
+NOTE:
+GitLab preserves all commits as [`keep-around` refs](../../user/project/repository/reducing_the_repo_size_using_git.md)
+so that deployed commits are not garbage collected, even if it's not referenced by the deployment refs.
+
 ### Scope environments with specs
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/2112) in GitLab Premium 9.4.
@@ -855,11 +935,6 @@ To ensure the `action: stop` can always run when needed, you can:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/21182) in GitLab 14.4.
 
-FLAG:
-On self-managed GitLab, by default this bug fix is available. To hide the bug fix per project,
-ask an administrator to [disable the feature flag](../../administration/feature_flags.md) named `surface_environment_creation_failure`.
-On GitLab.com, this bug fix is available.
-
 If your project is configured to [create a dynamic environment](#create-a-dynamic-environment),
 you might encounter this error because the dynamically generated parameter can't be used for creating an environment.
 
@@ -911,3 +986,19 @@ To fix this, use one of the following solutions:
     script: deploy review app
     environment: review/$CI_COMMIT_REF_SLUG
   ```
+
+### Deployment refs are not found
+
+Starting from GitLab 14.5, GitLab [deletes old deployment refs](#archive-old-deployments)
+to keep your Git repository performant.
+
+If you have to restore archived Git-refs, please ask an administrator of your self-managed GitLab instance
+to execute the following command on Rails console:
+
+```ruby
+Project.find_by_full_path(<your-project-full-path>).deployments.where(archived: true).each(&:create_ref)
+```
+
+Please note that GitLab could drop this support in the future for the performance concern.
+You can open an issue in [GitLab Issue Tracker](https://gitlab.com/gitlab-org/gitlab/-/issues/new)
+to discuss the behavior of this feature.

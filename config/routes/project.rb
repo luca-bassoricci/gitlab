@@ -317,6 +317,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resources :google_cloud, only: [:index]
 
+        namespace :google_cloud do
+          resources :service_accounts, only: [:index, :create]
+        end
+
         resources :environments, except: [:destroy] do
           member do
             post :stop
@@ -359,6 +363,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :alert_management, only: [:index] do
           get 'details', on: :member
         end
+
+        get 'alert_management/:id', to: 'alert_management#details', as: 'alert_management_alert'
 
         get 'work_items/*work_items_path' => 'work_items#index', as: :work_items
 
@@ -451,6 +457,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             end
           end
         end
+
+        namespace :integrations do
+          resource :shimo, only: [:show]
+        end
       end
       # End of the /-/ scope.
 
@@ -538,6 +548,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           delete :delete_attachment # rubocop:todo Cop/PutProjectRoutesUnderScope
           post :resolve # rubocop:todo Cop/PutProjectRoutesUnderScope
           delete :resolve, action: :unresolve # rubocop:todo Cop/PutProjectRoutesUnderScope
+          get :outdated_line_change # rubocop:todo Cop/PutProjectRoutesUnderScope
         end
       end
 

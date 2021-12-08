@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# Push Rules **(PREMIUM)**
+# Push rules **(PREMIUM)**
 
 Gain additional control over what can and can't be pushed to your repository by using
 regular expressions to reject pushes based on commit contents, branch names or file details.
@@ -13,6 +13,10 @@ regular expressions to reject pushes based on commit contents, branch names or f
 GitLab already offers [protected branches](../user/project/protected_branches.md), but there are
 cases when you need some specific rules. Some common scenarios: preventing Git tag removal, or
 enforcing a special format for commit messages.
+
+INFO:
+Get access to push rules and more with a
+[free 30-day trial of GitLab Ultimate](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=p-push-rules-docs).
 
 Push rules are [pre-receive Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) you
 can enable in a user-friendly interface. They are defined either:

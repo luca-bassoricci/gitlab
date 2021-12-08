@@ -7,7 +7,7 @@ RSpec.describe 'Edit group settings' do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:developer) { create(:user) }
-  let_it_be(:group) { create(:group, name: 'Foo bar', path: 'foo') }
+  let_it_be(:group, refind: true) { create(:group, name: 'Foo bar', path: 'foo') }
 
   before_all do
     group.add_owner(user)
@@ -76,7 +76,7 @@ RSpec.describe 'Edit group settings' do
       it 'is not visible' do
         visit edit_group_path(group)
 
-        expect(page).not_to have_content('Prevent adding new members to project membership within this group')
+        expect(page).not_to have_content('Prevent adding new members to projects within this group')
       end
     end
 
@@ -84,7 +84,7 @@ RSpec.describe 'Edit group settings' do
       it 'is visible' do
         visit edit_group_path(group)
 
-        expect(page).to have_content('Prevent adding new members to project membership within this group')
+        expect(page).to have_content('Prevent adding new members to projects within this group')
       end
 
       context 'when current user is not the Owner' do
@@ -153,7 +153,7 @@ RSpec.describe 'Edit group settings' do
     end
   end
 
-  context 'enable delayed project removal' do
+  context 'enable delayed project deletion' do
     before do
       stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
     end
@@ -450,6 +450,124 @@ RSpec.describe 'Edit group settings' do
         wait_for_requests
 
         expect(page).not_to have_content("Group 'Foo bar' was successfully updated.")
+      end
+    end
+
+    describe 'form submit button', :js do
+      def fill_in_new_user_signups_cap(new_user_signups_cap_value)
+        page.within('#js-permissions-settings') do
+          fill_in 'group[new_user_signups_cap]', with: new_user_signups_cap_value
+          click_button 'Save changes'
+        end
+      end
+
+      shared_examples 'successful form submit' do
+        it 'shows form submit successful message' do
+          fill_in_new_user_signups_cap(new_user_signups_cap_value)
+
+          expect(page).to have_content("Group 'Foo bar' was successfully updated.")
+        end
+      end
+
+      shared_examples 'confirmation modal before submit' do
+        it 'shows #confirm-general-permissions-changes modal' do
+          fill_in_new_user_signups_cap(new_user_signups_cap_value)
+
+          expect(page).to have_selector('#confirm-general-permissions-changes')
+          expect(page).to have_css('#confirm-general-permissions-changes .modal-body', text: 'By making this change, you will automatically approve all users in pending approval status.')
+        end
+      end
+
+      before do
+        stub_feature_flags(saas_user_caps: true)
+        group.namespace_settings.update!(new_user_signups_cap: group.group_members.count)
+      end
+
+      context 'when the auto approve pending users feature flag is enabled' do
+        before do
+          stub_feature_flags(saas_user_caps_auto_approve_pending_users_on_cap_increase: true)
+          visit edit_group_path(group, anchor: 'js-permissions-settings')
+        end
+
+        it 'shows correct helper text' do
+          expect(page).to have_content 'When the number of active users exceeds this number, additional users must be approved by an owner'
+          expect(page).not_to have_content 'Increasing the user cap will not automatically approve pending users'
+        end
+
+        context 'should show confirmation modal' do
+          context 'if user cap increases' do
+            it_behaves_like 'confirmation modal before submit' do
+              let(:new_user_signups_cap_value) { group.namespace_settings.new_user_signups_cap + 1 }
+            end
+          end
+
+          context 'if user cap changes from limited to unlimited' do
+            it_behaves_like 'confirmation modal before submit' do
+              let(:new_user_signups_cap_value) { nil }
+            end
+          end
+        end
+
+        context 'should not show confirmation modal' do
+          context 'if user cap decreases' do
+            it_behaves_like 'successful form submit' do
+              let(:new_user_signups_cap_value) { group.namespace_settings.new_user_signups_cap - 1 }
+            end
+          end
+
+          context 'if user cap changes from unlimited to limited' do
+            before do
+              group.namespace_settings.update!(new_user_signups_cap: nil)
+              visit edit_group_path(group, anchor: 'js-permissions-settings')
+            end
+
+            it_behaves_like 'successful form submit' do
+              let(:new_user_signups_cap_value) { 1 }
+            end
+          end
+        end
+      end
+
+      context 'when the auto approve pending users feature flag is disabled' do
+        before do
+          stub_feature_flags(saas_user_caps_auto_approve_pending_users_on_cap_increase: false)
+          visit edit_group_path(group, anchor: 'js-permissions-settings')
+        end
+
+        it 'shows correct helper text' do
+          expect(page).to have_content 'Increasing the user cap will not automatically approve pending users'
+        end
+
+        context 'should not show confirmation modal' do
+          context 'if user cap increases' do
+            it_behaves_like 'successful form submit' do
+              let(:new_user_signups_cap_value) { group.namespace_settings.new_user_signups_cap + 1 }
+            end
+          end
+
+          context 'if user cap changes from limited to unlimited' do
+            it_behaves_like 'successful form submit' do
+              let(:new_user_signups_cap_value) { nil }
+            end
+          end
+
+          context 'if user cap decreases' do
+            it_behaves_like 'successful form submit' do
+              let(:new_user_signups_cap_value) { group.namespace_settings.new_user_signups_cap - 1 }
+            end
+          end
+
+          context 'if user cap changes from unlimited to limited' do
+            before do
+              group.namespace_settings.update!(new_user_signups_cap: nil)
+              visit edit_group_path(group, anchor: 'js-permissions-settings')
+            end
+
+            it_behaves_like 'successful form submit' do
+              let(:new_user_signups_cap_value) { 1 }
+            end
+          end
+        end
       end
     end
   end

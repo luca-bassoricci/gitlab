@@ -75,7 +75,7 @@ export default {
       severityLevels: [],
       vulnerabilityStates: [],
       approvalVulnerabilityStatesKeys: Object.keys(APPROVAL_VULNERABILITY_STATES),
-      reportTypesKeys: Object.keys(REPORT_TYPES),
+      reportTypesKeys: Object.keys(this.$options.REPORT_TYPES),
       severityLevelsKeys: Object.keys(SEVERITY_LEVELS),
       ...this.getInitialData(),
     };
@@ -513,6 +513,7 @@ export default {
           key="all"
           is-check-item
           :is-checked="areAllScannersSelected"
+          data-testid="all-scanners-selected"
           @click.native.capture.stop="setAllSelectedScanners"
         >
           <gl-truncate :text="$options.APPROVAL_DIALOG_I18N.form.selectAllLabel" />
@@ -637,6 +638,7 @@ export default {
       :state="isValidApprovers"
       :invalid-feedback="invalidApprovers"
       data-testid="approvers-group"
+      data-qa-selector="member_select_field"
     >
       <approvers-select
         v-model="approversToAdd"
@@ -644,7 +646,6 @@ export default {
         :skip-user-ids="userIds"
         :skip-group-ids="groupIds"
         :is-invalid="!isValidApprovers"
-        data-qa-selector="member_select_field"
       />
     </gl-form-group>
     <div class="bordered-box overflow-auto h-12em">

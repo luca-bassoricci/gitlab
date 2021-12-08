@@ -63,7 +63,6 @@ describe('Commits edit component', () => {
     beforeEach(() => {
       createComponent({
         header: `<div class="test-header">${testCommitMessage}</div>`,
-        checkbox: `<label class="test-checkbox">${testLabel}</label >`,
       });
     });
 
@@ -72,13 +71,6 @@ describe('Commits edit component', () => {
 
       expect(headerSlotElement.exists()).toBe(true);
       expect(headerSlotElement.text()).toBe(testCommitMessage);
-    });
-
-    it('renders checkbox slot correctly', () => {
-      const checkboxSlotElement = wrapper.find('.test-checkbox');
-
-      expect(checkboxSlotElement.exists()).toBe(true);
-      expect(checkboxSlotElement.text()).toBe(testLabel);
     });
   });
 });

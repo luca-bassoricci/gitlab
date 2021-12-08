@@ -6,8 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Conan packages in the Package Registry **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8248) in GitLab Premium 12.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8248) in GitLab 12.6.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) from GitLab Premium to GitLab Free in 13.3.
 
 WARNING:
 The Conan package registry for GitLab is under development and isn't ready for production use due to
@@ -102,6 +102,30 @@ A package with the recipe `Hello/0.1@mycompany/beta` is created.
 
 For more details about creating and managing Conan packages, see the
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages.html).
+
+#### Package without a username and a channel
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/345055) in GitLab 14.6 [with a flag](../../../administration/feature_flags.md) named `packages_conan_allow_empty_username_channel`. Disabled by default.
+> - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/345055) in GitLab 14.6.
+
+Even though they are [recommended](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#user-channel)
+to distinguish your package from a similarly named existing package,
+the username and channel are not mandatory fields for a Conan package.
+
+You can create a package without a username and channel by removing them from
+the `create` command:
+
+```shell
+conan create .
+```
+
+The username _and_ the channel must be blank. If only one of these fields is
+blank, the request is rejected.
+
+NOTE:
+Empty usernames and channels can only be used if you use a [project remote](#add-a-remote-for-your-project).
+If you use an [instance remote](#add-a-remote-for-your-instance), the username
+and the channel must be set.
 
 ## Add the Package Registry as a Conan remote
 
@@ -265,7 +289,8 @@ conan upload Hello/0.1@mycompany/beta --all
 
 ## Publish a Conan package by using CI/CD
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11678) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11678) in GitLab 12.7.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) from GitLab Premium to GitLab Free in 13.3.
 
 To work with Conan commands in [GitLab CI/CD](../../../ci/index.md), you can
 use `CI_JOB_TOKEN` in place of the personal access token in your commands.

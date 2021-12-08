@@ -127,6 +127,10 @@ RSpec.describe Feature, stub_feature_flags: false do
   end
 
   describe '.enabled?' do
+    before do
+      allow(Feature).to receive(:log_feature_flag_states?).and_return(false)
+    end
+
     it 'returns false for undefined feature' do
       expect(described_class.enabled?(:some_random_feature_flag)).to be_falsey
     end
@@ -177,6 +181,24 @@ RSpec.describe Feature, stub_feature_flags: false do
       expect(ActiveRecord::Base).to receive(:connection) { raise ActiveRecord::NoDatabaseError, "No database" }
 
       expect(described_class.enabled?(:a_feature, default_enabled: fake_default)).to eq(fake_default)
+    end
+
+    context 'logging is enabled', :request_store do
+      before do
+        allow(Feature).to receive(:log_feature_flag_states?).and_call_original
+        described_class.enable(:feature_flag_state_logs)
+        described_class.enable(:enabled_feature_flag)
+        described_class.enabled?(:enabled_feature_flag)
+      end
+
+      it 'does not log feature_flag_state_logs' do
+        expect(described_class.logged_states).not_to have_key("feature_flag_state_logs")
+      end
+
+      it 'logs other feature flags' do
+        expect(described_class.logged_states).to have_key(:enabled_feature_flag)
+        expect(described_class.logged_states[:enabled_feature_flag]).to be_truthy
+      end
     end
 
     context 'cached feature flag', :request_store do
@@ -314,7 +336,7 @@ RSpec.describe Feature, stub_feature_flags: false do
 
             context 'when database exists' do
               before do
-                allow(Gitlab::Database.main).to receive(:exists?).and_return(true)
+                allow(ApplicationRecord.database).to receive(:exists?).and_return(true)
               end
 
               it 'checks the persisted status and returns false' do
@@ -326,7 +348,7 @@ RSpec.describe Feature, stub_feature_flags: false do
 
             context 'when database does not exist' do
               before do
-                allow(Gitlab::Database.main).to receive(:exists?).and_return(false)
+                allow(ApplicationRecord.database).to receive(:exists?).and_return(false)
               end
 
               it 'returns false without checking the status in the database' do

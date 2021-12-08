@@ -1,16 +1,12 @@
 # frozen_string_literal: true
 
-class Projects::GoogleCloudController < Projects::ApplicationController
-  before_action :authorize_can_manage_google_cloud_deployments!
-
-  feature_category :release_orchestration
-
+class Projects::GoogleCloudController < Projects::GoogleCloud::BaseController
   def index
-  end
-
-  private
-
-  def authorize_can_manage_google_cloud_deployments!
-    access_denied! unless can?(current_user, :manage_project_google_cloud, project)
+    @js_data = {
+      screen: 'home',
+      serviceAccounts: GoogleCloud::ServiceAccountsService.new(project).find_for_project,
+      createServiceAccountUrl: project_google_cloud_service_accounts_path(project),
+      emptyIllustrationUrl: ActionController::Base.helpers.image_path('illustrations/pipelines_empty.svg')
+    }.to_json
   end
 end

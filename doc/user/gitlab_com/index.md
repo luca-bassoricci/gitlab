@@ -85,7 +85,7 @@ are included when cloning.
 Top-level groups created after August 12, 2021 have delayed project deletion enabled by default.
 Projects are permanently deleted after a seven-day delay.
 
-You can disable this by changing the [group setting](../group/index.md#enable-delayed-project-removal).
+You can disable this by changing the [group setting](../group/index.md#enable-delayed-project-deletion).
 
 ## Alternative SSH port
 
@@ -135,11 +135,30 @@ the related documentation.
 | Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited |
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
+| [Max number of pipeline triggers in a project](../../administration/instance_limits.md#limit-the-number-of-pipeline-triggers) | `25000` for Free tier, Unlimited for all paid tiers | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Max pipelines per schedule](../../administration/instance_limits.md#limit-the-number-of-pipelines-created-by-a-pipeline-schedule-per-day) | `24` for Free tier, `288` for all paid tiers | Unlimited |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 | Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
 | [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | Free tier: `50` per-group / `50` per-project <br/> All paid tiers: `1_000` per-group  / `1_000` per-project | `1_000` per-group / `1_000` per-project |
+| [Limit dotenv variables](../../administration/instance_limits.md#limit-dotenv-variables) | Free tier: `50` / Premium tier: `100` / Ultimate tier: `150` | 150 |
+
+## Package registry limits
+
+The [maximum file size](../../administration/instance_limits.md#file-size-limits)
+for a package uploaded to the [GitLab Package Registry](../../user/packages/package_registry/index.md)
+varies by format:
+
+| Package type | GitLab.com | Default |
+|--------------|------------|---------|
+| Conan        | 5 GB       | 3 GB    |
+| Generic      | 5 GB       | 5 GB    |
+| Helm         | 5 MB       | 5 MB    |
+| Maven        | 5 GB       | 3 GB    |
+| npm:         | 5 GB       | 500 MB  |
+| NuGet        | 5 GB       | 500 MB  |
+| PyPI         | 5 GB       | 3 GB    |
+| Terraform    | 1 GB       | 1 GB    |
 
 ## Account and limit settings
 
@@ -198,11 +217,11 @@ The following limits apply for [Webhooks](../project/integrations/webhooks.md):
 | [Number of webhooks](../../administration/instance_limits.md#number-of-webhooks) | `100` per project, `50` per group | `100` per project, `50` per group |
 | Maximum payload size | 25 MB       | 25 MB   |
 
-## Shared Build Cloud runners
+## Runner SaaS
 
-GitLab has shared runners on GitLab.com that you can use to run your CI jobs.
+Runner SaaS is the hosted, secure, and managed build environment you can use to run CI/CD jobs for your GitLab.com hosted project.
 
-For more information, see [GitLab Build Cloud runners](../../ci/runners/index.md).
+For more information, see [Runner SaaS](../../ci/runners/index.md).
 
 ## Sidekiq
 
@@ -296,6 +315,7 @@ after the limits change in January, 2021:
 | **All** traffic (from a given **IP address**)                             | **600** requests per minute | **2,000** requests per minute | **2,000** requests per minute |
 | **Issue creation**                                                        |                             | **300** requests per minute   | **300** requests per minute   |
 | **Note creation** (on issues and merge requests)                          |                             | **300** requests per minute   | **60** requests per minute    |
+| **Advanced, project, and group search** API (for a given **IP address**)   |                             |    | **10** requests per minute    |
 
 More details are available on the rate limits for [protected
 paths](#protected-paths-throttle) and [raw

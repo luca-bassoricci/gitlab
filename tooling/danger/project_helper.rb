@@ -5,6 +5,7 @@ module Tooling
     module ProjectHelper
       LOCAL_RULES ||= %w[
         changelog
+        ci_config
         database
         documentation
         duplicate_yarn_dependencies
@@ -43,6 +44,28 @@ module Tooling
         %r{\Adoc/.*(\.(md|png|gif|jpg|yml))\z} => :docs,
         %r{\A(CONTRIBUTING|LICENSE|MAINTENANCE|PHILOSOPHY|PROCESS|README)(\.md)?\z} => :docs,
         %r{\Adata/whats_new/} => :docs,
+
+        %r{\A((ee|jh)/)?app/finders/(.+/)?integrations/} => [:integrations_be, :database, :backend],
+        [%r{\A((ee|jh)/)?db/(geo/)?(migrate|post_migrate)/}, %r{(:integrations|:\w+_tracker_data)\b}] => [:integrations_be, :database, :migration],
+        [%r{\A((ee|jh)/)?(app|lib)/.+\.rb}, %r{\b(Integrations::|\.execute_(integrations|hooks))\b}] => [:integrations_be, :backend],
+        %r{\A(
+          ((ee|jh)/)?app/((?!.*clusters)(?!.*alert_management)(?!.*views)(?!.*assets).+/)?integration.+ |
+          ((ee|jh)/)?app/((?!.*search).+/)?project_service.+ |
+          ((ee|jh)/)?app/(models|helpers|workers|services|controllers)/(.+/)?(jira_connect.+|.*hook.+) |
+          ((ee|jh)/)?app/controllers/(.+/)?oauth/jira/.+ |
+          ((ee|jh)/)?app/services/(.+/)?jira.+ |
+          ((ee|jh)/)?app/workers/(.+/)?(propagate_integration.+|irker_worker\.rb) |
+          ((ee|jh)/)?lib/(.+/)?(atlassian|data_builder|hook_data)/.+ |
+          ((ee|jh)/)?lib/(.+/)?.*integration.+ |
+          ((ee|jh)/)?lib/(.+/)?api/v3/github\.rb |
+          ((ee|jh)/)?lib/(.+/)?api/github/entities\.rb
+        )\z}x => [:integrations_be, :backend],
+
+        %r{\A(
+          ((ee|jh)/)?app/(views|assets)/((?!.*clusters)(?!.*alerts_settings).+/)?integration.+ |
+          ((ee|jh)/)?app/(views|assets)/(.+/)?jira_connect.+ |
+          ((ee|jh)/)?app/(views|assets)/((?!.*filtered_search).+/)?hooks?.+
+        )\z}x => [:integrations_fe, :frontend],
 
         %r{\A(
           app/assets/javascripts/tracking/.*\.js |
@@ -84,6 +107,7 @@ module Tooling
         %r{\A((ee|jh)/)?app/finders/} => [:database, :backend],
         %r{\Arubocop/cop/migration(/|\.rb)} => :database,
 
+        %r{\A(\.ruby-version\z|\.nvmrc\z|\.tool-versions\z)} => :tooling,
         %r{\A(\.gitlab-ci\.yml\z|\.gitlab\/ci)} => :tooling,
         %r{\A\.codeclimate\.yml\z} => :tooling,
         %r{\Alefthook.yml\z} => :tooling,
@@ -104,7 +128,7 @@ module Tooling
 
         %r{\A((spec/)?lib/generators/gitlab/usage_metric_)} => [:product_intelligence],
         %r{\A((ee|jh)/)?lib/gitlab/usage_data_counters/.*\.yml\z} => [:product_intelligence],
-        %r{\A((ee|jh)/)?config/metrics/((.*\.yml)|(schema\.json))\z} => [:product_intelligence],
+        %r{\A((ee|jh)/)?config/(events|metrics)/((.*\.yml)|(schema\.json))\z} => [:product_intelligence],
         %r{\A((ee|jh)/)?lib/gitlab/usage_data(_counters)?(/|\.rb)} => [:backend, :product_intelligence],
         %r{\A(
           lib/gitlab/tracking\.rb |
@@ -128,7 +152,8 @@ module Tooling
         %r{\A((ee|jh)/)?vendor/} => :backend,
         %r{\A(Gemfile|Gemfile.lock|Rakefile)\z} => :backend,
         %r{\A[A-Z_]+_VERSION\z} => :backend,
-        %r{\A\.rubocop((_manual)?_todo)?\.yml\z} => :backend,
+        %r{\A\.rubocop(_todo)?\.yml\z} => :backend,
+        %r{\A\.rubocop_todo/.*\.yml\z} => :backend,
         %r{\Afile_hooks/} => :backend,
 
         %r{\A((ee|jh)/)?qa/} => :qa,
@@ -151,18 +176,6 @@ module Tooling
         %r{\.js\z} => :frontend
       }.freeze
 
-      def changes_by_category
-        helper.changes_by_category(CATEGORIES)
-      end
-
-      def changes
-        helper.changes(CATEGORIES)
-      end
-
-      def categories_for_file(file)
-        helper.categories_for_file(file, CATEGORIES)
-      end
-
       def local_warning_message
         "#{MESSAGE_PREFIX} Only the following Danger rules can be run locally: #{LOCAL_RULES.join(', ')}"
       end
@@ -178,11 +191,7 @@ module Tooling
       end
 
       def all_ee_changes
-        changes.files.grep(%r{\Aee/})
-      end
-
-      def project_name
-        ee? ? 'gitlab' : 'gitlab-foss'
+        helper.changes.files.grep(%r{\Aee/})
       end
 
       def file_lines(filename)
@@ -197,11 +206,6 @@ module Tooling
 
       def read_file(filename)
         File.read(filename)
-      end
-
-      def ee?
-        # Support former project name for `dev` and support local Danger run
-        %w[gitlab gitlab-ee].include?(ENV['CI_PROJECT_NAME']) || Dir.exist?(File.expand_path('../../../ee', __dir__))
       end
     end
   end

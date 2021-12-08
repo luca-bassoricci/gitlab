@@ -33,7 +33,8 @@ RSpec.describe 'Gcp Cluster', :js do
       before do
         visit project_clusters_path(project)
 
-        click_link 'Integrate with a cluster certificate'
+        click_link 'Certificate'
+        click_link 'Connect with a certificate'
         click_link 'Create new cluster'
         click_link 'Google GKE'
       end
@@ -48,7 +49,8 @@ RSpec.describe 'Gcp Cluster', :js do
         before do
           allow_any_instance_of(GoogleApi::CloudPlatform::Client)
             .to receive(:projects_zones_clusters_create) do
-            OpenStruct.new(
+            double(
+              'cluster',
               self_link: 'projects/gcp-project-12345/zones/us-central1-a/operations/ope-123',
               status: 'RUNNING'
             )
@@ -143,8 +145,9 @@ RSpec.describe 'Gcp Cluster', :js do
         before do
           visit project_clusters_path(project)
 
-          click_link 'Connect cluster with certificate'
-          click_link 'Connect existing cluster'
+          click_link 'Certificate'
+          click_button(class: 'dropdown-toggle-split')
+          click_link 'Connect with a certificate'
         end
 
         it 'user sees the "Environment scope" field' do
@@ -158,11 +161,12 @@ RSpec.describe 'Gcp Cluster', :js do
           click_button 'Remove integration and resources'
           fill_in 'confirm_cluster_name_input', with: cluster.name
           click_button 'Remove integration'
+          click_link 'Certificate'
         end
 
         it 'user sees creation form with the successful message' do
           expect(page).to have_content('Kubernetes cluster integration was successfully removed.')
-          expect(page).to have_link('Integrate with a cluster certificate')
+          expect(page).to have_link('Connect with a certificate')
         end
       end
     end
@@ -171,6 +175,7 @@ RSpec.describe 'Gcp Cluster', :js do
   context 'when user has not dismissed GCP signup offer' do
     before do
       visit project_clusters_path(project)
+      click_link 'Certificate'
     end
 
     it 'user sees offer on cluster index page' do
@@ -178,7 +183,7 @@ RSpec.describe 'Gcp Cluster', :js do
     end
 
     it 'user sees offer on cluster create page' do
-      click_link 'Integrate with a cluster certificate'
+      click_link 'Connect with a certificate'
 
       expect(page).to have_css('.gcp-signup-offer')
     end
@@ -187,6 +192,7 @@ RSpec.describe 'Gcp Cluster', :js do
   context 'when user has dismissed GCP signup offer' do
     before do
       visit project_clusters_path(project)
+      click_link 'Certificate'
     end
 
     it 'user does not see offer after dismissing' do
@@ -195,19 +201,18 @@ RSpec.describe 'Gcp Cluster', :js do
       find('.gcp-signup-offer .js-close').click
       wait_for_requests
 
-      click_link 'Integrate with a cluster certificate'
+      click_link 'Connect with a certificate'
 
       expect(page).not_to have_css('.gcp-signup-offer')
     end
   end
 
   context 'when third party offers are disabled', :clean_gitlab_redis_shared_state do
-    let(:admin) { create(:admin) }
+    let(:user) { create(:admin) }
 
     before do
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-      sign_in(admin)
-      gitlab_enable_admin_mode_sign_in(admin)
+      gitlab_enable_admin_mode_sign_in(user)
       visit general_admin_application_settings_path
     end
 

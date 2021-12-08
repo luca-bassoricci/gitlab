@@ -1,10 +1,9 @@
-#import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
 #import "../fragments/vulnerability.fragment.graphql"
 
 query projectVulnerabilities(
   $fullPath: ID!
   $after: String
-  $first: Int
+  $first: Int = 20
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
@@ -17,6 +16,7 @@ query projectVulnerabilities(
   $vetEnabled: Boolean = false
 ) {
   project(fullPath: $fullPath) {
+    id
     vulnerabilities(
       after: $after
       first: $first
@@ -33,6 +33,7 @@ query projectVulnerabilities(
         ...VulnerabilityFragment
         externalIssueLinks @include(if: $includeExternalIssueLinks) {
           nodes {
+            id
             issue: externalIssue {
               externalTracker
               webUrl
@@ -43,6 +44,7 @@ query projectVulnerabilities(
         }
         hasSolutions
         mergeRequest {
+          id
           webUrl
           state
           securityAutoFix
@@ -50,7 +52,8 @@ query projectVulnerabilities(
         }
       }
       pageInfo {
-        ...PageInfo
+        endCursor
+        hasNextPage
       }
     }
   }

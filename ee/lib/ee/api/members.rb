@@ -54,6 +54,62 @@ module EE
             end
           end
 
+          desc 'Approves a pending member'
+          params do
+            requires :member_id, type: Integer, desc: 'The ID of the member requiring approval'
+          end
+          put ':id/members/:member_id/approve' do
+            group = find_group!(params[:id])
+            member = ::Member.find_by_id(params[:member_id])
+
+            not_found! unless member
+            bad_request! unless group.root?
+            bad_request! unless can?(current_user, :admin_group_member, group)
+
+            result = ::Members::ActivateService
+              .new(group, member: member, current_user: current_user)
+              .execute
+
+            if result[:status] == :success
+              no_content!
+            else
+              bad_request!(result[:message])
+            end
+          end
+
+          desc 'Approves all pending members'
+          post ':id/members/approve_all' do
+            group = find_group!(params[:id])
+
+            bad_request! unless group.root?
+            bad_request! unless can?(current_user, :admin_group_member, group)
+
+            result = ::Members::ActivateService
+              .new(group, activate_all: true, current_user: current_user)
+              .execute
+
+            if result[:status] == :success
+              no_content!
+            else
+              bad_request!(result[:message])
+            end
+          end
+
+          desc 'Lists all pending members for a group including invited users'
+          params do
+            use :pagination
+          end
+          get ":id/pending_members" do
+            group = find_group!(params[:id])
+
+            bad_request! unless group.root?
+            bad_request! unless can?(current_user, :admin_group_member, group)
+
+            members = ::Member.awaiting_or_invited_for_group(group)
+
+            present paginate(members), with: ::API::Entities::PendingMember
+          end
+
           desc 'Gets a list of billable users of root group.' do
             success Entities::Member
           end

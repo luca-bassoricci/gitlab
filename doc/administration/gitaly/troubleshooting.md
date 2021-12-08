@@ -157,7 +157,7 @@ Confirm the following are all true:
   successfully creates the project but doesn't create the README.
 - When [tailing the logs](https://docs.gitlab.com/omnibus/settings/logs.html#tail-logs-in-a-console-on-the-server)
   on a Gitaly client and reproducing the error, you get `401` errors
-  when reaching the [`/api/v4/internal/allowed`](../../development/internal_api.md) endpoint:
+  when reaching the [`/api/v4/internal/allowed`](../../development/internal_api/index.md) endpoint:
 
   ```shell
   # api_json.log
@@ -328,6 +328,27 @@ experiencing [clock drift](https://en.wikipedia.org/wiki/Clock_drift).
 Please ensure that the GitLab and Gitaly nodes are synchronized and use an NTP time
 server to keep them synchronized if possible.
 
+### Health check warnings
+
+The following warning in `/var/log/gitlab/praefect/current` can be ignored.
+
+```plaintext
+"error":"full method name not found: /grpc.health.v1.Health/Check",
+"msg":"error when looking up method info"
+```
+
+### File not found errors
+
+The following errors in `/var/log/gitlab/gitaly/current` can be ignored.
+They are caused by the GitLab Rails application checking for specific files
+that do not exist in a repository.
+
+```plaintext
+"error":"not found: .gitlab/route-map.yml"
+"error":"not found: Dockerfile"
+"error":"not found: .gitlab-ci.yml"
+```
+
 ## Troubleshoot Praefect (Gitaly Cluster)
 
 The following sections provide possible solutions to Gitaly Cluster errors.
@@ -353,17 +374,107 @@ Here are common errors and potential causes:
 
 ### Determine primary Gitaly node
 
-To determine the current primary Gitaly node for a specific Praefect node:
+To determine the primary node of a repository:
 
-- Use the `Shard Primary Election` [Grafana chart](praefect.md#grafana) on the
-  [`Gitlab Omnibus - Praefect` dashboard](https://gitlab.com/gitlab-org/grafana-dashboards/-/blob/master/omnibus/praefect.json).
-  This is recommended.
-- If you do not have Grafana set up, use the following command on each host of each
-  Praefect node:
+- In GitLab 14.6 and later, use the [`praefect metadata`](#view-repository-metadata) subcommand.
+- In GitLab 13.12 to GitLab 14.5 with [repository-specific primaries](praefect.md#repository-specific-primary-nodes),
+  use the [`gitlab:praefect:replicas` Rake task](../raketasks/praefect.md#replica-checksums).
+- With legacy election strategies in GitLab 13.12 and earlier, the primary was the same for all repositories in a virtual storage.
+  To determine the current primary Gitaly node for a specific virtual storage:
 
-  ```shell
-  curl localhost:9652/metrics | grep gitaly_praefect_primaries`
-  ```
+  - Use the `Shard Primary Election` [Grafana chart](praefect.md#grafana) on the
+    [`Gitlab Omnibus - Praefect` dashboard](https://gitlab.com/gitlab-org/grafana-dashboards/-/blob/master/omnibus/praefect.json).
+    This is recommended.
+  - If you do not have Grafana set up, use the following command on each host of each
+    Praefect node:
+
+    ```shell
+    curl localhost:9652/metrics | grep gitaly_praefect_primaries`
+    ```
+
+### View repository metadata
+
+> [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/3481) in GitLab 14.6.
+
+Gitaly Cluster maintains a [metadata database](index.md#components) about the repositories stored on the cluster. Use the `praefect metadata` subcommand
+to inspect the metadata for troubleshooting.
+
+You can retrieve a repository's metadata by its Praefect-assigned repository ID:
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -repository-id <repository-id>
+```
+
+You can also retrieve a repository's metadata by its virtual storage and relative path:
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -virtual-storage <virtual-storage> -relative-path <relative-path>
+```
+
+#### Examples
+
+To retrieve the metadata for a repository with a Praefect-assigned repository ID of 1:
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -repository-id 1
+```
+
+To retrieve the metadata for a repository with virtual storage `default` and relative path `@hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git`:
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -virtual-storage default -relative-path @hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git
+```
+
+Either of these examples retrieve the following metadata for an example repository:
+
+```plaintext
+Repository ID: 54771
+Virtual Storage: "default"
+Relative Path: "@hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git"
+Replica Path: "@hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git"
+Primary: "gitaly-1"
+Generation: 1
+Replicas:
+- Storage: "gitaly-1"
+  Assigned: true
+  Generation: 1, fully up to date
+  Healthy: true
+  Valid Primary: true
+- Storage: "gitaly-2"
+  Assigned: true
+  Generation: 0, behind by 1 changes
+  Healthy: true
+  Valid Primary: false
+- Storage: "gitaly-3"
+  Assigned: true
+  Generation: replica not yet created
+  Healthy: false
+  Valid Primary: false
+```
+
+#### Available metadata
+
+The metadata retrieved by `praefect metadata` includes the fields in the following tables.
+
+| Field             | Description                                                                                                        |
+|:------------------|:-------------------------------------------------------------------------------------------------------------------|
+| `Repository ID`   | Permanent unique ID assigned to the repository by Praefect. Different to the ID GitLab uses for repositories.      |
+| `Virtual Storage` | Name of the virtual storage the repository is stored in.                                                           |
+| `Relative Path`   | Repository's path in the virtual storage.                                                                          |
+| `Replica Path`    | Where on the Gitaly node's disk the repository's replicas are stored.                                                |
+| `Primary`         | Current primary of the repository.                                                                                 |
+| `Generation`      | Used by Praefect to track repository changes. Each write in the repository increments the repository's generation. |
+| `Replicas`        | A list of replicas that exist or are expected to exist.                                                            |
+
+For each replica, the following metadata is available:
+
+| `Replicas` Field | Description                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|:-----------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Storage`        | Name of the Gitaly storage that contains the replica.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `Assigned`       | Indicates whether the replica is expected to exist in the storage. Can be `false` if a Gitaly node is removed from the cluster or if the storage contains an extra copy after the repository's replication factor was decreased.                                                                                                                                                                                                                       |
+| `Generation`     | Latest confirmed generation of the replica. It indicates:<br><br>- The replica is fully up to date if the generation matches the repository's generation.<br>- The replica is outdated if the replica's generation is less than the repository's generation.<br>- `replica not yet created` if the replica does not yet exist at all on the storage.                                                                                                          |
+| `Healthy`        | Indicates whether the Gitaly node that is hosting this replica is considered healthy by the consensus of Praefect nodes.                                                                                                                                                                                                                                                                                                                               |
+| `Valid Primary`  | Indicates whether the replica is fit to serve as the primary node. If the repository's primary is not a valid primary, a failover occurs on the next write to the repository if there is another replica that is a valid primary. A replica is a valid primary if:<br><br>- It is stored on a healthy Gitaly node.<br>- It is fully up to date.<br>- It is not targeted by a pending deletion job from decreasing replication factor.<br>- It is assigned. |
 
 ### Check that repositories are in sync
 
@@ -371,7 +482,7 @@ Is [some cases](index.md#known-issues) the Praefect database can get out of sync
 a given repository is fully synced on all nodes, run the [`gitlab:praefect:replicas` Rake task](../raketasks/praefect.md#replica-checksums)
 that checksums the repository on all Gitaly nodes.
 
-The [Praefect dataloss](praefect.md#check-for-data-loss) command only checks the state of the repo in the Praefect database, and cannot
+The [Praefect dataloss](recovery.md#check-for-data-loss) command only checks the state of the repo in the Praefect database, and cannot
 be relied to detect sync problems in this scenario.
 
 ### Relation does not exist errors
@@ -409,3 +520,21 @@ This indicates that the virtual storage name used in the
 [`git_data_dirs` setting](praefect.md#gitaly) for GitLab.
 
 Resolve this by matching the virtual storage names used in Praefect and GitLab configuration.
+
+### Gitaly Cluster performance issues on cloud platforms
+
+Praefect does not require a lot of CPU or memory, and can run on small virtual machines.
+Cloud services may place other limits on the resources that small VMs can use, such as
+disk IO and network traffic.
+
+Praefect nodes generate a lot of network traffic. The following symptoms can be observed if their network bandwidth has
+been throttled by the cloud service:
+
+- Poor performance of Git operations.
+- High network latency.
+- High memory use by Praefect.
+
+Possible solutions:
+
+- Provision larger VMs to gain access to larger network traffic allowances.
+- Use your cloud service's monitoring and logging to check that the Praefect nodes are not exhausting their traffic allowances.

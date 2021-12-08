@@ -13,10 +13,10 @@ module Ci
       track_duration do
         variables = pipeline.variables_builder.scoped_variables(self, environment: environment, dependencies: dependencies)
 
-        variables.concat(predefined_variables) unless pipeline.predefined_vars_in_builder_enabled?
         variables.concat(project.predefined_variables)
         variables.concat(pipeline.predefined_variables)
         variables.concat(runner.predefined_variables) if runnable? && runner
+        variables.concat(kubernetes_variables)
         variables.concat(deployment_variables(environment: environment))
         variables.concat(yaml_variables)
         variables.concat(user_variables)
@@ -70,21 +70,15 @@ module Ci
       end
     end
 
-    def predefined_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        variables.append(key: 'CI_JOB_NAME', value: name)
-        variables.append(key: 'CI_JOB_STAGE', value: stage)
-        variables.append(key: 'CI_JOB_MANUAL', value: 'true') if action?
-        variables.append(key: 'CI_PIPELINE_TRIGGERED', value: 'true') if trigger_request
+    def kubernetes_variables
+      ::Gitlab::Ci::Variables::Collection.new.tap do |collection|
+        # Should get merged with the cluster kubeconfig in deployment_variables, see
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/335089
+        template = ::Ci::GenerateKubeconfigService.new(self).execute
 
-        variables.append(key: 'CI_NODE_INDEX', value: self.options[:instance].to_s) if self.options&.include?(:instance)
-        variables.append(key: 'CI_NODE_TOTAL', value: ci_node_total_value.to_s)
-
-        # legacy variables
-        variables.append(key: 'CI_BUILD_NAME', value: name)
-        variables.append(key: 'CI_BUILD_STAGE', value: stage)
-        variables.append(key: 'CI_BUILD_TRIGGERED', value: 'true') if trigger_request
-        variables.append(key: 'CI_BUILD_MANUAL', value: 'true') if action?
+        if template.valid?
+          collection.append(key: 'KUBECONFIG', value: template.to_yaml, public: false, file: true)
+        end
       end
     end
 
@@ -109,14 +103,6 @@ module Ci
 
     def secret_project_variables(environment: expanded_environment_name)
       project.ci_variables_for(ref: git_ref, environment: environment)
-    end
-
-    private
-
-    def ci_node_total_value
-      parallel = self.options&.dig(:parallel)
-      parallel = parallel.dig(:total) if parallel.is_a?(Hash)
-      parallel || 1
     end
   end
 end

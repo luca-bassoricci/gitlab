@@ -33,8 +33,13 @@ usernames. A GitLab administrator can configure the GitLab instance to
 
 ## Project members permissions
 
-The Owner role is only available at the group or personal namespace level (and for instance administrators) and is inherited by its projects.
-While Maintainer is the highest project-level role, some actions can only be performed by a personal namespace or group owner, or an instance administrator, who receives all permissions.
+A user's role determines what permissions they have on a project. The Owner role provides all permissions but is
+available only:
+
+- For group owners. The role is inherited for a group's projects.
+- For Administrators.
+
+Personal namespace owners have the same permissions as an Owner, but are displayed with the Maintainer role on projects created in their personal namespace.
 For more information, see [projects members documentation](project/members/index.md).
 
 The following table lists project permissions available for each role:
@@ -84,7 +89,7 @@ The following table lists project permissions available for each role:
 | [Incident Management](../operations/incident_management/index.md):<br>View [alerts](../operations/incident_management/alerts.md)                            |  | ✓ | ✓ | ✓ | ✓ |
 | [Incident Management](../operations/incident_management/index.md):<br>Assign an alert                                                                       | ✓| ✓ | ✓ | ✓ | ✓ |
 | [Incident Management](../operations/incident_management/index.md):<br>View [incident](../operations/incident_management/incidents.md)                       | ✓| ✓ | ✓ | ✓ | ✓ |
-| [Incident Management](../operations/incident_management/index.md):<br>Create [incident](../operations/incident_management/incidents.md)                     | ✓| ✓ | ✓ | ✓ | ✓ |
+| [Incident Management](../operations/incident_management/index.md):<br>Create [incident](../operations/incident_management/incidents.md)                     | (*17*) | ✓ | ✓ | ✓ | ✓ |
 | [Incident Management](../operations/incident_management/index.md):<br>View [on-call schedules](../operations/incident_management/oncall_schedules.md)       |  | ✓ | ✓ | ✓ | ✓ |
 | [Incident Management](../operations/incident_management/index.md):<br>Participate in on-call rotation                                                       | ✓| ✓ | ✓ | ✓ | ✓ |
 | [Incident Management](../operations/incident_management/index.md):<br>View [escalation policies](../operations/incident_management/escalation_policies.md)  |  | ✓ | ✓ | ✓ | ✓ |
@@ -211,7 +216,7 @@ The following table lists project permissions available for each role:
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [protected branches](project/protected_branches.md).
 1. If the [branch is protected](project/protected_branches.md), this depends on the access Developers and Maintainers are given.
-1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
+1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see [repository information like commits and release evidence](project/releases/index.md#view-a-release-and-download-assets).
 1. Actions are limited only to records owned (referenced) by user.
 1. When [Share Group Lock](group/index.md#prevent-a-project-from-being-shared-with-groups) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
 1. For information on eligible approvers for merge requests, see
@@ -225,7 +230,9 @@ The following table lists project permissions available for each role:
    [project visibility](../public_access/public_access.md) is set to private.
 1. Attached design files are moved together with the issue even if the user doesn't have the
    Developer role.
-1. Guest users can set metadata (for example, labels, assignees, or milestones) when creating an issue.
+1. Guest users can only set metadata (for example, labels, assignees, or milestones)
+   when creating an issue. They cannot change the metadata on existing issues.
+1. In GitLab 14.5 or later, Guests are not allowed to [create incidents](../operations/incident_management/incidents.md#incident-creation).
 
 ## Project features permissions
 
@@ -427,7 +434,7 @@ Be aware that this regex could lead to a
 
 ## Free Guest users **(ULTIMATE)**
 
-When a user is given Guest permissions on a project, group, or both, and holds no
+When a user is given the Guest role on a project, group, or both, and holds no
 higher permission level on any other project or group on the GitLab instance,
 the user is considered a guest user by GitLab and does not consume a license seat.
 There is no other specific "guest" designation for newly created users.

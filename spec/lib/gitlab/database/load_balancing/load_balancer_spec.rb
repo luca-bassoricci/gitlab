@@ -89,10 +89,25 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       host = double(:host)
 
       allow(lb).to receive(:host).and_return(host)
+      allow(Rails.application.executor).to receive(:active?).and_return(true)
       allow(host).to receive(:query_cache_enabled).and_return(false)
       allow(host).to receive(:connection).and_return(connection)
 
       expect(host).to receive(:enable_query_cache!).once
+
+      lb.read { 10 }
+    end
+
+    it 'does not enable query cache when outside Rails executor context' do
+      connection = double(:connection)
+      host = double(:host)
+
+      allow(lb).to receive(:host).and_return(host)
+      allow(Rails.application.executor).to receive(:active?).and_return(false)
+      allow(host).to receive(:query_cache_enabled).and_return(false)
+      allow(host).to receive(:connection).and_return(connection)
+
+      expect(host).not_to receive(:enable_query_cache!)
 
       lb.read { 10 }
     end
@@ -472,15 +487,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
     end
   end
 
-  describe 'primary connection re-use', :reestablished_active_record_base do
+  describe 'primary connection re-use', :reestablished_active_record_base, :add_ci_connection do
     let(:model) { Ci::ApplicationRecord }
-
-    before do
-      # fake additional Database
-      model.establish_connection(
-        ActiveRecord::DatabaseConfigurations::HashConfig.new(Rails.env, 'ci', ActiveRecord::Base.connection_db_config.configuration_hash)
-      )
-    end
 
     describe '#read' do
       it 'returns ci replica connection' do
@@ -516,6 +524,19 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
           end
         end
       end
+    end
+  end
+
+  describe '#wal_diff' do
+    it 'returns the diff between two write locations' do
+      loc1 = lb.send(:get_write_location, lb.pool.connection)
+
+      create(:user) # This ensures we get a new WAL location
+
+      loc2 = lb.send(:get_write_location, lb.pool.connection)
+      diff = lb.wal_diff(loc2, loc1)
+
+      expect(diff).to be_positive
     end
   end
 end

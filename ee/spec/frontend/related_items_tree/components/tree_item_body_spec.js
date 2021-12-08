@@ -1,6 +1,6 @@
-import { GlButton, GlLink, GlIcon } from '@gitlab/ui';
+import { GlButton, GlLabel, GlLink, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import Vue from 'vue';
+import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 
 import ItemWeight from 'ee/boards/components/issue_card_weight.vue';
@@ -39,6 +39,7 @@ const createIssueItem = (mockIssue = mockIssue1) => {
     type: ChildType.Issue,
     pathIdSeparator: PathIdSeparator.Issue,
     assignees: epicUtils.extractIssueAssignees(mockIssue.assignees),
+    labels: epicUtils.extractLabels(mockIssue.labels),
   };
 };
 
@@ -48,6 +49,7 @@ const createEpicItem = (mockEpic = mockOpenEpic, mockEpicMeta = mockEpicMeta1) =
     type: ChildType.Epic,
     pathIdSeparator: PathIdSeparator.Epic,
     ...mockEpicMeta,
+    labels: epicUtils.extractLabels(mockEpic.labels),
   };
 };
 
@@ -80,14 +82,22 @@ describe('RelatedItemsTree', () => {
   describe('TreeItemBody', () => {
     let wrapper;
 
+    const findChildLabels = () => wrapper.findAll(GlLabel);
     const findCountBadge = () => wrapper.find({ ref: 'countBadge' });
-    const findIssueHealthStatus = () => wrapper.find('[data-testid="issue-health-status"]');
     const findEpicHealthStatus = () => wrapper.find('[data-testid="epic-health-status"]');
+    const findIssueHealthStatus = () => wrapper.find('[data-testid="issue-health-status"]');
+    const findIssueIcon = () => wrapper.find({ ref: 'stateIconMd' });
+    const findLink = () => wrapper.findComponent(GlLink);
     const enableHealthStatus = () => {
       wrapper.vm.$store.commit('SET_INITIAL_CONFIG', {
         ...mockInitialConfig,
         allowIssuableHealthStatus: true,
       });
+    };
+    const setShowLabels = (isShowingLabels) => {
+      wrapper.vm.$store.dispatch('setShowLabels', isShowingLabels);
+
+      return nextTick();
     };
 
     beforeEach(() => {
@@ -137,7 +147,19 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.isOpen).toBe(true);
+            expect(findIssueIcon().attributes('name')).toBe('issues');
+          });
+        });
+      });
+
+      describe('isBlocked', () => {
+        it('returns true when `item.blocked` value is `true`', () => {
+          wrapper.setProps({
+            item: { ...mockItem, blocked: true },
+          });
+
+          return wrapper.vm.$nextTick(() => {
+            expect(findIssueIcon().attributes('name')).toBe('issue-block');
           });
         });
       });
@@ -149,7 +171,7 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.isClosed).toBe(true);
+            expect(findIssueIcon().attributes('name')).toBe('issue-closed');
           });
         });
       });
@@ -166,6 +188,36 @@ describe('RelatedItemsTree', () => {
         });
       });
 
+      describe('when toggling labels on', () => {
+        it('returns true when `item.labels` is defined and has values', async () => {
+          expect(findChildLabels().length).toBe(0);
+
+          await setShowLabels(true);
+
+          const labels = findChildLabels();
+
+          expect(labels.length).toBe(1);
+
+          const firstLabel = labels.at(0);
+
+          expect(firstLabel.props('backgroundColor')).toBe(mockIssue1.labels.nodes[0].color);
+          expect(firstLabel.props('description')).toBe(mockIssue1.labels.nodes[0].description);
+          expect(firstLabel.props('title')).toBe(mockIssue1.labels.nodes[0].title);
+        });
+      });
+
+      describe('when toggling labels off', () => {
+        it('returns true when `item.labels` is defined and has values', async () => {
+          await setShowLabels(true);
+
+          expect(findChildLabels().length).toBe(1);
+
+          await setShowLabels(false);
+
+          expect(findChildLabels().length).toBe(0);
+        });
+      });
+
       describe('stateText', () => {
         it('returns string `Opened` when `item.state` value is `opened`', () => {
           wrapper.setProps({
@@ -173,7 +225,7 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateText).toBe('Opened');
+            expect(findIssueIcon().props('ariaLabel')).toBe('Opened');
           });
         });
 
@@ -183,7 +235,7 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateText).toBe('Closed');
+            expect(findIssueIcon().props('ariaLabel')).toBe('Closed');
           });
         });
       });
@@ -195,7 +247,19 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconClass).toBe('issue-token-state-icon-open gl-text-green-500');
+            expect(findIssueIcon().attributes('class')).toContain(
+              'issue-token-state-icon-open gl-text-green-500',
+            );
+          });
+        });
+
+        it('return string `gl-text-red-500` when `item.blocked` value is `true`', () => {
+          wrapper.setProps({
+            item: { ...mockItem, blocked: true },
+          });
+
+          return wrapper.vm.$nextTick(() => {
+            expect(findIssueIcon().attributes('class')).toContain('gl-text-red-500');
           });
         });
 
@@ -205,28 +269,23 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconClass).toBe(
+            expect(findIssueIcon().attributes('class')).toContain(
               'issue-token-state-icon-closed gl-text-blue-500',
             );
           });
         });
       });
 
-      describe('itemId', () => {
-        it('returns string containing item id', () => {
-          expect(wrapper.vm.itemId).toBe('8');
-        });
-      });
-
-      describe('itemPath', () => {
-        it('returns string containing item path', () => {
-          expect(wrapper.vm.itemPath).toBe('gitlab-org/gitlab-shell');
+      describe('itemHierarchy', () => {
+        it('returns string containing item id and item path', () => {
+          const stateTooltip = wrapper.findAll(StateTooltip).at(0);
+          expect(stateTooltip.props('path')).toBe('gitlab-org/gitlab-shell#8');
         });
       });
 
       describe('computedPath', () => {
         it('returns value of `itemWebPath` when it is defined', () => {
-          expect(wrapper.vm.computedPath).toBe(mockItem.webPath);
+          expect(findLink().attributes('href')).toBe(mockItem.webPath);
         });
 
         it('returns `null` when `itemWebPath` is empty', () => {
@@ -235,7 +294,7 @@ describe('RelatedItemsTree', () => {
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.computedPath).toBeNull();
+            expect(findLink().attributes('href')).toBeUndefined();
           });
         });
       });
@@ -276,7 +335,7 @@ describe('RelatedItemsTree', () => {
 
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.vm.stateIconName).toBe(stateIconName);
+            expect(findIssueIcon().props('name')).toBe(stateIconName);
           });
         });
       });
@@ -293,6 +352,21 @@ describe('RelatedItemsTree', () => {
             parentItem: mockParentItem,
             item: mockItem,
           });
+        });
+      });
+
+      describe.each`
+        createItem         | expectedFilterUrl                                         | itemType
+        ${createEpicItem}  | ${`${mockInitialConfig.epicsWebUrl}?label_name[]=Label`}  | ${'epic'}
+        ${createIssueItem} | ${`${mockInitialConfig.issuesWebUrl}?label_name[]=Label`} | ${'issue'}
+      `('labelFilterUrl', ({ createItem, expectedFilterUrl, itemType }) => {
+        beforeEach(() => {
+          mockItem = createItem();
+          wrapper = createComponent();
+        });
+
+        it(`filterURL for ${itemType} should be ${expectedFilterUrl}`, () => {
+          expect(wrapper.vm.labelFilterUrl(mockItem.labels[0])).toBe(expectedFilterUrl);
         });
       });
     });
@@ -336,10 +410,8 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders item link', () => {
-        const link = wrapper.findComponent(GlLink);
-
-        expect(link.attributes('href')).toBe(mockItem.webPath);
-        expect(link.text()).toBe(mockItem.title);
+        expect(findLink().attributes('href')).toBe(mockItem.webPath);
+        expect(findLink().text()).toBe(mockItem.title);
       });
 
       it('renders item state tooltip for medium and small screens', () => {

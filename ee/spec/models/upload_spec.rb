@@ -6,6 +6,13 @@ RSpec.describe Upload do
   include EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax
 
+  it { is_expected.to have_one(:upload_state).inverse_of(:upload).class_name('Geo::UploadState') }
+
+  include_examples 'a replicable model with a separate table for verification state' do
+    let(:verifiable_model_record) { build(:upload) }
+    let(:unverifiable_model_record) { build(:upload, store: ObjectStorage::Store::REMOTE) }
+  end
+
   describe '.replicables_for_current_secondary' do
     # Selective sync is configured relative to the upload's model. Take care not
     # to specify a model_factory that contradicts factory.
@@ -92,12 +99,6 @@ RSpec.describe Upload do
     context 'when running in a Geo primary node' do
       let_it_be(:primary) { create(:geo_node, :primary) }
       let_it_be(:secondary) { create(:geo_node) }
-
-      it 'logs an event to the Geo event log' do
-        stub_current_geo_node(primary)
-
-        expect { subject.destroy }.to change(Geo::UploadDeletedEvent, :count).by(1)
-      end
 
       it 'logs an event to the Geo event log when bulk removal is used', :sidekiq_inline do
         stub_current_geo_node(primary)

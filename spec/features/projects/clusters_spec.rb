@@ -10,16 +10,17 @@ RSpec.describe 'Clusters', :js do
 
   before do
     project.add_maintainer(user)
-    gitlab_sign_in(user)
+    sign_in(user)
   end
 
   context 'when user does not have a cluster and visits cluster index page' do
     before do
       visit project_clusters_path(project)
+      click_link 'Certificate'
     end
 
     it 'sees empty state' do
-      expect(page).to have_link('Integrate with a cluster certificate')
+      expect(page).to have_link('Connect with a certificate')
       expect(page).to have_selector('.empty-state')
     end
   end
@@ -33,16 +34,17 @@ RSpec.describe 'Clusters', :js do
       before do
         create(:cluster, :provided_by_user, name: 'default-cluster', environment_scope: '*', projects: [project])
         visit project_clusters_path(project)
+        click_link 'Certificate'
+        click_button(class: 'dropdown-toggle-split')
       end
 
       it 'user sees an add cluster button' do
-        expect(page).to have_selector('.js-add-cluster:not(.readonly)')
+        expect(page).to have_content('Connect with a certificate')
       end
 
       context 'when user filled form with environment scope' do
         before do
-          click_link 'Connect cluster with certificate'
-          click_link 'Connect existing cluster'
+          click_link 'Connect with a certificate'
           fill_in 'cluster_name', with: 'staging-cluster'
           fill_in 'cluster_environment_scope', with: 'staging/*'
           click_button 'Add Kubernetes cluster'
@@ -70,8 +72,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user updates duplicated environment scope' do
         before do
-          click_link 'Connect cluster with certificate'
-          click_link 'Connect existing cluster'
+          click_link 'Connect with a certificate'
           fill_in 'cluster_name', with: 'staging-cluster'
           fill_in 'cluster_environment_scope', with: '*'
           fill_in 'cluster_platform_kubernetes_attributes_api_url', with: 'https://0.0.0.0'
@@ -108,16 +109,13 @@ RSpec.describe 'Clusters', :js do
 
         create(:cluster, :provided_by_gcp, name: 'default-cluster', environment_scope: '*', projects: [project])
         visit project_clusters_path(project)
-      end
-
-      it 'user sees a add cluster button' do
-        expect(page).to have_selector('.js-add-cluster:not(.readonly)')
+        click_link 'Certificate'
       end
 
       context 'when user filled form with environment scope' do
         before do
-          click_link 'Connect cluster with certificate'
-          click_link 'Create new cluster'
+          click_button(class: 'dropdown-toggle-split')
+          click_link 'Create a new cluster'
           click_link 'Google GKE'
 
           sleep 2 # wait for ajax
@@ -161,8 +159,8 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user updates duplicated environment scope' do
         before do
-          click_link 'Connect cluster with certificate'
-          click_link 'Create new cluster'
+          click_button(class: 'dropdown-toggle-split')
+          click_link 'Create a new cluster'
           click_link 'Google GKE'
 
           sleep 2 # wait for ajax
@@ -192,6 +190,7 @@ RSpec.describe 'Clusters', :js do
 
     before do
       visit project_clusters_path(project)
+      click_link 'Certificate'
     end
 
     it 'user sees a table with one cluster' do
@@ -214,7 +213,8 @@ RSpec.describe 'Clusters', :js do
     before do
       visit project_clusters_path(project)
 
-      click_link 'Integrate with a cluster certificate'
+      click_link 'Certificate'
+      click_link 'Connect with a certificate'
       click_link 'Create new cluster'
     end
 

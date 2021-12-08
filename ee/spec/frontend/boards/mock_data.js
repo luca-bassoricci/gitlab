@@ -1,11 +1,25 @@
 import { GlFilteredSearchToken } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { DEFAULT_MILESTONES_GRAPHQL } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
-import WeightToken from '~/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
+import EpicToken from 'ee/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import IterationToken from 'ee/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
+import ReleaseToken from '~/vue_shared/components/filtered_search_bar/tokens/release_token.vue';
+import WeightToken from 'ee/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
+
+export const mockEpicBoardResponse = {
+  data: {
+    workspace: {
+      epicBoard: {
+        id: 'gid://gitlab/Boards::EpicBoard/1',
+        name: 'Development',
+      },
+      __typename: 'Group',
+    },
+  },
+};
 
 export const mockLabel = {
   id: 'gid://gitlab/GroupLabel/121',
@@ -385,11 +399,11 @@ export const mockGroup2 = {
 
 export const mockSubGroups = [mockGroup0, mockGroup1, mockGroup2];
 
-export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
+export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones, fetchIterations) => [
   {
     icon: 'user',
     title: __('Assignee'),
-    type: 'assignee_username',
+    type: 'assignee',
     operators: [
       { value: '=', description: 'is' },
       { value: '!=', description: 'is not' },
@@ -402,7 +416,7 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
   {
     icon: 'pencil',
     title: __('Author'),
-    type: 'author_username',
+    type: 'author',
     operators: [
       { value: '=', description: 'is' },
       { value: '!=', description: 'is not' },
@@ -416,7 +430,7 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
   {
     icon: 'labels',
     title: __('Label'),
-    type: 'label_name',
+    type: 'label',
     operators: [
       { value: '=', description: 'is' },
       { value: '!=', description: 'is not' },
@@ -427,20 +441,26 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
     fetchLabels,
   },
   {
+    type: 'my-reaction',
+    icon: 'thumb-up',
+    title: 'My-Reaction',
+    unique: true,
+    token: EmojiToken,
+    fetchEmojis: expect.any(Function),
+  },
+  {
     icon: 'clock',
     title: __('Milestone'),
     symbol: '%',
-    type: 'milestone_title',
+    type: 'milestone',
     token: MilestoneToken,
     unique: true,
-    defaultMilestones: DEFAULT_MILESTONES_GRAPHQL,
     fetchMilestones,
   },
   {
     icon: 'issues',
     title: __('Type'),
-    type: 'types',
-    operators: [{ value: '=', description: 'is' }],
+    type: 'type',
     token: GlFilteredSearchToken,
     unique: true,
     options: [
@@ -449,14 +469,14 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
     ],
   },
   {
-    icon: 'weight',
-    title: __('Weight'),
-    type: 'weight',
-    token: WeightToken,
-    unique: true,
+    type: 'release',
+    title: __('Release'),
+    icon: 'rocket',
+    token: ReleaseToken,
+    fetchReleases: expect.any(Function),
   },
   {
-    type: 'epic_id',
+    type: 'epic',
     icon: 'epic',
     title: 'Epic',
     unique: true,
@@ -465,5 +485,24 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
     idProperty: 'id',
     useIdValue: true,
     fullPath: 'gitlab-org',
+  },
+  {
+    type: 'iteration',
+    icon: 'iteration',
+    title: 'Iteration',
+    operators: [
+      { value: '=', description: 'is' },
+      { value: '!=', description: 'is not' },
+    ],
+    unique: true,
+    fetchIterations,
+    token: IterationToken,
+  },
+  {
+    type: 'weight',
+    icon: 'weight',
+    title: __('Weight'),
+    token: WeightToken,
+    unique: true,
   },
 ];

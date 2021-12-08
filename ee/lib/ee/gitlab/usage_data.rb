@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# NOTE:
+# Implementing metrics direct in `usage_data.rb` is deprecated,
+# please add new instrumentation class and use add_metric method.
+# For more information, see https://docs.gitlab.com/ee/development/service_ping/metrics_instrumentation.html
+
 module EE
   module Gitlab
     module UsageData
@@ -144,13 +149,12 @@ module EE
 
         def security_products_usage
           results = SECURE_PRODUCT_TYPES.each_with_object({}) do |(secure_type, attribs), response|
+            next if secure_type == :license_management
+
             response[attribs[:name]] = count(::Ci::Build.where(name: secure_type)) # rubocop:disable CodeReuse/ActiveRecord
           end
 
-          # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
-          license_scan_count = results.delete(:license_scanning_jobs)
-          results[:license_management_jobs] += license_scan_count > 0 ? license_scan_count : 0 if license_scan_count.is_a?(Integer)
-
+          results[:license_management_jobs] = add_metric("LicenseManagementJobsMetric")
           results
         end
 
@@ -302,6 +306,7 @@ module EE
         # Omitted because no user, creator or author associated: `campaigns_imported_from_github`, `ldap_group_links`
         override :usage_activity_by_stage_manage
         def usage_activity_by_stage_manage(time_period)
+          time_frame = metric_time_period(time_period)
           super.merge({
             ldap_keys: distinct_count(::LDAPKey.where(time_period), :user_id),
             ldap_users: distinct_count(::GroupMember.of_ldap_type.where(time_period), :user_id),
@@ -312,7 +317,9 @@ module EE
             ldap_servers: ldap_available_servers.size,
             ldap_group_sync_enabled: ldap_config_present_for_any_provider?(:group_base),
             ldap_admin_sync_enabled: ldap_config_present_for_any_provider?(:admin_group),
-            group_saml_enabled: omniauth_provider_names.include?('group_saml')
+            group_saml_enabled: omniauth_provider_names.include?('group_saml'),
+            audit_event_destinations: add_metric('CountEventStreamingDestinationsMetric', time_frame: time_frame),
+            groups_with_event_streaming_destinations: add_metric('CountGroupsWithEventStreamingDestinationsMetric', time_frame: time_frame)
           })
         end
 
@@ -526,7 +533,9 @@ module EE
           min_id = minimum_id(::Integrations::JiraTrackerData.where(issues_enabled: true), :service_id)
           max_id = maximum_id(::Integrations::JiraTrackerData.where(issues_enabled: true), :service_id)
           # rubocop: enable UsageData/LargeTable:
-          count(::Integrations::Jira.active.includes(:jira_tracker_data).where(jira_tracker_data: { issues_enabled: true }), start: min_id, finish: max_id)
+          # rubocop: disable UsageData/DistinctCountByLargeForeignKey
+          distinct_count(::Integrations::Jira.active.left_outer_joins(:jira_tracker_data).where(jira_tracker_data: { issues_enabled: true }), start: min_id, finish: max_id)
+          # rubocop: enable UsageData/DistinctCountByLargeForeignKey
         end
         # rubocop:enable CodeReuse/ActiveRecord
 

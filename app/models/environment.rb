@@ -31,7 +31,7 @@ class Environment < ApplicationRecord
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus', disable_joins: true
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline', disable_joins: true
 
-  has_one :upcoming_deployment, -> { running.distinct_on_environment }, class_name: 'Deployment', inverse_of: :environment
+  has_one :upcoming_deployment, -> { upcoming.distinct_on_environment }, class_name: 'Deployment', inverse_of: :environment
   has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :generate_slug, if: ->(env) { env.slug.blank? }
@@ -89,6 +89,7 @@ class Environment < ApplicationRecord
 
   scope :for_project, -> (project) { where(project_id: project) }
   scope :for_tier, -> (tier) { where(tier: tier).where.not(tier: nil) }
+  scope :with_deployments, -> { where('EXISTS (?)', Deployment.select(1).where('deployments.environment_id = environments.id')) }
   scope :with_deployment, -> (sha) { where('EXISTS (?)', Deployment.select(1).where('deployments.environment_id = environments.id').where(sha: sha)) }
   scope :unfoldered, -> { where(environment_type: nil) }
   scope :with_rank, -> do

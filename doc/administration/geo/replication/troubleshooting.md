@@ -559,7 +559,7 @@ to start again from scratch, there are a few steps that can help you:
    You may want to remove the `/var/opt/gitlab/git-data/repositories.old` in the future
    as soon as you confirmed that you don't need it anymore, to save disk space.
 
-1. _(Optional)_ Rename other data folders and create new ones
+1. Optional. Rename other data folders and create new ones
 
    WARNING:
    You may still have files on the **secondary** node that have been removed from the **primary** node, but this
@@ -683,7 +683,7 @@ when promoting a secondary to a primary node with strategies to resolve them.
 
 ### Message: ActiveRecord::RecordInvalid: Validation failed: Name has already been taken
 
-When [promoting a **secondary** node](../disaster_recovery/index.md#step-3-promoting-a-secondary-node),
+When [promoting a **secondary** site](../disaster_recovery/index.md#step-3-promoting-a-secondary-site),
 you might encounter the following error:
 
 ```plaintext
@@ -751,7 +751,7 @@ This can be fixed in the database.
 
 ### Message: ``NoMethodError: undefined method `secondary?' for nil:NilClass``
 
-When [promoting a **secondary** node](../disaster_recovery/index.md#step-3-promoting-a-secondary-node),
+When [promoting a **secondary** site](../disaster_recovery/index.md#step-3-promoting-a-secondary-site),
 you might encounter the following error:
 
 ```plaintext
@@ -767,13 +767,13 @@ Tasks: TOP => geo:set_secondary_as_primary
 (See full trace by running task with --trace)
 ```
 
-This command is intended to be executed on a secondary node only, and this error
-is displayed if you attempt to run this command on a primary node.
+This command is intended to be executed on a secondary site only, and this error
+is displayed if you attempt to run this command on a primary site.
 
 ### Message: `sudo: gitlab-pg-ctl: command not found`
 
 When
-[promoting a **secondary** node with multiple servers](../disaster_recovery/index.md#promoting-a-secondary-node-with-multiple-servers),
+[promoting a **secondary** site with multiple nodes](../disaster_recovery/index.md#promoting-a-secondary-site-with-multiple-nodes-running-gitlab-144-and-earlier),
 you need to run the `gitlab-pg-ctl` command to promote the PostgreSQL
 read-replica database.
 

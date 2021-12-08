@@ -25,26 +25,6 @@ RSpec.shared_examples 'namespace traversal scopes' do
     it { is_expected.to contain_exactly(group_1.id, group_2.id) }
   end
 
-  describe '.without_sti_condition' do
-    subject { described_class.where(type: 'Group').without_sti_condition }
-
-    context 'when include_sti_condition is enabled' do
-      before do
-        stub_feature_flags(include_sti_condition: true)
-      end
-
-      it { expect(subject.where_values_hash).to have_key('type') }
-    end
-
-    context 'when include_sti_condition is disabled' do
-      before do
-        stub_feature_flags(include_sti_condition: false)
-      end
-
-      it { expect(subject.where_values_hash).not_to have_key('type') }
-    end
-  end
-
   describe '.order_by_depth' do
     subject { described_class.where(id: [group_1, nested_group_1, deep_nested_group_1]).order_by_depth(direction) }
 
@@ -67,6 +47,53 @@ RSpec.shared_examples 'namespace traversal scopes' do
     subject { query_result.column_names }
 
     it { is_expected.to eq described_class.column_names }
+  end
+
+  shared_examples '.roots' do
+    context 'with only sub-groups' do
+      subject { described_class.where(id: [deep_nested_group_1, nested_group_1, deep_nested_group_2]).roots }
+
+      it { is_expected.to contain_exactly(group_1, group_2) }
+    end
+
+    context 'with only root groups' do
+      subject { described_class.where(id: [group_1, group_2]).roots }
+
+      it { is_expected.to contain_exactly(group_1, group_2) }
+    end
+
+    context 'with all groups' do
+      subject { described_class.where(id: groups).roots }
+
+      it { is_expected.to contain_exactly(group_1, group_2) }
+    end
+  end
+
+  describe '.roots' do
+    context "use_traversal_ids_roots feature flag is true" do
+      before do
+        stub_feature_flags(use_traversal_ids: true)
+        stub_feature_flags(use_traversal_ids_roots: true)
+      end
+
+      it_behaves_like '.roots'
+
+      it 'not make recursive queries' do
+        expect { described_class.where(id: [nested_group_1]).roots.load }.not_to make_queries_matching(/WITH RECURSIVE/)
+      end
+    end
+
+    context "use_traversal_ids_roots feature flag is false" do
+      before do
+        stub_feature_flags(use_traversal_ids_roots: false)
+      end
+
+      it_behaves_like '.roots'
+
+      it 'make recursive queries' do
+        expect { described_class.where(id: [nested_group_1]).roots.load }.to make_queries_matching(/WITH RECURSIVE/)
+      end
+    end
   end
 
   shared_examples '.self_and_ancestors' do

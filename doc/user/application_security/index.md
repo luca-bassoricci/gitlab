@@ -16,6 +16,10 @@ GitLab can check your application for security vulnerabilities including:
 Statistics and details on vulnerabilities are included in the merge request. Providing
 actionable information _before_ changes are merged enables you to be proactive.
 
+INFO:
+Want to try out security scanning?
+[Try GitLab Ultimate free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-application-security-docs).
+
 GitLab also provides high-level statistics of vulnerabilities across projects and groups:
 
 - The [Security Dashboard](security_dashboard/index.md) provides a
@@ -31,19 +35,20 @@ For an overview of GitLab application security, see [Shifting Security Left](htt
 
 GitLab uses the following tools to scan and report known vulnerabilities found in your project.
 
-| Secure scanning tool                                                         | Description                                                            |
-|:-----------------------------------------------------------------------------|:-----------------------------------------------------------------------|
-| [Container Scanning](container_scanning/index.md)                            | Scan Docker containers for known vulnerabilities.                      |
-| [Dependency List](dependency_list/index.md)                                  | View your project's dependencies and their known vulnerabilities.      |
-| [Dependency Scanning](dependency_scanning/index.md)                          | Analyze your dependencies for known vulnerabilities.                   |
-| [Dynamic Application Security Testing (DAST)](dast/index.md)                 | Analyze running web applications for known vulnerabilities.            |
-| [DAST API](dast_api/index.md)                                                | Analyze running web APIs for known vulnerabilities.            |
-| [API fuzzing](api_fuzzing/index.md)                                          | Find unknown bugs and vulnerabilities in web APIs with fuzzing.        |
-| [Secret Detection](secret_detection/index.md)                                | Analyze Git history for leaked secrets.                                |
-| [Security Dashboard](security_dashboard/index.md)                            | View vulnerabilities in all your projects and groups.                  |
-| [Static Application Security Testing (SAST)](sast/index.md)                  | Analyze source code for known vulnerabilities.                         |
-| [Coverage fuzzing](coverage_fuzzing/index.md)                                | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
-| [Cluster Image Scanning](cluster_image_scanning/index.md)                    | Scan Kubernetes clusters for known vulnerabilities.                      |
+| Secure scanning tool                                           | Description                                                         |
+| :------------------------------------------------------------- | :------------------------------------------------------------------ |
+| [Container Scanning](container_scanning/index.md)              | Scan Docker containers for known vulnerabilities.                   |
+| [Dependency List](dependency_list/index.md)                    | View your project's dependencies and their known vulnerabilities.   |
+| [Dependency Scanning](dependency_scanning/index.md)            | Analyze your dependencies for known vulnerabilities.                |
+| [Dynamic Application Security Testing (DAST)](dast/index.md)   | Analyze running web applications for known vulnerabilities.         |
+| [DAST API](dast_api/index.md)                                  | Analyze running web APIs for known vulnerabilities.                 |
+| [API fuzzing](api_fuzzing/index.md)                            | Find unknown bugs and vulnerabilities in web APIs with fuzzing.     |
+| [Secret Detection](secret_detection/index.md)                  | Analyze Git history for leaked secrets.                             |
+| [Security Dashboard](security_dashboard/index.md)              | View vulnerabilities in all your projects and groups.               |
+| [Static Application Security Testing (SAST)](sast/index.md)    | Analyze source code for known vulnerabilities.                      |
+| [Infrastructure as Code (IaC) Scanning](iac_scanning/index.md) | Analyze your IaC configuration files for known vulnerabilities.      |
+| [Coverage fuzzing](coverage_fuzzing/index.md)                  | Find unknown bugs and vulnerabilities with coverage-guided fuzzing. |
+| [Cluster Image Scanning](cluster_image_scanning/index.md)      | Scan Kubernetes clusters for known vulnerabilities.                 |
 
 ## Security scanning with Auto DevOps
 
@@ -198,11 +203,11 @@ security issues:
 ### Vulnerability-Check rule
 
 To prevent a merge request introducing a security vulnerability in a project, enable the
-Vulnerability-Check rule. While this rule is enabled, an additional merge request approval is
-required when the latest security report in a merge request:
+Vulnerability-Check rule. While this rule is enabled, additional merge request approval by
+[eligible approvers](../project/merge_requests/approvals/rules.md#eligible-approvers)
+is required when the latest security report in a merge request:
 
-- Contains vulnerabilities that are not present in the target branch. Note that approval is still
-  required for dismissed vulnerabilities.
+- Contains vulnerabilities with states (for example, `previously detected`, `dismissed`) matching the rule's vulnerability states. Only `newly detected` will be considered if the target branch differs from the project default branch.
 - Contains vulnerabilities with severity levels (for example, `high`, `critical`, or `unknown`)
   matching the rule's severity levels.
 - Contains a vulnerability count higher than the rule allows.
@@ -210,23 +215,22 @@ required when the latest security report in a merge request:
 
 An approval is optional when the security report:
 
-- Contains no new vulnerabilities when compared to the target branch.
+- Contains only vulnerabilities with states (for example, `newly detected`, `resolved`) **NOT** matching the rule's vulnerability states.
 - Contains only vulnerabilities with severity levels (for example, `low`, `medium`) **NOT** matching
   the rule's severity levels.
 - Contains a vulnerability count equal to or less than what the rule allows.
 
+Project members assigned [at least the Maintainer role](../permissions.md#project-members-permissions) can enable or edit
+the Vulnerability-Check rule.
+
 #### Enable the Vulnerability-Check rule
 
-Prerequisites:
-
-- Maintainer or Owner [role](../permissions.md#project-members-permissions).
-
-To enable the `Vulnerability-Check` rule:
+To enable or edit the Vulnerability-Check rule:
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Settings > General**.
 1. Expand **Merge request approvals**.
-1. Select **Enable** or **Edit**.
+1. Select **Activate** or **Edit** of the Vulnerability-Check.
 1. Complete the fields. **Approvals required** must be at least 1.
 1. Select **Add approval rule**.
 
@@ -260,6 +264,103 @@ under your project's settings:
     </servers>
 </settings>
 ```
+
+## Using a custom scanning stage
+
+When security scanning is enabled by including CI/CD templates as described in the
+[Security scanning without Auto DevOps](#security-scanning-without-auto-devops) section, the scanning jobs
+use the predefined `test` stage by default. If you specify a custom stage in your `.gitlab-ci.yml` file without
+including a `test` stage, an error occurs.
+
+For example, the following attempts to use a `unit-tests` stage:
+
+```yaml
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+stages:
+  - unit-tests
+
+custom job:
+  stage: unit-tests
+  script:
+    - echo "custom job"
+```
+
+The above `.gitlab-ci.yml` causes a linting error:
+
+```plaintext
+Found errors in your .gitlab-ci.yml:
+- dependency_scanning job: chosen stage does not exist; available stages are .pre
+- unit-tests
+- .post
+```
+
+This error appears because the `test` stage used by the security scanning jobs isn't declared in the `.gitlab-ci.yml` file.
+To fix this issue, you can either:
+
+- Add a `test` stage in your `.gitlab-ci.yml`:
+
+  ```yaml
+  include:
+    - template: Security/Dependency-Scanning.gitlab-ci.yml
+    - template: Security/License-Scanning.gitlab-ci.yml
+    - template: Security/SAST.gitlab-ci.yml
+    - template: Security/Secret-Detection.gitlab-ci.yml
+
+  stages:
+    - test
+    - unit-tests
+
+  custom job:
+    stage: unit-tests
+    script:
+      - echo "custom job"
+  ```
+
+- Override the default stage of each security job. For example, to use a pre-defined stage named `unit-tests`:
+
+  ```yaml
+  include:
+    - template: Security/Dependency-Scanning.gitlab-ci.yml
+    - template: Security/License-Scanning.gitlab-ci.yml
+    - template: Security/SAST.gitlab-ci.yml
+    - template: Security/Secret-Detection.gitlab-ci.yml
+
+  stages:
+    - unit-tests
+
+  dependency_scanning:
+    stage: unit-tests
+
+  license_scanning:
+    stage: unit-tests
+
+  sast:
+    stage: unit-tests
+
+  .secret-analyzer:
+    stage: unit-tests
+
+  custom job:
+    stage: unit-tests
+    script:
+      - echo "custom job"
+  ```
+
+Learn more on overriding security jobs:
+
+- [Overriding SAST jobs](sast/index.md#overriding-sast-jobs).
+- [Overriding Dependency Scanning jobs](dependency_scanning/index.md#overriding-dependency-scanning-jobs).
+- [Overriding Container Scanning jobs](container_scanning/index.md#overriding-the-container-scanning-template).
+- [Overriding Secret Detection jobs](secret_detection/index.md#customizing-settings).
+- [Overriding DAST jobs](dast/index.md#customize-dast-settings).
+- [Overriding License Compliance jobs](../compliance/license_compliance/index.md#overriding-the-template).
+
+All the security scanning tools define their stage, so this error can occur with all of them.
 
 ## Security report validation
 
@@ -378,51 +479,6 @@ shows that a security report is out of date, you must run a new pipeline on the 
 Select **new pipeline** to run a new pipeline.
 
 ![Run a new pipeline](img/outdated_report_pipeline_v12_9.png)
-
-### Getting error message `sast job: stage parameter should be [some stage name here]`
-
-When [including](../../ci/yaml/index.md#includetemplate) a `.gitlab-ci.yml` template
-like [`SAST.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml),
-the following error may occur, depending on your GitLab CI/CD configuration:
-
-```plaintext
-Found errors in your .gitlab-ci.yml:
-
-* sast job: stage parameter should be unit-tests
-```
-
-This error appears when the included job's stage (named `test`) isn't declared in `.gitlab-ci.yml`.
-
-To fix this issue, you can either:
-
-- Add a `test` stage in your `.gitlab-ci.yml`.
-- Override the default stage of each security job. For example, to use a pre-defined stage name `unit-tests`:
-
-  ```yaml
-  include:
-    - template: Security/Dependency-Scanning.gitlab-ci.yml
-    - template: Security/License-Scanning.gitlab-ci.yml
-    - template: Security/SAST.gitlab-ci.yml
-    - template: Security/Secret-Detection.gitlab-ci.yml
-
-  stages:
-    - unit-tests
-
-  dependency_scanning:
-    stage: unit-tests
-
-  license_scanning:
-    stage: unit-tests
-
-  sast:
-    stage: unit-tests
-
-  .secret-analyzer:
-    stage: unit-tests
-  ```
-
-[Learn more on overriding SAST jobs](sast/index.md#overriding-sast-jobs).
-All the security scanning tools define their stage, so this error can occur with all of them.
 
 ### Getting warning messages `… report.json: no matching files`
 

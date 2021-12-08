@@ -50,6 +50,8 @@ module Types
             null: true,
             description: 'How long the job was enqueued before starting.'
 
+      field :previous_stage_jobs_or_needs, Types::Ci::JobType.connection_type, null: true,
+            description: 'Jobs that must complete before the job runs. Returns needed jobs if the job uses the `needs` keyword, and returns previous stage jobs otherwise.'
       field :detailed_status, Types::Ci::DetailedStatusType, null: true,
             description: 'Detailed status of the job.'
       field :artifacts, Types::Ci::JobArtifactType.connection_type, null: true,
@@ -98,6 +100,30 @@ module Types
       def artifacts
         if object.is_a?(::Ci::Build)
           object.job_artifacts
+        end
+      end
+
+      def previous_stage_jobs_or_needs
+        if object.scheduling_type == 'stage'
+          Gitlab::Graphql::Lazy.with_value(previous_stage_jobs) do |jobs|
+            jobs
+          end
+        else
+          object.needs
+        end
+      end
+
+      def previous_stage_jobs
+        BatchLoader::GraphQL.for([object.pipeline, object.stage_idx - 1]).batch(default_value: []) do |tuples, loader|
+          tuples.group_by(&:first).each do |pipeline, keys|
+            positions = keys.map(&:second)
+
+            stages = pipeline.stages.by_position(positions)
+
+            stages.each do |stage|
+              loader.call([pipeline, stage.position], stage.latest_statuses)
+            end
+          end
         end
       end
 

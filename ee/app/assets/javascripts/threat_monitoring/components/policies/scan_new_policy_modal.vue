@@ -1,7 +1,8 @@
 <script>
 import { GlButton, GlDropdown, GlSprintf, GlAlert, GlModal } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-import assignSecurityPolicyProject from '../../graphql/mutations/assign_security_policy_project.mutation.graphql';
+import linkSecurityPolicyProject from '../../graphql/mutations/link_security_policy_project.mutation.graphql';
+import unlinkSecurityPolicyProject from '../../graphql/mutations/unlink_security_policy_project.mutation.graphql';
 import InstanceProjectSelector from '../instance_project_selector.vue';
 
 export default {
@@ -12,13 +13,24 @@ export default {
       header: s__('SecurityOrchestration|Select security project'),
     },
     save: {
-      ok: s__('SecurityOrchestration|Security policy project was linked successfully'),
-      error: s__('SecurityOrchestration|An error occurred assigning your security policy project'),
+      okLink: s__('SecurityOrchestration|Security policy project was linked successfully'),
+      okUnlink: s__('SecurityOrchestration|Security policy project was unlinked successfully'),
+      errorLink: s__(
+        'SecurityOrchestration|An error occurred assigning your security policy project',
+      ),
+      errorUnlink: s__(
+        'SecurityOrchestration|An error occurred unassigning your security policy project',
+      ),
     },
+    unlinkButtonLabel: s__('SecurityOrchestration|Unlink project'),
+    unlinkWarning: s__(
+      'SecurityOrchestration|Unlinking a security project removes all policies stored in the linked security project. Save to confirm this action.',
+    ),
     disabledWarning: s__('SecurityOrchestration|Only owners can update Security Policy Project'),
     description: s__(
       'SecurityOrchestration|Select a project to store your security policies in. %{linkStart}More information.%{linkEnd}',
     ),
+    emptyPlaceholder: s__('SecurityOrchestration|Choose a project'),
   },
   components: {
     GlButton,
@@ -43,11 +55,17 @@ export default {
   },
   data() {
     return {
+      previouslySelectedProject: {},
       selectedProject: { ...this.assignedPolicyProject },
       hasSelectedNewProject: false,
+      shouldShowUnlinkWarning: false,
+      savingChanges: false,
     };
   },
   computed: {
+    selectedProjects() {
+      return [this.selectedProject];
+    },
     selectedProjectId() {
       return this.selectedProject?.id || '';
     },
@@ -55,16 +73,18 @@ export default {
       return this.selectedProject?.name || '';
     },
     isModalOkButtonDisabled() {
+      if (this.shouldShowUnlinkWarning) {
+        return false;
+      }
+
       return this.disableSecurityPolicyProject || !this.hasSelectedNewProject;
     },
   },
   methods: {
-    async saveChanges() {
-      this.$emit('updating-project');
-
+    async linkProject() {
       try {
         const { data } = await this.$apollo.mutate({
-          mutation: assignSecurityPolicyProject,
+          mutation: linkSecurityPolicyProject,
           variables: {
             input: {
               projectPath: this.projectPath,
@@ -77,19 +97,82 @@ export default {
           throw new Error(data.securityPolicyProjectAssign.errors);
         }
 
-        this.$emit('project-updated', { text: this.$options.i18n.save.ok, variant: 'success' });
+        this.previouslySelectedProject = this.selectedProject;
+
+        this.$emit('project-updated', {
+          text: this.$options.i18n.save.okLink,
+          variant: 'success',
+        });
       } catch {
-        this.$emit('project-updated', { text: this.$options.i18n.save.error, variant: 'danger' });
-      } finally {
-        this.hasSelectedNewProject = false;
+        this.$emit('project-updated', {
+          text: this.$options.i18n.save.errorLink,
+          variant: 'danger',
+        });
       }
     },
+
+    async unlinkProject() {
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: unlinkSecurityPolicyProject,
+          variables: {
+            input: {
+              projectPath: this.projectPath,
+            },
+          },
+        });
+
+        if (data?.securityPolicyProjectUnassign?.errors?.length) {
+          throw new Error(data.securityPolicyProjectUnassign.errors);
+        }
+
+        this.shouldShowUnlinkWarning = false;
+        this.previouslySelectedProject = {};
+        this.$emit('project-updated', {
+          text: this.$options.i18n.save.okUnlink,
+          variant: 'success',
+        });
+      } catch {
+        this.$emit('project-updated', {
+          text: this.$options.i18n.save.errorUnlink,
+          variant: 'danger',
+        });
+      }
+    },
+
+    async saveChanges() {
+      this.savingChanges = true;
+      this.$emit('updating-project');
+
+      if (this.shouldShowUnlinkWarning) {
+        await this.unlinkProject();
+      } else {
+        await this.linkProject();
+      }
+
+      this.savingChanges = false;
+    },
     setSelectedProject(data) {
+      this.shouldShowUnlinkWarning = false;
       this.hasSelectedNewProject = true;
       this.selectedProject = data;
       this.$refs.dropdown.hide();
     },
+    confirmDeletion() {
+      this.shouldShowUnlinkWarning = !this.shouldShowUnlinkWarning;
+      this.selectedProject = {};
+      this.hasSelectedNewProject = true;
+    },
+    restoreProject() {
+      this.selectedProject = this.previouslySelectedProject;
+    },
     closeModal() {
+      if (this.hasSelectedNewProject && !this.savingChanges) {
+        this.restoreProject();
+      }
+
+      this.hasSelectedNewProject = false;
+      this.shouldShowUnlinkWarning = false;
       this.$emit('close');
     },
   },
@@ -120,20 +203,37 @@ export default {
       >
         {{ $options.i18n.disabledWarning }}
       </gl-alert>
-      <gl-dropdown
-        ref="dropdown"
-        class="gl-w-full gl-pb-5"
-        menu-class="gl-w-full! gl-max-w-full!"
-        :disabled="disableSecurityPolicyProject"
-        :text="selectedProjectName"
+      <gl-alert
+        v-if="shouldShowUnlinkWarning"
+        class="gl-mb-4"
+        variant="warning"
+        :dismissible="false"
       >
-        <instance-project-selector
+        {{ $options.i18n.unlinkWarning }}
+      </gl-alert>
+      <div class="gl-display-flex gl-mb-3">
+        <gl-dropdown
+          ref="dropdown"
           class="gl-w-full"
-          :max-list-height="$options.PROJECT_SELECTOR_HEIGHT"
-          :selected-projects="[selectedProject]"
-          @projectClicked="setSelectedProject"
+          menu-class="gl-w-full! gl-max-w-full!"
+          :disabled="disableSecurityPolicyProject"
+          :text="selectedProjectName || $options.i18n.emptyPlaceholder"
+        >
+          <instance-project-selector
+            class="gl-w-full"
+            :max-list-height="$options.PROJECT_SELECTOR_HEIGHT"
+            :selected-projects="selectedProjects"
+            @projectClicked="setSelectedProject"
+          />
+        </gl-dropdown>
+        <gl-button
+          v-if="selectedProjectId || shouldShowUnlinkWarning"
+          icon="remove"
+          class="gl-ml-3"
+          :aria-label="$options.i18n.unlinkButtonLabel"
+          @click="confirmDeletion"
         />
-      </gl-dropdown>
+      </div>
       <div class="gl-pb-5">
         <gl-sprintf :message="$options.i18n.description">
           <template #link="{ content }">

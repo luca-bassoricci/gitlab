@@ -19,8 +19,20 @@ module BulkImports
             pipeline: BulkImports::Common::Pipelines::LabelsPipeline,
             stage: 2
           },
+          milestones: {
+            pipeline: BulkImports::Common::Pipelines::MilestonesPipeline,
+            stage: 2
+          },
+          badges: {
+            pipeline: BulkImports::Common::Pipelines::BadgesPipeline,
+            stage: 2
+          },
           issues: {
             pipeline: BulkImports::Projects::Pipelines::IssuesPipeline,
+            stage: 3
+          },
+          snippets: {
+            pipeline: BulkImports::Projects::Pipelines::SnippetsPipeline,
             stage: 3
           },
           boards: {
@@ -35,8 +47,36 @@ module BulkImports
             pipeline: BulkImports::Projects::Pipelines::ExternalPullRequestsPipeline,
             stage: 4
           },
+          protected_branches: {
+            pipeline: BulkImports::Projects::Pipelines::ProtectedBranchesPipeline,
+            stage: 4
+          },
+          ci_pipelines: {
+            pipeline: BulkImports::Projects::Pipelines::CiPipelinesPipeline,
+            stage: 4
+          },
+          project_feature: {
+            pipeline: BulkImports::Projects::Pipelines::ProjectFeaturePipeline,
+            stage: 4
+          },
+          container_expiration_policy: {
+            pipeline: BulkImports::Projects::Pipelines::ContainerExpirationPolicyPipeline,
+            stage: 4
+          },
+          service_desk_setting: {
+            pipeline: BulkImports::Projects::Pipelines::ServiceDeskSettingPipeline,
+            stage: 4
+          },
+          wiki: {
+            pipeline: BulkImports::Common::Pipelines::WikiPipeline,
+            stage: 5
+          },
           uploads: {
             pipeline: BulkImports::Common::Pipelines::UploadsPipeline,
+            stage: 5
+          },
+          auto_devops: {
+            pipeline: BulkImports::Projects::Pipelines::AutoDevopsPipeline,
             stage: 5
           },
           finisher: {

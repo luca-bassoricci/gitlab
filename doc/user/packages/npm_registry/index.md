@@ -6,8 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # npm packages in the Package Registry **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5934) in GitLab Premium 11.7.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5934) in GitLab 11.7.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) from GitLab Premium to GitLab Free in 13.3.
 
 Publish npm packages in your project's Package Registry. Then install the
 packages whenever you need to use them as a dependency.
@@ -16,6 +16,10 @@ Only [scoped](https://docs.npmjs.com/misc/scope/) packages are supported.
 
 For documentation of the specific API endpoints that the npm package manager
 client uses, see the [npm API documentation](../../../api/packages/npm.md).
+
+WARNING:
+Never hardcode GitLab tokens (or any tokens) directly in `.npmrc` files or any other files that can
+be committed to a repository.
 
 ## Build an npm package
 
@@ -164,8 +168,8 @@ If you encounter an error with [Yarn](https://classic.yarnpkg.com/en/), view
 
 ### Authenticate with a CI job token
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9104) in GitLab Premium 12.5.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9104) in GitLab 12.5.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) from GitLab Premium to GitLab Free in 13.3.
 
 If you're using npm with GitLab CI/CD, a CI job token can be used instead of a personal access token or deploy token.
 The token inherits the permissions of the user that generates the pipeline.
@@ -207,6 +211,15 @@ Then, you can run `npm publish` either locally or by using GitLab CI/CD.
 
 - **GitLab CI/CD:** Set an `NPM_TOKEN` [CI/CD variable](../../../ci/variables/index.md)
   under your project's **Settings > CI/CD > Variables**.
+
+## Working with private registries
+
+When working with private repositories, you may want to configure additional settings to ensure a secure communication channel:
+
+```shell
+# Force npm to always require authentication when accessing the registry, even for GET requests.
+npm config set always-auth true
+```
 
 ## Package naming convention
 
@@ -363,6 +376,10 @@ This rule has a different impact depending on the package name:
 This aligns with npmjs.org's behavior. However, npmjs.org does not ever let you publish
 the same version more than once, even if it has been deleted.
 
+## `package.json` limitations
+
+You can't publish a package if its `package.json` file exceeds 20,000 characters.
+
 ## Install a package
 
 npm packages are commonly-installed by using the `npm` or `yarn` commands
@@ -417,37 +434,46 @@ You can route package requests to organizations and users outside of GitLab.
 To do this, add lines to your `.npmrc` file. Replace `my-org` with the namespace or group that owns your project's repository,
 and use your organization's URL. The name is case-sensitive and must match the name of your group or namespace exactly.
 
+Use environment variables to set up your tokens: `export MY_TOKEN="<your token>"`.
+
 ```shell
 @foo:registry=https://gitlab.example.com/api/v4/packages/npm/
-//gitlab.example.com/api/v4/packages/npm/:_authToken= "<your_token>"
-//gitlab.example.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
+//gitlab.example.com/api/v4/packages/npm/:_authToken=${MY_TOKEN}
+//gitlab.example.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken=${MY_TOKEN}
 
 @my-other-org:registry=https://gitlab.example.com/api/v4/packages/npm/
-//gitlab.example.com/api/v4/packages/npm/:_authToken= "<your_token>"
-//gitlab.example.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
+//gitlab.example.com/api/v4/packages/npm/:_authToken=${MY_TOKEN}
+//gitlab.example.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken=${MY_TOKEN}
 ```
 
-### npm dependencies metadata
+### npm metadata
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11867) in GitLab Premium 12.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11867) in GitLab 12.6.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) from GitLab Premium to GitLab Free in 13.3.
+> - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/330929) in GitLab 14.5.
 
-In GitLab 12.6 and later, packages published to the Package Registry expose the following attributes to the npm client:
+The GitLab Package Registry exposes the following attributes to the npm client.
+These are similar to the [abbreviated metadata format](https://github.com/npm/registry/blob/9e368cf6aaca608da5b2c378c0d53f475298b916/docs/responses/package-metadata.md#abbreviated-metadata-format):
 
-- name
-- version
-- dist-tags
-- dependencies
-  - dependencies
-  - devDependencies
-  - bundleDependencies
-  - peerDependencies
-  - deprecated
+- `name`
+- `versions`
+  - `name`
+  - `version`
+  - `deprecated`
+  - `dependencies`
+  - `devDependencies`
+  - `bundleDependencies`
+  - `peerDependencies`
+  - `bin`
+  - `directories`
+  - `dist`
+  - `engines`
+  - `_hasShrinkwrap`
 
 ## Add npm distribution tags
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9425) in GitLab Premium 12.8.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9425) in GitLab 12.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) from GitLab Premium to GitLab Free in 13.3.
 
 You can add [distribution tags](https://docs.npmjs.com/cli/dist-tag/) to newly-published packages.
 Tags are optional and can be assigned to only one package at a time.
@@ -578,6 +604,10 @@ root namespace and therefore cannot be published again using the same name.
 
 This is also true even if the prior published package shares the same name,
 but not the version.
+
+#### Package JSON file is too large
+
+Make sure that your `package.json` file does not [exceed `20,000` characters](#packagejson-limitations).
 
 ### `npm publish` returns `npm ERR! 500 Internal Server Error - PUT`
 

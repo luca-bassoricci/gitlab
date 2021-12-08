@@ -17,7 +17,7 @@ module EE
           'action' => 'geo_proxy_to_primary',
           'data' => {
             'api_endpoints' => custom_action_api_endpoints_for(cmd),
-            'primary_repo' => primary_http_repo_url
+            'primary_repo' => primary_http_repo_internal_url
           }
         }
 
@@ -46,8 +46,8 @@ module EE
         messages + ['', lag_message]
       end
 
-      def primary_http_repo_url
-        geo_primary_http_url_to_repo(container)
+      def primary_http_repo_internal_url
+        geo_primary_http_internal_url_to_repo(container)
       end
 
       def primary_ssh_url_to_repo
@@ -55,7 +55,8 @@ module EE
       end
 
       def current_replication_lag_message
-        return if ::Gitlab::Database.read_write? || current_replication_lag == 0
+        return unless ::Gitlab::Geo.secondary?
+        return if current_replication_lag == 0
 
         "Current replication lag: #{current_replication_lag} seconds"
       end

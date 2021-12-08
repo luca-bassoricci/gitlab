@@ -111,6 +111,7 @@ RSpec.describe BulkImports::NdjsonPipeline do
       context = double(portable: group, current_user: user, import_export_config: config, bulk_import: import_double, entity: entity_double)
       allow(subject).to receive(:import_export_config).and_return(config)
       allow(subject).to receive(:context).and_return(context)
+      relation_object = double
 
       expect(Gitlab::ImportExport::Group::RelationFactory)
         .to receive(:create)
@@ -124,8 +125,26 @@ RSpec.describe BulkImports::NdjsonPipeline do
           user: user,
           excluded_keys: nil
         )
+        .and_return(relation_object)
+      expect(relation_object).to receive(:assign_attributes).with(group: group)
 
       subject.transform(context, data)
+    end
+
+    context 'when data is nil' do
+      before do
+        expect(Gitlab::ImportExport::Group::RelationFactory).not_to receive(:create)
+      end
+
+      it 'returns' do
+        expect(subject.transform(nil, nil)).to be_nil
+      end
+
+      context 'when relation hash is nil' do
+        it 'returns' do
+          expect(subject.transform(nil, [nil, 0])).to be_nil
+        end
+      end
     end
   end
 
@@ -135,16 +154,6 @@ RSpec.describe BulkImports::NdjsonPipeline do
         object = double(persisted?: false)
 
         expect(object).to receive(:save!)
-
-        subject.load(nil, object)
-      end
-    end
-
-    context 'when object is persisted' do
-      it 'does not save the object' do
-        object = double(persisted?: true)
-
-        expect(object).not_to receive(:save!)
 
         subject.load(nil, object)
       end

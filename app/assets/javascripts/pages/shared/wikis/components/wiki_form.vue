@@ -15,10 +15,13 @@ import { setUrlFragment } from '~/lib/utils/url_utility';
 import { __, s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
-  WIKI_CONTENT_EDITOR_TRACKING_LABEL,
   CONTENT_EDITOR_LOADED_ACTION,
   SAVED_USING_CONTENT_EDITOR_ACTION,
+  WIKI_CONTENT_EDITOR_TRACKING_LABEL,
+  WIKI_FORMAT_LABEL,
+  WIKI_FORMAT_UPDATED_ACTION,
 } from '../constants';
 
 const trackingMixin = Tracking.mixin({
@@ -44,7 +47,7 @@ export default {
         newPage: s__(
           'WikiPage|Tip: You can specify the full path for the new file. We will automatically create any missing directories.',
         ),
-        moreInformation: s__('WikiPage|More Information.'),
+        learnMore: s__('WikiPage|Learn more.'),
       },
     },
     format: {
@@ -102,6 +105,8 @@ export default {
       newPage: s__('WikiPage|Create page'),
     },
     cancel: s__('WikiPage|Cancel'),
+    editSourceButtonText: s__('WikiPage|Edit source'),
+    editRichTextButtonText: s__('WikiPage|Edit rich text'),
   },
   contentEditorFeedbackIssue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332629',
   components: {
@@ -121,7 +126,7 @@ export default {
   directives: {
     GlModalDirective,
   },
-  mixins: [trackingMixin],
+  mixins: [trackingMixin, glFeatureFlagMixin()],
   inject: ['formatOptions', 'pageInfo'],
   data() {
     return {
@@ -129,7 +134,6 @@ export default {
       format: this.pageInfo.format || 'markdown',
       content: this.pageInfo.content || '',
       isContentEditorAlertDismissed: false,
-      isContentEditorLoading: true,
       useContentEditor: false,
       commitMessage: '',
       isDirty: false,
@@ -162,6 +166,11 @@ export default {
     linkExample() {
       return MARKDOWN_LINK_TEXT[this.format];
     },
+    toggleEditingModeButtonText() {
+      return this.isContentEditorActive
+        ? this.$options.i18n.editSourceButtonText
+        : this.$options.i18n.editRichTextButtonText;
+    },
     submitButtonText() {
       return this.pageInfo.persisted
         ? this.$options.i18n.submitButton.existingPage
@@ -186,7 +195,23 @@ export default {
       return this.format === 'markdown';
     },
     showContentEditorAlert() {
-      return this.isMarkdownFormat && !this.useContentEditor && !this.isContentEditorAlertDismissed;
+      return (
+        !this.glFeatures.wikiSwitchBetweenContentEditorRawMarkdown &&
+        this.isMarkdownFormat &&
+        !this.useContentEditor &&
+        !this.isContentEditorAlertDismissed
+      );
+    },
+    showSwitchEditingModeButton() {
+      return this.glFeatures.wikiSwitchBetweenContentEditorRawMarkdown && this.isMarkdownFormat;
+    },
+    displayWikiSpecificMarkdownHelp() {
+      return !this.isContentEditorActive;
+    },
+    displaySwitchBackToClassicEditorMessage() {
+      return (
+        !this.glFeatures.wikiSwitchBetweenContentEditorRawMarkdown && this.isContentEditorActive
+      );
     },
     disableSubmitButton() {
       return this.noContent || !this.title || this.contentEditorRenderFailed;
@@ -210,6 +235,14 @@ export default {
         .then(({ data }) => data.body);
     },
 
+    toggleEditingMode() {
+      if (this.useContentEditor) {
+        this.content = this.contentEditor.getSerializedContent();
+      }
+
+      this.useContentEditor = !this.useContentEditor;
+    },
+
     async handleFormSubmit(e) {
       e.preventDefault();
 
@@ -218,6 +251,8 @@ export default {
 
         this.trackFormSubmit();
       }
+
+      this.trackWikiFormat();
 
       // Wait until form field values are refreshed
       await this.$nextTick();
@@ -304,6 +339,17 @@ export default {
       }
     },
 
+    trackWikiFormat() {
+      this.track(WIKI_FORMAT_UPDATED_ACTION, {
+        label: WIKI_FORMAT_LABEL,
+        extra: {
+          project_path: this.pageInfo.path,
+          old_format: this.pageInfo.format,
+          value: this.format,
+        },
+      });
+    },
+
     dismissContentEditorAlert() {
       this.isContentEditorAlertDismissed = true;
     },
@@ -359,10 +405,9 @@ export default {
         <span class="gl-display-inline-block gl-max-w-full gl-mt-2 gl-text-gray-600">
           <gl-icon class="gl-mr-n1" name="bulb" />
           {{ titleHelpText }}
-          <gl-link :href="helpPath" target="_blank"
-            ><gl-icon name="question-o" />
-            {{ $options.i18n.title.helpText.moreInformation }}</gl-link
-          >
+          <gl-link :href="helpPath" target="_blank">
+            {{ $options.i18n.title.helpText.learnMore }}
+          </gl-link>
         </span>
       </div>
     </div>
@@ -393,6 +438,19 @@ export default {
         }}</label>
       </div>
       <div class="col-sm-10">
+        <div
+          v-if="showSwitchEditingModeButton"
+          class="gl-display-flex gl-justify-content-end gl-mb-3"
+        >
+          <gl-button
+            data-testid="toggle-editing-mode-button"
+            data-qa-selector="editing_mode_button"
+            :data-qa-mode="toggleEditingModeButtonText"
+            variant="link"
+            @click="toggleEditingMode"
+            >{{ toggleEditingModeButtonText }}</gl-button
+          >
+        </div>
         <gl-alert
           v-if="showContentEditorAlert"
           class="gl-mb-6"
@@ -486,7 +544,7 @@ export default {
         <div class="error-alert"></div>
 
         <div class="form-text gl-text-gray-600">
-          <gl-sprintf v-if="!isContentEditorActive" :message="$options.i18n.linksHelpText">
+          <gl-sprintf v-if="displayWikiSpecificMarkdownHelp" :message="$options.i18n.linksHelpText">
             <template #linkExample
               ><code>{{ linkExample }}</code></template
             >
@@ -501,7 +559,7 @@ export default {
               ></template
             >
           </gl-sprintf>
-          <span v-else>
+          <span v-if="displaySwitchBackToClassicEditorMessage">
             {{ $options.i18n.contentEditor.switchToOldEditor.helpText }}
             <gl-button variant="link" @click="confirmSwitchToOldEditor">{{
               $options.i18n.contentEditor.switchToOldEditor.label

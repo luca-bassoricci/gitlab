@@ -17,8 +17,10 @@ class Integration < ApplicationRecord
     pivotaltracker prometheus pushover redmine slack slack_slash_commands teamcity unify_circuit webex_teams youtrack zentao
   ].freeze
 
+  # TODO Shimo is temporary disabled on group and instance-levels.
+  # See: https://gitlab.com/gitlab-org/gitlab/-/issues/345677
   PROJECT_SPECIFIC_INTEGRATION_NAMES = %w[
-    jenkins
+    jenkins shimo
   ].freeze
 
   # Fake integrations to help with local development.
@@ -373,7 +375,7 @@ class Integration < ApplicationRecord
   end
 
   def to_data_fields_hash
-    data_fields.as_json(only: data_fields.class.column_names).except('id', 'service_id')
+    data_fields.as_json(only: data_fields.class.column_names).except('id', 'service_id', 'integration_id')
   end
 
   def event_channel_names

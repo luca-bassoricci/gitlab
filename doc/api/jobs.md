@@ -71,6 +71,7 @@ Example of response
     "runner": null,
     "stage": "test",
     "status": "failed",
+    "failure_reason": "script_failure",
     "tag": false,
     "web_url": "https://example.com/foo/bar/-/jobs/7",
     "user": {
@@ -126,6 +127,7 @@ Example of response
     "runner": null,
     "stage": "test",
     "status": "failed",
+    "failure_reason": "stuck_or_timeout_failure",
     "tag": false,
     "web_url": "https://example.com/foo/bar/-/jobs/6",
     "user": {
@@ -207,6 +209,7 @@ Example of response
     "runner": null,
     "stage": "test",
     "status": "failed",
+    "failure_reason": "stuck_or_timeout_failure",
     "tag": false,
     "web_url": "https://example.com/foo/bar/-/jobs/6",
     "user": {
@@ -271,6 +274,7 @@ Example of response
     "runner": null,
     "stage": "test",
     "status": "failed",
+    "failure_reason": "script_failure",
     "tag": false,
     "web_url": "https://example.com/foo/bar/-/jobs/7",
     "user": {
@@ -294,7 +298,7 @@ Example of response
 ]
 ```
 
-In GitLab 13.3 and later, this endpoint [returns data for any pipeline](pipelines.md#single-pipeline-requests)
+In GitLab 13.3 and later, this endpoint [returns data for any pipeline](pipelines.md#get-a-single-pipeline)
 including [child pipelines](../ci/pipelines/parent_child_pipelines.md).
 
 In GitLab 13.5 and later, this endpoint does not return retried jobs in the response
@@ -443,6 +447,7 @@ Example of response
   "runner": null,
   "stage": "test",
   "status": "failed",
+  "failure_reason": "script_failure",
   "tag": false,
   "web_url": "https://example.com/foo/bar/-/jobs/8",
   "user": {

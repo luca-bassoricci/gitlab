@@ -6,6 +6,7 @@ RSpec.describe 'Admin updates EE-only settings' do
   include StubENV
 
   before do
+    stub_feature_flags(bootstrap_confirmation_modals: false)
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     admin = create(:admin)
     sign_in(admin)
@@ -115,7 +116,7 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(page).not_to have_content('Namespaces to index')
         expect(page).not_to have_content('Projects to index')
 
-        check 'Limit namespaces and projects that can be indexed'
+        check 'Limit the number of namespaces and projects that can be indexed.'
 
         expect(page).to have_content('Namespaces to index')
         expect(page).to have_content('Projects to index')

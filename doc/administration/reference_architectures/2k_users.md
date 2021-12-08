@@ -41,6 +41,8 @@ For all PaaS solutions that involve configuring instances, it is strongly recomm
 
 ```plantuml
 @startuml 2k
+skinparam linetype ortho
+
 card "**External Load Balancer**" as elb #6a9be7
 
 collections "**GitLab Rails** x3" as gitlab #32CD32
@@ -100,8 +102,7 @@ To set up GitLab and its components to accommodate up to 2,000 users:
    more advanced code search across your entire GitLab instance.
 1. [Configure NFS](#configure-nfs-optional) (optional, and not recommended)
    to have shared disk storage service as an alternative to Gitaly or object
-   storage. You can skip this step if you're not using GitLab Pages (which
-   requires NFS).
+   storage.
 
 ## Configure the external load balancer
 
@@ -958,8 +959,7 @@ cluster alongside your instance, read how to
 
 For improved performance, [object storage](#configure-the-object-storage),
 along with [Gitaly](#configure-gitaly), are recommended over using NFS whenever
-possible. However, if you intend to use GitLab Pages,
-[you must use NFS](troubleshooting.md#gitlab-pages-requires-nfs).
+possible.
 
 See how to [configure NFS](../nfs.md).
 
@@ -1038,6 +1038,7 @@ For all PaaS solutions that involve configuring instances, it is strongly recomm
 
 ```plantuml
 @startuml 2k
+skinparam linetype ortho
 
 card "Kubernetes via Helm Charts" as kubernetes {
   card "**External Load Balancer**" as elb #6a9be7
@@ -1045,10 +1046,8 @@ card "Kubernetes via Helm Charts" as kubernetes {
   together {
     collections "**Webservice** x3" as gitlab #32CD32
     collections "**Sidekiq** x2" as sidekiq #ff8dd1
+    card "**Supporting Services**" as support
   }
-
-  card "**Prometheus + Grafana**" as monitor #7FFFD4
-  card "**Supporting Services**" as support
 }
 
 card "**Gitaly**" as gitaly #FF8C00
@@ -1057,7 +1056,6 @@ card "**Redis**" as redis #FF6347
 cloud "**Object Storage**" as object_storage #white
 
 elb -[#6a9be7]-> gitlab
-elb -[#6a9be7]--> monitor
 
 gitlab -[#32CD32]--> gitaly
 gitlab -[#32CD32]--> postgres
@@ -1066,14 +1064,8 @@ gitlab -[#32CD32]--> redis
 
 sidekiq -[#ff8dd1]--> gitaly
 sidekiq -[#ff8dd1]-> object_storage
-sidekiq -[#ff8dd1]---> postgres
-sidekiq -[#ff8dd1]---> redis
-
-monitor .[#7FFFD4]u-> gitlab
-monitor .[#7FFFD4]-> gitaly
-monitor .[#7FFFD4]-> postgres
-monitor .[#7FFFD4,norank]--> redis
-monitor .[#7FFFD4,norank]u--> elb
+sidekiq -[#ff8dd1]--> postgres
+sidekiq -[#ff8dd1]--> redis
 
 @enduml
 ```

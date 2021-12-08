@@ -94,6 +94,7 @@ RSpec.describe Integrations::JiraSerializers::IssueDetailEntity do
         }
       ],
       author: hash_including(
+        id: 'reporter@reporter.com',
         name: 'reporter',
         avatar_url: 'http://reporter.avatar'
       ),
@@ -110,6 +111,7 @@ RSpec.describe Integrations::JiraSerializers::IssueDetailEntity do
         hash_including(
           id: '10022',
           author: hash_including(
+            id: 'comment@author.com',
             name: 'comment_author',
             avatar_url: 'http://comment_author.avatar'
           ),

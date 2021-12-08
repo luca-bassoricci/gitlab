@@ -12,6 +12,13 @@ describe('IssueBoardFilter', () => {
   const createComponent = () => {
     wrapper = shallowMount(IssueBoardFilteredSpec, {
       propsData: { fullPath: 'gitlab-org', boardType: 'group' },
+      provide: {
+        isSignedIn: true,
+        releasesFetchPath: '/releases',
+        glFeatures: {
+          iterationCadences: true,
+        },
+      },
     });
   };
 
@@ -41,7 +48,12 @@ describe('IssueBoardFilter', () => {
     });
 
     it('passes the correct tokens to BoardFilteredSearch including epics', () => {
-      const tokens = mockTokens(fetchLabelsSpy, fetchAuthorsSpy, wrapper.vm.fetchMilestones);
+      const tokens = mockTokens(
+        fetchLabelsSpy,
+        fetchAuthorsSpy,
+        wrapper.vm.fetchMilestones,
+        wrapper.vm.fetchIterations,
+      );
 
       expect(wrapper.find(BoardFilteredSearch).props('tokens')).toEqual(tokens);
     });

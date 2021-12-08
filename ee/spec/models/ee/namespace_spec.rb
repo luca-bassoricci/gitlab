@@ -678,22 +678,6 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#new_monthly_ci_minutes_enabled?' do
-    subject { namespace.new_monthly_ci_minutes_enabled? }
-
-    context 'when feature flag ci_use_new_monthly_minutes is enabled' do
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when feature flag ci_use_new_monthly_minutes is disabled' do
-      before do
-        stub_feature_flags(ci_use_new_monthly_minutes: false)
-      end
-
-      it { is_expected.to be_falsy }
-    end
-  end
-
   describe '#shared_runners_minutes_limit_enabled?' do
     subject { namespace.shared_runners_minutes_limit_enabled? }
 
@@ -735,8 +719,7 @@ RSpec.describe Namespace do
       it 'generates a subscription and returns default plan' do
         expect(namespace.actual_plan).to eq(Plan.default)
 
-        # This should be revisited after https://gitlab.com/gitlab-org/gitlab/-/issues/214434
-        expect(namespace.gitlab_subscription).to be_present
+        expect(namespace.gitlab_subscription).to be_nil
       end
     end
 

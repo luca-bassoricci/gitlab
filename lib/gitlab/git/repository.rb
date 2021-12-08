@@ -20,6 +20,7 @@ module Gitlab
       EMPTY_REPOSITORY_CHECKSUM = '0000000000000000000000000000000000000000'
 
       NoRepository = Class.new(::Gitlab::Git::BaseError)
+      RepositoryExists = Class.new(::Gitlab::Git::BaseError)
       InvalidRepository = Class.new(::Gitlab::Git::BaseError)
       InvalidBlobName = Class.new(::Gitlab::Git::BaseError)
       InvalidRef = Class.new(::Gitlab::Git::BaseError)
@@ -101,6 +102,8 @@ module Gitlab
       def create_repository
         wrapped_gitaly_errors do
           gitaly_repository_client.create_repository
+        rescue GRPC::AlreadyExists => e
+          raise RepositoryExists, e.message
         end
       end
 
@@ -157,6 +160,8 @@ module Gitlab
         wrapped_gitaly_errors do
           gitaly_repository_client.remove
         end
+      rescue NoRepository
+        nil
       end
 
       def replicate(source_repository)
@@ -198,9 +203,9 @@ module Gitlab
 
       # Returns an Array of Tags
       #
-      def tags(sort_by: nil)
+      def tags(sort_by: nil, pagination_params: nil)
         wrapped_gitaly_errors do
-          gitaly_ref_client.tags(sort_by: sort_by)
+          gitaly_ref_client.tags(sort_by: sort_by, pagination_params: pagination_params)
         end
       end
 

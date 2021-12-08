@@ -32,17 +32,30 @@ RSpec.describe Security::SecurityOrchestrationPolicies::ScanPipelineService do
       it_behaves_like 'creates scan jobs', 1, [:'secret-detection-0']
     end
 
+    context 'when action contains variables' do
+      let(:actions) { [{ scan: 'sast', variables: { SAST_EXCLUDED_ANALYZERS: 'semgrep' } }] }
+
+      it 'parses variables from the action and applies them in configuration service' do
+        expect_next_instance_of(::Security::SecurityOrchestrationPolicies::CiConfigurationService) do |ci_configuration_service|
+          expect(ci_configuration_service).to receive(:execute).once.with(actions.first, 'SAST_DISABLED' => nil, 'SAST_EXCLUDED_ANALYZERS' => 'semgrep').and_call_original
+        end
+
+        subject
+      end
+    end
+
     context 'when there are multiple actions' do
       let(:actions) do
         [
           { scan: 'secret_detection' },
           { scan: 'dast', scanner_profile: 'Scanner Profile', site_profile: 'Site Profile' },
           { scan: 'cluster_image_scanning' },
-          { scan: 'container_scanning' }
+          { scan: 'container_scanning' },
+          { scan: 'sast' }
         ]
       end
 
-      it_behaves_like 'creates scan jobs', 4, [:'secret-detection-0', :'dast-1', :'cluster-image-scanning-2', :'container-scanning-3']
+      it_behaves_like 'creates scan jobs', 5, [:'secret-detection-0', :'dast-1', :'cluster-image-scanning-2', :'container-scanning-3', :'sast-4']
     end
 
     context 'when there are valid and invalid actions' do

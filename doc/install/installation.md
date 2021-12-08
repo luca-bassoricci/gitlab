@@ -49,7 +49,7 @@ If the highest number stable branch is unclear, check the [GitLab blog](https://
 | Software | Minimum version | Notes |
 | -------- | --------------- | ----- |
 | [Ruby](#2-ruby)     | `2.7`             | From GitLab 13.6, Ruby 2.7 is required. Ruby 3.0 is not supported yet (see [the relevant epic](https://gitlab.com/groups/gitlab-org/-/epics/5149) for the current status). You must use the standard MRI implementation of Ruby. We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab needs several Gems that have native extensions. |
-| [Go](#3-go) | `1.15` | |
+| [Go](#3-go) | `1.16` | |
 | [Git](#git) | `2.33.x` | From GitLab 14.4, Git 2.33.x and later is required. It's highly recommended that you use the [Git version provided by Gitaly](#git). |
 | [Node.js](#4-node) | `12.22.1` | GitLab uses [webpack](https://webpack.js.org/) to compile frontend assets. Node.js 14.x is recommended, as it's faster. You can check which version you're running with `node -v`. You need to update it to a newer version if needed. |
 
@@ -250,11 +250,11 @@ page](https://golang.org/dl).
 # Remove former Go installation folder
 sudo rm -rf /usr/local/go
 
-curl --remote-name --progress-bar "https://dl.google.com/go/go1.15.12.linux-amd64.tar.gz"
-echo 'bbdb935699e0b24d90e2451346da76121b2412d30930eabcd80907c230d098b7  go1.15.12.linux-amd64.tar.gz' | shasum -a256 -c - && \
-  sudo tar -C /usr/local -xzf go1.15.12.linux-amd64.tar.gz
-sudo ln -sf /usr/local/go/bin/{go,godoc,gofmt} /usr/local/bin/
-rm go1.15.12.linux-amd64.tar.gz
+curl --remote-name --progress-bar "https://golang.org/dl/go1.16.10.linux-amd64.tar.gz"
+echo '414cd18ce1d193769b9e97d2401ad718755ab47816e13b2a1cde203d263b55cf  go1.16.10.linux-amd64.tar.gz' | shasum -a256 -c - && \
+  sudo tar -C /usr/local -xzf go1.16.10.linux-amd64.tar.gz
+sudo ln -sf /usr/local/go/bin/{go,gofmt} /usr/local/bin/
+rm go1.16.10.linux-amd64.tar.gz
 ```
 
 ## 4. Node
@@ -1034,7 +1034,7 @@ To use GitLab with HTTPS:
    1. Set the `port` option in section 1 to `443`.
    1. Set the `https` option in section 1 to `true`.
 1. In the `config.yml` of GitLab Shell:
-   1. Set `gitlab_url` option to the HTTPS endpoint of GitLab (e.g. `https://git.example.com`).
+   1. Set `gitlab_url` option to the HTTPS endpoint of GitLab (for example, `https://git.example.com`).
    1. Set the certificates using either the `ca_file` or `ca_path` option.
 1. Use the `gitlab-ssl` NGINX example configuration instead of the `gitlab` configuration.
    1. Update `YOUR_SERVER_FQDN`.
@@ -1119,7 +1119,7 @@ host localhost          # Give your setup a name (here: override localhost)
     hostname 127.0.0.1; # Your server name or IP
 ```
 
-You also need to change the corresponding options (e.g. `ssh_user`, `ssh_host`, `admin_uri`) in the `config\gitlab.yml` file.
+You also need to change the corresponding options (for example, `ssh_user`, `ssh_host`, `admin_uri`) in the `config\gitlab.yml` file.
 
 ### Additional Markup Styles
 

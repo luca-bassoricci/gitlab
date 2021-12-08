@@ -43,11 +43,6 @@ There were some patenting and licensing concerns with GraphQL. However, these
 have been resolved to our satisfaction. The reference implementations
 were re-licensed under MIT, and the OWF license used for the GraphQL specification.
 
-When GraphQL is fully implemented, GitLab:
-
-- Can delete controller-specific endpoints.
-- Will no longer maintain two different APIs.
-
 ## Compatibility guidelines
 
 The HTTP API is versioned with a single number, which is currently `4`. This number
@@ -214,7 +209,7 @@ Impersonation tokens are a type of [personal access token](../user/profile/perso
 They can be created only by an administrator, and are used to authenticate with the
 API as a specific user.
 
-Use impersonation tokens an alternative to:
+Use impersonation tokens as an alternative to:
 
 - The user's password or one of their personal access tokens.
 - The [Sudo](#sudo) feature. The user's or administrator's password or token
@@ -283,7 +278,7 @@ message with a status code of `403`:
 ```
 
 If an access token without the `sudo` scope is provided, an error message is
-be returned with a status code of `403`:
+returned with a status code of `403`:
 
 ```json
 {

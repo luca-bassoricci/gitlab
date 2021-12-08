@@ -33,6 +33,7 @@ module Quality
         initializers
         javascripts
         lib
+        metrics_server
         models
         policies
         presenters
@@ -54,6 +55,7 @@ module Quality
         tooling
       ],
       integration: %w[
+        commands
         controllers
         mailers
         requests

@@ -6,6 +6,7 @@ RSpec.describe User do
   include ProjectForksHelper
   include TermsHelper
   include ExclusiveLeaseHelpers
+  include LdapHelpers
 
   it_behaves_like 'having unique enum values'
 
@@ -1725,6 +1726,52 @@ RSpec.describe User do
     end
   end
 
+  context 'two_factor_u2f_enabled?' do
+    let_it_be(:user) { create(:user, :two_factor) }
+
+    context 'when webauthn feature flag is enabled' do
+      context 'user has no U2F registration' do
+        it { expect(user.two_factor_u2f_enabled?).to eq(false) }
+      end
+
+      context 'user has existing U2F registration' do
+        it 'returns false' do
+          device = U2F::FakeU2F.new(FFaker::BaconIpsum.characters(5))
+          create(:u2f_registration, name: 'my u2f device',
+                 user: user,
+                 certificate: Base64.strict_encode64(device.cert_raw),
+                 key_handle: U2F.urlsafe_encode64(device.key_handle_raw),
+                 public_key: Base64.strict_encode64(device.origin_public_key_raw))
+
+          expect(user.two_factor_u2f_enabled?).to eq(false)
+        end
+      end
+    end
+
+    context 'when webauthn feature flag is disabled' do
+      before do
+        stub_feature_flags(webauthn: false)
+      end
+
+      context 'user has no U2F registration' do
+        it { expect(user.two_factor_u2f_enabled?).to eq(false) }
+      end
+
+      context 'user has existing U2F registration' do
+        it 'returns true' do
+          device = U2F::FakeU2F.new(FFaker::BaconIpsum.characters(5))
+          create(:u2f_registration, name: 'my u2f device',
+                 user: user,
+                 certificate: Base64.strict_encode64(device.cert_raw),
+                 key_handle: U2F.urlsafe_encode64(device.key_handle_raw),
+                 public_key: Base64.strict_encode64(device.origin_public_key_raw))
+
+          expect(user.two_factor_u2f_enabled?).to eq(true)
+        end
+      end
+    end
+  end
+
   describe 'projects' do
     before do
       @user = create(:user)
@@ -1855,15 +1902,31 @@ RSpec.describe User do
     end
 
     context 'when user has running CI pipelines' do
-      let(:service) { double }
       let(:pipelines) { build_list(:ci_pipeline, 3, :running) }
 
-      it 'aborts all running pipelines and related jobs' do
-        expect(user).to receive(:pipelines).and_return(pipelines)
-        expect(Ci::DropPipelineService).to receive(:new).and_return(service)
-        expect(service).to receive(:execute_async_for_all).with(pipelines, :user_blocked, user)
+      it 'drops all running pipelines and related jobs' do
+        drop_service = double
+        disable_service = double
 
-        user.block
+        expect(user).to receive(:pipelines).and_return(pipelines)
+        expect(Ci::DropPipelineService).to receive(:new).and_return(drop_service)
+        expect(drop_service).to receive(:execute_async_for_all).with(pipelines, :user_blocked, user)
+
+        expect(Ci::DisableUserPipelineSchedulesService).to receive(:new).and_return(disable_service)
+        expect(disable_service).to receive(:execute).with(user)
+
+        user.block!
+      end
+
+      it 'does not drop running pipelines if the transaction rolls back' do
+        expect(Ci::DropPipelineService).not_to receive(:new)
+        expect(Ci::DisableUserPipelineSchedulesService).not_to receive(:new)
+
+        User.transaction do
+          user.block
+
+          raise ActiveRecord::Rollback
+        end
       end
     end
 
@@ -3462,19 +3525,7 @@ RSpec.describe User do
 
     subject { user.membership_groups }
 
-    shared_examples 'returns groups where the user is a member' do
-      specify { is_expected.to contain_exactly(parent_group, child_group) }
-    end
-
-    it_behaves_like 'returns groups where the user is a member'
-
-    context 'when feature flag :linear_user_membership_groups is disabled' do
-      before do
-        stub_feature_flags(linear_user_membership_groups: false)
-      end
-
-      it_behaves_like 'returns groups where the user is a member'
-    end
+    specify { is_expected.to contain_exactly(parent_group, child_group) }
   end
 
   describe '#authorizations_for_projects' do
@@ -4143,6 +4194,23 @@ RSpec.describe User do
     it 'stores the correct access levels' do
       expect(user.project_authorizations.where(access_level: Gitlab::Access::GUEST).exists?).to eq(true)
       expect(user.project_authorizations.where(access_level: Gitlab::Access::REPORTER).exists?).to eq(true)
+    end
+  end
+
+  describe '#remove_project_authorizations' do
+    let_it_be(:project1) { create(:project) }
+    let_it_be(:project2) { create(:project) }
+    let_it_be(:project3) { create(:project) }
+    let_it_be(:user) { create(:user) }
+
+    it 'removes the project authorizations of the user, in specified projects' do
+      create(:project_authorization, user: user, project: project1)
+      create(:project_authorization, user: user, project: project2)
+      create(:project_authorization, user: user, project: project3)
+
+      user.remove_project_authorizations([project1.id, project2.id])
+
+      expect(user.project_authorizations.pluck(:project_id)).to match_array([project3.id])
     end
   end
 
@@ -5808,7 +5876,7 @@ RSpec.describe User do
   end
 
   describe '#active_for_authentication?' do
-    subject { user.active_for_authentication? }
+    subject(:active_for_authentication?) { user.active_for_authentication? }
 
     let(:user) { create(:user) }
 
@@ -5818,6 +5886,14 @@ RSpec.describe User do
       end
 
       it { is_expected.to be false }
+
+      it 'does not check if LDAP is allowed' do
+        stub_ldap_setting(enabled: true)
+
+        expect(Gitlab::Auth::Ldap::Access).not_to receive(:allowed?)
+
+        active_for_authentication?
+      end
     end
 
     context 'when user is a ghost user' do
@@ -5826,6 +5902,28 @@ RSpec.describe User do
       end
 
       it { is_expected.to be false }
+    end
+
+    context 'when user is ldap_blocked' do
+      before do
+        user.ldap_block
+      end
+
+      it 'rechecks if LDAP is allowed when LDAP is enabled' do
+        stub_ldap_setting(enabled: true)
+
+        expect(Gitlab::Auth::Ldap::Access).to receive(:allowed?)
+
+        active_for_authentication?
+      end
+
+      it 'does not check if LDAP is allowed when LDAP is not enabled' do
+        stub_ldap_setting(enabled: false)
+
+        expect(Gitlab::Auth::Ldap::Access).not_to receive(:allowed?)
+
+        active_for_authentication?
+      end
     end
 
     context 'based on user type' do
@@ -6170,19 +6268,7 @@ RSpec.describe User do
 
     subject { user.send(:groups_with_developer_maintainer_project_access) }
 
-    shared_examples 'groups_with_developer_maintainer_project_access examples' do
-      specify { is_expected.to contain_exactly(developer_group2) }
-    end
-
-    it_behaves_like 'groups_with_developer_maintainer_project_access examples'
-
-    context 'when feature flag :linear_user_groups_with_developer_maintainer_project_access is disabled' do
-      before do
-        stub_feature_flags(linear_user_groups_with_developer_maintainer_project_access: false)
-      end
-
-      it_behaves_like 'groups_with_developer_maintainer_project_access examples'
-    end
+    specify { is_expected.to contain_exactly(developer_group2) }
   end
 
   describe '.get_ids_by_username' do
@@ -6192,6 +6278,33 @@ RSpec.describe User do
 
     it 'returns the id of each record matching username' do
       expect(described_class.get_ids_by_username([user_name])).to match_array([user_id])
+    end
+  end
+
+  describe 'user_project' do
+    it 'returns users project matched by username and public visibility' do
+      user = create(:user)
+      public_project = create(:project, :public, path: user.username, namespace: user.namespace)
+      create(:project, namespace: user.namespace)
+
+      expect(user.user_project).to eq(public_project)
+    end
+  end
+
+  describe 'user_readme' do
+    it 'returns readme from user project' do
+      user = create(:user)
+      create(:project, :repository, :public, path: user.username, namespace: user.namespace)
+
+      expect(user.user_readme.name).to eq('README.md')
+      expect(user.user_readme.data).to include('testme')
+    end
+
+    it 'returns nil if project is private' do
+      user = create(:user)
+      create(:project, :repository, :private, path: user.username, namespace: user.namespace)
+
+      expect(user.user_readme).to be(nil)
     end
   end
 end

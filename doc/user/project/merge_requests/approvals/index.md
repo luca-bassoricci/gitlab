@@ -3,7 +3,7 @@ stage: Create
 group: Source Code
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, concepts
-disqus_identifier: 'https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html'
+disqus_identifier: 'https://docs.gitlab.com/ee/user/project/merge_requests/approvals/index.html'
 ---
 
 # Merge request approvals **(FREE)**
@@ -105,7 +105,7 @@ Without the approvals, the work cannot merge. Required approvals enable multiple
 - [Require approval from a security team](../../../application_security/index.md#security-approvals-in-merge-requests)
   before merging code that could introduce a vulnerability. **(ULTIMATE)**
 
-## Related links
+## Related topics
 
 - [Merge request approvals API](../../../../api/merge_request_approvals.md)
 - [Instance-level approval rules](../../../admin_area/merge_requests_approvals.md) for self-managed installations

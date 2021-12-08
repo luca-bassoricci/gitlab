@@ -17,6 +17,15 @@ RSpec.shared_examples 'base SamlProvider service' do
   end
 
   it 'updates SAML provider with given params' do
+    expect(::Gitlab::Audit::Auditor)
+      .to receive(:audit).with(
+        hash_including(
+          { name: audit_event_name,
+            author: current_user,
+            scope: group,
+            target: group })
+      ).exactly(4).times.and_call_original
+
     expect do
       service.execute
       group.reload
@@ -24,6 +33,20 @@ RSpec.shared_examples 'base SamlProvider service' do
              .and change { group.saml_provider&.certificate_fingerprint }.to(fingerprint)
              .and change { group.saml_provider&.enabled? }.to(true)
              .and change { group.saml_provider&.enforced_sso? }.to(true)
+             .and change { AuditEvent.count }.by(4)
+
+    audit_event_messages = [
+      %r{enabled changed([\w\s]*)to true},
+      %r{certificate_fingerprint changed([\w\W\s]*)to #{fingerprint}},
+      %r{sso_url changed([\w\W\s]*)to https:\/\/test},
+      %r{enforced_sso changed([\w\s]*)to true}
+    ]
+
+    audit_events = AuditEvent.last(4)
+
+    audit_event_messages.each_with_index do |expected_message, index|
+      expect(audit_events[index].details[:custom_message]).to match(expected_message)
+    end
   end
 end
 

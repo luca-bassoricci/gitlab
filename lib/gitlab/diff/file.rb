@@ -44,7 +44,7 @@ module Gitlab
         new_blob_lazy
         old_blob_lazy
 
-        preprocess_before_diff(diff) if Feature.enabled?(:jupyter_clean_diffs, repository.project)
+        preprocess_before_diff(diff) if Feature.enabled?(:jupyter_clean_diffs, repository.project, default_enabled: true)
       end
 
       def position(position_marker, position_type: :text)
@@ -456,19 +456,25 @@ module Gitlab
         from = old_blob_lazy&.data
         to = new_blob_lazy&.data
 
-        new_diff = IpynbDiff.diff(from, to,
-                                  diff_opts: { context: 5, include_diff_info: true },
-                                  transform_options: { cell_decorator: :percent },
-                                  raise_if_invalid_notebook: true)
+        transformed_diff = IpynbDiff.diff(from, to,
+                                          diff_opts: { context: 5, include_diff_info: true },
+                                          transform_options: { cell_decorator: :percent },
+                                          raise_if_invalid_notebook: true)
+        new_diff = strip_diff_frontmatter(transformed_diff)
 
-        diff.diff = new_diff.scan(/.*\n/)[2..-1].join('') if new_diff
+        if new_diff
+          diff.diff = new_diff
+          new_blob_lazy.transformed_for_diff = true if new_blob_lazy
+          old_blob_lazy.transformed_for_diff = true if old_blob_lazy
+        end
 
-        Gitlab::AppLogger.info({ message: new_diff ? 'IPYNB_DIFF_GENERATED' : 'IPYNB_DIFF_NIL',
-                                 from: from&.to_s, to: to&.to_s,
-                                 lib_version: Gem.loaded_specs["ipynbdiff"].version.version })
-
+        Gitlab::AppLogger.info({ message: new_diff ? 'IPYNB_DIFF_GENERATED' : 'IPYNB_DIFF_NIL' })
       rescue IpynbDiff::InvalidNotebookError => e
-        Gitlab::ErrorTracking.track_exception(e, issue_url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/344676')
+        Gitlab::ErrorTracking.log_exception(e)
+      end
+
+      def strip_diff_frontmatter(diff_content)
+        diff_content.scan(/.*\n/)[2..-1]&.join('') if diff_content.present?
       end
 
       def alternate_viewer_class

@@ -42,14 +42,20 @@ describe('RunnerList', () => {
     const headerLabels = findHeaders().wrappers.map((w) => w.text());
 
     expect(headerLabels).toEqual([
-      'Type/State',
-      'Runner',
+      'Status',
+      'Runner ID',
       'Version',
       'IP Address',
       'Tags',
       'Last contact',
       '', // actions has no label
     ]);
+  });
+
+  it('Sets runner id as a row key', () => {
+    createComponent({}, shallowMount);
+
+    expect(findTable().attributes('primary-key')).toBe('id');
   });
 
   it('Displays a list of runners', () => {
@@ -62,7 +68,7 @@ describe('RunnerList', () => {
     const { id, description, version, ipAddress, shortSha } = mockRunners[0];
 
     // Badges
-    expect(findCell({ fieldKey: 'type' }).text()).toMatchInterpolatedText('specific paused');
+    expect(findCell({ fieldKey: 'status' }).text()).toMatchInterpolatedText('not connected paused');
 
     // Runner summary
     expect(findCell({ fieldKey: 'summary' }).text()).toContain(

@@ -10,6 +10,8 @@ module EE
       TRIAL_ONBOARDING_BOARD_NAME = 'GitLab onboarding'
 
       prepended do
+        include OneTrustCSP
+
         before_action :authorized_for_trial_onboarding!,
                       only: [
                         :trial_getting_started,
@@ -36,6 +38,8 @@ module EE
       def continuous_onboarding_getting_started
         project = ::Project.find(params[:project_id])
         return access_denied! unless can?(current_user, :owner_access, project)
+
+        session[:confetti_post_signup] = true
 
         render locals: { project: project }
       end

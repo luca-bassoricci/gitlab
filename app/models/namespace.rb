@@ -16,7 +16,9 @@ class Namespace < ApplicationRecord
   include Namespaces::Traversal::Linear
   include EachBatch
 
-  ignore_column :delayed_project_removal, remove_with: '14.1', remove_after: '2021-05-22'
+  # Temporary column used for back-filling project namespaces.
+  # Remove it once the back-filling of all project namespaces is done.
+  ignore_column :tmp_project_id, remove_with: '14.7', remove_after: '2022-01-22'
 
   # Tells ActiveRecord not to store the full class name, in order to save some space
   # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/69794
@@ -49,9 +51,7 @@ class Namespace < ApplicationRecord
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
-  # TODO: can this be moved into the UserNamespace class?
-  #       evaluate in issue https://gitlab.com/gitlab-org/gitlab/-/issues/341070
-  belongs_to :owner, class_name: "User"
+  belongs_to :owner, class_name: 'User'
 
   belongs_to :parent, class_name: "Namespace"
   has_many :children, -> { where(type: Group.sti_name) }, class_name: "Namespace", foreign_key: :parent_id
@@ -94,7 +94,7 @@ class Namespace < ApplicationRecord
 
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
-  validate :validate_parent_type, if: -> { Feature.enabled?(:validate_namespace_parent_type, default_enabled: :yaml) }
+  validate :validate_parent_type
 
   # ProjectNamespaces excluded as they are not meant to appear in the group hierarchy at the moment.
   validate :nesting_level_allowed, unless: -> { project_namespace? }
@@ -495,6 +495,10 @@ class Namespace < ApplicationRecord
 
   def issue_repositioning_disabled?
     Feature.enabled?(:block_issue_repositioning, self, type: :ops, default_enabled: :yaml)
+  end
+
+  def project_namespace_creation_enabled?
+    Feature.enabled?(:create_project_namespace_on_project_create, self, default_enabled: :yaml)
   end
 
   private

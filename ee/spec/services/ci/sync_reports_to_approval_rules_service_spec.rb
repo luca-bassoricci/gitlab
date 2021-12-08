@@ -8,6 +8,10 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
   let(:merge_request) { create(:merge_request, source_project: project) }
   let(:pipeline) { create(:ee_ci_pipeline, :success, project: project, merge_requests_as_head_pipeline: [merge_request]) }
   let(:base_pipeline) { create(:ee_ci_pipeline, :success, project: project, ref: merge_request.target_branch, sha: merge_request.diff_base_sha) }
+  let(:scanners) { %w[dependency_scanning] }
+  let(:vulnerabilities_allowed) { 0 }
+  let(:severity_levels) { %w[high unknown] }
+  let(:vulnerability_states) { %w(newly_detected) }
 
   subject(:sync_rules) { described_class.new(pipeline).execute }
 
@@ -17,27 +21,23 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
     stub_licensed_features(dependency_scanning: true, dast: true, license_scanning: true)
   end
 
-  context 'with security rules' do
-    let(:report_approver_rule) { create(:report_approver_rule, merge_request: merge_request, approvals_required: 2) }
-    let(:scanners) { %w[dependency_scanning] }
-    let(:vulnerabilities_allowed) { 0 }
-    let(:severity_levels) { %w[high unknown] }
-    let(:vulnerability_states) { %w(newly_detected) }
-
-    before do
-      create(:approval_project_rule, :vulnerability, project: project, approvals_required: 2, scanners: scanners, vulnerabilities_allowed: vulnerabilities_allowed, severity_levels: severity_levels, vulnerability_states: vulnerability_states)
+  shared_examples 'a successful execution' do
+    it "is successful" do
+      expect(sync_rules[:status]).to eq(:success)
     end
+  end
 
+  shared_context 'security reports with vulnerabilities' do
     context 'when there are security reports' do
       context 'when pipeline passes' do
         context 'when high-severity vulnerabilities are present' do
           before do
-            create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: pipeline, project: project)
+            create(:ee_ci_build, :success, :dependency_scanning, :coverage, name: 'ds_job', pipeline: pipeline, project: project)
           end
 
           context 'when high-severity vulnerabilities already present in target branch pipeline' do
             before do
-              create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: base_pipeline, project: project)
+              create(:ee_ci_build, :success, :dependency_scanning, :coverage, name: 'ds_job', pipeline: base_pipeline, project: project)
             end
 
             it 'lowers approvals_required count to zero' do
@@ -161,12 +161,12 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
 
         context 'when high-severity vulnerabilities are present' do
           before do
-            create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: pipeline, project: project)
+            create(:ee_ci_build, :success, :dependency_scanning, :coverage, name: 'ds_job', pipeline: pipeline, project: project)
           end
 
           context 'when high-severity vulnerabilities already present in target branch pipeline' do
             before do
-              create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: base_pipeline, project: project)
+              create(:ee_ci_build, :success, :dependency_scanning, :coverage, name: 'ds_job', pipeline: base_pipeline, project: project)
             end
 
             it 'lowers approvals_required count to zero' do
@@ -215,6 +215,16 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
     end
   end
 
+  context 'with security rules' do
+    let(:report_approver_rule) { create(:report_approver_rule, merge_request: merge_request, approvals_required: 2) }
+
+    before do
+      create(:approval_project_rule, :vulnerability, project: project, approvals_required: 2, scanners: scanners, vulnerabilities_allowed: vulnerabilities_allowed, severity_levels: severity_levels, vulnerability_states: vulnerability_states)
+    end
+
+    include_context 'security reports with vulnerabilities'
+  end
+
   context 'with code coverage rules' do
     let!(:head_pipeline_builds) do
       [
@@ -240,6 +250,8 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
           ]
         end
 
+        it_behaves_like 'a successful execution'
+
         it "won't lower approvals_required count" do
           expect { sync_rules }
             .not_to change { report_approver_rule.reload.approvals_required }
@@ -255,6 +267,8 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
           ]
         end
 
+        it_behaves_like 'a successful execution'
+
         it "lowers approvals_required count" do
           expect { sync_rules }
             .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
@@ -262,6 +276,8 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
 
         context 'when MR is merged' do
           let!(:merge_request) { create(:merge_request, :merged, source_project: project) }
+
+          it_behaves_like 'a successful execution'
 
           it "won't change approvals_required count" do
             expect { subject }
@@ -279,9 +295,32 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
           ]
         end
 
+        it_behaves_like 'a successful execution'
+
         it "lowers approvals_required count" do
           expect { sync_rules }
             .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
+        end
+      end
+
+      context 'and head pipeline does not have coverage' do
+        let!(:head_pipeline_builds) do
+          [
+            create(:ci_build, :success, coverage: nil, pipeline: pipeline)
+          ]
+        end
+
+        let!(:base_pipeline_builds) do
+          [
+            create(:ci_build, :success, coverage: 60.0, pipeline: base_pipeline)
+          ]
+        end
+
+        it_behaves_like 'a successful execution'
+
+        it "does not lower approvals_required count" do
+          expect { sync_rules }
+            .not_to change { report_approver_rule.reload.approvals_required }
         end
       end
     end
@@ -298,6 +337,8 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
         allow(pipeline).to receive(:complete?).and_return(false)
       end
 
+      it_behaves_like 'a successful execution'
+
       it "won't lower approvals_required count" do
         expect { sync_rules }
           .not_to change { report_approver_rule.reload.approvals_required }
@@ -309,10 +350,70 @@ RSpec.describe Ci::SyncReportsToApprovalRulesService, '#execute' do
         allow(pipeline).to receive(:complete?).and_return(true)
       end
 
+      it_behaves_like 'a successful execution'
+
       it "lowers approvals_required count" do
         expect { sync_rules }
           .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
       end
     end
+
+    context 'when base pipeline does not have coverage' do
+      before do
+        allow(pipeline).to receive(:complete?).and_return(true)
+      end
+
+      let!(:base_pipeline_builds) do
+        [
+          create(:ci_build, :success, coverage: nil, pipeline: base_pipeline)
+        ]
+      end
+
+      it_behaves_like 'a successful execution'
+
+      it "does not lower approvals_required count" do
+        expect { sync_rules }
+          .not_to change { report_approver_rule.reload.approvals_required }
+      end
+    end
+  end
+
+  context 'with security orchestration rules' do
+    let(:report_approver_rule) { create(:report_approver_rule, :scan_finding, merge_request: merge_request, approvals_required: 2) }
+    let(:approval_project_rule) { create(:approval_project_rule, :scan_finding, project: project, approvals_required: 2, scanners: scanners, vulnerabilities_allowed: vulnerabilities_allowed, severity_levels: severity_levels, vulnerability_states: vulnerability_states) }
+    let!(:security_orchestration_policy_configuration) { create(:security_orchestration_policy_configuration, project: project) }
+
+    before do
+      create(:approval_merge_request_rule_source, approval_merge_request_rule: report_approver_rule, approval_project_rule: approval_project_rule)
+    end
+
+    context 'when there are security reports' do
+      context 'when pipeline passes' do
+        context 'when new vulnerabilities are present' do
+          before do
+            create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: pipeline, project: project)
+          end
+
+          context 'when only existing vulnerabilities are present' do
+            before do
+              create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: base_pipeline, project: project)
+            end
+
+            context 'with feature flag disabled' do
+              before do
+                stub_feature_flags(scan_result_policy: false)
+              end
+
+              it "won't change approval_required count" do
+                expect { subject }
+                .not_to change { report_approver_rule.reload.approvals_required }
+              end
+            end
+          end
+        end
+      end
+    end
+
+    include_context 'security reports with vulnerabilities'
   end
 end

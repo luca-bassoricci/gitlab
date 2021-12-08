@@ -2,11 +2,11 @@ import { GlFilteredSearchToken } from '@gitlab/ui';
 import { keyBy } from 'lodash';
 import { ListType } from '~/boards/constants';
 import { __ } from '~/locale';
-import { DEFAULT_MILESTONES_GRAPHQL } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
-import WeightToken from '~/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
+import ReleaseToken from '~/vue_shared/components/filtered_search_bar/tokens/release_token.vue';
 
 export const boardObj = {
   id: 1,
@@ -20,7 +20,6 @@ export const listObj = {
   position: 0,
   title: 'Test',
   list_type: 'label',
-  weight: 3,
   label: {
     id: 5000,
     title: 'Test',
@@ -30,17 +29,27 @@ export const listObj = {
   },
 };
 
-export const listObjDuplicate = {
-  id: listObj.id,
-  position: 1,
-  title: 'Test',
-  list_type: 'label',
-  weight: 3,
-  label: {
-    id: listObj.label.id,
-    title: 'Test',
-    color: '#ff0000',
-    description: 'testing;',
+export const mockGroupBoardResponse = {
+  data: {
+    workspace: {
+      board: {
+        id: 'gid://gitlab/Board/1',
+        name: 'Development',
+      },
+      __typename: 'Group',
+    },
+  },
+};
+
+export const mockProjectBoardResponse = {
+  data: {
+    workspace: {
+      board: {
+        id: 'gid://gitlab/Board/2',
+        name: 'Development',
+      },
+      __typename: 'Project',
+    },
   },
 };
 
@@ -143,7 +152,6 @@ export const rawIssue = {
   iid: '27',
   dueDate: null,
   timeEstimate: 0,
-  weight: null,
   confidential: false,
   referencePath: 'gitlab-org/test-subgroup/gitlab-test#27',
   path: '/gitlab-org/test-subgroup/gitlab-test/-/issues/27',
@@ -173,7 +181,6 @@ export const mockIssue = {
   title: 'Issue 1',
   dueDate: null,
   timeEstimate: 0,
-  weight: null,
   confidential: false,
   referencePath: `${mockIssueFullPath}#27`,
   path: `/${mockIssueFullPath}/-/issues/27`,
@@ -205,7 +212,6 @@ export const mockIssue2 = {
   title: 'Issue 2',
   dueDate: null,
   timeEstimate: 0,
-  weight: null,
   confidential: false,
   referencePath: 'gitlab-org/test-subgroup/gitlab-test#28',
   path: '/gitlab-org/test-subgroup/gitlab-test/-/issues/28',
@@ -223,7 +229,6 @@ export const mockIssue3 = {
   referencePath: '#29',
   dueDate: null,
   timeEstimate: 0,
-  weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
   assignees,
@@ -238,7 +243,6 @@ export const mockIssue4 = {
   referencePath: '#30',
   dueDate: null,
   timeEstimate: 0,
-  weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
   assignees,
@@ -539,11 +543,20 @@ export const mockMoveData = {
   ...mockMoveIssueParams,
 };
 
-export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
+export const mockEmojiToken = {
+  type: 'my-reaction',
+  icon: 'thumb-up',
+  title: 'My-Reaction',
+  unique: true,
+  token: EmojiToken,
+  fetchEmojis: expect.any(Function),
+};
+
+export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones, hasEmoji) => [
   {
     icon: 'user',
     title: __('Assignee'),
-    type: 'assignee_username',
+    type: 'assignee',
     operators: [
       { value: '=', description: 'is' },
       { value: '!=', description: 'is not' },
@@ -556,7 +569,7 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
   {
     icon: 'pencil',
     title: __('Author'),
-    type: 'author_username',
+    type: 'author',
     operators: [
       { value: '=', description: 'is' },
       { value: '!=', description: 'is not' },
@@ -570,7 +583,7 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
   {
     icon: 'labels',
     title: __('Label'),
-    type: 'label_name',
+    type: 'label',
     operators: [
       { value: '=', description: 'is' },
       { value: '!=', description: 'is not' },
@@ -580,21 +593,20 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
     symbol: '~',
     fetchLabels,
   },
+  ...(hasEmoji ? [mockEmojiToken] : []),
   {
     icon: 'clock',
     title: __('Milestone'),
     symbol: '%',
-    type: 'milestone_title',
+    type: 'milestone',
     token: MilestoneToken,
     unique: true,
-    defaultMilestones: DEFAULT_MILESTONES_GRAPHQL,
     fetchMilestones,
   },
   {
     icon: 'issues',
     title: __('Type'),
-    type: 'types',
-    operators: [{ value: '=', description: 'is' }],
+    type: 'type',
     token: GlFilteredSearchToken,
     unique: true,
     options: [
@@ -603,11 +615,11 @@ export const mockTokens = (fetchLabels, fetchAuthors, fetchMilestones) => [
     ],
   },
   {
-    icon: 'weight',
-    title: __('Weight'),
-    type: 'weight',
-    token: WeightToken,
-    unique: true,
+    type: 'release',
+    title: __('Release'),
+    icon: 'rocket',
+    token: ReleaseToken,
+    fetchReleases: expect.any(Function),
   },
 ];
 
@@ -634,8 +646,8 @@ export const mockProjectLabelsResponse = {
       labels: {
         nodes: [mockLabel1, mockLabel2],
       },
+      __typename: 'Project',
     },
-    __typename: 'Project',
   },
 };
 
@@ -646,7 +658,7 @@ export const mockGroupLabelsResponse = {
       labels: {
         nodes: [mockLabel1, mockLabel2],
       },
+      __typename: 'Group',
     },
-    __typename: 'Group',
   },
 };

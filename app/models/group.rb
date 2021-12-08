@@ -56,6 +56,9 @@ class Group < Namespace
   has_many :boards
   has_many :badges, class_name: 'GroupBadge'
 
+  has_many :organizations, class_name: 'CustomerRelations::Organization', inverse_of: :group
+  has_many :contacts, class_name: 'CustomerRelations::Contact', inverse_of: :group
+
   has_many :cluster_groups, class_name: 'Clusters::Group'
   has_many :clusters, through: :cluster_groups, class_name: 'Clusters::Cluster'
 
@@ -194,13 +197,8 @@ class Group < Namespace
     def ids_with_disabled_email(groups)
       inner_groups = Group.where('id = namespaces_with_emails_disabled.id')
 
-      inner_ancestors = if Feature.enabled?(:linear_group_ancestor_scopes, default_enabled: :yaml)
-                          inner_groups.self_and_ancestors
-                        else
-                          Gitlab::ObjectHierarchy.new(inner_groups).base_and_ancestors
-                        end
-
-      inner_query = inner_ancestors
+      inner_query = inner_groups
+        .self_and_ancestors
         .where(emails_disabled: true)
         .select('1')
         .limit(1)
@@ -762,14 +760,6 @@ class Group < Namespace
     Timelog.in_group(self)
   end
 
-  def organizations
-    ::CustomerRelations::Organization.where(group_id: self.id)
-  end
-
-  def contacts
-    ::CustomerRelations::Contact.where(group_id: self.id)
-  end
-
   def dependency_proxy_image_ttl_policy
     super || build_dependency_proxy_image_ttl_policy
   end
@@ -862,15 +852,7 @@ class Group < Namespace
   end
 
   def self.groups_including_descendants_by(group_ids)
-    groups = Group.where(id: group_ids)
-
-    if Feature.enabled?(:linear_group_including_descendants_by, default_enabled: :yaml)
-      groups.self_and_descendants
-    else
-      Gitlab::ObjectHierarchy
-      .new(groups)
-      .base_and_descendants
-    end
+    Group.where(id: group_ids).self_and_descendants
   end
 
   def disable_shared_runners!

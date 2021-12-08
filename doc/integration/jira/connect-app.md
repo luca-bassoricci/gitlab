@@ -23,7 +23,7 @@ We recommend the GitLab.com for Jira Cloud app, because data is
 synchronized in real time. The DVCS connector updates data only once per hour.
 
 The user configuring the GitLab.com for Jira Cloud app must have
-at least the [Maintainer](../../user/permissions.md) role the GitLab.com namespace.
+at least the [Maintainer](../../user/permissions.md) role in the GitLab.com namespace.
 
 This integration method supports [Smart Commits](dvcs.md#smart-commits).
 
@@ -76,7 +76,7 @@ If the app requires additional permissions, [the update must first be manually a
 ## Install the GitLab.com for Jira Cloud app for self-managed instances **(FREE SELF)**
 
 If your GitLab instance is self-managed, you must follow some
-extra steps to install the GitLab.com for Jira Cloud app.
+extra steps to install the GitLab.com for Jira Cloud app, and your GitLab instance must be accessible by Jira.
 
 Each Jira Cloud application must be installed from a single location. Jira fetches
 a [manifest file](https://developer.atlassian.com/cloud/jira/platform/connect-app-descriptor/)

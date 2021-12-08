@@ -4,6 +4,7 @@ module Registrations
   class GroupsController < ApplicationController
     include Registrations::CreateGroup
     include ::Gitlab::Utils::StrongMemoize
+    include OneTrustCSP
 
     layout 'minimal'
 
@@ -17,7 +18,7 @@ module Registrations
     end
 
     def create
-      @group = Groups::CreateService.new(current_user, group_params.merge(create_event: true)).execute
+      @group = Groups::CreateService.new(current_user, group_params).execute
 
       if @group.persisted?
         experiment(:combined_registration, user: current_user).track(:create_group, namespace: @group)

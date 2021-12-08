@@ -7,8 +7,6 @@ module Gitlab
         class Build < Seed::Base
           include Gitlab::Utils::StrongMemoize
 
-          EnvironmentCreationFailure = Class.new(StandardError)
-
           delegate :dig, to: :@seed_attributes
 
           def initialize(context, attributes, stages_for_needs_lookup = [])
@@ -80,7 +78,7 @@ module Gitlab
           def to_resource
             strong_memoize(:resource) do
               processable = initialize_processable
-              assign_resource_group(processable)
+              assign_resource_group(processable) unless @pipeline.create_deployment_in_separate_transaction?
               processable
             end
           end
@@ -90,7 +88,9 @@ module Gitlab
               ::Ci::Bridge.new(attributes)
             else
               ::Ci::Build.new(attributes).tap do |build|
-                build.assign_attributes(self.class.deployment_attributes_for(build))
+                unless @pipeline.create_deployment_in_separate_transaction?
+                  build.assign_attributes(self.class.deployment_attributes_for(build))
+                end
               end
             end
           end
@@ -107,20 +107,7 @@ module Gitlab
             environment = Seed::Environment.new(build).to_resource if environment.nil?
 
             unless environment.persisted?
-              if Feature.enabled?(:surface_environment_creation_failure, build.project, default_enabled: :yaml) &&
-                 Feature.disabled?(:surface_environment_creation_failure_override, build.project)
-                return { status: :failed, failure_reason: :environment_creation_failure }
-              end
-
-              # If there is a validation error on environment creation, such as
-              # the name contains invalid character, the build falls back to a
-              # non-environment job.
-              Gitlab::ErrorTracking.track_exception(
-                EnvironmentCreationFailure.new,
-                project_id: build.project_id,
-                reason: environment.errors.full_messages.to_sentence)
-
-              return { environment: nil }
+              return { status: :failed, failure_reason: :environment_creation_failure }
             end
 
             build.persisted_environment = environment
@@ -173,7 +160,7 @@ module Gitlab
           end
 
           def variable_expansion_errors
-            expanded_collection = evaluate_context.variables.sort_and_expand_all(@pipeline.project)
+            expanded_collection = evaluate_context.variables.sort_and_expand_all
             errors = expanded_collection.errors
             ["#{name}: #{errors}"] if errors
           end
@@ -215,12 +202,14 @@ module Gitlab
           end
 
           def runner_tags
-            { tag_list: evaluate_runner_tags }.compact
+            strong_memoize(:runner_tags) do
+              { tag_list: evaluate_runner_tags }.compact
+            end
           end
 
           def evaluate_runner_tags
-            @seed_attributes[:tag_list]&.map do |tag|
-              ExpandVariables.expand_existing(tag, evaluate_context.variables)
+            @seed_attributes.delete(:tag_list)&.map do |tag|
+              ExpandVariables.expand_existing(tag, -> { evaluate_context.variables_hash })
             end
           end
 
@@ -244,5 +233,3 @@ module Gitlab
     end
   end
 end
-
-Gitlab::Ci::Pipeline::Seed::Build.prepend_mod_with('Gitlab::Ci::Pipeline::Seed::Build')

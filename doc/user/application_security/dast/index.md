@@ -16,6 +16,10 @@ Dynamic Application Security Testing (DAST) examines applications for
 vulnerabilities like these in deployed environments. DAST uses the open source
 tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/) for analysis.
 
+INFO:
+Want to try out security scanning?
+[Try GitLab Ultimate free for 30 days](https://about.gitlab.com/free-trial?glm_source=docs.gitlab.com&glm_content=u-dast-docs).
+
 After DAST creates its report, GitLab evaluates it for discovered
 vulnerabilities between the source and target branches. Relevant
 findings are noted in the merge request.
@@ -254,7 +258,7 @@ The included template creates a `dast` job in your CI/CD pipeline and scans
 your project's running application for possible vulnerabilities.
 
 The results are saved as a
-[DAST report artifact](../../../ci/yaml/index.md#artifactsreportsdast)
+[DAST report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportsdast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest DAST artifact available. Behind the scenes, the
 [GitLab DAST Docker image](https://gitlab.com/security-products/dast)
@@ -954,6 +958,18 @@ An on-demand scan can be run in active or passive mode:
   minimize the risk of accidental damage, running an active scan requires a [validated site
   profile](#site-profile-validation).
 
+### View on-demand DAST scans
+
+To view running completed and scheduled on-demand DAST scans for a project, go to
+**Security & Compliance > On-demand Scans** in the left sidebar.
+
+- To view both running and completed scans, select **All**.
+- To view running scans only, select **Running**.
+- To view finished scans, select **Finished**. A finished scan is a scan that either succeeded,
+  failed, or was canceled.
+- To view scheduled scans, select **Scheduled**. It shows on-demand scans that have a schedule
+  set up. Those are _not_ included in the **All** tab.
+
 ### Run an on-demand DAST scan
 
 Prerequisites:
@@ -987,6 +1003,7 @@ To run an on-demand scan either at a scheduled date or frequency, read
 
 1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left
    sidebar.
+1. Select **New DAST scan**.
 1. Complete the **Scan name** and **Description** fields.
 1. In GitLab 13.10 and later, select the desired branch from the **Branch** dropdown.
 1. In **Scanner profile**, select a scanner profile from the dropdown.
@@ -1017,12 +1034,13 @@ The on-demand DAST scan runs, and the project's dashboard shows the results.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328749) in GitLab 14.3. [Deployed behind the `dast_on_demand_scans_scheduler` flag](../../../administration/feature_flags.md), disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/328749) in GitLab 14.4.
 > - [Enabled on self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/328749) in GitLab 14.4.
-> - [Feature flag dast_on_demand_scans_scheduler removed](https://gitlab.com/gitlab-org/gitlab/-/issues/328749) in GitLab 14.5.
+> - [Feature flag `dast_on_demand_scans_scheduler` removed](https://gitlab.com/gitlab-org/gitlab/-/issues/328749) in GitLab 14.5.
 
 To schedule a scan:
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Security & Compliance > On-demand Scans**.
+1. Select **New DAST scan**.
 1. Complete the **Scan name** and **Description** text boxes.
 1. In GitLab 13.10 and later, from the **Branch** dropdown list, select the desired branch.
 1. In the **Scanner profile** section, from the dropdown list, select a scanner profile.
@@ -1336,27 +1354,6 @@ The JSON report artifacts are not a public API of DAST and their format is expec
 The DAST tool always emits a JSON report file called `gl-dast-report.json` and
 sample reports can be found in the
 [DAST repository](https://gitlab.com/gitlab-org/security-products/dast/-/tree/master/test/end-to-end/expect).
-
-### Other formats
-
-Reports can also be generated in Markdown, HTML, and XML. These can be published as artifacts using the following configuration:
-
-```yaml
-include:
-  template: DAST.gitlab-ci.yml
-
-dast:
-  variables:
-    DAST_HTML_REPORT: report.html
-    DAST_MARKDOWN_REPORT: report.md
-    DAST_XML_REPORT: report.xml
-  artifacts:
-    paths:
-      - $DAST_HTML_REPORT
-      - $DAST_MARKDOWN_REPORT
-      - $DAST_XML_REPORT
-      - gl-dast-report.json
-```
 
 ## Optimizing DAST
 

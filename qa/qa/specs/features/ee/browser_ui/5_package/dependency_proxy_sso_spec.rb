@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
 module QA
-  # This test is disabled on staging and production due to `top_level_group_creation_enabled` set to false.
-  # See: https://gitlab.com/gitlab-org/gitlab/-/issues/342329#note_696599160
-  # When FF enabled, the test is failing with https://gitlab.com/gitlab-org/gitlab/-/issues/342523
-  RSpec.describe 'Package', :orchestrated, :group_saml, :requires_admin, quarantine: { only: [:staging, :production], issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/342523', type: :investigating } do
+  RSpec.describe 'Package', :orchestrated, :group_saml, :requires_admin, except: { subdomain: :staging } do
     describe 'Dependency Proxy Group SSO' do
       include Support::API
 
       let!(:group) do
-        Resource::Sandbox.fabricate_via_api! do |sandbox_group|
+        Resource::Sandbox.fabricate! do |sandbox_group|
           sandbox_group.path = "saml_sso_group_with_dependency_proxy_#{SecureRandom.hex(8)}"
         end
       end
@@ -48,6 +45,7 @@ module QA
       let(:uri) { URI.parse(Runtime::Scenario.gitlab_address) }
       let(:gitlab_host_with_port) { "#{uri.host}:#{uri.port}" }
       let(:dependency_proxy_url) { "#{gitlab_host_with_port}/#{project.group.full_path}/dependency_proxy/containers" }
+      let(:image_sha) { 'alpine@sha256:c3d45491770c51da4ef58318e3714da686bc7165338b7ab5ac758e75c7455efb' }
 
       before do
         Page::Main::Menu.perform(&:sign_out_if_signed_in)
@@ -74,34 +72,34 @@ module QA
         runner.remove_via_api!
       end
 
-      it "pulls an image using the dependency proxy on a group enforced SSO" do
+      it "pulls an image using the dependency proxy on a group enforced SSO", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/quality/test_cases/2291' do
         project.group.visit!
 
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
           commit.add_files([{
-                              file_path: '.gitlab-ci.yml',
-                              content:
+                             file_path: '.gitlab-ci.yml',
+                             content:
                                   <<~YAML
                                     dependency-proxy-pull-test:
                                       image: "docker:stable"
-                                      services: 
+                                      services:
                                       - name: "docker:stable-dind"
                                         command: ["--insecure-registry=#{gitlab_host_with_port}"]
                                       before_script:
                                         - apk add curl jq grep
                                         - docker login -u "$CI_DEPENDENCY_PROXY_USER" -p "$CI_DEPENDENCY_PROXY_PASSWORD" "$CI_DEPENDENCY_PROXY_SERVER"
                                       script:
-                                        - docker pull #{dependency_proxy_url}/alpine:latest
+                                        - docker pull #{dependency_proxy_url}/#{image_sha}
                                         - TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq --raw-output .token)
                                         - 'curl --head --header "Authorization: Bearer $TOKEN" "https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest" 2>&1'
-                                        - docker pull #{dependency_proxy_url}/alpine:latest
+                                        - docker pull #{dependency_proxy_url}/#{image_sha}
                                         - 'curl --head --header "Authorization: Bearer $TOKEN" "https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest" 2>&1'
                                       tags:
                                       - "runner-for-#{project.name}"
                                   YAML
-                          }])
+                           }])
         end
 
         project.visit!
@@ -122,12 +120,12 @@ module QA
         Page::Group::Menu.perform(&:go_to_dependency_proxy)
 
         Page::Group::DependencyProxy.perform do |index|
-          expect(index).to have_blob_count("Contains 2 blobs of images")
+          expect(index).to have_blob_count("Contains 1 blobs of images")
         end
       end
 
       def visit_group_sso_url
-        Runtime::Logger.debug(%Q[Visiting managed_group_url at "#{group_sso_url}"])
+        Runtime::Logger.debug(%(Visiting managed_group_url at "#{group_sso_url}"))
 
         page.visit group_sso_url
         Support::Waiter.wait_until { current_url == group_sso_url }

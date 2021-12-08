@@ -10,10 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - The pre-configured `KUBECONFIG` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/324275) in GitLab 14.2.
 > - The ability to authorize groups was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/5784) in GitLab 14.3.
 > - [Moved](https://gitlab.com/groups/gitlab-org/-/epics/6290) to GitLab Free in 14.5.
-
-WARNING:
-The CI/CD Tunnel is not supported for GitLab self-managed instances installed via Omnibus. We
-plan to [add support for Omnibus](https://gitlab.com/gitlab-org/gitlab/-/issues/324272) in the future.
+> - Support for Omnibus installations was [introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/5686) in GitLab 14.5.
 
 The CI/CD Tunnel enables users to access Kubernetes clusters from GitLab CI/CD jobs even if there is no network
 connectivity between GitLab Runner and a cluster. GitLab Runner does not have to be running in the same cluster.
@@ -43,6 +40,10 @@ To get the list of available contexts, run `kubectl config get-contexts`.
 The Agent can be configured to enable access to the CI/CD Tunnel to other projects or all the projects under a given group. This way you can have a single agent serving all the requests for several projects saving on resources and maintenance.
 
 You can read more on how to [authorize access in the Agent configuration reference](repository.md#authorize-projects-and-groups-to-use-an-agent).
+
+## Restrict access of authorized projects and groups **(PREMIUM)**
+
+You can [configure various impersonations](repository.md#use-impersonation-to-restrict-project-and-group-access) to restrict the permissions of a shared CI/CD Tunnel.
 
 ## Example for a `kubectl` command using the CI/CD Tunnel
 

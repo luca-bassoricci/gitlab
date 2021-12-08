@@ -178,6 +178,13 @@ RSpec.describe MergeRequest, factory_default: :keep do
     it 'returns the merge request title' do
       expect(subject.default_squash_commit_message).to eq(subject.title)
     end
+
+    it 'uses template from target project' do
+      subject.target_project.squash_commit_template = 'Squashed branch %{source_branch} into %{target_branch}'
+
+      expect(subject.default_squash_commit_message)
+        .to eq('Squashed branch master into feature')
+    end
   end
 
   describe 'modules' do
@@ -1132,7 +1139,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
       end
 
       it 'returns the correct overflow count' do
-        allow(Commit).to receive(:max_diff_options).and_return(max_files: 2)
+        allow(Commit).to receive(:diff_max_files).and_return(2)
         set_compare(merge_request)
 
         expect(merge_request.diff_size).to eq('2+')
@@ -1637,6 +1644,22 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       expect(request.default_merge_commit_message)
         .not_to match("By removing all code\n\n")
+    end
+
+    it 'uses template from target project' do
+      request = build(:merge_request, title: 'Fix everything')
+      subject.target_project.merge_commit_template = '%{title}'
+
+      expect(request.default_merge_commit_message)
+        .to eq('Fix everything')
+    end
+
+    it 'ignores template when include_description is true' do
+      request = build(:merge_request, title: 'Fix everything')
+      subject.target_project.merge_commit_template = '%{title}'
+
+      expect(request.default_merge_commit_message(include_description: true))
+        .to match("See merge request #{request.to_reference(full: true)}")
     end
   end
 
@@ -2904,6 +2927,8 @@ RSpec.describe MergeRequest, factory_default: :keep do
       params = {}
       merge_jid = 'hash-123'
 
+      allow(MergeWorker).to receive(:with_status).and_return(MergeWorker)
+
       expect(merge_request).to receive(:expire_etag_cache)
       expect(MergeWorker).to receive(:perform_async).with(merge_request.id, user_id, params) do
         merge_jid
@@ -2921,6 +2946,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:rebase_jid) { 'rebase-jid' }
 
     subject(:execute) { merge_request.rebase_async(user_id) }
+
+    before do
+      allow(RebaseWorker).to receive(:with_status).and_return(RebaseWorker)
+    end
 
     it 'atomically enqueues a RebaseWorker job and updates rebase_jid' do
       expect(RebaseWorker)
@@ -3931,7 +3960,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
         create_build(source_pipeline, 60.2, 'test:1')
         create_build(target_pipeline, 50, 'test:2')
 
-        expect(merge_request.pipeline_coverage_delta).to eq('10.20')
+        expect(merge_request.pipeline_coverage_delta).to be_within(0.001).of(10.2)
       end
     end
 

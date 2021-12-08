@@ -10,13 +10,13 @@ Collaborating around Infrastructure as Code (IaC) changes requires both code cha
 
 ## Output Terraform Plan information into a merge request
 
-Using the [GitLab Terraform Report artifact](../../../ci/yaml/index.md#artifactsreportsterraform),
+Using the [GitLab Terraform Report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportsterraform),
 you can expose details from `terraform plan` runs directly into a merge request widget,
 enabling you to see statistics about the resources that Terraform creates,
 modifies, or destroys.
 
 WARNING:
-Like any other job artifact, Terraform Plan data is [viewable by anyone with Guest access](../../permissions.md) to the repository.
+Like any other job artifact, Terraform Plan data is viewable by anyone with the Guest [role](../../permissions.md) on the repository.
 Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform Plan
 includes sensitive data such as passwords, access tokens, or certificates, we strongly
 recommend encrypting plan output or modifying the project visibility settings.
@@ -62,7 +62,7 @@ To manually configure a GitLab Terraform Report artifact:
 1. Define a `script` that runs `terraform plan` and `terraform show`. These commands
    pipe the output and convert the relevant bits into a store variable `PLAN_JSON`.
    This JSON is used to create a
-   [GitLab Terraform Report artifact](../../../ci/yaml/index.md#artifactsreportsterraform).
+   [GitLab Terraform Report artifact](../../../ci/yaml/artifacts_reports.md#artifactsreportsterraform).
    The Terraform report obtains a Terraform `tfplan.json` file. The collected
    Terraform plan report is uploaded to GitLab as an artifact, and is shown in merge requests.
 

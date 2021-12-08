@@ -55,6 +55,12 @@ module ApplicationWorker
       subclass.after_set_class_attribute { subclass.set_queue }
     end
 
+    def with_status
+      status_from_class = self.sidekiq_options_hash['status_expiration']
+
+      set(status_expiration: status_from_class || Gitlab::SidekiqStatus::DEFAULT_EXPIRATION)
+    end
+
     def generated_queue_name
       Gitlab::SidekiqConfig::WorkerRouter.queue_name_from_worker_name(self)
     end
@@ -87,9 +93,11 @@ module ApplicationWorker
     end
 
     def perform_async(*args)
+      return super if Gitlab::Database::LoadBalancing.primary_only?
+
       # Worker execution for workers with data_consistency set to :delayed or :sticky
       # will be delayed to give replication enough time to complete
-      if utilizes_load_balancing_capabilities?
+      if utilizes_load_balancing_capabilities? && Feature.disabled?(:skip_scheduling_workers_for_replicas, default_enabled: :yaml)
         perform_in(delay_interval, *args)
       else
         super

@@ -34,6 +34,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:escalation_rules).class_name('IncidentManagement::EscalationRule') }
     it { is_expected.to have_many(:escalation_policies).class_name('IncidentManagement::EscalationPolicy').through(:escalation_rules) }
     it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:user) }
+    it { is_expected.to have_many(:deployment_approvals) }
   end
 
   describe 'nested attributes' do
@@ -128,6 +129,14 @@ RSpec.describe User do
           expect(SetUserStatusBasedOnUserCapSettingWorker).to receive(:perform_async).once
 
           create(:user, state: 'blocked_pending_approval')
+        end
+
+        context 'when the user is already active' do
+          it 'does not enqueue SetUserStatusBasedOnUserCapSettingWorker' do
+            expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)
+
+            create(:user, state: 'active')
+          end
         end
       end
     end
@@ -1934,6 +1943,112 @@ RSpec.describe User do
       create(:incident_management_escalation_rule, :with_user, :resolved, policy: policy, user: user)
 
       expect(user.escalation_policies).to contain_exactly(policy)
+    end
+  end
+
+  describe '.user_cap_reached?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { described_class.user_cap_reached? }
+
+    where(:billable_count, :user_cap_max, :result) do
+      2 | nil | false
+      2 | 5   | false
+      5 | 5   | true
+      8 | 5   | true
+    end
+
+    with_them do
+      before do
+        allow(described_class).to receive_message_chain(:billable, :limit).and_return(Array.new(billable_count, instance_double('User')))
+        allow(described_class).to receive(:user_cap_max).and_return(user_cap_max)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '.user_cap_max' do
+    it 'is equal to new_user_signups_cap setting' do
+      cap = 10
+      stub_application_setting(new_user_signups_cap: cap)
+
+      expect(described_class.user_cap_max).to eq(cap)
+    end
+  end
+
+  describe '#blocked_auto_created_omniauth_user?' do
+    context 'when the auto-creation of an omniauth user is blocked' do
+      before do
+        stub_omniauth_setting(block_auto_created_users: true)
+      end
+
+      context 'when the user is an omniauth user' do
+        it 'is true' do
+          omniauth_user = create(:omniauth_user)
+
+          expect(omniauth_user.blocked_auto_created_omniauth_user?).to be_truthy
+        end
+      end
+
+      context 'when the user is not an omniauth user' do
+        it 'is false' do
+          user = build(:user)
+
+          expect(user.blocked_auto_created_omniauth_user?).to be_falsey
+        end
+      end
+    end
+  end
+
+  describe '#has_valid_credit_card?' do
+    it 'returns true when a credit card validation is present' do
+      credit_card_validation = build(:credit_card_validation, credit_card_validated_at: Time.current)
+      user = build(:user, credit_card_validation: credit_card_validation)
+
+      expect(user.has_valid_credit_card?).to be_truthy
+    end
+
+    it 'returns false when a credit card validation is present, but the credit_card_validated_at attribute is blank' do
+      credit_card_validation = build(:credit_card_validation, credit_card_validated_at: nil)
+      user = build(:user, credit_card_validation: credit_card_validation)
+
+      expect(user.has_valid_credit_card?).to be_falsey
+    end
+
+    it 'returns false when a credit card validation is missing' do
+      user = build(:user, credit_card_validation: nil)
+
+      expect(user.has_valid_credit_card?).to be_falsey
+    end
+  end
+
+  describe '#activate_based_on_user_cap?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:user) { create(:user) }
+
+    subject { user.activate_based_on_user_cap? }
+
+    where(:blocked_auto_created_omniauth, :blocked_pending_approval, :user_cap_max_present, :result) do
+      true  | true  | true  | false
+      false | true  | true  | true
+      true  | false | true  | false
+      false | false | true  | false
+      true  | true  | false | false
+      false | true  | false | false
+      true  | false | false | false
+      false | false | false | false
+    end
+
+    with_them do
+      before do
+        allow(user).to receive(:blocked_auto_created_omniauth_user?).and_return(blocked_auto_created_omniauth)
+        allow(user).to receive(:blocked_pending_approval?).and_return(blocked_pending_approval)
+        allow(described_class.user_cap_max).to receive(:present?).and_return(user_cap_max_present)
+      end
+
+      it { is_expected.to eq(result) }
     end
   end
 end

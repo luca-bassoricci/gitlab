@@ -56,6 +56,8 @@ In your repository, add the Agent configuration file under:
 .gitlab/agents/<agent-name>/config.yaml
 ```
 
+Make sure that `<agent-name>` conforms to the [Agent's naming format](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/identity_and_auth.md#agent-identity-and-name).
+
 Your `config.yaml` file specifies all configurations of the Agent, such as:
 
 - The manifest projects to synchronize.
@@ -68,7 +70,8 @@ synchronizations is:
 ```yaml
 gitops:
   manifest_projects:
-  - id: "path-to/your-manifest-project-1"
+  # The `id` is the path to the Git repository holding your manifest files
+  - id: "path/to/your-manifest-project-1"
     paths:
     - glob: '/**/*.{yaml,yml,json}'
 ```
@@ -85,10 +88,10 @@ the Agent in subsequent steps.
 
 In GitLab:
 
+1. Ensure that [GitLab CI/CD is enabled in your project](../../../../ci/enable_or_disable_ci.md#enable-cicd-in-a-project).
 1. From your project's sidebar, select **Infrastructure > Kubernetes clusters**.
-1. Select the **GitLab Agent managed clusters** tab.
-1. Select **Integrate with the GitLab Agent**.
-1. From the **Select an Agent** dropdown menu, select the Agent you want to connect and select **Next** to access the installation form.
+1. Select **Actions**.
+1. From the **Select an Agent** dropdown, select the Agent you want to connect and select **Register Agent** to access the installation form.
 1. The form reveals your registration token. Securely store this secret token as you cannot view it again.
 1. Copy the command under **Recommended installation method**.
 
@@ -340,26 +343,27 @@ The following example projects can help you get started with the Kubernetes Agen
 
 Users with at least the [Developer](../../../permissions.md) can access the user interface
 for the GitLab Kubernetes Agent at **Infrastructure > Kubernetes clusters**, under the
-**GitLab Agent managed clusters** tab. This page lists all registered agents for
-the current project, and the configuration directory for each agent:
+**Agent** tab. This page lists all registered agents for the current project,
+and the configuration directory for each agent:
 
-![GitLab Kubernetes Agent list UI](../../img/kubernetes-agent-ui-list_v13_8.png)
+![GitLab Kubernetes Agent list UI](../../img/kubernetes-agent-ui-list_v14_5.png)
 
 Additional management interfaces are planned for the GitLab Kubernetes Agent.
 [Provide more feedback in the related epic](https://gitlab.com/groups/gitlab-org/-/epics/4739).
 
 ## Upgrades and version compatibility
 
-As the GitLab Kubernetes Agent is a new product, we are constantly adding new features
-to it. As a result, while shipped features are production ready, its internal API is
-neither stable nor versioned yet. For this reason, GitLab only guarantees compatibility
-between corresponding major.minor (X.Y) versions of GitLab and its cluster side
-component, `agentk`.
+The GitLab Kubernetes Agent is comprised of two major components: `agentk` and `kas`.
+As we provide `kas` installers built into the various GitLab installation methods, the required `kas` version corresponds to the GitLab `major.minor` (X.Y) versions.
 
-Upgrade your agent installations together with GitLab upgrades. To decide which version of `agentk` to install follow:
+At the same time, `agentk` and `kas` can differ by 1 minor version in either direction. For example,
+`agentk` 14.4 supports `kas` 14.3, 14.4, and 14.5 (regardless of the patch).
 
-1. Open the [`GITLAB_KAS_VERSION`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
-1. Change the `master` branch and select the Git tag associated with your version. For instance, you could change it to GitLab [v13.5.3-ee release](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.5.3-ee/GITLAB_KAS_VERSION)
+A feature introduced in a given GitLab minor version might work with other `agentk` or `kas` versions.
+To make sure that it works, use at least the same `agentk` and `kas` minor version. For example,
+if your GitLab version is 14.2, use at least `agentk` 14.2 and `kas` 14.2.
+
+We recommend upgrading your `kas` installations together with GitLab instances' upgrades, and to upgrade the `agentk` installations after upgrading GitLab.
 
 The available `agentk` and `kas` versions can be found in
 [the container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/).

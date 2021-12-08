@@ -48,7 +48,7 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
    sudo -u git -H editor config/gitlab.yml
    ```
 
-1. See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
+1. See [Configure initial settings](omniauth.md#configure-initial-settings) for initial settings.
 
 1. Add the provider configuration:
 
@@ -57,9 +57,10 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
    ```ruby
    gitlab_rails['omniauth_providers'] = [
      {
-       "name" => "salesforce",
-       "app_id" => "SALESFORCE_CLIENT_ID",
-       "app_secret" => "SALESFORCE_CLIENT_SECRET"
+       name: "salesforce",
+       # label: "Provider name", # optional label for login button, defaults to "Salesforce"
+       app_id: "SALESFORCE_CLIENT_ID",
+       app_secret: "SALESFORCE_CLIENT_SECRET"
      }
    ]
    ```
@@ -68,6 +69,7 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
 
    ```yaml
    - { name: 'salesforce',
+       # label: 'Provider name', # optional label for login button, defaults to "Salesforce"
        app_id: 'SALESFORCE_CLIENT_ID',
        app_secret: 'SALESFORCE_CLIENT_SECRET'
    }

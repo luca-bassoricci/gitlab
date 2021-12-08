@@ -15,12 +15,15 @@ class Projects::ForksController < Projects::ApplicationController
   before_action :authorize_fork_namespace!, only: [:create]
 
   feature_category :source_code_management
+  urgency :low, [:index]
 
   before_action do
     push_frontend_feature_flag(:fork_project_form, @project, default_enabled: :yaml)
   end
 
   def index
+    @sort = params[:sort]
+
     @total_forks_count    = project.forks.size
     @public_forks_count   = project.forks.public_only.size
     @private_forks_count  = @total_forks_count - project.forks.public_and_internal_only.size

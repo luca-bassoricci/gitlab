@@ -63,7 +63,7 @@ To edit a merge request approval rule:
 
 1. Go to your project and select **Settings > General**.
 1. Expand **Merge request (MR) approvals**, and then select **Edit**.
-1. (Optional) Change the **Rule name**.
+1. Optional. Change the **Rule name**.
 1. Set the number of required approvals in **Approvals required**. The minimum value is `0`.
 1. Add or remove eligible approvers, as needed:
    - *To add users or groups as approvers,* search for users or groups that are
@@ -167,7 +167,7 @@ for protected branches. **(PREMIUM)**
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40491) in GitLab 13.4.
 > - Moved to GitLab Premium in 13.9.
 
-You may need to grant users with [Reporter permissions](../../../permissions.md#project-members-permissions),
+You may have to grant users with the Reporter [role](../../../permissions.md#project-members-permissions)
 permission to approve merge requests before they can merge to a protected branch.
 Some users (like managers) may not need permission to push or merge code, but still need
 oversight on proposed work. To enable approval permissions for these users without

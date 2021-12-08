@@ -174,8 +174,10 @@ class License < ApplicationRecord
     issuable_health_status
     jira_vulnerabilities_integration
     jira_issue_association_enforcement
+    kubernetes_cluster_vulnerabilities
     license_scanning
     personal_access_token_expiration_policy
+    project_quality_summary
     prometheus_alerts
     pseudonymizer
     quality_management
@@ -183,12 +185,14 @@ class License < ApplicationRecord
     report_approver_rules
     requirements
     sast
+    sast_iac
     sast_custom_rulesets
     sast_fp_reduction
     secret_detection
     security_dashboard
     security_on_demand_scans
     security_orchestration_policies
+    ssh_key_expiration_policy
     status_page
     subepics
     threat_monitoring
@@ -259,7 +263,7 @@ class License < ApplicationRecord
   validate :valid_license
   validate :check_users_limit, if: :new_record?, unless: [:validate_with_trueup?, :reconciliation_completed?]
   validate :check_trueup, unless: :reconciliation_completed?, if: [:new_record?, :validate_with_trueup?]
-  validate :check_restricted_user_count, if: :reconciliation_completed?
+  validate :check_restricted_user_count, if: [:new_record?, :reconciliation_completed?]
   validate :not_expired, if: :new_record?
 
   before_validation :reset_license, if: :data_changed?

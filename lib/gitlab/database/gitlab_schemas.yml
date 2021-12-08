@@ -1,4 +1,5 @@
 abuse_reports: :gitlab_main
+agent_activity_events: :gitlab_main
 agent_group_authorizations: :gitlab_main
 agent_project_authorizations: :gitlab_main
 alert_management_alert_assignees: :gitlab_main
@@ -85,6 +86,7 @@ ci_job_token_project_scope_links: :gitlab_ci
 ci_job_variables: :gitlab_ci
 ci_minutes_additional_packs: :gitlab_ci
 ci_namespace_monthly_usages: :gitlab_ci
+ci_namespace_mirrors: :gitlab_ci
 ci_pending_builds: :gitlab_ci
 ci_pipeline_artifacts: :gitlab_ci
 ci_pipeline_chat_data: :gitlab_ci
@@ -96,6 +98,7 @@ ci_pipelines: :gitlab_ci
 ci_pipeline_variables: :gitlab_ci
 ci_platform_metrics: :gitlab_ci
 ci_project_monthly_usages: :gitlab_ci
+ci_project_mirrors: :gitlab_ci
 ci_refs: :gitlab_ci
 ci_resource_groups: :gitlab_ci
 ci_resources: :gitlab_ci
@@ -156,13 +159,12 @@ dast_site_profiles_pipelines: :gitlab_main
 dast_sites: :gitlab_main
 dast_site_tokens: :gitlab_main
 dast_site_validations: :gitlab_main
-dep_ci_build_trace_section_names: :gitlab_main
-dep_ci_build_trace_sections: :gitlab_main
 dependency_proxy_blobs: :gitlab_main
 dependency_proxy_group_settings: :gitlab_main
 dependency_proxy_image_ttl_group_policies: :gitlab_main
 dependency_proxy_manifests: :gitlab_main
 deploy_keys_projects: :gitlab_main
+deployment_approvals: :gitlab_main
 deployment_clusters: :gitlab_main
 deployment_merge_requests: :gitlab_main
 deployments: :gitlab_main
@@ -222,7 +224,6 @@ geo_repository_deleted_events: :gitlab_main
 geo_repository_renamed_events: :gitlab_main
 geo_repository_updated_events: :gitlab_main
 geo_reset_checksum_events: :gitlab_main
-geo_upload_deleted_events: :gitlab_main
 gitlab_subscription_histories: :gitlab_main
 gitlab_subscriptions: :gitlab_main
 gpg_keys: :gitlab_main
@@ -252,6 +253,7 @@ incident_management_oncall_schedules: :gitlab_main
 incident_management_oncall_shifts: :gitlab_main
 incident_management_pending_alert_escalations: :gitlab_main
 incident_management_pending_issue_escalations: :gitlab_main
+incident_management_timeline_events: :gitlab_main
 index_statuses: :gitlab_main
 in_product_marketing_emails: :gitlab_main
 insights: :gitlab_main
@@ -263,6 +265,7 @@ issuable_severities: :gitlab_main
 issuable_slas: :gitlab_main
 issue_assignees: :gitlab_main
 issue_customer_relations_contacts: :gitlab_main
+issue_emails: :gitlab_main
 issue_email_participants: :gitlab_main
 issue_links: :gitlab_main
 issue_metrics: :gitlab_main
@@ -287,7 +290,7 @@ lfs_objects_projects: :gitlab_main
 licenses: :gitlab_main
 lists: :gitlab_main
 list_user_preferences: :gitlab_main
-loose_foreign_keys_deleted_records: :gitlab_main
+loose_foreign_keys_deleted_records: :gitlab_shared
 member_tasks: :gitlab_main
 members: :gitlab_main
 merge_request_assignees: :gitlab_main
@@ -326,7 +329,6 @@ oauth_access_tokens: :gitlab_main
 oauth_applications: :gitlab_main
 oauth_openid_requests: :gitlab_main
 onboarding_progresses: :gitlab_main
-open_project_tracker_data: :gitlab_main
 operations_feature_flags_clients: :gitlab_main
 operations_feature_flag_scopes: :gitlab_main
 operations_feature_flags: :gitlab_main
@@ -357,6 +359,7 @@ packages_dependency_links: :gitlab_main
 packages_events: :gitlab_main
 packages_helm_file_metadata: :gitlab_main
 packages_maven_metadata: :gitlab_main
+packages_npm_metadata: :gitlab_main
 packages_nuget_dependency_link_metadata: :gitlab_main
 packages_nuget_metadata: :gitlab_main
 packages_package_file_build_infos: :gitlab_main
@@ -488,6 +491,7 @@ trending_projects: :gitlab_main
 u2f_registrations: :gitlab_main
 upcoming_reconciliations: :gitlab_main
 uploads: :gitlab_main
+upload_states: :gitlab_main
 user_agent_details: :gitlab_main
 user_callouts: :gitlab_main
 user_canonical_emails: :gitlab_main
@@ -529,6 +533,7 @@ vulnerability_issue_links: :gitlab_main
 vulnerability_occurrence_identifiers: :gitlab_main
 vulnerability_occurrence_pipelines: :gitlab_main
 vulnerability_occurrences: :gitlab_main
+vulnerability_reads: :gitlab_main
 vulnerability_remediations: :gitlab_main
 vulnerability_scanners: :gitlab_main
 vulnerability_statistics: :gitlab_main

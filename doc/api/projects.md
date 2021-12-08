@@ -182,6 +182,8 @@ When the user is authenticated and `simple` is not set this returns something li
     "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
     "marked_for_deletion_at": "2020-04-03", // Deprecated and will be removed in API v5 in favor of marked_for_deletion_on
     "marked_for_deletion_on": "2020-04-03",
     "statistics": {
@@ -298,6 +300,8 @@ When the user is authenticated and `simple` is not set this returns something li
     "service_desk_address": null,
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
     "statistics": {
       "commit_count": 12,
       "storage_size": 2066080,
@@ -366,6 +370,9 @@ Keyset pagination supports only `order_by=id`. Other sorting options aren't avai
 
 Get a list of visible projects owned by the given user. When accessed without
 authentication, only public projects are returned.
+
+NOTE:
+Only the projects in the user's (specified in `user_id`) namespace are returned. Projects owned by the user in any group or subgroups are not returned.
 
 This endpoint supports [keyset pagination](index.md#keyset-based-pagination)
 for selected `order_by` options.
@@ -464,6 +471,8 @@ GET /users/:user_id/projects
     "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
     "marked_for_deletion_at": "2020-04-03", // Deprecated and will be removed in API v5 in favor of marked_for_deletion_on
     "marked_for_deletion_on": "2020-04-03",
     "statistics": {
@@ -580,6 +589,8 @@ GET /users/:user_id/projects
     "service_desk_address": null,
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
     "statistics": {
       "commit_count": 12,
       "storage_size": 2066080,
@@ -706,6 +717,8 @@ Example response:
     "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
     "statistics": {
       "commit_count": 37,
       "storage_size": 1038090,
@@ -817,6 +830,8 @@ Example response:
     "service_desk_address": null,
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
     "statistics": {
       "commit_count": 12,
       "storage_size": 2066080,
@@ -984,6 +999,8 @@ GET /projects/:id
   "service_desk_address": null,
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "merge_commit_template": null,
+  "squash_commit_template": null,
   "marked_for_deletion_at": "2020-04-03", // Deprecated and will be removed in API v5 in favor of marked_for_deletion_on
   "marked_for_deletion_on": "2020-04-03",
   "compliance_frameworks": [ "sox" ],
@@ -1055,7 +1072,7 @@ If the project is a fork, and you provide a valid token to authenticate, the
       "ssh_url_to_repo":"git@gitlab.com:gitlab-org/gitlab-foss.git",
       "http_url_to_repo":"https://gitlab.com/gitlab-org/gitlab-foss.git",
       "web_url":"https://gitlab.com/gitlab-org/gitlab-foss",
-      "avatar_url":"https://assets.gitlab-static.net/uploads/-/system/project/avatar/13083/logo-extra-whitespace.png",
+      "avatar_url":"https://gitlab.com/uploads/-/system/project/avatar/13083/logo-extra-whitespace.png",
       "license_url": "https://gitlab.com/gitlab-org/gitlab/-/blob/master/LICENSE",
       "license": {
         "key": "mit",
@@ -1296,6 +1313,8 @@ POST /projects/user/:user_id
 | `issues_enabled`                                            | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable issues for this project. Use `issues_access_level` instead. |
 | `jobs_enabled`                                              | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable jobs for this project. Use `builds_access_level` instead. |
 | `lfs_enabled`                                               | boolean | **{dotted-circle}** No | Enable LFS. |
+| `merge_commit_template`                                     | string  | **{dotted-circle}** No | [Template](../user/project/merge_requests/commit_templates.md) used to create merge commit message in merge requests. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20263) in GitLab 14.5.)_ |
+| `squash_commit_template`                                    | string  | **{dotted-circle}** No | [Template](../user/project/merge_requests/commit_templates.md) used to create squash commit message in merge requests. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/345275) in GitLab 14.6.)_ |
 | `merge_method`                                              | string  | **{dotted-circle}** No | Set the [merge method](#project-merge-method) used. |
 | `merge_requests_access_level`                               | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `merge_requests_enabled`                                    | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable merge requests for this project. Use `merge_requests_access_level` instead. |
@@ -1342,6 +1361,17 @@ where `password` is a public access key with the `api` scope enabled.
 PUT /projects/:id
 ```
 
+For example, to toggle the setting for
+[shared runners on a GitLab.com project](../ci/runners/index.md):
+
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your-token>" \
+     --url 'https://gitlab.com/api/v4/projects/<your-project-ID>' \
+     --data "shared_runners_enabled=true" # to turn off: "shared_runners_enabled=false"
+```
+
+Supported attributes:
+
 | Attribute                                                   | Type           | Required               | Description |
 |-------------------------------------------------------------|----------------|------------------------|-------------|
 | `allow_merge_on_skipped_pipeline`                           | boolean        | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
@@ -1373,6 +1403,7 @@ PUT /projects/:id
 | `issues_enabled`                                            | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable issues for this project. Use `issues_access_level` instead. |
 | `jobs_enabled`                                              | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable jobs for this project. Use `builds_access_level` instead. |
 | `lfs_enabled`                                               | boolean        | **{dotted-circle}** No | Enable LFS. |
+| `merge_commit_template`                                     | string         | **{dotted-circle}** No | [Template](../user/project/merge_requests/commit_templates.md) used to create merge commit message in merge requests. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20263) in GitLab 14.5.)_ |
 | `merge_method`                                              | string         | **{dotted-circle}** No | Set the [merge method](#project-merge-method) used. |
 | `merge_requests_access_level`                               | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `merge_requests_enabled`                                    | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable merge requests for this project. Use `merge_requests_access_level` instead. |
@@ -1388,7 +1419,7 @@ PUT /projects/:id
 | `packages_enabled`                                          | boolean        | **{dotted-circle}** No | Enable or disable packages repository feature. |
 | `pages_access_level`                                        | string         | **{dotted-circle}** No | One of `disabled`, `private`, `enabled`, or `public`. |
 | `requirements_access_level`                                 | string         | **{dotted-circle}** No | One of `disabled`, `private`, `enabled` or `public` |
-| `restrict_user_defined_variables`                           | boolean        | **{dotted-circle}** No | Allow only maintainers to pass user-defined variables when triggering a pipeline. For example when the pipeline is triggered in the UI, with the API, or by a trigger token. |
+| `restrict_user_defined_variables`                           | boolean        | **{dotted-circle}** No | Allow only users with the [Maintainer role](../user/permissions.md) to pass user-defined variables when triggering a pipeline. For example when the pipeline is triggered in the UI, with the API, or by a trigger token. |
 | `path`                                                      | string         | **{dotted-circle}** No | Custom repository name for the project. By default generated based on name. |
 | `public_builds`                                             | boolean        | **{dotted-circle}** No | If `true`, jobs can be viewed by non-project members. |
 | `remove_source_branch_after_merge`                          | boolean        | **{dotted-circle}** No | Enable `Delete source branch` option by default for all new merge requests. |
@@ -1531,6 +1562,7 @@ Example responses:
     "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "merge_commit_template": null,
     "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
     "_links": {
       "self": "http://example.com/api/v4/projects",
@@ -1632,6 +1664,7 @@ Example response:
   "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "merge_commit_template": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
@@ -1731,6 +1764,7 @@ Example response:
   "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "merge_commit_template": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
@@ -1924,6 +1958,7 @@ Example response:
   "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "merge_commit_template": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
@@ -2044,6 +2079,7 @@ Example response:
   "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "merge_commit_template": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
@@ -2063,9 +2099,13 @@ This endpoint:
 
 - Deletes a project including all associated resources (including issues and
   merge requests).
+- In [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) and later, on
+  [Premium or higher](https://about.gitlab.com/pricing/) tiers,
+  [delayed project deletion](../user/project/settings/index.md#delayed-project-deletion)
+  is applied if enabled.
 - From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) on
   [Premium or higher](https://about.gitlab.com/pricing/) tiers, group
-  administrators can [configure](../user/group/index.md#enable-delayed-project-removal)
+  administrators can [configure](../user/group/index.md#enable-delayed-project-deletion)
   projects within a group to be deleted after a delayed period. When enabled,
   actual deletion happens after the number of days specified in the
   [default deletion delay](../user/admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
@@ -2073,7 +2113,7 @@ This endpoint:
 WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935)
 in GitLab 12.6 was changed to [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382)
-in GitLab 13.2, as discussed in [Enable delayed project removal](../user/group/index.md#enable-delayed-project-removal).
+in GitLab 13.2, as discussed in [Enable delayed project deletion](../user/group/index.md#enable-delayed-project-deletion).
 
 ```plaintext
 DELETE /projects/:id
@@ -2463,8 +2503,8 @@ GET /projects/:id/push_rule
 {
   "id": 1,
   "project_id": 3,
-  "commit_message_regex": "Fixes \d+\..*",
-  "commit_message_negative_regex": "ssh\:\/\/",
+  "commit_message_regex": "Fixes \\d+\\..*",
+  "commit_message_negative_regex": "ssh\\:\\/\\/",
   "branch_name_regex": "",
   "deny_delete_tag": false,
   "created_at": "2012-10-12T17:04:47Z",
@@ -2670,6 +2710,7 @@ Example response:
   "merge_method": "merge",
   "squash_option": "default_on",
   "suggestion_commit_message": null,
+  "merge_commit_template": null,
   "auto_devops_enabled": true,
   "auto_devops_deploy_strategy": "continuous",
   "autoclose_referenced_issues": true,

@@ -6,14 +6,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Pipelines API **(FREE)**
 
-## Single Pipeline Requests
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36494) in GitLab 13.3.
-
-Endpoints that request information about a single pipeline return data for any pipeline.
-Before 13.3, requests for [child pipelines](../ci/pipelines/parent_child_pipelines.md) returned
-a 404 error.
-
 ## Pipelines pagination
 
 By default, `GET` requests return 20 results at a time because the API results
@@ -22,6 +14,9 @@ are paginated.
 Read more on [pagination](index.md#pagination).
 
 ## List project pipelines
+
+List pipelines in a project. Child pipelines are not included in the results,
+but you can [get child pipeline](pipelines.md#get-a-single-pipeline) individually.
 
 ```plaintext
 GET /projects/:id/pipelines
@@ -55,7 +50,7 @@ Example of response
     "iid": 12,
     "project_id": 1,
     "status": "pending",
-    "soure": "push",
+    "source": "push",
     "ref": "new-pipeline",
     "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
     "web_url": "https://example.com/foo/bar/pipelines/47",
@@ -67,7 +62,7 @@ Example of response
     "iid": 13,
     "project_id": 1,
     "status": "pending",
-    "soure": "web",
+    "source": "web",
     "ref": "new-pipeline",
     "sha": "eb94b618fb5865b26e80fdd8ae531b7a63ad851a",
     "web_url": "https://example.com/foo/bar/pipelines/48",
@@ -78,6 +73,11 @@ Example of response
 ```
 
 ## Get a single pipeline
+
+Get one pipeline from a project.
+
+You can also get a single [child pipeline](../ci/pipelines/parent_child_pipelines.md).
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36494) in GitLab 13.3.
 
 ```plaintext
 GET /projects/:id/pipelines/:pipeline_id
@@ -275,7 +275,7 @@ POST /projects/:id/pipeline
 |-------------|---------|----------|---------------------|
 | `id`        | integer/string | yes | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `ref`       | string  | yes      | Reference to commit |
-| `variables` | array   | no       | An array containing the variables available in the pipeline, matching the structure `[{ 'key': 'UPLOAD_TO_S3', 'variable_type': 'file', 'value': 'true' }]` |
+| `variables` | array   | no       | An array containing the variables available in the pipeline, matching the structure `[{ 'key': 'UPLOAD_TO_S3', 'variable_type': 'file', 'value': 'true' }, {'key': 'TEST', 'value': 'test variable'}]`. If `variable_type` is excluded, it defaults to `env_var`. |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipeline?ref=main"

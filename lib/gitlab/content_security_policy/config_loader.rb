@@ -19,11 +19,11 @@ module Gitlab
           'font_src' => "'self'",
           'form_action' => "'self' https: http:",
           'frame_ancestors' => "'self'",
-          'frame_src' => "https://www.google.com/recaptcha/ https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
+          'frame_src' => ContentSecurityPolicy::Directives.frame_src,
           'img_src' => "'self' data: blob: http: https:",
           'manifest_src' => "'self'",
           'media_src' => "'self'",
-          'script_src' => "'strict-dynamic' 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.recaptcha.net https://apis.google.com",
+          'script_src' => ContentSecurityPolicy::Directives.script_src,
           'style_src' => "'self' 'unsafe-inline'",
           'worker_src' => "#{Gitlab::Utils.append_path(Gitlab.config.gitlab.url, 'assets/')} blob: data:",
           'object_src' => "'none'",
@@ -36,6 +36,7 @@ module Gitlab
         if Rails.env.development?
           allow_webpack_dev_server(directives)
           allow_letter_opener(directives)
+          allow_snowplow_micro(directives) if Gitlab::Tracking.snowplow_micro_enabled?
           allow_customersdot(directives) if ENV['CUSTOMER_PORTAL_URL'].present?
         end
 
@@ -138,13 +139,15 @@ module Gitlab
         append_to_directive(directives, 'frame_src', Gitlab::Utils.append_path(Gitlab.config.gitlab.url, '/rails/letter_opener/'))
       end
 
+      def self.allow_snowplow_micro(directives)
+        url = URI.join(Gitlab::Tracking::Destinations::SnowplowMicro.new.uri, '/').to_s
+        append_to_directive(directives, 'connect_src', url)
+      end
+
       # Using 'self' in the CSP introduces several CSP bypass opportunities
       # for this reason we list the URLs where GitLab frames itself instead
       def self.allow_framed_gitlab_paths(directives)
-        # We need the version without trailing / for the sidekiq page itself
-        # and we also need the version with trailing / for "deeper" pages
-        # like /admin/sidekiq/busy
-        ['/admin/sidekiq', '/admin/sidekiq/', '/-/speedscope/index.html'].map do |path|
+        ['/admin/', '/assets/', '/-/speedscope/index.html'].map do |path|
           append_to_directive(directives, 'frame_src', Gitlab::Utils.append_path(Gitlab.config.gitlab.url, path))
         end
       end

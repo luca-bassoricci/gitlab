@@ -35,9 +35,13 @@
   - 1
 - - analytics_usage_trends_counter_job
   - 1
+- - app_sec_dast_scans_consistency
+  - 1
 - - approval_rules_external_approval_rule_payload
   - 1
 - - approve_blocked_pending_approval_users
+  - 1
+- - audit_events_audit_event_streaming
   - 1
 - - authorized_keys
   - 2
@@ -68,6 +72,8 @@
 - - ci_batch_reset_minutes
   - 1
 - - ci_delete_objects
+  - 1
+- - ci_upstream_projects_subscriptions_cleanup
   - 1
 - - container_repository
   - 1
@@ -199,6 +205,8 @@
   - 1
 - - incident_management_pending_escalations_alert_create
   - 1
+- - integrations_create_external_cross_reference
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
@@ -252,6 +260,8 @@
 - - migrate_external_diffs
   - 1
 - - namespaceless_project_destroy
+  - 1
+- - namespaces_invite_team_email
   - 1
 - - namespaces_onboarding_issue_created
   - 1
@@ -342,8 +352,6 @@
 - - propagate_integration_inherit_descendant
   - 1
 - - propagate_integration_project
-  - 1
-- - propagate_service_template
   - 1
 - - reactive_caching
   - 1

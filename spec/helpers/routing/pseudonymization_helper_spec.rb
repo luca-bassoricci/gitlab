@@ -11,15 +11,15 @@ RSpec.describe ::Routing::PseudonymizationHelper do
 
   let(:merge_request) { create(:merge_request, source_project: project) }
 
+  let(:subject) { helper.masked_page_url(group: group, project: project) }
+
   before do
     stub_feature_flags(mask_page_urls: true)
-    allow(helper).to receive(:group).and_return(group)
-    allow(helper).to receive(:project).and_return(project)
   end
 
   shared_examples 'masked url' do
     it 'generates masked page url' do
-      expect(helper.masked_page_url).to eq(masked_url)
+      expect(subject).to eq(masked_url)
     end
   end
 
@@ -72,6 +72,8 @@ RSpec.describe ::Routing::PseudonymizationHelper do
 
     context 'with controller for groups with subgroups and project' do
       let(:masked_url) { "http://localhost/namespace#{subgroup.id}/project#{subproject.id}"}
+      let(:group) { subgroup }
+      let(:project) { subproject }
       let(:request) do
         double(:Request,
                path_parameters: {
@@ -86,8 +88,6 @@ RSpec.describe ::Routing::PseudonymizationHelper do
       end
 
       before do
-        allow(helper).to receive(:group).and_return(subgroup)
-        allow(helper).to receive(:project).and_return(subproject)
         allow(helper).to receive(:request).and_return(request)
       end
 
@@ -96,6 +96,7 @@ RSpec.describe ::Routing::PseudonymizationHelper do
 
     context 'with controller for groups and subgroups' do
       let(:masked_url) { "http://localhost/groups/namespace#{subgroup.id}/-/shared"}
+      let(:group) { subgroup }
       let(:request) do
         double(:Request,
                path_parameters: {
@@ -109,7 +110,6 @@ RSpec.describe ::Routing::PseudonymizationHelper do
       end
 
       before do
-        allow(helper).to receive(:group).and_return(subgroup)
         allow(helper).to receive(:request).and_return(request)
       end
 
@@ -178,6 +178,47 @@ RSpec.describe ::Routing::PseudonymizationHelper do
 
       it_behaves_like 'masked url'
     end
+
+    context 'when some query params are not required to be masked' do
+      let(:masked_url) { "http://localhost/dashboard/issues?author_username=masked_author_username&scope=all&state=masked_state" }
+      let(:request) do
+        double(:Request,
+               path_parameters: {
+                controller: 'dashboard',
+                action: 'issues'
+               },
+               protocol: 'http',
+               host: 'localhost',
+               query_string: 'author_username=root&scope=all&state=opened')
+      end
+
+      before do
+        stub_const('Routing::PseudonymizationHelper::MaskHelper::QUERY_PARAMS_TO_NOT_MASK', %w[scope].freeze)
+        allow(helper).to receive(:request).and_return(request)
+      end
+
+      it_behaves_like 'masked url'
+    end
+
+    context 'when query string has keys with the same names as path params' do
+      let(:masked_url) { "http://localhost/dashboard/issues?action=masked_action&scope=all&state=opened" }
+      let(:request) do
+        double(:Request,
+               path_parameters: {
+                controller: 'dashboard',
+                action: 'issues'
+               },
+               protocol: 'http',
+               host: 'localhost',
+               query_string: 'action=foobar&scope=all&state=opened')
+      end
+
+      before do
+        allow(helper).to receive(:request).and_return(request)
+      end
+
+      it_behaves_like 'masked url'
+    end
   end
 
   describe 'when url has no params to mask' do
@@ -189,7 +230,7 @@ RSpec.describe ::Routing::PseudonymizationHelper do
       end
 
       it 'masked_page_url' do
-        expect(helper.masked_page_url).to eq(root_url)
+        expect(subject).to eq(root_url)
       end
     end
   end
@@ -221,7 +262,7 @@ RSpec.describe ::Routing::PseudonymizationHelper do
           ActionController::RoutingError,
           url: '/dashboard/issues?assignee_username=root').and_call_original
 
-        expect(helper.masked_page_url).to be_nil
+        expect(subject).to be_nil
       end
     end
   end
@@ -232,7 +273,7 @@ RSpec.describe ::Routing::PseudonymizationHelper do
     end
 
     it 'returns nil' do
-      expect(helper.masked_page_url).to be_nil
+      expect(subject).to be_nil
     end
   end
 end

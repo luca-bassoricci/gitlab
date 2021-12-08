@@ -30,6 +30,19 @@ RSpec.describe Security::Ingestion::FindingMap do
     end
   end
 
+  describe '#issue_feedback' do
+    let!(:feedback) do
+      create(:vulnerability_feedback,
+             :issue,
+             project: security_finding.scan.project,
+             project_fingerprint: report_finding.project_fingerprint)
+    end
+
+    subject { finding_map.issue_feedback }
+
+    it { is_expected.to eq(feedback) }
+  end
+
   describe '#to_hash' do
     let(:expected_hash) do
       {
@@ -48,7 +61,7 @@ RSpec.describe Security::Ingestion::FindingMap do
         description: 'The cipher does not provide data integrity update 1',
         solution: 'GCM mode introduces an HMAC into the resulting encrypted data, providing integrity of the result.',
         message: nil,
-        cve: nil,
+        cve: report_finding.cve,
         location: {
           "class" => "com.gitlab.security_products.tests.App",
           "end_line" => 29,

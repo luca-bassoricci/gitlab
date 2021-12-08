@@ -15,7 +15,6 @@ RSpec.describe "Issues > User edits issue", :js do
 
   context 'with authorized user' do
     before do
-      stub_feature_flags(labels_widget: false)
       project.add_developer(user)
       project_with_milestones.add_developer(user)
       sign_in(user)
@@ -146,12 +145,12 @@ RSpec.describe "Issues > User edits issue", :js do
           fill_in 'Comment', with: '/label ~syzygy'
 
           click_button 'Comment'
-          expect(page).to have_text('added syzygy label just now')
+          expect(page).to have_text('added syzygy label just now', wait: 300)
 
           page.within '.block.labels' do
             # Remove `verisimilitude` label
             within '.gl-label' do
-              click_button
+              click_button 'Remove label'
             end
 
             expect(page).to have_text('syzygy')

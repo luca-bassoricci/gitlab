@@ -16,6 +16,8 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { historyPushState, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import groupBoardIterationsQuery from 'ee/boards/graphql/group_board_iterations.query.graphql';
+import projectBoardIterationsQuery from 'ee/boards/graphql/project_board_iterations.query.graphql';
 import {
   fullEpicBoardId,
   formatEpic,
@@ -25,7 +27,7 @@ import {
   FiltersInfo,
 } from '../boards_util';
 
-import { EpicFilterType, GroupByParamType, FilterFields } from '../constants';
+import { EpicFilterType, GroupByParamType, FilterFields, IterationIDs } from '../constants';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicCreateMutation from '../graphql/epic_create.mutation.graphql';
 import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
@@ -33,8 +35,8 @@ import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
 import subGroupsQuery from '../graphql/sub_groups.query.graphql';
+import currentIterationQuery from '../graphql/board_current_iteration.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
-import updateEpicLabelsMutation from '../graphql/update_epic_labels.mutation.graphql';
 
 import * as types from './mutation_types';
 
@@ -93,6 +95,46 @@ export { gqlClient };
 export default {
   ...actionsCE,
 
+  addListNewIssue: async (
+    { state: { boardConfig, boardType, fullPath }, dispatch, commit },
+    issueInputObj,
+  ) => {
+    const { iterationId } = boardConfig;
+    let { iterationCadenceId } = boardConfig;
+
+    if (!iterationCadenceId && iterationId === IterationIDs.CURRENT) {
+      const iteration = await gqlClient
+        .query({
+          query: currentIterationQuery,
+          context: {
+            isSingleRequest: true,
+          },
+          variables: {
+            isGroup: boardType === BoardType.group,
+            fullPath,
+          },
+        })
+        .then(({ data }) => {
+          return data[boardType]?.iterations?.nodes?.[0];
+        });
+
+      iterationCadenceId = iteration.iterationCadence.id;
+    }
+
+    return actionsCE.addListNewIssue(
+      {
+        state: {
+          boardConfig: { ...boardConfig, iterationId, iterationCadenceId },
+          boardType,
+          fullPath,
+        },
+        dispatch,
+        commit,
+      },
+      issueInputObj,
+    );
+  },
+
   setFilters: ({ commit, dispatch, state: { issuableType } }, filters) => {
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
@@ -107,6 +149,52 @@ export default {
         filterFields: FilterFields,
       }),
     );
+  },
+
+  fetchIterations({ state, commit }, title) {
+    commit(types.RECEIVE_ITERATIONS_REQUEST);
+
+    const { fullPath, boardType } = state;
+
+    const variables = {
+      fullPath,
+      title,
+    };
+
+    let query;
+    if (boardType === BoardType.project) {
+      query = projectBoardIterationsQuery;
+    }
+    if (boardType === BoardType.group) {
+      query = groupBoardIterationsQuery;
+    }
+
+    if (!query) {
+      // eslint-disable-next-line @gitlab/require-i18n-strings
+      throw new Error('Unknown board type');
+    }
+
+    return gqlClient
+      .query({
+        query,
+        variables,
+      })
+      .then(({ data }) => {
+        const errors = data[boardType]?.errors;
+        const iterations = data[boardType]?.iterations.nodes;
+
+        if (errors?.[0]) {
+          throw new Error(errors[0]);
+        }
+
+        commit(types.RECEIVE_ITERATIONS_SUCCESS, iterations);
+
+        return iterations;
+      })
+      .catch((e) => {
+        commit(types.RECEIVE_ITERATIONS_FAILURE);
+        throw e;
+      });
   },
 
   performSearch({ dispatch, getters }) {
@@ -253,6 +341,7 @@ export default {
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { epicId, ...filterParams } = state.filterParams;
+
     if (noEpicIssues && epicId !== undefined) {
       return null;
     }
@@ -582,34 +671,8 @@ export default {
     }
   },
 
-  setActiveEpicLabels: async ({ commit, getters, state }, input) => {
+  setActiveEpicLabels: async ({ commit, getters }, input) => {
     const { activeBoardItem } = getters;
-
-    if (!gon.features?.labelsWidget) {
-      const { data } = await gqlClient.mutate({
-        mutation: updateEpicLabelsMutation,
-        variables: {
-          input: {
-            iid: String(activeBoardItem.iid),
-            addLabelIds: input.addLabelIds ?? [],
-            removeLabelIds: input.removeLabelIds ?? [],
-            groupPath: state.fullPath,
-          },
-        },
-      });
-
-      if (data.updateEpic?.errors?.length > 0) {
-        throw new Error(data.updateEpic.errors);
-      }
-
-      commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
-        itemId: activeBoardItem.id,
-        prop: 'labels',
-        value: data.updateEpic.epic.labels.nodes,
-      });
-
-      return;
-    }
 
     let labels = input?.labels || [];
     if (input.removeLabelIds) {

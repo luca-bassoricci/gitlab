@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Two factor auths' do
+  include Spec::Support::Helpers::ModalHelpers
+
   context 'when signed in' do
     before do
       sign_in(user)
@@ -45,6 +47,19 @@ RSpec.describe 'Two factor auths' do
           expect(page).to have_content('Status: Enabled')
         end
       end
+
+      context 'when invalid pin is provided' do
+        let_it_be(:user) { create(:omniauth_user) }
+
+        it 'renders a error alert with a link to the troubleshooting section' do
+          visit profile_two_factor_auth_path
+
+          fill_in 'pin_code', with: '123'
+          click_button 'Register with two-factor app'
+
+          expect(page).to have_link('Try the troubleshooting steps here.', href: help_page_path('user/profile/account/two_factor_authentication.md', anchor: 'troubleshooting'))
+        end
+      end
     end
 
     context 'when user has two-factor authentication enabled' do
@@ -57,7 +72,7 @@ RSpec.describe 'Two factor auths' do
 
         click_button 'Disable two-factor authentication'
 
-        page.within('[role="dialog"]') do
+        within_modal do
           click_button 'Disable'
         end
 
@@ -67,7 +82,7 @@ RSpec.describe 'Two factor auths' do
 
         click_button 'Disable two-factor authentication'
 
-        page.within('[role="dialog"]') do
+        within_modal do
           click_button 'Disable'
         end
 
@@ -99,7 +114,7 @@ RSpec.describe 'Two factor auths' do
 
           click_button 'Disable two-factor authentication'
 
-          page.within('[role="dialog"]') do
+          within_modal do
             click_button 'Disable'
           end
 

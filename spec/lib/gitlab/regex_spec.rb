@@ -264,23 +264,37 @@ RSpec.describe Gitlab::Regex do
     it { is_expected.not_to match('1.2.3') }
   end
 
-  describe '.conan_recipe_component_regex' do
-    subject { described_class.conan_recipe_component_regex }
+  context 'conan recipe components' do
+    shared_examples 'accepting valid recipe components values' do
+      let(:fifty_one_characters) { 'f_a' * 17}
 
-    let(:fifty_one_characters) { 'f_a' * 17}
+      it { is_expected.to match('foobar') }
+      it { is_expected.to match('foo_bar') }
+      it { is_expected.to match('foo+bar') }
+      it { is_expected.to match('_foo+bar-baz+1.0') }
+      it { is_expected.to match('1.0.0') }
+      it { is_expected.not_to match('-foo_bar') }
+      it { is_expected.not_to match('+foo_bar') }
+      it { is_expected.not_to match('.foo_bar') }
+      it { is_expected.not_to match('foo@bar') }
+      it { is_expected.not_to match('foo/bar') }
+      it { is_expected.not_to match('!!()()') }
+      it { is_expected.not_to match(fifty_one_characters) }
+    end
 
-    it { is_expected.to match('foobar') }
-    it { is_expected.to match('foo_bar') }
-    it { is_expected.to match('foo+bar') }
-    it { is_expected.to match('_foo+bar-baz+1.0') }
-    it { is_expected.to match('1.0.0') }
-    it { is_expected.not_to match('-foo_bar') }
-    it { is_expected.not_to match('+foo_bar') }
-    it { is_expected.not_to match('.foo_bar') }
-    it { is_expected.not_to match('foo@bar') }
-    it { is_expected.not_to match('foo/bar') }
-    it { is_expected.not_to match('!!()()') }
-    it { is_expected.not_to match(fifty_one_characters) }
+    describe '.conan_recipe_component_regex' do
+      subject { described_class.conan_recipe_component_regex }
+
+      it_behaves_like 'accepting valid recipe components values'
+      it { is_expected.not_to match('_') }
+    end
+
+    describe '.conan_recipe_user_channel_regex' do
+      subject { described_class.conan_recipe_user_channel_regex }
+
+      it_behaves_like 'accepting valid recipe components values'
+      it { is_expected.to match('_') }
+    end
   end
 
   describe '.package_name_regex' do
@@ -344,6 +358,18 @@ RSpec.describe Gitlab::Regex do
   describe '.maven_version_regex' do
     subject { described_class.maven_version_regex }
 
+    it 'has no ReDoS issues with long strings' do
+      Timeout.timeout(5) do
+        expect(subject).to match("aaaaaaaa.aaaaaaaaa+aa-111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111.11111111111111111111111111111111111111111111111111111111")
+      end
+    end
+
+    it 'has no ReDos issues with long strings ending with an exclamation mark' do
+      Timeout.timeout(5) do
+        expect(subject).not_to match('a' * 50000 + '!')
+      end
+    end
+
     it { is_expected.to match('0')}
     it { is_expected.to match('1') }
     it { is_expected.to match('03') }
@@ -364,6 +390,7 @@ RSpec.describe Gitlab::Regex do
     it { is_expected.to match('703220b4e2cea9592caeb9f3013f6b1e5335c293') }
     it { is_expected.to match('RELEASE') }
     it { is_expected.not_to match('..1.2.3') }
+    it { is_expected.not_to match('1.2.3..beta') }
     it { is_expected.not_to match('  1.2.3') }
     it { is_expected.not_to match("1.2.3  \r\t") }
     it { is_expected.not_to match("\r\t 1.2.3") }

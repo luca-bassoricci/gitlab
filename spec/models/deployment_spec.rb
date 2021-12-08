@@ -268,31 +268,69 @@ RSpec.describe Deployment do
       end
     end
 
-    describe 'synching status to Jira' do
-      let(:deployment) { create(:deployment) }
+    context 'when deployment is blocked' do
+      let(:deployment) { create(:deployment, :created) }
 
+      it 'has correct status' do
+        deployment.block!
+
+        expect(deployment).to be_blocked
+        expect(deployment.finished_at).to be_nil
+      end
+
+      it 'does not execute Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker).not_to receive(:perform_async)
+
+        deployment.block!
+      end
+
+      it 'does not execute Deployments::HooksWorker' do
+        expect(Deployments::HooksWorker).not_to receive(:perform_async)
+
+        deployment.block!
+      end
+    end
+
+    describe 'synching status to Jira' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      let(:deployment) { create(:deployment, project: project) }
       let(:worker) { ::JiraConnect::SyncDeploymentsWorker }
 
-      it 'calls the worker on creation' do
-        expect(worker).to receive(:perform_async).with(Integer)
+      context 'when Jira Connect subscription does not exist' do
+        it 'does not call the worker' do
+          expect(worker).not_to receive(:perform_async)
 
-        deployment
+          deployment
+        end
       end
 
-      it 'does not call the worker for skipped deployments' do
-        expect(deployment).to be_present # warm-up, ignore the creation trigger
+      context 'when Jira Connect subscription exists' do
+        before_all do
+          create(:jira_connect_subscription, namespace: project.namespace)
+        end
 
-        expect(worker).not_to receive(:perform_async)
+        it 'calls the worker on creation' do
+          expect(worker).to receive(:perform_async).with(Integer)
 
-        deployment.skip!
-      end
+          deployment
+        end
 
-      %i[run! succeed! drop! cancel!].each do |event|
-        context "when we call pipeline.#{event}" do
-          it 'triggers a Jira synch worker' do
-            expect(worker).to receive(:perform_async).with(deployment.id)
+        it 'does not call the worker for skipped deployments' do
+          expect(deployment).to be_present # warm-up, ignore the creation trigger
 
-            deployment.send(event)
+          expect(worker).not_to receive(:perform_async)
+
+          deployment.skip!
+        end
+
+        %i[run! succeed! drop! cancel!].each do |event|
+          context "when we call pipeline.#{event}" do
+            it 'triggers a Jira synch worker' do
+              expect(worker).to receive(:perform_async).with(deployment.id)
+
+              deployment.send(event)
+            end
           end
         end
       end
@@ -385,6 +423,43 @@ RSpec.describe Deployment do
     end
   end
 
+  describe '.archivables_in' do
+    subject { described_class.archivables_in(project, limit: limit) }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:deployment_1) { create(:deployment, project: project) }
+    let_it_be(:deployment_2) { create(:deployment, project: project) }
+    let_it_be(:deployment_3) { create(:deployment, project: project) }
+
+    let(:limit) { 100 }
+
+    context 'when there are no archivable deployments in the project' do
+      it 'returns nothing' do
+        expect(subject).to be_empty
+      end
+    end
+
+    context 'when there are archivable deployments in the project' do
+      before do
+        stub_const("::Deployment::ARCHIVABLE_OFFSET", 1)
+      end
+
+      it 'returns all archivable deployments' do
+        expect(subject.count).to eq(2)
+        expect(subject).to contain_exactly(deployment_1, deployment_2)
+      end
+
+      context 'with limit' do
+        let(:limit) { 1 }
+
+        it 'takes the limit into account' do
+          expect(subject.count).to eq(1)
+          expect(subject.take).to be_in([deployment_1, deployment_2])
+        end
+      end
+    end
+  end
+
   describe 'scopes' do
     describe 'last_for_environment' do
       let(:production) { create(:environment) }
@@ -411,11 +486,12 @@ RSpec.describe Deployment do
       subject { described_class.active }
 
       it 'retrieves the active deployments' do
-        deployment1 = create(:deployment, status: :created )
-        deployment2 = create(:deployment, status: :running )
-        create(:deployment, status: :failed )
-        create(:deployment, status: :canceled )
+        deployment1 = create(:deployment, status: :created)
+        deployment2 = create(:deployment, status: :running)
+        create(:deployment, status: :failed)
+        create(:deployment, status: :canceled)
         create(:deployment, status: :skipped)
+        create(:deployment, status: :blocked)
 
         is_expected.to contain_exactly(deployment1, deployment2)
       end
@@ -475,9 +551,25 @@ RSpec.describe Deployment do
         deployment2 = create(:deployment, status: :success)
         deployment3 = create(:deployment, status: :failed)
         deployment4 = create(:deployment, status: :canceled)
+        deployment5 = create(:deployment, status: :blocked)
         create(:deployment, status: :skipped)
 
-        is_expected.to contain_exactly(deployment1, deployment2, deployment3, deployment4)
+        is_expected.to contain_exactly(deployment1, deployment2, deployment3, deployment4, deployment5)
+      end
+    end
+
+    describe 'upcoming' do
+      subject { described_class.upcoming }
+
+      it 'retrieves the upcoming deployments' do
+        deployment1 = create(:deployment, status: :running)
+        deployment2 = create(:deployment, status: :blocked)
+        create(:deployment, status: :success)
+        create(:deployment, status: :failed)
+        create(:deployment, status: :canceled)
+        create(:deployment, status: :skipped)
+
+        is_expected.to contain_exactly(deployment1, deployment2)
       end
     end
   end
@@ -774,6 +866,7 @@ RSpec.describe Deployment do
     it 'schedules workers when finishing a deploy' do
       expect(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
       expect(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      expect(Deployments::ArchiveInProjectWorker).to receive(:perform_async)
       expect(Deployments::HooksWorker).to receive(:perform_async)
 
       expect(deploy.update_status('success')).to eq(true)
@@ -801,6 +894,27 @@ RSpec.describe Deployment do
         .with(instance_of(described_class::StatusUpdateError), deployment_id: deploy.id)
 
       expect(deploy.update_status('created')).to eq(false)
+    end
+
+    context 'mapping status to event' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:status, :method) do
+        'running'  | :run!
+        'success'  | :succeed!
+        'failed'   | :drop!
+        'canceled' | :cancel!
+        'skipped'  | :skip!
+        'blocked'  | :block!
+      end
+
+      with_them do
+        it 'calls the correct method for the given status' do
+          expect(deploy).to receive(method)
+
+          deploy.update_status(status)
+        end
+      end
     end
   end
 

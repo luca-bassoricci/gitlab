@@ -29,7 +29,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         location: location,
         metadata_version: 'sast:1.0',
         name: 'Cipher with no integrity',
-        raw_metadata: 'I am a stringified json object',
+        original_data: {},
         report_type: :sast,
         scanner: scanner,
         scan: nil,
@@ -71,7 +71,8 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
           location: location,
           metadata_version: 'sast:1.0',
           name: 'Cipher with no integrity',
-          raw_metadata: 'I am a stringified json object',
+          raw_metadata: '{}',
+          original_data: {},
           report_type: :sast,
           scanner: scanner,
           severity: :high,
@@ -98,7 +99,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
       end
     end
 
-    %i[compare_key identifiers location metadata_version name raw_metadata report_type scanner uuid].each do |attribute|
+    %i[compare_key identifiers location metadata_version name original_data report_type scanner uuid].each do |attribute|
       context "when attribute #{attribute} is missing" do
         before do
           params.delete(attribute)
@@ -144,6 +145,10 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         severity: occurrence.severity,
         uuid: occurrence.uuid,
         details: occurrence.details,
+        cve: occurrence.compare_key,
+        description: occurrence.description,
+        message: occurrence.message,
+        solution: occurrence.solution,
         signatures: []
       })
     end
@@ -185,19 +190,20 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
   end
 
   describe '#unsafe?' do
-    where(:severity, :levels, :unsafe?) do
-      'critical' | %w(critical high) | true
-      'high'     | %w(critical high) | true
-      'medium'   | %w(critical high) | false
-      'low'      | %w(critical high) | false
-      'info'     | %w(critical high) | false
-      'unknown'  | []                | false
+    where(:severity, :levels, :report_types, :unsafe?) do
+      'critical' | %w(critical high) | %w(dast)               | true
+      'high'     | %w(critical high) | %w(dast sast)          | true
+      'high'     | %w(critical high) | %w(container_scanning) | false
+      'medium'   | %w(critical high) | %w(dast)               | false
+      'low'      | %w(critical high) | %w(dast)               | false
+      'info'     | %w(critical high) | %w(dast)               | false
+      'unknown'  | []                | %w(dast)               | false
     end
 
     with_them do
-      let(:finding) { create(:ci_reports_security_finding, severity: severity) }
+      let(:finding) { create(:ci_reports_security_finding, severity: severity, report_type: 'dast') }
 
-      subject { finding.unsafe?(levels) }
+      subject { finding.unsafe?(levels, report_types) }
 
       it { is_expected.to be(unsafe?) }
     end

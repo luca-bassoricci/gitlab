@@ -16,9 +16,14 @@ module QA
       end
 
       let(:project_deploy_token) do
-        Resource::DeployToken.fabricate_via_browser_ui! do |deploy_token|
+        Resource::ProjectDeployToken.fabricate_via_api! do |deploy_token|
           deploy_token.name = 'npm-deploy-token'
           deploy_token.project = project
+          deploy_token.scopes = %w[
+            read_repository
+            read_package_registry
+            write_package_registry
+          ]
         end
       end
 
@@ -120,7 +125,7 @@ module QA
 
       let(:package) do
         Resource::Package.init do |package|
-          package.name = "@#{registry_scope}/#{project.name}"
+          package.name = "@#{registry_scope}/#{project.name}-#{SecureRandom.hex(8)}"
           package.project = project
         end
       end
@@ -146,7 +151,7 @@ module QA
           when :ci_job_token
             '${CI_JOB_TOKEN}'
           when :project_deploy_token
-            "\"#{project_deploy_token.password}\""
+            "\"#{project_deploy_token.token}\""
           end
         end
 
@@ -194,7 +199,7 @@ module QA
           Page::Project::Artifact::Show.perform do |artifacts|
             artifacts.go_to_directory('node_modules')
             artifacts.go_to_directory("@#{registry_scope}")
-            expect(artifacts).to have_content( "#{project.name}")
+            expect(artifacts).to have_content("#{project.name}")
           end
 
           project.visit!
