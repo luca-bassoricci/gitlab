@@ -5,8 +5,8 @@ module EE
     extend ActiveSupport::Concern
 
     STATE_ENUM_MAP = {
+      current: 0,
       upcoming: 1,
-      current: 2,
       closed: 3
     }.with_indifferent_access.freeze
 
