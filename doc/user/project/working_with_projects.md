@@ -261,7 +261,7 @@ To add a star to a project:
 ## Delete a project
 
 After you delete a project, projects in personal namespaces are deleted immediately. You can 
-[enable delayed project removal](../group/index.md#enable-delayed-project-removal) to 
+[enable delayed project removal](../group/index.md#enable-delayed-project-deletion) to 
 delay deletion of projects in a group.
 
 To delete a project:
