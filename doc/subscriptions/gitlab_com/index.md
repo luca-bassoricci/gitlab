@@ -244,12 +244,12 @@ previous period), log in to the [Customers Portal](https://customers.gitlab.com/
 
 - If a **Resume subscription** button is displayed, your subscription was canceled
   previously. Click it to resume automatic renewal.
-- If a **Cancel subscription** button is displayed, your subscription is set to automatically
-  renew at the end of the subscription period. Click it to cancel automatic renewal.
+- If a **Cancel subscription** button is displayed, your subscription is set to automatically renew at the end of the subscription period. Click this button to cancel the subscription automatic renewal.  
+
+For immediate cancellation of a subscription please contact the [Support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293)
 
 If you have difficulty during the renewal process, contact the
 [Support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293) for assistance.
-
 ## Change the contact person for your subscription
 
 To change the contact person who manages your subscription,
@@ -438,6 +438,7 @@ The **Purchased storage available** total is incremented by the amount purchased
 projects are unlocked and their excess usage is deducted from the additional storage.
 
 ## Contact Support
+
 
 Learn more about:
 
