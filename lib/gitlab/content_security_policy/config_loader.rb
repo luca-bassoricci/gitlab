@@ -15,7 +15,8 @@ module Gitlab
         directives = {
           'default_src' => "'self'",
           'base_uri' => "'self'",
-          'connect_src' => "'self'",
+          # NOTE: DO NOT CHECK IN!!
+          'connect_src' => "*",
           'font_src' => "'self'",
           'form_action' => "'self' https: http:",
           'frame_ancestors' => "'self'",

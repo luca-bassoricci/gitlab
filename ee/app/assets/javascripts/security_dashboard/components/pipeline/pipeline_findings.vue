@@ -68,7 +68,7 @@ export default {
       update: ({ project }) =>
         project?.pipeline?.securityReportFindings?.nodes?.map((finding) => ({
           ...finding,
-          // vulnerabilties and findings are different but similar entities. Vulnerabilities have
+          // vulnerabilities and findings are different but similar entities. Vulnerabilities have
           // ids, findings have uuid. To make the selection work with the vulnerability list, we're
           // going to massage the data and add an `id` field to the finding.
           id: finding.uuid,
@@ -81,6 +81,9 @@ export default {
       },
       skip() {
         return !this.filters;
+      },
+      context: {
+        useMockEndpoint: true,
       },
     },
   },
