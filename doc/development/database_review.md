@@ -148,9 +148,9 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
 ##### Query Plans
 
 - The query plan for each raw SQL query included in the merge request along with the link to the query plan following each raw SQL snippet.
-- Provide a public link to the plan from either:
-  - [postgres.ai](https://postgres.ai/): Follow the link in `#database-lab` and generate a shareable, public link
-    by clicking the **Share** button in the upper right corner.
+- Provide a the plan from either:
+  - [postgres.ai](https://postgres.ai/): Share the link from the `#database-lab` or
+    JoeBot result. Please do not use public links to results.
   - [explain.depesz.com](https://explain.depesz.com) or [explain.dalibo.com](https://explain.dalibo.com): Paste both the plan and the query used in the form.
 - When providing query plans, make sure it hits enough data:
   - You can use a GitLab production replica to test your queries on a large scale,
@@ -165,6 +165,8 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   plan _before_ and _after_ the change. This helps spot differences quickly.
 - Include data that shows the performance improvement, preferably in
   the form of a benchmark.
+- Be [SAFE](https://about.gitlab.com/handbook/legal/safe-framework/). Any data that is
+  not SAFE must be redacted or should be in a [confidential comment](https://docs.gitlab.com/ee/user/discussions/#mark-a-comment-as-confidential).
 
 #### Preparation when adding foreign keys to existing tables
 
