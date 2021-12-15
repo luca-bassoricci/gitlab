@@ -1,0 +1,14 @@
+- name: "Deprecation of `DS_DEFAULT_ANALYZERS` variable" # The name of the feature to be deprecated
+  announcement_milestone: "13.9" # The milestone when this feature was first announced as deprecated.
+  announcement_date: "2021-02-08" # The date of the milestone release when this feature was first announced as deprecated. This should almost always be the 22nd of a month (YYYY-MM-22), unless you did an out of band blog post.
+  removal_milestone: "15.0" # The milestone when this feature is planned to be removed
+  removal_date: "2022-05-22" # This should almost always be the 22nd of a month (YYYY-MM-22), the date of the milestone release when this feature is planned to be removed.
+  body: | # Do not modify this line, instead modify the lines below.
+    To exclude a DS analyzer previously you needed to remove it from the default list of analyzers and use that to set the `DS_DEFAULT_ANALYZERS` variable in your project’s CI template. We determined it should be easier to avoid running a particular analyzer without losing the benefit of newly added analyzers. Now you should be able to migrate from `DS_DEFAULT_ANALYZERS` to `DS_EXCLUDED_ANALYZERS` as [described in the documentation](https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#disable-specific-analyzers). Read more about the change in [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/287691), the [13.9 release post](https://about.gitlab.com/releases/2021/02/22/gitlab-13-9-released/#deprecations-for-dependency-scanning), the [14.0 blog post](https://about.gitlab.com/blog/2021/06/04/gitlab-moving-to-14-breaking-changes/#deprecations-for-dependency-scanning), and [the relevant blog post](https://about.gitlab.com/blog/2021/02/08/composition-analysis-14-deprecations-and-removals/).
+# The following items are not published on the docs page, but may be used in the future.
+  stage: secure # (optional - may be required in the future) String value of the stage that the feature was created in. e.g., Growth
+  tiers: ultimate # (optional - may be required in the future) An array of tiers that the feature is available in currently.  e.g., [Free, Silver, Gold, Core, Premium, Ultimate]
+  issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/333299 # (optional) This is a link to the deprecation issue in GitLab
+  documentation_url: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#disable-specific-analyzers # (optional) This is a link to the current documentation page
+  image_url: # (optional) This is a link to a thumbnail image depicting the feature
+  video_url: # (optional) Use the youtube thumbnail URL with the structure of https://img.youtube.com/vi/UNIQUEID/hqdefault.jpg
