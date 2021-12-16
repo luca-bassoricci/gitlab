@@ -10,9 +10,7 @@ module QA
       def wait_for_requests(skip_finished_loading_check: false, skip_resp_code_check: false)
         # We have tests that use 404 pages, allow them to skip this check
         unless skip_resp_code_check
-          if QA::Support::PageErrorChecker.check_page_for_error_code(Capybara.page) != 0
-            QA::Support::PageErrorChecker.report!(Capybara.page)
-          end
+          QA::Support::PageErrorChecker.check_page_for_error_code(Capybara.page)
         end
 
         Waiter.wait_until(log: false) do
