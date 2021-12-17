@@ -150,6 +150,7 @@ end
 RSpec.shared_examples 'migration adds mapping' do
   let(:migration) { described_class.new(version) }
   let(:helper) { Gitlab::Elastic::Helper.new }
+  let(:default_mappings) { { "blob" => { "properties" => { "content" => { "type" => "text" } } } } }
 
   before do
     allow(migration).to receive(:helper).and_return(helper)
@@ -168,7 +169,7 @@ RSpec.shared_examples 'migration adds mapping' do
 
     context 'migration process' do
       before do
-        allow(helper).to receive(:get_mapping).and_return({})
+        allow(helper).to receive(:get_mapping).and_return(default_mappings)
       end
 
       it 'updates the issues index mappings' do
@@ -186,7 +187,7 @@ RSpec.shared_examples 'migration adds mapping' do
 
     context 'mapping has not been updated' do
       before do
-        allow(helper).to receive(:get_mapping).and_return({})
+        allow(helper).to receive(:get_mapping).and_return(default_mappings)
       end
 
       specify { expect(migration).not_to be_completed }

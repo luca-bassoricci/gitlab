@@ -213,6 +213,7 @@ module Elastic
             analyzer: :code_analyzer,
             search_analyzer: :code_search_analyzer
           indexes :language, type: :keyword
+          indexes :extension, type: :keyword
         end
 
         indexes :commit do
