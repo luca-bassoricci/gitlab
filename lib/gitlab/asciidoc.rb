@@ -62,14 +62,15 @@ module Gitlab
       end
 
       extra_attrs = path_attrs(context[:requested_path])
-      asciidoc_opts = { safe: :secure,
+      asciidoc_opts = { safe: :unsafe,
                         backend: :gitlab_html5,
                         attributes: DEFAULT_ADOC_ATTRS
                                         .merge(extra_attrs)
                                         .merge({
                                                    # Define the Kroki server URL from the settings.
                                                    # This attribute cannot be overridden from the AsciiDoc document.
-                                                   'kroki-server-url' => Gitlab::CurrentSettings.kroki_url
+                                                   'kroki-server-url' => Gitlab::CurrentSettings.kroki_url,
+                                                   'allow-uri-read' => true
                                                }),
                         extensions: extensions }
 
