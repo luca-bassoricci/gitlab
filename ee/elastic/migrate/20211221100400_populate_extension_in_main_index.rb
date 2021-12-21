@@ -11,15 +11,15 @@ class PopulateExtensionInMainIndex < Elastic::Migration
       def arr = ctx._source.blob.file_name.splitOnToken('.');
       if (arr.length > 1) {
         if (arr[0] == '' && arr.length <= 2) {
-          ctx._source.blob.extension = null
+          ctx._source.blob.extension = ''
         } else {
           ctx._source.blob.extension = arr[arr.length-1]
         }
       } else {
-        ctx._source.blob.extension = null
+        ctx._source.blob.extension = ''
       }
     } else {
-      ctx._source.blob.extension = null
+      ctx._source.blob.extension = ''
     }
   EOF
 
