@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class PopulateExtensionInMainIndex < Elastic::Migration
-  # include Elastic::MigrationHelper
-
   batched!
   throttle_delay 1.minute
 
@@ -119,10 +117,11 @@ class PopulateExtensionInMainIndex < Elastic::Migration
       },
       script: {
         lang: 'painless',
-        source: "if (ctx._source.blob.file_name != null) { def arr = ctx._source.blob.file_name.splitOnToken('.'); if (arr.length > 1) {ctx._source.blob.extension = arr[arr.length-1] } else { ctx._source.blob.extension = '' }} else { ctx._source.blob.extension = '' }"
+        source: "if (ctx._source.blob.file_name != null) {" \
+                "def arr = ctx._source.blob.file_name.splitOnToken('.');" \
+                "if (arr.length > 1) {ctx._source.blob.extension = arr[arr.length-1] }" \
+                "else { ctx._source.blob.extension = '' }} else { ctx._source.blob.extension = '' }"
       }
-      # "source": "if (ctx._source.blob.file_name != null) { def arr = ctx._source.blob.file_name.splitOnToken('.'); if (arr.length > 1) {ctx._source.blob.extension = arr[arr.length-1] } else { ctx._source.blob.extension = null }}"
-      # "source": "if (ctx._source.blob.file_name != null) { def arr = ctx._source.blob.file_name.splitOnToken('.'); if (arr.length > 1) {ctx._source.blob.extension = arr[arr.length-1] } else { ctx._source.blob.extension = null }} else { ctx._source.blob.extension = null }"
     }
 
     response = client.update_by_query(index: index_name, body: query, wait_for_completion: false)
