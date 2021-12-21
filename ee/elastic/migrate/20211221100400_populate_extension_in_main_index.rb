@@ -114,7 +114,7 @@ class PopulateExtensionInMainIndex < Elastic::Migration
       },
       query: {
         term: {
-          type: 'blobs'
+          type: 'blob'
         }
       },
       script: {
@@ -122,8 +122,11 @@ class PopulateExtensionInMainIndex < Elastic::Migration
         source: "if (ctx._source.blob.file_name != null) {" \
                 "def arr = ctx._source.blob.file_name.splitOnToken('.');" \
                 "if (arr.length > 1) {" \
-                "ctx._source.blob.extension = arr[arr.length-1] }}"
+                "ctx._source.blob.extension = arr[arr.length-1]" \
+                "} else { ctx._source.blob.extension = null }}"
       }
+      # "source": "if (ctx._source.blob.file_name != null) { def arr = ctx._source.blob.file_name.splitOnToken('.'); if (arr.length > 1) {ctx._source.blob.extension = arr[arr.length-1] } else { ctx._source.blob.extension = null }}"
+      # "source": "if (ctx._source.blob.file_name != null) { def arr = ctx._source.blob.file_name.splitOnToken('.'); if (arr.length > 1) {ctx._source.blob.extension = arr[arr.length-1] } else { ctx._source.blob.extension = null }} else { ctx._source.blob.extension = null }"
     }
 
     response = client.update_by_query(index: index_name, body: query, wait_for_completion: false)
@@ -155,7 +158,7 @@ class PopulateExtensionInMainIndex < Elastic::Migration
         },
         must_not: {
           exists: {
-            field: 'extension'
+            field: 'blob.extension'
           }
         }
       }
