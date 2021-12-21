@@ -25,10 +25,11 @@ RSpec.describe PopulateExtensionInMainIndex do
     using RSpec::Parameterized::TableSyntax
 
     where(:file_name, :result) do
-      nil                 | ''
-      '.gitignore'        | ''
-      '.hidden_file.conf' | 'conf'
-      'index.md'          | 'md'
+      nil                      | ''
+      '.gitignore'             | ''
+      '.hidden_file.conf'      | 'conf'
+      'index.md'               | 'md'
+      'default.config.example' | 'example'
     end
 
     with_them do
