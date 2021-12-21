@@ -6,6 +6,23 @@ class PopulateExtensionInMainIndex < Elastic::Migration
 
   MAX_ATTEMPTS_PER_SLICE = 30
 
+  UPDATE_SCRIPT = <<-EOF
+    if (ctx._source.blob.file_name != null) {
+      def arr = ctx._source.blob.file_name.splitOnToken('.');
+      if (arr.length > 1) {
+        if (arr[0] == '' && arr.length <= 2) {
+          ctx._source.blob.extension = null
+        } else {
+          ctx._source.blob.extension = arr[arr.length-1]
+        }
+      } else {
+        ctx._source.blob.extension = null
+      }
+    } else {
+      ctx._source.blob.extension = null
+    }
+  EOF
+
   def migrate
     if migration_state[:slice].blank?
       options = {
