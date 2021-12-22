@@ -4,25 +4,26 @@ module QA
   module Support
     class PageErrorChecker
       def self.report!(page, error_code)
-        # if severe_errors.none? || !page.driver.options[:browser].eq(:chrome)
-        #
-        case QA::Runtime::Env.browser
-        when :chrome
-          severe_errors = logs(page).select { |log| log.level == 'SEVERE' }
-          report = if !severe_errors.none?
-                     "There #{severe_errors.count == 1 ? 'was' : 'were'} #{severe_errors.count} "\
-                     "error#{severe_errors.count == 1 ? '' : 's'}:\n\n#{error_report_for(severe_errors)}"
-                   else
-                     status_code_report(error_code)
-                   end
-        else
-          report = status_code_report(error_code)
-        end
+        report = if QA::Runtime::Env.browser == :chrome
+                   return_chrome_errors(page, error_code)
+                 else
+                   status_code_report(error_code)
+                 end
 
         raise "#{report}\n\n"\
           "Username: #{Runtime::User.username}\n\n"\
           "Path: #{page.current_path}\n\n"\
           "Group: #{Runtime::Namespace.sandbox_name}"
+      end
+
+      def self.return_chrome_errors(page, error_code)
+        severe_errors = logs(page).select { |log| log.level == 'SEVERE' }
+        if severe_errors.none?
+          status_code_report(error_code)
+        else
+          "There #{severe_errors.count == 1 ? 'was' : 'were'} #{severe_errors.count} "\
+            "SEVERE level error#{severe_errors.count == 1 ? '' : 's'}:\n\n#{error_report_for(severe_errors)}"
+        end
       end
 
       def self.status_code_report(error_code)

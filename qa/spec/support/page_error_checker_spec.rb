@@ -3,6 +3,46 @@
 RSpec.describe QA::Support::PageErrorChecker do
   describe '.report!' do
     context 'reports errors' do
+      let(:page) { double(Capybara.page) }
+
+      let(:expected_chrome_error) do
+        "chrome errors\n\n"\
+        "Username: testuser\n\n"\
+        "Path: /test/path\n\n"\
+        "Group: testgroup"
+      end
+
+      let(:expected_basic_error) do
+        "foo status\n\n"\
+        "Username: testuser\n\n"\
+        "Path: /test/path\n\n"\
+        "Group: testgroup"
+      end
+
+      it 'reports error message on chrome browser' do
+        allow(QA::Support::PageErrorChecker).to receive(:return_chrome_errors).and_return('chrome errors')
+        allow(page).to receive(:current_path).and_return('/test/path')
+        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
+        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
+        allow(QA::Runtime::Env).to receive(:browser).and_return(:chrome)
+
+        expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_chrome_error)
+      end
+
+      it 'reports basic message on non-chrome browser' do
+        allow(QA::Support::PageErrorChecker).to receive(:status_code_report).and_return('foo status')
+        allow(page).to receive(:current_path).and_return('/test/path')
+        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
+        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
+        allow(QA::Runtime::Env).to receive(:browser).and_return(:firefox)
+
+        expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_basic_error)
+      end
+    end
+  end
+
+  describe '.return_chrome_errors' do
+    context 'returns error message' do
       before do
         single_log = Class.new do
           def level
@@ -29,75 +69,46 @@ RSpec.describe QA::Support::PageErrorChecker do
         end
         stub_const('NoErrorMockedLogs', no_error_mocked_logs)
       end
-
       let(:page) { double(Capybara.page) }
 
       let(:expected_single_error) do
-        "There was 1 error:\n\n"\
-        "bar foo\n\n"\
-        "Username: testuser\n\n"\
-        "Path: /test/path\n\n"\
-        "Group: testgroup"
+        "There was 1 SEVERE level error:\n\n"\
+        "bar foo"
       end
 
       let(:expected_multiple_error) do
-        "There were 3 errors:\n\n"\
+        "There were 3 SEVERE level errors:\n\n"\
         "bar foo\n"\
         "foo\n"\
-        "bar\n\n"\
-        "Username: testuser\n\n"\
-        "Path: /test/path\n\n"\
-        "Group: testgroup"
+        "bar"
       end
 
-      let(:expected_basic_error) do
-        "Status code 500 found\n\n"\
-        "Username: testuser\n\n"\
-        "Path: /test/path\n\n"\
-        "Group: testgroup"
+      it 'returns status code report on no severe errors found' do
+        allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(NoErrorMockedLogs)
+        allow(QA::Support::PageErrorChecker).to receive(:status_code_report).with('123').and_return('Test Status Code return 123')
+
+        expect(QA::Support::PageErrorChecker.return_chrome_errors(page, '123')).to eq('Test Status Code return 123')
       end
 
-      it 'reports on 1 browser error' do
+      it 'returns report on 1 severe error found' do
         allow(QA::Support::PageErrorChecker).to receive(:error_report_for).with([SingleLog]).and_return('bar foo')
         allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(OneErrorMockedLogs)
         allow(page).to receive(:current_path).and_return('/test/path')
         allow(QA::Runtime::User).to receive(:username).and_return('testuser')
         allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
-        allow(QA::Runtime::Env).to receive(:browser).and_return(:chrome)
 
-        expect { QA::Support::PageErrorChecker.report!(page, 404) }.to raise_error(RuntimeError, expected_single_error)
+        expect(QA::Support::PageErrorChecker.return_chrome_errors(page, '123')).to eq(expected_single_error)
       end
 
-      it 'reports on multiple browser errors' do
-        allow(QA::Support::PageErrorChecker).to receive(:error_report_for)
-            .with([SingleLog, SingleLog, SingleLog]).and_return("bar foo\nfoo\nbar")
-        allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(ThreeErrorsMockedLogs)
-        allow(page).to receive(:current_path).and_return('/test/path')
-        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
-        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
-        allow(QA::Runtime::Env).to receive(:browser).and_return(:chrome)
-
-        expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_multiple_error)
-      end
-
-      it 'reports basic message on no browser errors' do
-        allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(NoErrorMockedLogs)
-        allow(page).to receive(:current_path).and_return('/test/path')
-        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
-        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
-        allow(QA::Runtime::Env).to receive(:browser).and_return(:chrome)
-        expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_basic_error)
-      end
-
-      it 'reports basic message on non-chrome browser' do
+      it 'returns report on multiple severe errors found' do
         allow(QA::Support::PageErrorChecker).to receive(:error_report_for)
                                                     .with([SingleLog, SingleLog, SingleLog]).and_return("bar foo\nfoo\nbar")
         allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(ThreeErrorsMockedLogs)
         allow(page).to receive(:current_path).and_return('/test/path')
         allow(QA::Runtime::User).to receive(:username).and_return('testuser')
         allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
-        allow(QA::Runtime::Env).to receive(:browser).and_return(:firefox)
-        expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_basic_error)
+
+        expect(QA::Support::PageErrorChecker.return_chrome_errors(page, '123')).to eq(expected_multiple_error)
       end
     end
   end
@@ -115,8 +126,8 @@ RSpec.describe QA::Support::PageErrorChecker do
     let(:page) { double(Capybara.page) }
     let(:error_404_str) do
       "<div class=\"error\">"\
-                             "<img src=\"404.png\" alt=\"404\" />"\
-                          "</div>"
+        "<img src=\"404.png\" alt=\"404\" />"\
+      "</div>"
     end
 
     let(:error_500_str) { "<h1>   500   </h1>"}
