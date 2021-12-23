@@ -1,4 +1,4 @@
----
+https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/---
 stage: Multiple stages
 group: Macro UX
 info: The page to describe a story related to Platform Engineer and Kubernetes Deployment.
@@ -111,7 +111,7 @@ so that I can quickly jump on the incident investigation and mitigation.
 
 ### How I accomplished this task
 
-- Setup Promehteus instance in the cluster.
+- Setup [Promehteus instance in the cluster](https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/).
 - Setup [Prometheus Integration](https://docs.gitlab.com/ee/user/project/integrations/prometheus.html)
 
 ## Chapter 6: Scale up the infrastructure
