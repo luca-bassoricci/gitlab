@@ -67,7 +67,7 @@ As a preliminary step, I'll install an Ingress Controller to obtain the server a
 
 - Create a Kubernetes Cluster on GKE.
 - Setup [Kubernetes Agent](https://docs.gitlab.com/ee/user/clusters/agent/install/index.html).
-- Download Nginx Ingress official repository.
+- Download [Nginx Ingress official manifests](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/#2-create-common-resources)
 - Configure Agent Config files.
 - Confirm the Nginx is responding.
 
