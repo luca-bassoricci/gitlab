@@ -59,9 +59,7 @@ is along with the company standards.
 _Related to Create and Configure stages_
 
 The proposed infrastructure has been approved. Now, I'm commiting the
-plan to launch the website.
-
-I'll create a new cluster on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
+plan to launch the website. I'll create a new cluster on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
 and author manifiest files to build the infrastucture.
 As a preliminary step, I'll install an Ingress Controller to obtain the server address.
 
