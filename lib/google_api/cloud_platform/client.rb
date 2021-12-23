@@ -12,10 +12,7 @@ require 'google/apis/iam_v1'
 module GoogleApi
   module CloudPlatform
     class Client < GoogleApi::Auth
-      SCOPE = [
-        'https://www.googleapis.com/auth/cloud-platform',
-        'https://www.googleapis.com/auth/service.management'
-      ].freeze
+      SCOPE = 'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/service.management'
       LEAST_TOKEN_LIFE_TIME = 10.minutes
       CLUSTER_MASTER_AUTH_USERNAME = 'admin'
       CLUSTER_IPV4_CIDR_BLOCK = '/16'
