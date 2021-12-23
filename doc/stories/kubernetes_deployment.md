@@ -1,4 +1,4 @@
-https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/---
+---
 stage: Multiple stages
 group: Macro UX
 info: The page to describe a story related to Platform Engineer and Kubernetes Deployment.
