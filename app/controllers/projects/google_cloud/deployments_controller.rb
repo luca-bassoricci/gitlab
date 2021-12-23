@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::BaseController
+  before_action :validate_gcp_token!
+
   def cloud_run
     branch_name = "cloud-run-#{SecureRandom.hex(8)}"
     pipeline_content = generate_cloud_run_pipeline
@@ -35,7 +37,10 @@ class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::Base
   end
 
   def cloud_storage
-    render json: { "foo" => "bar" }
+    google_api_client = GoogleApi::CloudPlatform::Client.new(token_in_session, nil)
+    gcp_project_id = 'ssrirangan-504e97bf'
+    services = google_api_client.list_services(gcp_project_id)
+    render json: { "foo" => "bar", "services" => services }
   end
 
   private

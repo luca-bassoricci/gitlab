@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'securerandom'
+require 'google/apis/serviceusage_v1'
 require 'google/apis/compute_v1'
 require 'google/apis/container_v1'
 require 'google/apis/container_v1beta1'
@@ -11,7 +12,10 @@ require 'google/apis/iam_v1'
 module GoogleApi
   module CloudPlatform
     class Client < GoogleApi::Auth
-      SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
+      SCOPE = [
+        'https://www.googleapis.com/auth/cloud-platform',
+        'https://www.googleapis.com/auth/service.management'
+      ].freeze
       LEAST_TOKEN_LIFE_TIME = 10.minutes
       CLUSTER_MASTER_AUTH_USERNAME = 'admin'
       CLUSTER_IPV4_CIDR_BLOCK = '/16'
@@ -128,6 +132,11 @@ module GoogleApi
         name = "projects/#{gcp_project_id}/serviceAccounts/#{service_account_id}"
         request_body = Google::Apis::IamV1::CreateServiceAccountKeyRequest.new
         service.create_service_account_key(name, request_body)
+      end
+
+      def list_services(gcp_project_id)
+        service = Google::Apis::ServiceusageV1::ServiceUsageService.new
+        service.list_services("projects/#{gcp_project_id}")
       end
 
       private
