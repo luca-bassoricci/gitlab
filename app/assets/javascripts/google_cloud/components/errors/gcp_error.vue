@@ -1,28 +1,44 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
-import { __ } from '~/locale';
 
 export default {
   components: { GlAlert },
   props: {
-    error: {
+    title: {
       type: String,
       required: true,
     },
-  },
-  i18n: {
-    title: __('Google Cloud project misconfigured'),
-    description: __(
-      'GitLab and Google Cloud configuration seems to be incomplete. This probably can be fixed by your GitLab administration team. You may share these logs with them:',
-    ),
+    description: {
+      type: String,
+      required: true,
+    },
+    primaryButtonText: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    primaryButtonLink: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    error: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
 };
 </script>
 
 <template>
-  <gl-alert :dismissible="false" variant="warning" :title="$options.i18n.title">
-    {{ $options.i18n.description }}
-    <blockquote>
+  <gl-alert :dismissible='false'
+            variant='warning'
+            :title='title'
+            :primary-button-text='primaryButtonText'
+            :primary-button-link='primaryButtonLink'>
+    {{ description }}
+    <blockquote v-if='error' class='gl-mt-5'>
       <code>{{ error }}</code>
     </blockquote>
   </gl-alert>

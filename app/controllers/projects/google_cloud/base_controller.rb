@@ -54,8 +54,60 @@ class Projects::GoogleCloud::BaseController < Projects::ApplicationController
   end
 
   def handle_gcp_error(error, project)
+    message = error.body
+    @js_data = { screen: 'gcp_error' }
+
+    if message.include?('Cloud Resource Manager API has not been used in project')
+      @js_data['title'] = 'GCP Misconfiguration - CloudResourceManager API not enabled'
+      @js_data['description'] = <<-DESCRIPTION
+        The Google Cloud Platform project associated with this GitLab instance
+        is not configured to use the Cloud Resource Manager API.
+        This can be enabled by your administrator.
+        Please contact your GitLab administrator to resolve this issue.
+        If you are the admin, you may use the link below to enable the API.
+      DESCRIPTION
+      @js_data['primaryButtonText'] = 'Enable Cloud Resource Manager API'
+      @js_data['primaryButtonLink'] = URI.extract(message).first
+
+    elsif message.include?('Identity and Access Management (IAM) API has not been used in project')
+      @js_data['title'] = 'GCP Misconfiguration - Identity and Access Management API not enabled'
+      @js_data['description'] = <<-DESCRIPTION
+        The Google Cloud Platform project associated with this GitLab instance
+        is not configured to use the Identity and Access Management API.
+        This can be enabled by your administrator.
+        Please contact your GitLab administrator to resolve this issue.
+        If you are the admin, you may use the link below to enable the API.
+      DESCRIPTION
+      @js_data['primaryButtonText'] = 'Enable Identity and Access Management API'
+      @js_data['primaryButtonLink'] = URI.extract(message).first
+
+    elsif message.include?('Service Usage API has not been used in project')
+      @js_data['title'] = 'GCP Misconfiguration - Service Usage API not enabled'
+      @js_data['description'] = <<-DESCRIPTION
+        The Google Cloud Platform project associated with this GitLab instance
+        is not configured to use the Service Usage API.
+        This can be enabled by your administrator.
+        Please contact your GitLab administrator to resolve this issue.
+        If you are the admin, you may use the link below to enable the API.
+      DESCRIPTION
+      @js_data['primaryButtonText'] = 'Enable Service Usage API'
+      @js_data['primaryButtonLink'] = URI.extract(message).first
+
+    elsif message.include?('Billing must be enabled')
+      @js_data['title'] = 'GCP Misconfiguration - Billing account required'
+      @js_data['description'] = <<-DESCRIPTION
+        A billing account needs to be associated with your Google Cloud Platform projects.
+        If you are the Google Cloud Platform admin, please log in to the Google Cloud Console
+        and associate a billing account with your projects.
+      DESCRIPTION
+      @js_data['error'] = message
+      @js_data['primaryButtonText'] = 'Configure billing account'
+      gcp_project_id = JSON.parse(error.body)['error']['details'][1]['metadata']['project']
+      @js_data['primaryButtonLink'] = "https://console.cloud.google.com/billing?project=#{gcp_project_id}"
+    end
+
+    @js_data = @js_data.to_json
     Gitlab::ErrorTracking.track_exception(error, project_id: project.id)
-    @js_data = { screen: 'gcp_error', error: error.to_s }.to_json
     render status: :unauthorized, template: 'projects/google_cloud/errors/gcp_error'
   end
 end

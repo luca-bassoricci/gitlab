@@ -131,9 +131,11 @@ module GoogleApi
         service.create_service_account_key(name, request_body)
       end
 
-      def list_services(gcp_project_id)
+      def enable_cloud_run(gcp_project_id)
+        name = "projects/#{gcp_project_id}/services/run.googleapis.com"
         service = Google::Apis::ServiceusageV1::ServiceUsageService.new
-        service.list_services("projects/#{gcp_project_id}")
+        service.authorization = access_token
+        service.enable_service(name)
       end
 
       private
