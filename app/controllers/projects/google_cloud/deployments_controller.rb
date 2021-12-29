@@ -13,6 +13,8 @@ class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::Base
       google_api_client = GoogleApi::CloudPlatform::Client.new(token_in_session, nil)
       gcp_project_ids.each do |gcp_project_id|
         google_api_client.enable_cloud_run(gcp_project_id)
+        google_api_client.enable_artifacts_registry(gcp_project_id)
+        google_api_client.enable_cloud_build(gcp_project_id)
       end
       branch_name = "cloud-run-#{SecureRandom.hex(8)}"
       pipeline_content = generate_cloud_run_pipeline

@@ -140,9 +140,33 @@ module GoogleApi
         policy = service.get_project_iam_policy(gcp_project_id)
         policy.bindings.append(
           Google::Apis::CloudresourcemanagerV1::Binding.new(
-            role: "roles/editor",
+            role: "roles/iam.serviceAccountUser",
             members: ["serviceAccount:#{service_account_email}"]
-          )
+          ),
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/artifactregistry.admin",
+            members: ["serviceAccount:#{service_account_email}"]
+          ),
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/cloudbuild.builds.builder",
+            members: ["serviceAccount:#{service_account_email}"]
+          ),
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/run.admin",
+            members: ["serviceAccount:#{service_account_email}"]
+          ),
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/storage.admin",
+            members: ["serviceAccount:#{service_account_email}"]
+          ),
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/cloudsql.admin",
+            members: ["serviceAccount:#{service_account_email}"]
+          ),
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/browser",
+            members: ["serviceAccount:#{service_account_email}"]
+          ),
         )
         policy_request_body = Google::Apis::CloudresourcemanagerV1::SetIamPolicyRequest.new(policy: policy)
 
@@ -152,6 +176,20 @@ module GoogleApi
 
       def enable_cloud_run(gcp_project_id)
         name = "projects/#{gcp_project_id}/services/run.googleapis.com"
+        service = Google::Apis::ServiceusageV1::ServiceUsageService.new
+        service.authorization = access_token
+        service.enable_service(name)
+      end
+
+      def enable_artifacts_registry(gcp_project_id)
+        name = "projects/#{gcp_project_id}/services/artifactregistry.googleapis.com"
+        service = Google::Apis::ServiceusageV1::ServiceUsageService.new
+        service.authorization = access_token
+        service.enable_service(name)
+      end
+
+      def enable_cloud_build(gcp_project_id)
+        name = "projects/#{gcp_project_id}/services/cloudbuild.googleapis.com"
         service = Google::Apis::ServiceusageV1::ServiceUsageService.new
         service.authorization = access_token
         service.enable_service(name)
