@@ -131,6 +131,25 @@ module GoogleApi
         service.create_service_account_key(name, request_body)
       end
 
+      def grant_service_account_roles(gcp_project_id, service_account_email)
+        # initialize google cloudresourcemanager service
+        service = Google::Apis::CloudresourcemanagerV1::CloudResourceManagerService.new
+        service.authorization = access_token
+
+        # prepare request
+        policy = service.get_project_iam_policy(gcp_project_id)
+        policy.bindings.append(
+          Google::Apis::CloudresourcemanagerV1::Binding.new(
+            role: "roles/editor",
+            members: ["serviceAccount:#{service_account_email}"]
+          )
+        )
+        policy_request_body = Google::Apis::CloudresourcemanagerV1::SetIamPolicyRequest.new(policy: policy)
+
+        # set policy
+        service.set_project_iam_policy(gcp_project_id, policy_request_body)
+      end
+
       def enable_cloud_run(gcp_project_id)
         name = "projects/#{gcp_project_id}/services/run.googleapis.com"
         service = Google::Apis::ServiceusageV1::ServiceUsageService.new

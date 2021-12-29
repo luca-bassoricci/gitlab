@@ -33,6 +33,7 @@ class Projects::GoogleCloud::ServiceAccountsController < Projects::GoogleCloud::
 
     service_account = google_api_client.create_service_account(gcp_project, generated_name, generated_desc)
     service_account_key = google_api_client.create_service_account_key(gcp_project, service_account.unique_id)
+    google_api_client.grant_service_account_roles(gcp_project, service_account.email)
 
     service_accounts_service.add_for_project(
       environment,
