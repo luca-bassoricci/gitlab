@@ -27,19 +27,22 @@ class Projects::GoogleCloud::ServiceAccountsController < Projects::GoogleCloud::
     google_api_client = GoogleApi::CloudPlatform::Client.new(token_in_session, nil)
     service_accounts_service = GoogleCloud::ServiceAccountsService.new(project)
     gcp_project = params[:gcp_project]
-    environment = params[:environment]
-    generated_name = "GitLab :: #{@project.name} :: #{environment}"
-    generated_desc = "GitLab generated service account for project '#{@project.name}' and environment '#{environment}'"
+    environment_name = params[:environment]
+    environment = project.environments.find_by(name: environment_name)
+    is_environment_protected = environment ? environment.protected? : false
+    generated_name = "GitLab :: #{@project.name} :: #{environment_name}"
+    generated_desc = "GitLab generated service account for project '#{@project.name}' and environment '#{environment_name}'"
 
     service_account = google_api_client.create_service_account(gcp_project, generated_name, generated_desc)
     service_account_key = google_api_client.create_service_account_key(gcp_project, service_account.unique_id)
     google_api_client.grant_service_account_roles(gcp_project, service_account.email)
 
     service_accounts_service.add_for_project(
-      environment,
+      environment_name,
       service_account.project_id,
       service_account.to_json,
-      service_account_key.to_json
+      service_account_key.to_json,
+      is_environment_protected
     )
 
     redirect_to project_google_cloud_index_path(project), notice: _('Service account generated successfully')

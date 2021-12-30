@@ -27,21 +27,24 @@ module GoogleCloud
       end
     end
 
-    def add_for_project(environment, gcp_project_id, service_account, service_account_key)
+    def add_for_project(environment, gcp_project_id, service_account, service_account_key, protected)
       project_var_create_or_replace(
         environment,
         'GCP_PROJECT_ID',
-        gcp_project_id
+        gcp_project_id,
+        protected
       )
       project_var_create_or_replace(
         environment,
         'GCP_SERVICE_ACCOUNT',
-        service_account
+        service_account,
+        protected
       )
       project_var_create_or_replace(
         environment,
         'GCP_SERVICE_ACCOUNT_KEY',
-        service_account_key
+        service_account_key,
+        protected
       )
     end
 
@@ -55,11 +58,14 @@ module GoogleCloud
       end
     end
 
-    def project_var_create_or_replace(environment_scope, key, value)
+    def project_var_create_or_replace(environment_scope, key, value, protected)
       params = { key: key, filter: { environment_scope: environment_scope } }
       existing_variable = ::Ci::VariablesFinder.new(@project, params).execute.first
       existing_variable.destroy if existing_variable
-      @project.variables.create!(key: key, value: value, environment_scope: environment_scope, protected: true)
+      @project.variables.create!(key: key,
+                                 value: value,
+                                 environment_scope: environment_scope,
+                                 protected: protected)
     end
   end
 end
