@@ -66,10 +66,8 @@ class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::Base
 stages:
   - deploy
 
-"Deploy :: Cloud Run":
-  stage: deploy
-  script:
-    - echo "MOCK Deploying to Cloud Run"
+include:
+  remote: https://gitlab.com/gitlab-org/incubation-engineering/five-minute-production/library/-/raw/main/gcp/cloud-run.gitlab-ci.yml
     YAML
   end
 end
