@@ -17,19 +17,24 @@ class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::Base
         google_api_client.enable_cloud_build(gcp_project_id)
       end
       branch_name = "cloud-run-#{SecureRandom.hex(8)}"
-      pipeline_content = generate_cloud_run_pipeline
       target_branch = project.default_branch
 
       project.repository.add_branch(current_user, branch_name, target_branch)
+
+      gitlab_ci_yml = begin
+                        get_gitlab_ci_yml # this can fail on the very first commit
+                      rescue StandardError
+                        nil
+                      end
 
       commit_attrs = {
         commit_message: 'Enable Cloud Run deployments',
         branch_name: branch_name,
         start_branch: branch_name,
         actions: [
-          { action: 'update',
+          { action: gitlab_ci_yml.present? ? 'update' : 'create',
             file_path: '.gitlab-ci.yml',
-            content: pipeline_content }
+            content: generate_cloud_run_pipeline(gitlab_ci_yml) }
         ]
       }
 
@@ -61,13 +66,20 @@ class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::Base
     project.variables.filter { |var| var.key == 'GCP_PROJECT_ID' }.map { |var| var.value }
   end
 
-  def generate_cloud_run_pipeline
-    <<-YAML
-stages:
-  - deploy
+  def get_gitlab_ci_yml
+    gitlab_ci_yml = project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
+    YAML.safe_load(gitlab_ci_yml || '{}')
+  end
 
-include:
-  remote: https://gitlab.com/gitlab-org/incubation-engineering/five-minute-production/library/-/raw/main/gcp/cloud-run.gitlab-ci.yml
-    YAML
+  def generate_cloud_run_pipeline(gitlab_ci_yml)
+    stages = gitlab_ci_yml['stages'] || []
+    gitlab_ci_yml['stages'] = (stages + ['deploy']).uniq
+
+    includes = gitlab_ci_yml['include'] || []
+    includes = Array.wrap(includes)
+    includes << { 'remote' => 'https://gitlab.com/gitlab-org/incubation-engineering/five-minute-production/library/-/raw/main/gcp/cloud-run.gitlab-ci.yml' }
+    gitlab_ci_yml['include'] = includes.uniq
+
+    gitlab_ci_yml.to_yaml
   end
 end
