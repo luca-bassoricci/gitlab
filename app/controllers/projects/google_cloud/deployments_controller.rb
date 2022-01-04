@@ -73,10 +73,12 @@ class Projects::GoogleCloud::DeploymentsController < Projects::GoogleCloud::Base
 
   def generate_cloud_run_pipeline(gitlab_ci_yml)
     stages = gitlab_ci_yml['stages'] || []
-    gitlab_ci_yml['stages'] = (stages + ['deploy']).uniq
+    gitlab_ci_yml['stages'] = (stages + %w[build test deploy]).uniq
 
     includes = gitlab_ci_yml['include'] || []
     includes = Array.wrap(includes)
+    includes << { 'template' => 'Jobs/Build.gitlab-ci.yml' }
+    includes << { 'template' => 'Jobs/Test.gitlab-ci.yml' }
     includes << { 'remote' => 'https://gitlab.com/gitlab-org/incubation-engineering/five-minute-production/library/-/raw/main/gcp/cloud-run.gitlab-ci.yml' }
     gitlab_ci_yml['include'] = includes.uniq
 
