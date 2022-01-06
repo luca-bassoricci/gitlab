@@ -35,7 +35,7 @@
                 .form-group.project-name.col-sm-12
                   = f.label :name, class: 'gl-font-weight-bold' do
                     %span= _('Project name')
-                  = f.text_field :name, class: 'form-control', autofocus: true, data: { track_label: 'blank_project', track_action: 'activate_form_input', track_property: 'project_name', track_value: '' }
+                  = f.text_field :name, class: 'form-control', autofocus: true, data: { track_label: 'blank_project', track_action: 'activate_form_input', track_property: 'project_name', track_value: '', qa_selector: 'project_name_text_field' }
                   .form-text.text-muted= _('You can always edit this later')
                 .form-group.col-sm-12
                   = f.label :path, class: 'gl-font-weight-bold' do
@@ -51,7 +51,7 @@
                 = link_to sprite_icon('question-o'), help_page_path('public_access/public_access'), aria: { label: 'Documentation for Visibility Level' }, target: '_blank', rel: 'noopener noreferrer'
               = render 'shared/visibility_level', f: f, visibility_level: visibility_level.to_i, can_change_visibility_level: true, form_model: @project, with_label: false
 
-              = f.submit _('Create project'), class: 'btn gl-button btn-confirm btn-block', data: { track_label: 'blank_project', track_action: 'click_button', track_property: 'create_project', track_value: '' }
+              = f.submit _('Create project'), class: 'btn gl-button btn-confirm btn-block', data: { track_label: 'blank_project', track_action: 'click_button', track_property: 'create_project', track_value: '', qa_selector: 'create_project_button' }
 
           #import-project-pane.tab-pane.import-project-pane.js-toggle-container{ role: 'tabpanel' }
             - if import_sources_enabled?

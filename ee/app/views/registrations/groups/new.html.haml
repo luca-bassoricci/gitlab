@@ -23,7 +23,8 @@
             = f.text_field :name, class: 'form-control js-autofill-group-name',
               required: true,
               title: _('Please fill in a descriptive name for your group.'),
-              autofocus: true
+              autofocus: true,
+              data: { qa_selector: 'group_name_text_field' }
             .form-text.text-muted= _('You can always edit this later')
         .row
           .form-group.col-sm-12
@@ -51,5 +52,5 @@
 
         .row
           .form-group.col-sm-12.gl-mb-0
-            = button_tag class: %w[btn gl-button btn-confirm gl-w-full!] do
+            = button_tag class: %w[btn gl-button btn-confirm gl-w-full!], data: { qa_selector: 'create_group_button' } do
               = _('Create group')

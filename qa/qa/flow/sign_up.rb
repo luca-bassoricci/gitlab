@@ -26,7 +26,29 @@ module QA
           sign_up.click_new_user_register_button
         end
 
-        Page::Registration::Welcome.perform(&:click_get_started_button_if_available)
+        Page::Registration::Welcome.perform do |welcome_page|
+          if welcome_page.has_get_started_button?
+            welcome_page.select_role('Other')
+            welcome_page.choose_setup_for_company
+            welcome_page.click_get_started_button
+          end
+        end
+
+        Page::Registration::Groups.perform do |welcome_page|
+          if welcome_page.has_create_group_button?
+            welcome_page.set_group_name("group-at-registration_#{SecureRandom.hex(8)}")
+            welcome_page.click_create_group_button
+          end
+        end
+
+        Page::Registration::Projects.perform do |welcome_page|
+          if welcome_page.has_create_project_button?
+            welcome_page.set_project_name("project-at-registration_#{SecureRandom.hex(8)}")
+            welcome_page.click_create_project_button
+          end
+        end
+
+        Page::Registration::Welcome.perform(&:click_ok_lets_go_link)
 
         success = if user.expect_fabrication_success
                     Page::Main::Menu.perform(&:has_personal_area?)
