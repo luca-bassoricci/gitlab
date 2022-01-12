@@ -686,7 +686,7 @@ module.exports = {
        Upstream reference:
        https://github.com/Pikaday/Pikaday/blob/5c1a7559be/pikaday.js#L14
     */
-    new webpack.IgnorePlugin(/moment/, /pikaday/),
+    new webpack.IgnorePlugin({ resourceRegExp: /moment/, contextRegExp: /pikaday/ }),
   ].filter(Boolean),
   devServer: {
     before(app, server) {
@@ -706,7 +706,8 @@ module.exports = {
   devtool: NO_SOURCEMAPS ? false : devtool,
 
   node: {
-    fs: 'empty', // sqljs requires fs
-    setImmediate: false,
+    global: false,
+    __filename: false,
+    __dirname: false,
   },
 };
