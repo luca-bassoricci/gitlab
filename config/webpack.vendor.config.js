@@ -104,8 +104,10 @@ module.exports = {
 
   resolve: {
     fallback: {
-      fs: false, // sqljs requires fs
-      path: false, // sqljs requires path
+      // sqljs dependencies
+      fs: false,
+      path: false,
+      crypto: false,
     }
   },
 
