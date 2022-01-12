@@ -89,6 +89,13 @@ module.exports = {
     }),
   ],
 
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [__filename],
+    },
+  },
+
   node: {
     global: false,
     __filename: false,
@@ -98,6 +105,7 @@ module.exports = {
   resolve: {
     fallback: {
       fs: false, // sqljs requires fs
+      path: false, // sqljs requires path
     }
   },
 
