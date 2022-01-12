@@ -90,9 +90,16 @@ module.exports = {
   ],
 
   node: {
-    fs: 'empty', // sqljs requires fs
-    setImmediate: false,
+    global: false,
+    __filename: false,
+    __dirname: false,
   },
+
+  resolve: {
+    fallback: {
+      fs: false, // sqljs requires fs
+    }
+  }
 
   devtool: 'cheap-module-source-map',
 };

@@ -710,4 +710,10 @@ module.exports = {
     __filename: false,
     __dirname: false,
   },
+
+  resolve: {
+    fallback: {
+      fs: false, // sqljs requires fs
+    }
+  }
 };
