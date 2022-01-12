@@ -99,7 +99,7 @@ module.exports = {
     fallback: {
       fs: false, // sqljs requires fs
     }
-  }
+  },
 
   devtool: 'cheap-module-source-map',
 };
