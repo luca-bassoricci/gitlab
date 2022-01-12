@@ -9,7 +9,7 @@ const BABEL_LOADER_VERSION = require('babel-loader/package.json').version;
 const CompressionPlugin = require('compression-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const glob = require('glob');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 const VUE_LOADER_VERSION = require('vue-loader/package.json').version;
 const VUE_VERSION = require('vue/package.json').version;
 
