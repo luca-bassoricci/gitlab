@@ -89,13 +89,6 @@ module.exports = {
     }),
   ],
 
-  cache: {
-    type: 'filesystem',
-    buildDependencies: {
-      config: [__filename],
-    },
-  },
-
   node: {
     global: false,
     __filename: false,

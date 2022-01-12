@@ -705,13 +705,6 @@ module.exports = {
 
   devtool: NO_SOURCEMAPS ? false : devtool,
 
-  cache: {
-    type: 'filesystem',
-    buildDependencies: {
-      config: [__filename],
-    },
-  },
-
   node: {
     global: false,
     __filename: false,
