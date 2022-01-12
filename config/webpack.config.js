@@ -65,7 +65,7 @@ const SOURCEGRAPH_PATH = path.join('sourcegraph', SOURCEGRAPH_VERSION, '/');
 const SOURCEGRAPH_OUTPUT_PATH = path.join(WEBPACK_OUTPUT_PATH, SOURCEGRAPH_PATH);
 const SOURCEGRAPH_PUBLIC_PATH = path.join(WEBPACK_PUBLIC_PATH, SOURCEGRAPH_PATH);
 
-const devtool = IS_PRODUCTION ? 'source-map' : 'cheap-module-eval-source-map';
+const devtool = IS_PRODUCTION ? 'source-map' : 'eval-cheap-module-source-map';
 
 let autoEntriesCount = 0;
 let watchAutoEntries = [];
