@@ -1,29 +1,26 @@
 # frozen_string_literal: true
 
 RSpec.describe QA::Support::PageErrorChecker do
+  let(:test_path) do
+    '/test/path'
+  end
+  let(:page) { double(Capybara.page) }
+
   describe '.report!' do
     context 'reports errors' do
-      let(:page) { double(Capybara.page) }
-
       let(:expected_chrome_error) do
         "chrome errors\n\n"\
-        "Username: testuser\n\n"\
-        "Path: /test/path\n\n"\
-        "Group: testgroup"
+        "Path: #{test_path}"
       end
 
       let(:expected_basic_error) do
         "foo status\n\n"\
-        "Username: testuser\n\n"\
-        "Path: /test/path\n\n"\
-        "Group: testgroup"
+        "Path: #{test_path}"
       end
 
       it 'reports error message on chrome browser' do
         allow(QA::Support::PageErrorChecker).to receive(:return_chrome_errors).and_return('chrome errors')
-        allow(page).to receive(:current_path).and_return('/test/path')
-        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
-        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
+        allow(page).to receive(:current_path).and_return(test_path)
         allow(QA::Runtime::Env).to receive(:browser).and_return(:chrome)
 
         expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_chrome_error)
@@ -31,9 +28,7 @@ RSpec.describe QA::Support::PageErrorChecker do
 
       it 'reports basic message on non-chrome browser' do
         allow(QA::Support::PageErrorChecker).to receive(:status_code_report).and_return('foo status')
-        allow(page).to receive(:current_path).and_return('/test/path')
-        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
-        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
+        allow(page).to receive(:current_path).and_return(test_path)
         allow(QA::Runtime::Env).to receive(:browser).and_return(:firefox)
 
         expect { QA::Support::PageErrorChecker.report!(page, 500) }.to raise_error(RuntimeError, expected_basic_error)
@@ -69,7 +64,7 @@ RSpec.describe QA::Support::PageErrorChecker do
         end
         stub_const('NoErrorMockedLogs', no_error_mocked_logs)
       end
-      let(:page) { double(Capybara.page) }
+
 
       let(:expected_single_error) do
         "There was 1 SEVERE level error:\n\n"\
@@ -93,9 +88,7 @@ RSpec.describe QA::Support::PageErrorChecker do
       it 'returns report on 1 severe error found' do
         allow(QA::Support::PageErrorChecker).to receive(:error_report_for).with([SingleLog]).and_return('bar foo')
         allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(OneErrorMockedLogs)
-        allow(page).to receive(:current_path).and_return('/test/path')
-        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
-        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
+        allow(page).to receive(:current_path).and_return(test_path)
 
         expect(QA::Support::PageErrorChecker.return_chrome_errors(page, '123')).to eq(expected_single_error)
       end
@@ -104,9 +97,7 @@ RSpec.describe QA::Support::PageErrorChecker do
         allow(QA::Support::PageErrorChecker).to receive(:error_report_for)
                                                     .with([SingleLog, SingleLog, SingleLog]).and_return("bar foo\nfoo\nbar")
         allow(QA::Support::PageErrorChecker).to receive(:logs).with(page).and_return(ThreeErrorsMockedLogs)
-        allow(page).to receive(:current_path).and_return('/test/path')
-        allow(QA::Runtime::User).to receive(:username).and_return('testuser')
-        allow(QA::Runtime::Namespace).to receive(:sandbox_name).and_return('testgroup')
+        allow(page).to receive(:current_path).and_return(test_path)
 
         expect(QA::Support::PageErrorChecker.return_chrome_errors(page, '123')).to eq(expected_multiple_error)
       end
@@ -123,7 +114,6 @@ RSpec.describe QA::Support::PageErrorChecker do
       end
       stub_const('NokogiriParse', nokogiri_parse)
     end
-    let(:page) { double(Capybara.page) }
     let(:error_404_str) do
       "<div class=\"error\">"\
         "<img src=\"404.png\" alt=\"404\" />"\
@@ -213,8 +203,6 @@ RSpec.describe QA::Support::PageErrorChecker do
       end
       stub_const('Driver', driver_class)
     end
-
-    let(:page) { double(Capybara.page) }
 
     it 'gets driver browser logs' do
       allow(page).to receive(:driver).and_return(Driver)
