@@ -217,7 +217,7 @@ module UsersHelper
   end
 
   def trials_link_url
-    'https://about.gitlab.com/free-trial/'
+    ::Gitlab::MarketingSite.free_trial_url
   end
 
   def trials_allowed?(user)

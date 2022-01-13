@@ -150,7 +150,7 @@
                 = render 'layouts/header/sign_in_register_button', class: 'gl-sm-display-none'
               - e.try(:trial_focused) do
                 %li.nav-item.gl-display-none.gl-sm-display-block
-                  = link_to _('Get a free trial'), 'https://about.gitlab.com/free-trial/', class: 'gl-button btn btn-default btn-sign-in', data: { track_action: 'click_button', track_experiment: e.name, track_label: 'get_a_free_trial' }
+                  = link_to _('Get a free trial'), ::Gitlab::MarketingSite.free_trial_url, class: 'gl-button btn btn-default btn-sign-in', data: { track_action: 'click_button', track_experiment: e.name, track_label: 'get_a_free_trial' }
                 %li.nav-item.gl-display-none.gl-sm-display-block
                   = link_to _('Sign up'), new_user_registration_path, data: { track_action: 'click_button', track_experiment: e.name, track_label: 'sign_up' }
                 %li.nav-item.gl-display-none.gl-sm-display-block

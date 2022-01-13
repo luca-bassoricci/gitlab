@@ -15,7 +15,7 @@
         %kbd.flat.float-right{ "aria-hidden": "true" }= '?'.html_safe
     %li.divider
   %li
-    = link_to _("Submit feedback"), "https://about.gitlab.com/submit-feedback"
+    = link_to _("Submit feedback"), ::Gitlab::MarketingSite.submit_feedback_url
   - if current_user_menu?(:help) || current_user_menu?(:settings) || current_user_menu?(:profile)
     %li
       = render 'shared/user_dropdown_contributing_link'

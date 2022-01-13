@@ -40,7 +40,7 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
     when :verify
       project_pipelines_url(group.projects.first)
     when :trial, :trial_short
-      'https://about.gitlab.com/free-trial/'
+      ::Gitlab::MarketingSite.free_trial_url
     when :team, :team_short
       group_group_members_url(group)
     when :admin_verify

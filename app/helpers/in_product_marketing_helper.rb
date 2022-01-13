@@ -7,6 +7,6 @@ module InProductMarketingHelper
   end
 
   def about_link(image, width)
-    link_to inline_image_link(image, { width: width, style: "width: #{width}px;", alt: s_('InProductMarketing|go to about.gitlab.com') }), 'https://about.gitlab.com/'
+    link_to inline_image_link(image, { width: width, style: "width: #{width}px;", alt: s_('InProductMarketing|go to about.gitlab.com') }), ::Gitlab::MarketingSite.base_url
   end
 end

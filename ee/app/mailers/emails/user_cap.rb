@@ -11,7 +11,7 @@ module Emails
       @url_to_manage_pending_users = 'https://docs.gitlab.com/ee/user/admin_area/approving_users.html#approve-or-reject-a-user-sign-up'
       @url_to_adjust_user_cap = 'https://docs.gitlab.com/ee/user/admin_area/settings/sign_up_restrictions.html#set-the-user-cap-number'
       @url_to_docs = 'https://docs.gitlab.com/'
-      @url_to_support = 'https://about.gitlab.com/support/'
+      @url_to_support = ::Gitlab::MarketingSite.support_url
 
       mail to: email, subject: s_('AdminUsers|Important information about usage on your GitLab instance')
     end

@@ -127,7 +127,7 @@ module Billing
           "cta_classes": " btn-confirm-secondary",
           "cta_data": {},
           "purchase_link": {
-            "href": "https://about.gitlab.com/pricing/gitlab-com/feature-comparison/"
+            "href": ::Gitlab::MarketingSite.pricing_saas_feature_comparison_url
           }
         },
         'premium' => {
