@@ -42,36 +42,13 @@ few important details:
 - A Docker `config.json` file needs to be created with the authentication
   information for the desired container registry.
 
-In the following example, kaniko is used to:
+### Using the GitLab provided template
 
-1. Build a Docker image.
-1. Then push it to [GitLab Container Registry](../../user/packages/container_registry/index.md).
-
-The job runs only when a tag is pushed. A `config.json` file is created under
-`/kaniko/.docker` with the needed GitLab Container Registry credentials taken from the
-[predefined CI/CD variables](../variables/index.md#predefined-cicd-variables)
-GitLab CI/CD provides.
-
-In the last step, kaniko uses the `Dockerfile` under the
-root directory of the project, builds the Docker image and pushes it to the
-project's Container Registry while tagging it with the Git tag:
+You can use the [`Kaniko.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Kaniko.gitlab-ci.yml) template as-is to build a single Dockerfile or you can build multiple containers with it using the [`parallel:matrix`](../yaml/#parallelmatrix) syntax. Further customizations options are described in the linked template.
 
 ```yaml
-build:
-  stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - >-
-      /kaniko/executor
-      --context "${CI_PROJECT_DIR}"
-      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
-      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
-  rules:
-    - if: $CI_COMMIT_TAG
+include:
+  - template: Kaniko.gitlab-ci.yml
 ```
 
 ### Building an image with kaniko behind a proxy
