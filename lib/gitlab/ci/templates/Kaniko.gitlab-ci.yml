@@ -2,19 +2,22 @@
 # https://docs.gitlab.com/ee/development/cicd/templates.html
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Kaniko.gitlab-ci.yml
+
 include:
   - template: Jobs/container-build.gitlab-ci.yml
 
 # Build and publish a tag/branch to Gitlab Docker Registry using Kaniko and Gitlab Docker executor.
 # Kaniko can build Docker images without using Docker-In-Docker and it's permission
-# drawbacks. No additional configuration required.
+# drawbacks. This job works as-is or can be further customized using variables or by extending the base job `.kaniko-build`
 kaniko-build:
   extends: [".kaniko-build"]
   variables:
     # Specify the image tag, a sensible default is compiled in the `.kaniko-build` job if omitted
-    # IMAGE_TAG:
+    # KANIKO_BUILD_IMAGE_TAG:
+    # Specify the image name, defaults to an empty string
+    # KANIKO_BUILD_IMAGE_NAME:
     # The Dockerfile to build
-    DOCKERFILE: ${CI_PROJECT_DIR}/Dockerfile
+    KANIKO_BUILD_DOCKERFILE: ${CI_PROJECT_DIR}/Dockerfile
     # Additional options for Kaniko executor.
     # For more details see https://github.com/GoogleContainerTools/kaniko/blob/master/README.md#additional-flags
     KANIKO_ARGS: ""
