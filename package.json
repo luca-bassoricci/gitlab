@@ -134,6 +134,7 @@
     "fast-mersenne-twister": "1.0.2",
     "file-loader": "^6.2.0",
     "fuzzaldrin-plus": "^0.6.0",
+    "gitlab-vscode": "file:/home/paul/dev/projects/gitlab-vscode/dist",
     "graphql": "^15.7.2",
     "graphql-tag": "^2.11.0",
     "highlight.js": "^11.3.1",

@@ -4,6 +4,7 @@ const path = require('path');
 
 const BABEL_VERSION = require('@babel/core/package.json').version;
 const SOURCEGRAPH_VERSION = require('@sourcegraph/code-host-integration/package.json').version;
+const GITLAB_VSCODE_VERSION = require('gitlab-vscode/package.json').version;
 
 const BABEL_LOADER_VERSION = require('babel-loader/package.json').version;
 const CompressionPlugin = require('compression-webpack-plugin');
@@ -64,6 +65,10 @@ const SOURCEGRAPH_PACKAGE = '@sourcegraph/code-host-integration';
 const SOURCEGRAPH_PATH = path.join('sourcegraph', SOURCEGRAPH_VERSION, '/');
 const SOURCEGRAPH_OUTPUT_PATH = path.join(WEBPACK_OUTPUT_PATH, SOURCEGRAPH_PATH);
 const SOURCEGRAPH_PUBLIC_PATH = path.join(WEBPACK_PUBLIC_PATH, SOURCEGRAPH_PATH);
+
+const GITLAB_VSCODE_PATH = path.join('gitlab-vscode', GITLAB_VSCODE_VERSION, '/');
+const GITLAB_VSCODE_OUTPUT_PATH = path.join(WEBPACK_OUTPUT_PATH, GITLAB_VSCODE_PATH);
+const GITLAB_VSCODE_PUBLIC_PATH = path.join(WEBPACK_PUBLIC_PATH, GITLAB_VSCODE_PATH);
 
 const devtool = IS_PRODUCTION ? 'source-map' : 'cheap-module-eval-source-map';
 
@@ -569,6 +574,10 @@ module.exports = {
           },
         },
         {
+          from: path.join(ROOT_PATH, 'node_modules', 'gitlab-vscode', 'public', '/'),
+          to: GITLAB_VSCODE_OUTPUT_PATH,
+        },
+        {
           from: path.join(
             ROOT_PATH,
             'node_modules/@gitlab/visual-review-tools/dist/visual_review_toolbar.js',
@@ -678,6 +687,7 @@ module.exports = {
       IS_JH: IS_JH ? 'window.gon && window.gon.jh' : JSON.stringify(false),
       // This is used by Sourcegraph because these assets are loaded dnamically
       'process.env.SOURCEGRAPH_PUBLIC_PATH': JSON.stringify(SOURCEGRAPH_PUBLIC_PATH),
+      'process.env.GITLAB_VSCODE_PUBLIC_PATH': JSON.stringify(GITLAB_VSCODE_PUBLIC_PATH),
     }),
 
     /* Pikaday has a optional dependency to moment.
@@ -695,12 +705,16 @@ module.exports = {
     host: DEV_SERVER_HOST,
     port: DEV_SERVER_PORT,
     public: DEV_SERVER_PUBLIC_ADDR,
-    allowedHosts: DEV_SERVER_ALLOWED_HOSTS,
+    allowedHosts: ['.vscode-webview.net'].concat(DEV_SERVER_ALLOWED_HOSTS || []),
     https: DEV_SERVER_HTTPS,
     contentBase: false,
     stats: 'errors-only',
     hot: DEV_SERVER_LIVERELOAD,
     inline: DEV_SERVER_LIVERELOAD,
+    headers: {
+      // *.vscode-webview.net
+      'Access-Control-Allow-Origin': '*',
+    },
   },
 
   devtool: NO_SOURCEMAPS ? false : devtool,

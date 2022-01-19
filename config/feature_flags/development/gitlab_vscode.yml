@@ -1,0 +1,8 @@
+---
+name: gitlab_vscode
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '14.7'
+type: development
+group: group::editor
+default_enabled: false

@@ -7,6 +7,7 @@ import Translate from '~/vue_shared/translate';
 import { parseBoolean } from '../lib/utils/common_utils';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import ide from './components/ide.vue';
+import { initGitlabVSCode } from './init_gitlab_vscode';
 import { createRouter } from './ide_router';
 import { DEFAULT_THEME } from './lib/themes';
 import { createStore } from './stores';
@@ -93,7 +94,13 @@ export const initIde = (el, options = {}) => {
  */
 export function startIde(options) {
   const ideElement = document.getElementById('ide');
-  if (ideElement) {
+  if (!ideElement) {
+    return;
+  }
+
+  if (gon.features?.gitlabVSCode) {
+    initGitlabVSCode(ideElement);
+  } else {
     resetServiceWorkersPublicPath();
     initIde(ideElement, options);
   }

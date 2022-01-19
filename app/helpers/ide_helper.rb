@@ -20,7 +20,8 @@ module IdeHelper
       'fork-info' => @fork_info&.to_json,
       'project' => convert_to_project_entity_json(@project),
       'enable-environments-guidance' => enable_environments_guidance?.to_s,
-      'preview-markdown-path' => @project && preview_markdown_path(@project)
+      'preview-markdown-path' => @project && preview_markdown_path(@project),
+      'csp-nonce' => content_security_policy_nonce
     }
   end
 

@@ -6069,6 +6069,18 @@ gettext-extractor@^3.5.3:
     pofile "1.0.x"
     typescript "2 - 4"
 
+"gitlab-vscode@file:../../gitlab-vscode/dist":
+  version "1.0.0"
+  dependencies:
+    fuzzaldrin-plus "^0.6.0"
+    mustache "^4.2.0"
+
+"gitlab-vscode@file:/home/paul/dev/projects/gitlab-vscode/dist":
+  version "1.0.0"
+  dependencies:
+    fuzzaldrin-plus "^0.6.0"
+    mustache "^4.2.0"
+
 glob-parent@^5.1.1, glob-parent@^5.1.2, glob-parent@~5.1.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.2.tgz#869832c58034fe68a4093c17dc15e8340d8401c4"
@@ -8784,6 +8796,11 @@ multicast-dns@^6.0.1:
   dependencies:
     dns-packet "^1.0.1"
     thunky "^0.1.0"
+
+mustache@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/mustache/-/mustache-4.2.0.tgz#e5892324d60a12ec9c2a73359edca52972bf6f64"
+  integrity sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==
 
 nanocolors@^0.1.5:
   version "0.1.12"
