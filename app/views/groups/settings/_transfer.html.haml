@@ -1,5 +1,5 @@
 - form_id = "transfer-group-form"
-- initial_data = { button_text: s_('GroupSettings|Transfer group'), confirm_danger_message: transfer_group_message(@group), phrase: @group.name, target_form_id: form_id, qa_selector: "transfer_group_button", parent_groups: parent_group_options(group), is_paid_group: group.paid?.to_s, paid_group_help_link: help_page_path('subscriptions/index', anchor: 'change-the-linked-namespace') }
+- initial_data = { button_text: s_('GroupSettings|Transfer group'), confirm_danger_message: transfer_group_message(@group), phrase: @group.name, target_form_id: form_id, qa_selector: "transfer_group_button", parent_groups: parent_group_options(group), is_paid_group: true.to_s, paid_group_help_link: help_page_path('subscriptions/index', anchor: 'change-the-linked-namespace') }
 
 .sub-section
   %h4.warning-title= s_('GroupSettings|Transfer group')
