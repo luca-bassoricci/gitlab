@@ -14,16 +14,8 @@ RSpec.describe QA::Tools::TestResourceDataProcessor do
       end
     end
 
-    context 'when resource api response is nil' do
-      let(:resource) { double(QA::Resource::Project, api_delete_path: '/foo', api_response: nil) }
-
-      it 'does not collect resource' do
-        expect(described_class.collect(resource, info)).to eq(nil)
-      end
-    end
-
-    context 'when resource is restricted' do
-      let(:resource) { double(QA::Resource::Sandbox, api_delete_path: '/foo', api_response: 'foo') }
+    context 'when resource is mocked' do
+      let(:resource) { double(RSpec::Mocks::Double, api_delete_path: '/foo', api_response: 'foo') }
 
       it 'does not collect resource' do
         expect(described_class.collect(resource, info)).to eq(nil)

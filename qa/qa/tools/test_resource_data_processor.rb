@@ -17,11 +17,7 @@ module QA
         # Each type contains an array of resource object (hash) of the same type
         # E.g: { "QA::Resource::Project": [ { info: 'foo', api_path: '/foo'}, {...} ] }
         def collect(resource, info)
-          return if resource.api_response.nil? ||
-            resource.is_a?(RSpec::Mocks::Double) ||
-            resource.is_a?(Resource::Sandbox) ||
-            resource.is_a?(Resource::User) ||
-            resource.is_a?(Resource::Fork)
+          return if resource.is_a?(RSpec::Mocks::Double)
 
           api_path = if resource.respond_to?(:api_delete_path)
                        resource.api_delete_path.gsub('%2F', '/')
