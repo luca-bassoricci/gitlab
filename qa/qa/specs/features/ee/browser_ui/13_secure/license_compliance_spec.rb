@@ -14,7 +14,7 @@ module QA
         @project&.remove_via_api! if @project
       end
 
-      it 'has empty state', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347681' do
+      it 'has empty state', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/348866', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347681' do
         Flow::Login.sign_in_unless_signed_in
         @project.visit!
         Page::Project::Menu.perform(&:click_on_license_compliance)
