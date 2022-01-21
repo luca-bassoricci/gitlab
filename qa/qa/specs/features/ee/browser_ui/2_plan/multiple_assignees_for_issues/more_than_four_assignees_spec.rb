@@ -42,7 +42,7 @@ module QA
         end
       end
 
-      it 'shows the first three assignees and a +n sign in the issues list', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347976' do
+      it 'shows the first three assignees and a +n sign in the issues list', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/335599', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347976' do
         project.visit!
 
         Page::Project::Menu.perform(&:click_issues)
