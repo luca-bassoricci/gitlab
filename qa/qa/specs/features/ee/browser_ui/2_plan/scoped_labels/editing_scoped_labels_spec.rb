@@ -37,7 +37,7 @@ module QA
       end
 
       it(
-        'correctly applies simple and multiple colon scoped pairs labels',
+        'correctly applies simple and multiple colon scoped pairs labels', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/350783', type: :investigating },
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347993'
       ) do
         Page::Project::Issue::Show.perform do |show|
