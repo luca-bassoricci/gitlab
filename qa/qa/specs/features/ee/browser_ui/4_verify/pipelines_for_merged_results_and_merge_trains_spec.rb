@@ -70,7 +70,7 @@ module QA
           expect(show).to have_pipeline_status('passed'), 'Expected the merge request pipeline to pass.'
 
           # The default option is to merge via merge train,
-          # but that is covered by the 'merges via a merge train' test
+          # but that is covered by the 'merges via a merge train', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/349923', type: :investigating } test
           show.skip_merge_train_and_merge_immediately
 
           expect(show).to be_merged, "Expected content 'The changes were merged' but it did not appear."
