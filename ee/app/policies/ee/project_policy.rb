@@ -403,6 +403,13 @@ module EE
       rule { (admin | maintainer) & group_merge_request_approval_settings_enabled }.policy do
         enable :admin_merge_request_approval_settings
       end
+
+      rule { can?(:read_alert_management_alert) }.enable :read_alert_metric_image
+
+      rule { can?(:update_alert_management_alert) }.policy do
+        enable  :upload_alert_metric_image
+        enable  :destroy_alert_metric_image
+      end
     end
 
     override :lookup_access_level!
