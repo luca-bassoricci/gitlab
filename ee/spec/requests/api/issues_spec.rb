@@ -631,8 +631,8 @@ RSpec.describe API::Issues, :mailer do
     with_them do
       before do
         # Local storage
-        stub_uploads_object_storage(IssuableMetricImageUploader, enabled: false)
-        allow_any_instance_of(IssuableMetricImageUploader).to receive(:file_storage?).and_return(true)
+        stub_uploads_object_storage(MetricImageUploader, enabled: false)
+        allow_any_instance_of(MetricImageUploader).to receive(:file_storage?).and_return(true)
 
         stub_licensed_features(incident_metric_upload: true)
         project.send("add_#{user_role}", user2)
@@ -662,9 +662,9 @@ RSpec.describe API::Issues, :mailer do
       before do
         # Object storage
         stub_licensed_features(incident_metric_upload: true)
-        stub_uploads_object_storage(IssuableMetricImageUploader)
+        stub_uploads_object_storage(MetricImageUploader)
 
-        allow_any_instance_of(IssuableMetricImageUploader).to receive(:file_storage?).and_return(false)
+        allow_any_instance_of(MetricImageUploader).to receive(:file_storage?).and_return(false)
         project.add_developer(user2)
       end
 
