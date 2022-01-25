@@ -8,7 +8,6 @@ export const initGitlabVSCode = async (el) => {
 
   const baseUrl = new URL(process.env.GITLAB_VSCODE_PUBLIC_PATH, window.location.href);
 
-  el.style.filter = 'blur(8px)';
   await start(el, {
     baseUrl: cleanTrailingSlash(baseUrl.href),
     projectPath: project.path_with_namespace,
@@ -16,5 +15,4 @@ export const initGitlabVSCode = async (el) => {
     gitlabUrl: gon.gitlab_url,
     nonce,
   });
-  el.style.filter = '';
 };
