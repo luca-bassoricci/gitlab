@@ -2,6 +2,8 @@
 
 module API
   class AlertManagementAlerts < ::API::Base
+    feature_category :incident_management
+
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
@@ -38,6 +40,8 @@ module API
 
           alert = find_project_alert(params[:alert_iid])
 
+          authorize!(:upload_alert_metric_image, alert)
+
           upload = ::AlertManagement::MetricImages::UploadService.new(
             alert,
             current_user,
@@ -47,7 +51,7 @@ module API
           if upload.success?
             present upload.payload[:metric], with: Entities::MetricImage, current_user: current_user, project: user_project
           else
-            render_api_error!(upload.message, 403)
+            render_api_error!(upload.message, 400)
           end
         end
 

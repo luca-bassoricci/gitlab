@@ -36,7 +36,7 @@ module MetricImageUploading
   private
 
   def valid_file_extensions
-    SAFE_IMAGE_EXT
+    Gitlab::FileTypeDetection::SAFE_IMAGE_EXT
   end
 
   def validate_file_is_image

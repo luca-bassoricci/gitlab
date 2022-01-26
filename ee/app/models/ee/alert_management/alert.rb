@@ -9,7 +9,7 @@ module EE
         include AfterCommitQueue
 
         has_many :pending_escalations, class_name: 'IncidentManagement::PendingEscalations::Alert', foreign_key: :alert_id, inverse_of: :alert
-        has_many :metric_images, class_name: 'AlertManagement::MetricImage'
+        has_many :metric_images, class_name: '::AlertManagement::MetricImage'
 
         after_create do |alert|
           run_after_commit { alert.trigger_auto_rollback }
@@ -23,7 +23,7 @@ module EE
       end
 
       def metric_images_available?
-        return false unless AlertManagement::MetricImage.available_for?(project)
+        return false unless ::AlertManagement::MetricImage.available_for?(project)
 
         true
       end

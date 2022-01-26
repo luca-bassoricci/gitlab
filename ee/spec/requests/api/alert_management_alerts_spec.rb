@@ -11,6 +11,67 @@ RSpec.describe API::AlertManagementAlerts, :mailer do
   let_it_be(:user) { create(:user) }
   let_it_be(:alert) { create(:alert_management_alert, project: project) }
 
+  describe 'PUT /projects/:id/alert_management_alerts/:alert_iid/metric_images/authorize' do
+    include_context 'workhorse headers'
+
+    before do
+      project.add_developer(user)
+    end
+
+    subject { post api("/projects/#{project.id}/alert_management_alerts/#{alert.iid}/metric_images/authorize", user), headers: workhorse_headers }
+
+    it 'authorizes uploading with workhorse header' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+    end
+
+    it 'rejects requests that bypassed gitlab-workhorse' do
+      workhorse_headers.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
+
+      subject
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+    end
+
+    context 'when using remote storage' do
+      context 'when direct upload is enabled' do
+        before do
+          stub_uploads_object_storage(MetricImageUploader, enabled: true, direct_upload: true)
+        end
+
+        it 'responds with status 200, location of file remote store and object details' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+          expect(json_response).not_to have_key('TempPath')
+          expect(json_response['RemoteObject']).to have_key('ID')
+          expect(json_response['RemoteObject']).to have_key('GetURL')
+          expect(json_response['RemoteObject']).to have_key('StoreURL')
+          expect(json_response['RemoteObject']).to have_key('DeleteURL')
+          expect(json_response['RemoteObject']).to have_key('MultipartUpload')
+        end
+      end
+
+      context 'when direct upload is disabled' do
+        before do
+          stub_uploads_object_storage(MetricImageUploader, enabled: true, direct_upload: false)
+        end
+
+        it 'handles as a local file' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+          expect(json_response['TempPath']).to eq(MetricImageUploader.workhorse_local_upload_path)
+          expect(json_response['RemoteObject']).to be_nil
+        end
+      end
+    end
+  end
+
   describe 'POST /projects/:id/alert_management_alerts/:alert_iid/metric_images' do
     include WorkhorseHelpers
     using RSpec::Parameterized::TableSyntax
@@ -43,7 +104,7 @@ RSpec.describe API::AlertManagementAlerts, :mailer do
         expect(json_response['filename']).to eq(file_name)
         expect(json_response['url']).to eq(url)
         expect(json_response['url_text']).to eq(url_text)
-        expect(json_response['file_path']).to match(%r{/uploads/-/system/alert_management_metric_image/file/[\d+]/#{file_name}})
+        expect(json_response['file_path']).to match(%r{/uploads/-/system/alert_management_metric_image/file/\d+/#{file_name}})
         expect(json_response['created_at']).not_to be_nil
         expect(json_response['id']).not_to be_nil
       end
@@ -54,13 +115,13 @@ RSpec.describe API::AlertManagementAlerts, :mailer do
         subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
-        expect(json_response['message']).to eq('Not allowed!')
+        expect(json_response['message']).to eq('403 Forbidden')
       end
     end
 
     where(:user_role, :expected_status) do
-      # :guest     | :unauthorized_upload
-      # :reporter  | :unauthorized_upload
+      :guest     | :unauthorized_upload
+      :reporter  | :unauthorized_upload
       :developer | :can_upload_metric_image
     end
 
@@ -68,7 +129,9 @@ RSpec.describe API::AlertManagementAlerts, :mailer do
       before do
         # Local storage
         stub_uploads_object_storage(MetricImageUploader, enabled: false)
-        allow_any_instance_of(MetricImageUploader).to receive(:file_storage?).and_return(true)
+        allow_next_instance_of(MetricImageUploader) do |uploader|
+          allow(uploader).to receive(:file_storage?).and_return(true)
+        end
 
         stub_licensed_features(alert_metric_upload: true)
         project.send("add_#{user_role}", user)
@@ -93,13 +156,33 @@ RSpec.describe API::AlertManagementAlerts, :mailer do
       end
     end
 
+    context 'error when saving' do
+      before do
+        project.add_developer(user)
+
+        allow_next_instance_of(::AlertManagement::MetricImages::UploadService) do |service|
+          error = double(success?: false, message: 'some error')
+          allow(service).to receive(:execute).and_return(error)
+        end
+      end
+
+      it 'returns an error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(response.body).to match(/some error/)
+      end
+    end
+
     context 'object storage enabled' do
       before do
         # Object storage
-        stub_licensed_features(incident_metric_upload: true)
+        stub_licensed_features(alert_metric_upload: true)
         stub_uploads_object_storage(MetricImageUploader)
 
-        allow_any_instance_of(MetricImageUploader).to receive(:file_storage?).and_return(false)
+        allow_next_instance_of(MetricImageUploader) do |uploader|
+          allow(uploader).to receive(:file_storage?).and_return(true)
+        end
         project.add_developer(user)
       end
 
@@ -166,186 +249,156 @@ RSpec.describe API::AlertManagementAlerts, :mailer do
     end
   end
 
-  # describe 'PUT /projects/:id/issues/:issue_iid/metric_images/:metric_image_id' do
-  #   using RSpec::Parameterized::TableSyntax
+  describe 'PUT /projects/:id/alert_management_alerts/:alert_iid/metric_images/:metric_image_id' do
+    using RSpec::Parameterized::TableSyntax
 
-  #   let_it_be(:project) do
-  #     create(:project, :public, creator_id: user.id, namespace: user.namespace)
-  #   end
+    let!(:image) { create(:alert_metric_image, alert: alert) }
+    let(:params) { { url: 'http://test.example.com', url_text: 'Example website 123' } }
 
-  #   let!(:image) { create(:issuable_metric_image, issue: issue) }
-  #   let(:params) { { url: 'http://test.example.com', url_text: 'Example website 123' } }
+    subject { put api("/projects/#{project.id}/alert_management_alerts/#{alert.iid}/metric_images/#{image.id}", user), params: params }
 
-  #   subject { put api("/projects/#{project.id}/issues/#{issue.iid}/metric_images/#{image.id}", user2), params: params }
+    shared_examples 'can_update_metric_image' do
+      it 'can update the metric images' do
+        subject
 
-  #   shared_examples 'can_update_metric_image' do
-  #     it 'can update the metric images' do
-  #       subject
+        expect(response).to have_gitlab_http_status(:success)
+        expect(json_response['url']).to eq(params[:url])
+        expect(json_response['url_text']).to eq(params[:url_text])
+      end
+    end
 
-  #       expect(response).to have_gitlab_http_status(:success)
-  #       expect(json_response['url']).to eq(params[:url])
-  #       expect(json_response['url_text']).to eq(params[:url_text])
-  #     end
-  #   end
+    shared_examples 'unauthorized_update' do
+      it 'cannot update the metric image' do
+        subject
 
-  #   shared_examples 'unauthorized_update' do
-  #     it 'cannot delete the metric image' do
-  #       subject
+        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(image.reload).to eq(image)
+      end
+    end
 
-  #       expect(response).to have_gitlab_http_status(:forbidden)
-  #       expect(image.reload).to eq(image)
-  #     end
-  #   end
+    where(:user_role, :public_project, :expected_status) do
+      :not_member | false | :unauthorized_update
+      :not_member | true  | :unauthorized_update
+      :guest      | false | :unauthorized_update
+      :reporter   | false | :unauthorized_update
+      :developer  | false | :can_update_metric_image
+    end
 
-  #   shared_examples 'not_found' do
-  #     it 'cannot delete the metric image' do
-  #       subject
+    with_them do
+      before do
+        stub_licensed_features(alert_metric_upload: true)
+        project.send("add_#{user_role}", user) unless user_role == :not_member
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE) unless public_project
+      end
 
-  #       expect(response).to have_gitlab_http_status(:not_found)
-  #       expect(image.reload).to eq(image)
-  #     end
-  #   end
+      it_behaves_like "#{params[:expected_status]}"
+    end
 
-  #   where(:user_role, :own_issue, :issue_confidential, :expected_status) do
-  #     :not_member | false | false | :unauthorized_update
-  #     :not_member | true  | false | :unauthorized_update
-  #     :not_member | true  | true  | :unauthorized_update
-  #     :guest      | false | true  | :not_found
-  #     :guest      | false | false | :unauthorized_update
-  #     :guest      | true  | false | :can_update_metric_image
-  #     :reporter   | true  | false | :can_update_metric_image
-  #     :reporter   | false | false | :can_update_metric_image
-  #   end
+    context 'user has access' do
+      before do
+        project.add_developer(user)
+      end
 
-  #   with_them do
-  #     before do
-  #       stub_licensed_features(incident_metric_upload: true)
-  #       project.send("add_#{user_role}", user2) unless user_role == :not_member
-  #     end
+      context 'metric image not found' do
+        subject { put api("/projects/#{project.id}/alert_management_alerts/#{alert.iid}/metric_images/#{non_existing_record_id}", user) }
 
-  #     let!(:issue) do
-  #       author = own_issue ? user2 : user
-  #       confidential = issue_confidential
+        it 'returns an error' do
+          subject
 
-  #       create(:incident, project: project, confidential: confidential, author: author)
-  #     end
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(json_response['message']).to eq('Metric image not found')
+        end
+      end
 
-  #     it_behaves_like "#{params[:expected_status]}"
-  #   end
+      context 'metric image cannot be updated' do
+        let(:params) { { url_text: 'something_long' * 100 } }
 
-  #   context 'user has access' do
-  #     let(:issue) { create(:incident, project: project) }
+        it 'returns an error' do
+          subject
 
-  #     before do
-  #       project.add_reporter(user2)
-  #     end
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq('Metric image could not be updated')
+        end
+      end
+    end
+  end
 
-  #     context 'metric image not found' do
-  #       subject { delete api("/projects/#{project.id}/issues/#{issue.iid}/metric_images/#{non_existing_record_id}", user2) }
+  describe 'DELETE /projects/:id/alert_management_alerts/:alert_iid/metric_images/:metric_image_id' do
+    using RSpec::Parameterized::TableSyntax
 
-  #       it 'returns an error' do
-  #         subject
+    let!(:image) { create(:alert_metric_image, alert: alert) }
 
-  #         expect(response).to have_gitlab_http_status(:not_found)
-  #         expect(json_response['message']).to eq('Metric image not found')
-  #       end
-  #     end
+    subject { delete api("/projects/#{project.id}/alert_management_alerts/#{alert.iid}/metric_images/#{image.id}", user) }
 
-  #     context 'metric image cannot be updated' do
-  #       let(:params) { { url_text: 'something_long' * 100 } }
+    shared_examples 'can_delete_metric_image' do
+      it 'can delete the metric images' do
+        subject
 
-  #       it 'returns an error' do
-  #         subject
+        expect(response).to have_gitlab_http_status(:no_content)
+        expect { image.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
 
-  #         expect(response).to have_gitlab_http_status(:bad_request)
-  #         expect(json_response['message']).to eq('Metric image could not be updated')
-  #       end
-  #     end
-  #   end
-  # end
+    shared_examples 'unauthorized_delete' do
+      it 'cannot delete the metric image' do
+        subject
 
-  # describe 'DELETE /projects/:id/issues/:issue_iid/metric_images/:metric_image_id' do
-  #   using RSpec::Parameterized::TableSyntax
+        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(image.reload).to eq(image)
+      end
+    end
 
-  #   let_it_be(:project) do
-  #     create(:project, :public, creator_id: user.id, namespace: user.namespace)
-  #   end
+    where(:user_role, :public_project, :expected_status) do
+      :not_member | false | :unauthorized_delete
+      :not_member | true  | :unauthorized_delete
+      :guest      | false | :unauthorized_delete
+      :reporter   | false | :unauthorized_delete
+      :developer  | false | :can_delete_metric_image
+    end
 
-  #   let!(:image) { create(:issuable_metric_image, issue: issue) }
+    with_them do
+      before do
+        stub_licensed_features(alert_metric_upload: true)
+        project.send("add_#{user_role}", user) unless user_role == :not_member
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE) unless public_project
+      end
 
-  #   subject { delete api("/projects/#{project.id}/issues/#{issue.iid}/metric_images/#{image.id}", user2) }
+      it_behaves_like "#{params[:expected_status]}"
+    end
 
-  #   shared_examples 'can_delete_metric_image' do
-  #     it 'can delete the metric images' do
-  #       subject
+    context 'user has access' do
+      before do
+        project.add_developer(user)
+      end
 
-  #       expect(response).to have_gitlab_http_status(:no_content)
-  #       expect { image.reload }.to raise_error(ActiveRecord::RecordNotFound)
-  #     end
-  #   end
+      context 'metric image not found' do
+        subject { delete api("/projects/#{project.id}/alert_management_alerts/#{alert.iid}/metric_images/#{non_existing_record_id}", user) }
 
-  #   shared_examples 'unauthorized_delete' do
-  #     it 'cannot delete the metric image' do
-  #       subject
+        it 'returns an error' do
+          subject
 
-  #       expect(response).to have_gitlab_http_status(:forbidden)
-  #       expect(image.reload).to eq(image)
-  #     end
-  #   end
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(json_response['message']).to eq('Metric image not found')
+        end
+      end
 
-  #   shared_examples 'not_found' do
-  #     it 'cannot delete the metric image' do
-  #       subject
+      context 'error when deleting' do
+        before do
+          allow_next_instance_of(AlertManagement::AlertsFinder) do |finder|
+            allow(finder).to receive(:execute).and_return([alert])
+          end
 
-  #       expect(response).to have_gitlab_http_status(:not_found)
-  #       expect(image.reload).to eq(image)
-  #     end
-  #   end
+          allow(alert).to receive_message_chain('metric_images.find_by_id') { image }
+          allow(image).to receive(:destroy).and_return(false)
+        end
 
-  #   where(:user_role, :own_issue, :issue_confidential, :expected_status) do
-  #     :not_member | false | false | :unauthorized_delete
-  #     :not_member | true  | false | :unauthorized_delete
-  #     :not_member | true  | true  | :unauthorized_delete
-  #     :guest      | false | true  | :not_found
-  #     :guest      | false | false | :unauthorized_delete
-  #     :guest      | true  | false | :can_delete_metric_image
-  #     :reporter   | true  | false | :can_delete_metric_image
-  #     :reporter   | false | false | :can_delete_metric_image
-  #   end
+        it 'returns an error' do
+          subject
 
-  #   with_them do
-  #     before do
-  #       stub_licensed_features(incident_metric_upload: true)
-  #       project.send("add_#{user_role}", user2) unless user_role == :not_member
-  #     end
-
-  #     let!(:issue) do
-  #       author = own_issue ? user2 : user
-  #       confidential = issue_confidential
-
-  #       create(:incident, project: project, confidential: confidential, author: author)
-  #     end
-
-  #     it_behaves_like "#{params[:expected_status]}"
-  #   end
-
-  #   context 'user has access' do
-  #     let(:issue) { create(:incident, project: project) }
-
-  #     before do
-  #       project.add_reporter(user2)
-  #     end
-
-  #     context 'metric image not found' do
-  #       subject { delete api("/projects/#{project.id}/issues/#{issue.iid}/metric_images/#{non_existing_record_id}", user2) }
-
-  #       it 'returns an error' do
-  #         subject
-
-  #         expect(response).to have_gitlab_http_status(:not_found)
-  #         expect(json_response['message']).to eq('Metric image not found')
-  #       end
-  #     end
-  #   end
-  # end
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq('Metric image could not be deleted')
+        end
+      end
+    end
+  end
 end
