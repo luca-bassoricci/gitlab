@@ -5,7 +5,8 @@ module EE
     extend ActiveSupport::Concern
 
     EE_MODEL_CLASSES = {
-      'issuable_metric_image' => IssuableMetricImage
+      'issuable_metric_image' => IssuableMetricImage,
+      'alert_management_metric_image' => ::AlertManagement::MetricImage
     }.freeze
 
     class_methods do

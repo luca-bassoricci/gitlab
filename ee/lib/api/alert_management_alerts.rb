@@ -11,7 +11,7 @@ module API
     resource :projects, requirements: ::API::API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       namespace ':id/alert_management_alerts/:alert_iid/metric_images' do
         post 'authorize' do
-          authorize!(:upload_alert_metric_image, find_project_alert(request.params[:alert_iid]))
+          authorize!(:upload_alert_management_metric_image, find_project_alert(request.params[:alert_iid]))
 
           require_gitlab_workhorse!
           ::Gitlab::Workhorse.verify_api_request!(request.headers)
@@ -40,7 +40,7 @@ module API
 
           alert = find_project_alert(params[:alert_iid])
 
-          authorize!(:upload_alert_metric_image, alert)
+          authorize!(:upload_alert_management_metric_image, alert)
 
           upload = ::AlertManagement::MetricImages::UploadService.new(
             alert,
@@ -59,7 +59,7 @@ module API
         get do
           alert = find_project_alert(params[:alert_iid])
 
-          if can?(current_user, :read_alert_metric_image, alert)
+          if can?(current_user, :read_alert_management_metric_image, alert)
             present alert.metric_images.order_created_at_asc, with: Entities::MetricImage
           else
             render_api_error!('Alert not found', 404)
@@ -77,7 +77,7 @@ module API
         put ':metric_image_id' do
           alert = find_project_alert(params[:alert_iid])
 
-          authorize!(:destroy_alert_metric_image, alert)
+          authorize!(:destroy_alert_management_metric_image, alert)
 
           metric_image = alert.metric_images.find_by_id(params[:metric_image_id])
 
@@ -99,7 +99,7 @@ module API
         delete ':metric_image_id' do
           alert = find_project_alert(params[:alert_iid])
 
-          authorize!(:destroy_alert_metric_image, alert)
+          authorize!(:destroy_alert_management_metric_image, alert)
 
           metric_image = alert.metric_images.find_by_id(params[:metric_image_id])
 

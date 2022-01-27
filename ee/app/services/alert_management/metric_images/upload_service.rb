@@ -37,7 +37,7 @@ module AlertManagement
       end
 
       def can_upload_metrics?
-        current_user&.can?(:upload_alert_metric_image, alert)
+        current_user&.can?(:upload_alert_management_metric_image, alert)
       end
     end
   end

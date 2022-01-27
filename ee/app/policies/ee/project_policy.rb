@@ -404,11 +404,11 @@ module EE
         enable :admin_merge_request_approval_settings
       end
 
-      rule { can?(:read_alert_management_alert) }.enable :read_alert_metric_image
+      rule { can?(:read_alert_management_alert) }.enable :read_alert_management_metric_image
 
       rule { can?(:update_alert_management_alert) }.policy do
-        enable  :upload_alert_metric_image
-        enable  :destroy_alert_metric_image
+        enable  :upload_alert_management_metric_image
+        enable  :destroy_alert_management_metric_image
       end
     end
 

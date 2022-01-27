@@ -58,9 +58,13 @@ class UploadsController < ApplicationController
       when Projects::Topic
         true
       else
-        permission = "read_#{model.class.underscore}".to_sym
+        permission = if model.respond_to?(:model_name)
+                       "read_#{model.model_name}"
+                     else
+                       "read_#{model.class.underscore}"
+                     end
 
-        can?(current_user, permission, model)
+        can?(current_user, permission.to_sym, model)
       end
 
     render_unauthorized unless authorized

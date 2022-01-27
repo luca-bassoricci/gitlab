@@ -16,6 +16,10 @@ module AlertManagement
       project&.feature_available?(:alert_metric_upload)
     end
 
+    def model_name
+      self.class.name.split('::').join('_').underscore
+    end
+
     private
 
     def local_path
@@ -25,10 +29,6 @@ module AlertManagement
         model: model_name,
         mounted_as: 'file'
       )
-    end
-
-    def model_name
-      self.class.name.split('::').join('_').underscore
     end
   end
 end
