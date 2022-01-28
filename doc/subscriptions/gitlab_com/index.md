@@ -391,6 +391,5 @@ apply, contact [GitLab Support](https://support.gitlab.com/hc/en-us/requests/new
 
 ### Unable to link subcription to namespace
 
-If you cannot link a subscription to your namespace:
-
-- Ensure that you have th __owner__ in the namespace that you want the link the subscription
+If you cannot link a subscription to your namespace, ensure that you have the Owner role
+in the namespace you want to link the subscription to.
