@@ -20,7 +20,7 @@ module QA
 
     # Note this context ensures that the example it contains is executed after the example above. Be aware of the order of execution if you add new examples in either context.
     context 'after adding an ssh key' do
-      it 'can delete an ssh key', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347820' do
+      it 'can delete an ssh key', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/348278', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347820' do
         Page::Main::Menu.perform(&:click_edit_profile_link)
         Page::Profile::Menu.perform(&:click_ssh_keys)
         Page::Profile::SSHKeys.perform do |ssh_keys|
