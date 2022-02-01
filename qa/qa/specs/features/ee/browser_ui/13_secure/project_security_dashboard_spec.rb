@@ -87,7 +87,7 @@ module QA
       end
 
       it(
-        'creates an issue from vulnerability details',
+        'creates an issue from vulnerability details', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/351265', type: :investigating },
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347683'
       ) do
         Page::Project::Menu.perform(&:click_on_vulnerability_report)
