@@ -16,8 +16,8 @@ module AlertManagement
       project&.feature_available?(:alert_metric_upload)
     end
 
-    def model_name
-      self.class.name.split('::').join('_').underscore
+    def full_model_name
+      model_name.param_key
     end
 
     private
@@ -26,7 +26,7 @@ module AlertManagement
       Gitlab::Routing.url_helpers.alert_metric_image_upload_path(
         filename: file.filename,
         id: file.upload.model_id,
-        model: model_name,
+        model: full_model_name,
         mounted_as: 'file'
       )
     end

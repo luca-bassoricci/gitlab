@@ -58,8 +58,8 @@ class UploadsController < ApplicationController
       when Projects::Topic
         true
       else
-        permission = if model.respond_to?(:model_name)
-                       "read_#{model.model_name}"
+        permission = if model.respond_to?(:full_model_name)
+                       "read_#{model.full_model_name}"
                      else
                        "read_#{model.class.underscore}"
                      end
