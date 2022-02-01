@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify' do
-    describe 'Add or Remove CI variable via UI', :smoke do
+  RSpec.describe 'Verify', quarantine: {
+    type: :investigating,
+    issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/351460'
+  } do
+    describe 'Add or Remove CI variable via UI' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-with-ci-variables'
