@@ -42,9 +42,8 @@ module Namespaces
       UnboundedSearch = Class.new(StandardError)
 
       included do
-        before_update :lock_both_roots, if: -> { sync_traversal_ids? && parent_id_changed? }
-        after_create :sync_traversal_ids, if: -> { sync_traversal_ids? }
-        after_update :sync_traversal_ids, if: -> { sync_traversal_ids? && saved_change_to_parent_id? }
+        before_update :reset_traversal_ids, if: -> { sync_traversal_ids? && parent_id_changed? }
+        after_commit :sync_traversal_ids, if: -> { sync_traversal_ids? && traversal_ids.empty? }
       end
 
       def sync_traversal_ids?
@@ -187,6 +186,11 @@ module Namespaces
         clear_memoization(:root_ancestor)
 
         Namespace::TraversalHierarchy.for_namespace(self).sync_traversal_ids!
+        self.reset
+      end
+
+      def reset_traversal_ids
+        self.traversal_ids = []
       end
 
       # Lock the root of the hierarchy we just left, and lock the root of the hierarchy
