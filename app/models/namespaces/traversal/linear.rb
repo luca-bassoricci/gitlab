@@ -42,8 +42,13 @@ module Namespaces
       UnboundedSearch = Class.new(StandardError)
 
       included do
+        attr_accessor :rebuild_traversal_ids
+
+        before_update :lock_both_roots, if: -> { sync_traversal_ids? && parent_id_changed? }
+        # this callback will flag that traversal_ids need rebuilding
         before_update :reset_traversal_ids, if: -> { sync_traversal_ids? && parent_id_changed? }
-        after_commit :sync_traversal_ids, if: -> { sync_traversal_ids? && traversal_ids.empty? }
+        # this callback will be triggered if traversal ids need rebuilding, e.g. when parent_id changed or when traversal_ids is empty, i.e. when namespace was created
+        after_commit :sync_traversal_ids, if: -> { sync_traversal_ids? && (rebuild_traversal_ids || traversal_ids.empty?) }
       end
 
       def sync_traversal_ids?
@@ -83,17 +88,17 @@ module Namespaces
         traversal_ids.present?
       end
 
+      # rubocop:disable Gitlab/ModuleWithInstanceVariables
       def root_ancestor
         return super unless use_traversal_ids_for_root_ancestor?
 
-        strong_memoize(:root_ancestor) do
-          if parent_id.nil?
-            self
-          else
-            Namespace.find_by(id: traversal_ids.first)
-          end
-        end
+        @root_ancestor ||= if parent_id.nil?
+                             self
+                           else
+                             Namespace.find_by(id: traversal_ids.first)
+                           end
       end
+      # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       def self_and_descendants
         return super unless use_traversal_ids?
@@ -186,11 +191,14 @@ module Namespaces
         clear_memoization(:root_ancestor)
 
         Namespace::TraversalHierarchy.for_namespace(self).sync_traversal_ids!
+        # after sync-ing traversal_ids reset the rebuild_traversal_ids flag
+        self.rebuild_traversal_ids = false
+        # because this is a after_commit callback, we need to reload the record
         self.reset
       end
 
       def reset_traversal_ids
-        self.traversal_ids = []
+        self.rebuild_traversal_ids = true
       end
 
       # Lock the root of the hierarchy we just left, and lock the root of the hierarchy
