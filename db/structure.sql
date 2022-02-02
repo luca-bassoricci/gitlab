@@ -10539,24 +10539,24 @@ CREATE TABLE application_settings (
     admin_mode boolean DEFAULT false NOT NULL,
     delayed_project_removal boolean DEFAULT false NOT NULL,
     lock_delayed_project_removal boolean DEFAULT false NOT NULL,
-    external_pipeline_validation_service_timeout integer,
-    encrypted_external_pipeline_validation_service_token text,
-    encrypted_external_pipeline_validation_service_token_iv text,
-    external_pipeline_validation_service_url text,
     throttle_unauthenticated_packages_api_requests_per_period integer DEFAULT 800 NOT NULL,
     throttle_unauthenticated_packages_api_period_in_seconds integer DEFAULT 15 NOT NULL,
     throttle_authenticated_packages_api_requests_per_period integer DEFAULT 1000 NOT NULL,
     throttle_authenticated_packages_api_period_in_seconds integer DEFAULT 15 NOT NULL,
     throttle_unauthenticated_packages_api_enabled boolean DEFAULT false NOT NULL,
     throttle_authenticated_packages_api_enabled boolean DEFAULT false NOT NULL,
-    deactivate_dormant_users boolean DEFAULT false NOT NULL,
     whats_new_variant smallint DEFAULT 0,
+    external_pipeline_validation_service_timeout integer,
+    encrypted_external_pipeline_validation_service_token text,
+    encrypted_external_pipeline_validation_service_token_iv text,
+    external_pipeline_validation_service_url text,
+    deactivate_dormant_users boolean DEFAULT false NOT NULL,
     encrypted_spam_check_api_key bytea,
     encrypted_spam_check_api_key_iv bytea,
-    floc_enabled boolean DEFAULT false NOT NULL,
     elasticsearch_username text,
     encrypted_elasticsearch_password bytea,
     encrypted_elasticsearch_password_iv bytea,
+    floc_enabled boolean DEFAULT false NOT NULL,
     diff_max_lines integer DEFAULT 50000 NOT NULL,
     diff_max_files integer DEFAULT 1000 NOT NULL,
     valid_runner_registrars character varying[] DEFAULT '{project,group}'::character varying[],
@@ -10567,33 +10567,33 @@ CREATE TABLE application_settings (
     encrypted_customers_dot_jwt_signing_key bytea,
     encrypted_customers_dot_jwt_signing_key_iv bytea,
     pypi_package_requests_forwarding boolean DEFAULT true NOT NULL,
+    max_yaml_size_bytes bigint DEFAULT 1048576 NOT NULL,
+    max_yaml_depth integer DEFAULT 100 NOT NULL,
     throttle_unauthenticated_files_api_requests_per_period integer DEFAULT 125 NOT NULL,
     throttle_unauthenticated_files_api_period_in_seconds integer DEFAULT 15 NOT NULL,
     throttle_authenticated_files_api_requests_per_period integer DEFAULT 500 NOT NULL,
     throttle_authenticated_files_api_period_in_seconds integer DEFAULT 15 NOT NULL,
     throttle_unauthenticated_files_api_enabled boolean DEFAULT false NOT NULL,
     throttle_authenticated_files_api_enabled boolean DEFAULT false NOT NULL,
-    max_yaml_size_bytes bigint DEFAULT 1048576 NOT NULL,
-    max_yaml_depth integer DEFAULT 100 NOT NULL,
-    throttle_authenticated_git_lfs_requests_per_period integer DEFAULT 1000 NOT NULL,
-    throttle_authenticated_git_lfs_period_in_seconds integer DEFAULT 60 NOT NULL,
-    throttle_authenticated_git_lfs_enabled boolean DEFAULT false NOT NULL,
     user_deactivation_emails_enabled boolean DEFAULT true NOT NULL,
     throttle_unauthenticated_api_enabled boolean DEFAULT false NOT NULL,
     throttle_unauthenticated_api_requests_per_period integer DEFAULT 3600 NOT NULL,
     throttle_unauthenticated_api_period_in_seconds integer DEFAULT 3600 NOT NULL,
+    throttle_authenticated_git_lfs_requests_per_period integer DEFAULT 1000 NOT NULL,
+    throttle_authenticated_git_lfs_period_in_seconds integer DEFAULT 60 NOT NULL,
+    throttle_authenticated_git_lfs_enabled boolean DEFAULT false NOT NULL,
     jobs_per_stage_page_size integer DEFAULT 200 NOT NULL,
     sidekiq_job_limiter_mode smallint DEFAULT 1 NOT NULL,
     sidekiq_job_limiter_compression_threshold_bytes integer DEFAULT 100000 NOT NULL,
     sidekiq_job_limiter_limit_bytes integer DEFAULT 0 NOT NULL,
-    suggest_pipeline_enabled boolean DEFAULT true NOT NULL,
+    dependency_proxy_ttl_group_policy_worker_capacity smallint DEFAULT 2 NOT NULL,
     throttle_unauthenticated_deprecated_api_requests_per_period integer DEFAULT 1800 NOT NULL,
     throttle_unauthenticated_deprecated_api_period_in_seconds integer DEFAULT 3600 NOT NULL,
     throttle_unauthenticated_deprecated_api_enabled boolean DEFAULT false NOT NULL,
     throttle_authenticated_deprecated_api_requests_per_period integer DEFAULT 3600 NOT NULL,
     throttle_authenticated_deprecated_api_period_in_seconds integer DEFAULT 3600 NOT NULL,
     throttle_authenticated_deprecated_api_enabled boolean DEFAULT false NOT NULL,
-    dependency_proxy_ttl_group_policy_worker_capacity smallint DEFAULT 2 NOT NULL,
+    suggest_pipeline_enabled boolean DEFAULT true NOT NULL,
     content_validation_endpoint_url text,
     encrypted_content_validation_api_key bytea,
     encrypted_content_validation_api_key_iv bytea,
@@ -10612,7 +10612,7 @@ CREATE TABLE application_settings (
     container_registry_import_start_max_retries integer DEFAULT 50 NOT NULL,
     container_registry_import_max_step_duration integer DEFAULT 300 NOT NULL,
     container_registry_import_target_plan text DEFAULT 'free'::text NOT NULL,
-    container_registry_import_created_before timestamp with time zone DEFAULT '2022-01-23 00:00:00+00'::timestamp with time zone NOT NULL,
+    container_registry_import_created_before timestamp with time zone DEFAULT '2022-01-22 16:00:00-08'::timestamp with time zone NOT NULL,
     runner_token_expiration_interval integer,
     group_runner_token_expiration_interval integer,
     project_runner_token_expiration_interval integer,
@@ -15431,8 +15431,8 @@ CREATE TABLE integrations (
     inherit_from_id bigint,
     alert_events boolean,
     group_id bigint,
-    type_new text,
     vulnerability_events boolean DEFAULT false NOT NULL,
+    type_new text,
     archive_trace_events boolean DEFAULT false NOT NULL,
     CONSTRAINT check_a948a0aa7e CHECK ((char_length(type_new) <= 255))
 );
@@ -16143,8 +16143,8 @@ CREATE TABLE members (
     expires_at date,
     ldap boolean DEFAULT false NOT NULL,
     override boolean DEFAULT false NOT NULL,
-    state smallint DEFAULT 0,
     invite_email_success boolean DEFAULT true NOT NULL,
+    state smallint DEFAULT 0,
     member_namespace_id bigint
 );
 
@@ -16742,7 +16742,8 @@ CREATE TABLE namespaces (
     shared_runners_enabled boolean DEFAULT true NOT NULL,
     allow_descendants_override_disabled_shared_runners boolean DEFAULT false NOT NULL,
     traversal_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
-    tmp_project_id integer
+    tmp_project_id integer,
+    email_visibility_disabled boolean
 );
 
 CREATE SEQUENCE namespaces_id_seq
@@ -26315,7 +26316,7 @@ CREATE INDEX index_events_on_author_id_and_created_at_merge_requests ON events U
 
 CREATE INDEX index_events_on_author_id_and_id ON events USING btree (author_id, id);
 
-CREATE INDEX index_events_on_created_at_and_id ON events USING btree (created_at, id) WHERE (created_at > '2021-08-27 00:00:00+00'::timestamp with time zone);
+CREATE INDEX index_events_on_created_at_and_id ON events USING btree (created_at, id) WHERE (created_at > '2021-08-26 17:00:00-07'::timestamp with time zone);
 
 CREATE INDEX index_events_on_group_id_partial ON events USING btree (group_id) WHERE (group_id IS NOT NULL);
 
