@@ -5,10 +5,6 @@ class IssuableMetricImage < ApplicationRecord
 
   belongs_to :issue, class_name: 'Issue', foreign_key: 'issue_id', inverse_of: :metric_images
 
-  attribute :file_store, :integer, default: -> { MetricImageUploader.default_store }
-
-  mount_file_store_uploader MetricImageUploader
-
   validates :issue, presence: true
 
   def self.available_for?(project)

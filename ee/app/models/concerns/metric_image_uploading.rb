@@ -16,6 +16,10 @@ module MetricImageUploading
     validates :url_text, length: { maximum: 128 }
 
     scope :order_created_at_asc, -> { order(created_at: :asc) }
+
+    attribute :file_store, :integer, default: -> { MetricImageUploader.default_store }
+
+    mount_file_store_uploader MetricImageUploader
   end
 
   def filename

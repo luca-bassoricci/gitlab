@@ -8,10 +8,6 @@ module AlertManagement
 
     belongs_to :alert, class_name: 'AlertManagement::Alert', foreign_key: 'alert_id', inverse_of: :metric_images
 
-    attribute :file_store, :integer, default: -> { MetricImageUploader.default_store }
-
-    mount_file_store_uploader MetricImageUploader
-
     def self.available_for?(project)
       project&.feature_available?(:alert_metric_upload)
     end
