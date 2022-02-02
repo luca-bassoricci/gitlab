@@ -278,7 +278,8 @@ class GroupsController < Groups::ApplicationController
       :prevent_sharing_groups_outside_hierarchy,
       :setup_for_company,
       :jobs_to_be_done,
-      :crm_enabled
+      :crm_enabled,
+      :email_visibility_disabled
     ]
   end
 
