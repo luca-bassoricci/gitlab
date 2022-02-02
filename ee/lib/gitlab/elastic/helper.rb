@@ -90,20 +90,18 @@ module Gitlab
       def create_migrations_index
         settings = { number_of_shards: 1 }
         mappings = {
-          _doc: {
-            properties: {
-              completed: {
-                type: 'boolean'
-              },
-              state: {
-                type: 'object'
-              },
-              started_at: {
-                type: 'date'
-              },
-              completed_at: {
-                type: 'date'
-              }
+          properties: {
+            completed: {
+              type: 'boolean'
+            },
+            state: {
+              type: 'object'
+            },
+            started_at: {
+              type: 'date'
+            },
+            completed_at: {
+              type: 'date'
             }
           }
         }
@@ -114,7 +112,7 @@ module Gitlab
             settings: settings.to_hash,
             mappings: mappings.to_hash
           }
-        }.merge(additional_index_options)
+        }
 
         client.indices.create create_index_options
 
@@ -343,10 +341,8 @@ module Gitlab
         mappings.merge!(options[:mappings]) if options[:mappings]
 
         meta_info = {
-          doc: {
-            _meta: {
-              created_by: Gitlab::VERSION
-            }
+          _meta: {
+            created_by: Gitlab::VERSION
           }
         }
 
@@ -356,20 +352,10 @@ module Gitlab
             settings: settings,
             mappings: mappings.deep_merge(meta_info)
           }
-        }.merge(additional_index_options)
+        }
 
         client.indices.create create_index_options
         client.indices.put_alias(name: alias_name, index: index_name) if with_alias
-      end
-
-      def additional_index_options
-        {}.tap do |options|
-          # include_type_name defaults to false in ES7. This will ensure ES6
-          # behaves like ES7 when creating mappings. See
-          # https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
-          # for more information.
-          options[:include_type_name] = false if Gitlab::VersionInfo.parse(client.info['version']['number']).major == 6
-        end
       end
     end
   end
