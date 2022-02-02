@@ -128,6 +128,10 @@ module UsersHelper
     Feature.enabled?(:ban_user_feature_flag)
   end
 
+  def email_visibility_disabled?(user)
+    user.groups.self_and_ancestors.where(email_visibility_disabled: true).exists?
+  end
+
   def confirm_user_data(user)
     message = if user.unconfirmed_email.present?
                 _('This user has an unconfirmed email address (%{email}). You may force a confirmation.') % { email: user.unconfirmed_email }
