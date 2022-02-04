@@ -6,7 +6,7 @@ require_relative './config_shared_examples'
 RSpec.describe Elastic::Latest::Config do
   describe '.document_type' do
     it 'returns config' do
-      expect(described_class.document_type).to eq('doc')
+      expect(described_class.document_type).to be_nil
     end
   end
 
