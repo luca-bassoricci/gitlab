@@ -9,12 +9,44 @@ RSpec.shared_examples 'a Geo verifiable registry' do
 
   context 'state machine' do
     context 'when transitioning to synced' do
+      let(:registry) { create(registry_class_factory, :started, :verification_succeeded) }
+
       it 'marks verification as pending' do
-        registry = create(registry_class_factory, :started, :verification_succeeded)
+        # It's likely we will remove will_never_be_checksummed_on_the_primary?
+        # so using `expect` will remind us to remove it here too.
+        expect(registry).to receive(:will_never_be_checksummed_on_the_primary?).and_return(false)
 
         registry.synced!
 
         expect(registry.reload).to be_verification_pending
+      end
+
+      context 'band-aid for GitLab managed object storage replication verification loop' do
+        context 'when the model_record will never be checksummed on the primary' do
+          before do
+            allow(registry).to receive(:will_never_be_checksummed_on_the_primary?).and_return(true)
+          end
+
+          context 'when the registry is already verification_succeeded' do
+            let(:registry) { create(registry_class_factory, :started, :verification_succeeded) }
+
+            it 'leaves verification as succeeded' do
+              registry.synced!
+
+              expect(registry.reload).to be_verification_succeeded
+            end
+          end
+
+          context 'when the registry is verification_pending' do
+            let(:registry) { create(registry_class_factory, :started) }
+
+            it 'changes verification to succeeded' do
+              registry.synced!
+
+              expect(registry.reload).to be_verification_succeeded
+            end
+          end
+        end
       end
     end
   end
@@ -172,6 +204,8 @@ RSpec.shared_examples 'a Geo verifiable registry' do
   describe '#track_checksum_attempt!', :aggregate_failures do
     context 'when verification was not yet started' do
       it 'starts verification' do
+        allow(subject).to receive(:will_never_be_checksummed_on_the_primary?).and_return(false)
+
         expect do
           subject.track_checksum_attempt! do
             'a_checksum_value'
@@ -179,45 +213,85 @@ RSpec.shared_examples 'a Geo verifiable registry' do
         end.to change { subject.verification_started_at }.from(nil)
       end
 
-      context 'comparison with primary checksum' do
-        let(:replicator) { double('replicator') }
-        let(:calculated_checksum) { 'abc123' }
-
+      context 'when the model record will never be checksummed on the primary' do
         before do
-          allow(subject).to receive(:replicator).and_return(replicator)
-          allow(replicator).to receive(:matches_checksum?).with(calculated_checksum).and_return(matches_checksum)
+          allow(registry).to receive(:will_never_be_checksummed_on_the_primary?).and_return(true)
         end
 
-        context 'when the calculated checksum matches the primary checksum' do
-          let(:matches_checksum) { true }
+        context 'when the registry is already verification_succeeded' do
+          let(:registry) { create(registry_class_factory, :started, :verification_succeeded) }
 
-          it 'transitions to verification_succeeded and updates the checksum' do
+          it 'leaves verification as succeeded' do
             expect do
-              subject.track_checksum_attempt! do
-                calculated_checksum
+              registry.track_checksum_attempt! do
+                ''
               end
-            end.to change { subject.verification_succeeded? }.from(false).to(true)
+            end.not_to change { registry.verification_succeeded? }
 
-            expect(subject.verification_checksum).to eq(calculated_checksum)
+            expect(registry.verification_checksum).to eq('0000000000000000000000000000000000000000')
           end
         end
 
-        context 'when the calculated checksum does not match the primary checksum' do
-          let(:matches_checksum) { false }
+        context 'when the registry is verification_pending' do
+          let(:registry) { create(registry_class_factory, :started) }
 
-          it 'transitions to verification_failed and updates mismatch fields' do
-            allow(replicator).to receive(:primary_checksum).and_return(calculated_checksum)
-
+          it 'changes verification to succeeded' do
             expect do
-              subject.track_checksum_attempt! do
-                calculated_checksum
+              registry.track_checksum_attempt! do
+                ''
               end
-            end.to change { subject.verification_failed? }.from(false).to(true)
+            end.to change { registry.verification_succeeded? }.from(false).to(true)
 
-            expect(subject.verification_checksum).to eq(calculated_checksum)
-            expect(subject.verification_checksum_mismatched).to eq(calculated_checksum)
-            expect(subject.checksum_mismatch).to eq(true)
-            expect(subject.verification_failure).to match('Checksum does not match the primary checksum')
+            expect(registry.verification_checksum).to eq('0000000000000000000000000000000000000000')
+          end
+        end
+      end
+
+      context 'when the primary site is expected to checksum the model record' do
+        before do
+          allow(replicator).to receive(:will_never_be_checksummed_on_the_primary?).and_return(false)
+        end
+
+        context 'comparison with primary checksum' do
+          let(:replicator) { double('replicator') }
+          let(:calculated_checksum) { 'abc123' }
+
+          before do
+            allow(subject).to receive(:replicator).and_return(replicator)
+            allow(replicator).to receive(:matches_checksum?).with(calculated_checksum).and_return(matches_checksum)
+          end
+
+          context 'when the calculated checksum matches the primary checksum' do
+            let(:matches_checksum) { true }
+
+            it 'transitions to verification_succeeded and updates the checksum' do
+              expect do
+                subject.track_checksum_attempt! do
+                  calculated_checksum
+                end
+              end.to change { subject.verification_succeeded? }.from(false).to(true)
+
+              expect(subject.verification_checksum).to eq(calculated_checksum)
+            end
+          end
+
+          context 'when the calculated checksum does not match the primary checksum' do
+            let(:matches_checksum) { false }
+
+            it 'transitions to verification_failed and updates mismatch fields' do
+              allow(replicator).to receive(:primary_checksum).and_return(calculated_checksum)
+
+              expect do
+                subject.track_checksum_attempt! do
+                  calculated_checksum
+                end
+              end.to change { subject.verification_failed? }.from(false).to(true)
+
+              expect(subject.verification_checksum).to eq(calculated_checksum)
+              expect(subject.verification_checksum_mismatched).to eq(calculated_checksum)
+              expect(subject.checksum_mismatch).to eq(true)
+              expect(subject.verification_failure).to match('Checksum does not match the primary checksum')
+            end
           end
         end
       end
@@ -225,6 +299,8 @@ RSpec.shared_examples 'a Geo verifiable registry' do
 
     context 'when verification was started' do
       it 'does not update verification_started_at' do
+        allow(subject).to receive(:will_never_be_checksummed_on_the_primary?).and_return(false)
+
         subject.verification_started!
         expected = subject.verification_started_at
 
@@ -237,6 +313,8 @@ RSpec.shared_examples 'a Geo verifiable registry' do
     end
 
     it 'yields to the checksum calculation' do
+      allow(subject).to receive(:will_never_be_checksummed_on_the_primary?).and_return(false)
+
       expect do |probe|
         subject.track_checksum_attempt!(&probe)
       end.to yield_with_no_args
@@ -244,6 +322,8 @@ RSpec.shared_examples 'a Geo verifiable registry' do
 
     context 'when an error occurs while yielding' do
       it 'sets verification_failed' do
+        allow(subject).to receive(:will_never_be_checksummed_on_the_primary?).and_return(false)
+
         subject.track_checksum_attempt! do
           raise 'an error'
         end
