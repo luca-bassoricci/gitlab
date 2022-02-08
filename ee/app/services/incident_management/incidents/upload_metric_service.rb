@@ -3,6 +3,8 @@
 module IncidentManagement
   module Incidents
     class UploadMetricService < BaseService
+      attr_reader :issuable, :project, :file, :url, :url_text, :metric
+
       def initialize(issuable, current_user, params = {})
         super
 
@@ -22,8 +24,6 @@ module IncidentManagement
       rescue ::ActiveRecord::RecordInvalid => e
         ServiceResponse.error(message: e.message)
       end
-
-      attr_reader :issuable, :project, :file, :url, :url_text, :metric
 
       private
 

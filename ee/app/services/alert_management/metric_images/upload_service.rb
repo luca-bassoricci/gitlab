@@ -3,6 +3,8 @@
 module AlertManagement
   module MetricImages
     class UploadService < BaseService
+      attr_reader :alert, :project, :file, :url, :url_text, :metric
+
       def initialize(alert, current_user, params = {})
         super
 
@@ -22,8 +24,6 @@ module AlertManagement
       rescue ::ActiveRecord::RecordInvalid => e
         ServiceResponse.error(message: e.message)
       end
-
-      attr_reader :alert, :project, :file, :url, :url_text, :metric
 
       private
 
