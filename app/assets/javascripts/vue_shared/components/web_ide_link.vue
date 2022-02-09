@@ -149,7 +149,6 @@ export default {
 
       const handleOptions = this.needsToFork
         ? {
-            href: '#modal-confirm-fork-edit',
             handle: () => {
               if (this.disableForkModal) {
                 this.$emit('edit', 'simple');
@@ -192,7 +191,6 @@ export default {
 
       const handleOptions = this.needsToFork
         ? {
-            href: '#modal-confirm-fork-webide',
             handle: () => {
               if (this.disableForkModal) {
                 this.$emit('edit', 'ide');

@@ -17,8 +17,7 @@ const TEST_USER_PREFERENCES_GITPOD_PATH = '/-/profile/preferences#user_gitpod_en
 const TEST_USER_PROFILE_ENABLE_GITPOD_PATH = '/-/profile?user%5Bgitpod_enabled%5D=true';
 const forkPath = '/some/fork/path';
 
-const ACTION_EDIT = {
-  href: TEST_EDIT_URL,
+const BASE_ACTION_EDIT = {
   key: 'edit',
   text: 'Edit',
   secondaryText: 'Edit this file only.',
@@ -29,13 +28,8 @@ const ACTION_EDIT = {
     'data-track-label': 'edit',
   },
 };
-const ACTION_EDIT_CONFIRM_FORK = {
-  ...ACTION_EDIT,
-  href: '#modal-confirm-fork-edit',
-  handle: expect.any(Function),
-};
-const ACTION_WEB_IDE = {
-  href: TEST_WEB_IDE_URL,
+
+const BASE_ACTION_WEB_IDE = {
   key: 'webide',
   secondaryText: 'Quickly and easily edit multiple files in your project.',
   tooltip: '',
@@ -46,11 +40,17 @@ const ACTION_WEB_IDE = {
     'data-track-label': 'web_ide',
   },
 };
-const ACTION_WEB_IDE_CONFIRM_FORK = {
-  ...ACTION_WEB_IDE,
-  href: '#modal-confirm-fork-webide',
-  handle: expect.any(Function),
+
+const ACTION_EDIT = {
+  ...BASE_ACTION_EDIT,
+  href: TEST_EDIT_URL,
 };
+
+const ACTION_WEB_IDE = {
+  ...BASE_ACTION_WEB_IDE,
+  href: TEST_WEB_IDE_URL,
+};
+
 const ACTION_WEB_IDE_EDIT_FORK = { ...ACTION_WEB_IDE, text: 'Edit fork in Web IDE' };
 const ACTION_GITPOD = {
   href: TEST_GITPOD_URL,
@@ -132,7 +132,10 @@ describe('Web IDE link component', () => {
     },
     {
       props: { needsToFork: true },
-      expectedActions: [ACTION_WEB_IDE_CONFIRM_FORK, ACTION_EDIT_CONFIRM_FORK],
+      expectedActions: [
+        { ...BASE_ACTION_WEB_IDE, handle: expect.any(Function) },
+        { ...BASE_ACTION_EDIT, handle: expect.any(Function) },
+      ],
     },
     {
       props: {
