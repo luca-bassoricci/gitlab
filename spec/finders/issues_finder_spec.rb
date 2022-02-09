@@ -409,6 +409,17 @@ RSpec.describe IssuesFinder do
           expect(issues.map { |issue| issue.milestone.due_date }).to contain_exactly(tomorrow, two_days_from_now, tomorrow)
         end
 
+        context 'when feature flag :replace_multiple_groups_all_objects is disabled' do
+          before do
+            stub_feature_flags(replace_multiple_groups_all_objects: false)
+          end
+
+          it 'returns issues in the upcoming milestone for each project or group' do
+            expect(issues.map { |issue| issue.milestone.title }).to contain_exactly('1.1', '8.8', '9.9')
+            expect(issues.map { |issue| issue.milestone.due_date }).to contain_exactly(tomorrow, two_days_from_now, tomorrow)
+          end
+        end
+
         context 'using NOT' do
           let(:params) { { not: { milestone_title: Milestone::Upcoming.name } } }
 

@@ -95,7 +95,11 @@ class IssuableFinder
       elsif group
         [group]
       elsif current_user
-        Gitlab::ObjectHierarchy.new(current_user.authorized_groups, current_user.groups).all_objects
+        if Feature.enabled?(:replace_multiple_groups_all_objects, current_user, default_enabled: :yaml)
+          Namespace.from_union([current_user.authorized_groups.self_and_ancestors, current_user.groups.self_and_descendants])
+        else
+          Gitlab::ObjectHierarchy.new(current_user.authorized_groups, current_user.groups).all_objects
+        end
       else
         []
       end

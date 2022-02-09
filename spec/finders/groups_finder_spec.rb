@@ -272,6 +272,14 @@ RSpec.describe GroupsFinder do
       end
 
       include_examples '#execute'
+
+      context 'when :replace_multiple_groups_all_objects feature flag is disabled' do
+        before do
+          stub_feature_flags(replace_multiple_groups_all_objects: false)
+        end
+
+        include_examples '#execute'
+      end
     end
   end
 end

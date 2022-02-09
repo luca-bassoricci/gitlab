@@ -1,0 +1,8 @@
+---
+name: replace_multiple_groups_all_objects
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/80282
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/352389
+milestone: '14.8'
+type: development
+group: group::authentication and authorization
+default_enabled: false
