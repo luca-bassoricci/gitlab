@@ -27,6 +27,7 @@ default:
 workflow:
   rules:
     # If `$FORCE_GITLAB_CI` is set, create a pipeline.
+    - when: never
     - if: '$FORCE_GITLAB_CI'
     # As part of the process of creating RCs automatically, we update stable
     # branches with the changes of the most recent production deployment. The
