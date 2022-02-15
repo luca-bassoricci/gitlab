@@ -27,8 +27,10 @@ module Gitlab
 
       def relation_scoped_to_range(source_table, source_key_column, start_id, stop_id)
         define_batchable_model(source_table, connection: ActiveRecord::Base.connection)
+          .joins('INNER JOIN namespaces ON members.source_id = namespaces.id')
           .where(source_key_column => start_id..stop_id)
           .where(type: 'GroupMember')
+          .where(source_type: 'Namespace')
           .where(member_namespace_id: nil)
       end
     end
