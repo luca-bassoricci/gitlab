@@ -10,7 +10,7 @@ Service Ping consists of two kinds of data:
 
 - **Counters**: Track how often a certain event happened over time, such as how many CI/CD pipelines have run.
   They are monotonic and always trend up.
-- **Observations**: Facts collected from one or more GitLab instances and can carry arbitrary data.
+- **Observations**: Facts collected from one or more Gitlab instances and can carry arbitrary data.
   There are no general guidelines for how to collect those, due to the individual nature of that data.
 
 To implement a new metric in Service Ping, follow these steps:
@@ -229,7 +229,7 @@ includes the following arguments:
 The method includes the following prerequisites:
 
 - The supplied `relation` must include the primary key defined as the numeric column.
-  For example: `id bigint NOT NULL`.
+  for example: `id bigint NOT NULL`.
 - The `estimate_batch_distinct_count` can handle a joined relation. To use its ability to
   count non-unique columns, the joined relation **must not** have a one-to-many relationship,
   such as `has_many :boards`.
@@ -376,7 +376,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
      [See Metric name](metrics_dictionary.md#metric-name) for a complete guide on metric naming suggestion.
 
-     Consider including in the event's name the Redis slot to be able to count totals for a specific category.
+     Consider including in the event's name the Redis slot to be able to count totals for a specific catgory.
 
      Example names: `users_creating_epics`, `users_triggering_security_scans`.
 
