@@ -6,7 +6,19 @@ import { __, sprintf } from '~/locale';
 import { modalTypes } from '../../constants';
 import { trimPathComponents, getPathParent } from '../../utils';
 
+const i18n = { 
+  cancel: __('Cancel') 
+};
+
 export default {
+  modalActions: {
+    cancel: {
+      text: i18n.cancel,
+      attributes: {
+        variant: 'default',
+      },
+    },
+  },
   components: {
     GlModal,
     GlButton,
@@ -42,6 +54,12 @@ export default {
       }
 
       return __('Create file');
+    },
+    actionPrimary() {
+      return {
+        text: this.buttonLabel,
+        attributes: [{ variant: 'confirm' }],
+      };
     },
     isCreatingNewFile() {
       return this.modalType === modalTypes.blob;
@@ -136,11 +154,11 @@ export default {
     data-qa-selector="new_file_modal"
     data-testid="ide-new-entry"
     :title="modalTitle"
-    :ok-title="buttonLabel"
-    ok-variant="success"
     size="lg"
-    @ok="submitForm"
-    @hide="resetData"
+    :action-primary="actionPrimary"
+    :action-cancel="$options.modalActions.cancel"
+    @primary="submitForm"
+    @cancel="resetData"
   >
     <div class="form-group row">
       <label class="label-bold col-form-label col-sm-2"> {{ __('Name') }} </label>
