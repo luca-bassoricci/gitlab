@@ -6,8 +6,8 @@ import { __, sprintf } from '~/locale';
 import { modalTypes } from '../../constants';
 import { trimPathComponents, getPathParent } from '../../utils';
 
-const i18n = { 
-  cancelButtonText: __('Cancel') 
+const i18n = {
+  cancelButtonText: __('Cancel'),
 };
 
 export default {
@@ -56,8 +56,8 @@ export default {
     actionCancel() {
       return {
         text: i18n.cancel,
-        attributes: [{ variant: 'default' }]
-      }
+        attributes: [{ variant: 'default' }],
+      };
     },
     isCreatingNewFile() {
       return this.modalType === modalTypes.blob;
