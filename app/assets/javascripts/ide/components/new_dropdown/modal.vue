@@ -7,18 +7,10 @@ import { modalTypes } from '../../constants';
 import { trimPathComponents, getPathParent } from '../../utils';
 
 const i18n = { 
-  cancel: __('Cancel') 
+  cancelButtonText: __('Cancel') 
 };
 
 export default {
-  modalActions: {
-    cancel: {
-      text: i18n.cancel,
-      attributes: {
-        variant: 'default',
-      },
-    },
-  },
   components: {
     GlModal,
     GlButton,
@@ -60,6 +52,12 @@ export default {
         text: this.buttonLabel,
         attributes: [{ variant: 'confirm' }],
       };
+    },
+    actionCancel() {
+      return {
+        text: i18n.cancel,
+        attributes: [{ variant: 'default' }]
+      }
     },
     isCreatingNewFile() {
       return this.modalType === modalTypes.blob;
@@ -156,7 +154,7 @@ export default {
     :title="modalTitle"
     size="lg"
     :action-primary="actionPrimary"
-    :action-cancel="$options.modalActions.cancel"
+    :action-cancel="actionCancel"
     @primary="submitForm"
     @cancel="resetData"
   >
