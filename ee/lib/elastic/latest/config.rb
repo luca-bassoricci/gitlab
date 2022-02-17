@@ -78,7 +78,7 @@ module Elastic
             },
             tokenizer: {
               my_ngram_tokenizer: {
-                type: 'nGram',
+                type: 'ngram',
                 min_gram: 2,
                 max_gram: 3,
                 token_chars: %w(letter digit)
