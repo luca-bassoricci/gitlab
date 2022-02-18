@@ -38,8 +38,9 @@ Mirror a repository when:
 Prerequisite:
 
 - You must have at least the Maintainer role for the project.
-- If your mirror connects with `ssh://`, the host key must be detectable on the server,
-  or you must have a local copy of the key.
+- If your mirror is accessible over `ssh`:
+  - the git repository URL must follow the format: ssh://git@<host>/<username>/<repository>.git
+  - the host key must be detectable on the server, or you must have a local copy of the key.
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Settings > Repository**.
@@ -64,7 +65,9 @@ Prerequisite:
 1. Select **Mirror repository**.
 
 If you select `SSH public key` as your authentication method, GitLab generates a
-public key for your GitLab repository. You must provide this key to the non-GitLab server.
+public key for your GitLab repository. All mirror updates will fail until this key
+is provided to the non-GitLab server. You can then manually trigger a new
+mirror update, or wait until the next automatic attempt, to finish setting up the mirror.
 To learn more, read [Get your SSH public key](#get-your-ssh-public-key).
 
 ## Update a mirror
