@@ -82,7 +82,7 @@ module QA
       end
 
       context 'when at the project level' do
-        it 'publishes and installs a pypi package', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348015' do
+        it 'publishes and installs a pypi package', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/349234', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348015' do
           Page::Project::Menu.perform(&:click_packages_link)
 
           Page::Project::Packages::Index.perform do |index|
