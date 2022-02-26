@@ -25,7 +25,7 @@ module QA
         target_project.visit!
       end
 
-      it 'configures and syncs a (pull) mirrored repository', :aggregate_failures,
+      it 'configures and syncs a (pull) mirrored repository', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/352197', type: :investigating }, :aggregate_failures,
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347736',
         quarantine: {
           only: { subdomain: :staging },
