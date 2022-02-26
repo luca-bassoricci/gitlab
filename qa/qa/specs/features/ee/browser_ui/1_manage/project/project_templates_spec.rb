@@ -43,7 +43,7 @@ module QA
           @group = Resource::Group.fabricate_via_api!
         end
 
-        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347932' do
+        it 'successfully imports the project using template', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/350792', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347932' do
           built_in = 'Ruby on Rails'
 
           @group.visit!
