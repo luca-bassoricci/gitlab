@@ -285,6 +285,10 @@ gem 'gitlab_chronic_duration', '~> 0.10.6.2'
 
 gem 'rack-proxy', '~> 0.6.0'
 
+# TODO: remove this once >= 1.15.5 properly works.
+# see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/81947
+gem 'ffi', '= 1.15.4'
+
 gem 'sassc-rails', '~> 2.1.0'
 gem 'autoprefixer-rails', '10.2.5.1'
 gem 'terser', '1.0.2'
