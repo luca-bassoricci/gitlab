@@ -59,7 +59,13 @@ class GroupsFinder < UnionFinder
         groups << current_user.groups.self_and_descendants
       else
         groups << if Feature.enabled?(:replace_multiple_groups_all_objects, current_user, default_enabled: :yaml)
-                    Namespace.from_union([groups_for_ancestors.self_and_ancestors, groups_for_descendants.self_and_descendants])
+                    Namespace.from_union(
+                      [
+                        groups_for_ancestors(selector: %i[namespaces.id namespaces.traversal_ids]).self_and_ancestors,
+                        groups_for_descendants.self_and_descendants(include_self: false)
+                      ],
+                      remove_duplicates: false
+                    )
                   else
                     Gitlab::ObjectHierarchy.new(groups_for_ancestors, groups_for_descendants).all_objects
                   end
@@ -71,8 +77,8 @@ class GroupsFinder < UnionFinder
     groups
   end
 
-  def groups_for_ancestors
-    current_user.authorized_groups
+  def groups_for_ancestors(selector: nil)
+    current_user.authorized_groups(selector: selector)
   end
 
   def groups_for_descendants

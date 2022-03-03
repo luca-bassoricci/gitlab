@@ -981,9 +981,9 @@ class User < ApplicationRecord
   end
 
   # Returns the groups a user has access to, either through a membership or a project authorization
-  def authorized_groups
+  def authorized_groups(selector: nil)
     Group.unscoped do
-      authorized_groups_with_shared_membership
+      authorized_groups_with_shared_membership(selector: selector)
     end
   end
 
@@ -2102,24 +2102,31 @@ class User < ApplicationRecord
     @group_callouts_by_feature_name ||= group_callouts.index_by(&:source_feature_name)
   end
 
-  def authorized_groups_without_shared_membership
-    Group.from_union([
-      groups.select(Namespace.arel_table[Arel.star]),
-      authorized_projects.joins(:namespace).select(Namespace.arel_table[Arel.star])
-    ])
+  def authorized_groups_without_shared_membership(selector: nil)
+    Group
+      .from_union([
+        groups.reselect(selector || Group.default_select_columns),
+        authorized_projects.joins(:group).reselect(selector || Group.default_select_columns)
+      ])
+      .typeless
+      .reselect(selector)
   end
 
-  def authorized_groups_with_shared_membership
-    cte = Gitlab::SQL::CTE.new(:direct_groups, authorized_groups_without_shared_membership)
+  def authorized_groups_with_shared_membership(selector: nil)
+    direct_groups = authorized_groups_without_shared_membership(selector: selector)
+    cte = Gitlab::SQL::CTE.new(:direct_groups, direct_groups)
     cte_alias = cte.table.alias(Group.table_name)
 
     Group
       .with(cte.to_arel)
+      .reselect(selector)
       .from_union([
-        Group.from(cte_alias),
-        Group.joins(:shared_with_group_links)
-             .where(group_group_links: { shared_with_group_id: Group.from(cte_alias) })
-    ])
+        Group.from(cte_alias).reselect(selector).typeless,
+        Group.reselect(selector)
+             .joins(:shared_with_group_links)
+             .where(group_group_links: { shared_with_group_id: Group.from(cte_alias).typeless })
+      ])
+      .typeless
   end
 
   def default_private_profile_to_false

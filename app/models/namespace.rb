@@ -129,6 +129,7 @@ class Namespace < ApplicationRecord
       saved_change_to_name? || saved_change_to_path? || saved_change_to_parent_id?
   }
 
+  scope :typeless, -> { unscope(where: [:type]) }
   scope :user_namespaces, -> { where(type: Namespaces::UserNamespace.sti_name) }
   scope :without_project_namespaces, -> { where(Namespace.arel_table[:type].not_eq(Namespaces::ProjectNamespace.sti_name)) }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
