@@ -31,7 +31,8 @@ module Gitlab
         # The value can be a path or a URL.
         'kroki-plantuml-include!' => '',
         # This feature is disabled because it relies on the local file system to save diagrams retrieved from the Kroki server.
-        'kroki-fetch-diagram!' => ''
+        'kroki-fetch-diagram!' => '',
+        'allow-uri-read' => true
     }.freeze
 
     def self.path_attrs(path)

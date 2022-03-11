@@ -31,17 +31,18 @@ module Gitlab
         doc = reader.document
 
         max_include_depth = doc.attributes.fetch('max-include-depth').to_i
+        allow_uri_read = doc.attributes.key?('allow-uri-read')
 
         return false if max_include_depth < 1
-        return false if target_http?(target)
+        return false if target_http?(target) && !allow_uri_read
         return false if included.size >= max_includes
-
         true
       end
 
       override :resolve_target_path
       def resolve_target_path(target, reader)
         return unless repository.try(:exists?)
+        return target if target_http? target
 
         base_path = reader.include_stack.empty? ? requested_path : reader.file
         path = resolve_relative_path(target, base_path)
@@ -51,12 +52,18 @@ module Gitlab
 
       override :read_lines
       def read_lines(filename, selector)
-        blob = read_blob(ref, filename)
+        if Gitlab::Git::Blob.find(repository, ref, filename)
+          blob = read_blob(ref, filename)
+          content = blob.data
+        else
+          # filename is not in the repository so read as standard include
+          content = Gitlab::HTTP.get(filename)
+        end
 
         if selector
-          blob.data.each_line.select.with_index(1, &selector)
+          content.each_line.select.with_index(1, &selector)
         else
-          blob.data
+          content
         end
       end
 
