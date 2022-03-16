@@ -17431,23 +17431,15 @@ CREATE TABLE namespace_ci_cd_settings (
 );
 
 CREATE TABLE namespace_details (
-    id bigint NOT NULL,
-    namespace_id integer,
-    description character varying,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    description text,
     description_html text,
     cached_markdown_version integer,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    namespace_id bigint NOT NULL,
+    CONSTRAINT check_2df620eaf6 CHECK ((char_length(description_html) <= 255)),
+    CONSTRAINT check_2f563eec0f CHECK ((char_length(description) <= 255))
 );
-
-CREATE SEQUENCE namespace_details_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE namespace_details_id_seq OWNED BY namespace_details.id;
 
 CREATE TABLE namespace_limits (
     additional_purchased_storage_size bigint DEFAULT 0 NOT NULL,
@@ -23084,8 +23076,6 @@ ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_s
 
 ALTER TABLE ONLY namespace_admin_notes ALTER COLUMN id SET DEFAULT nextval('namespace_admin_notes_id_seq'::regclass);
 
-ALTER TABLE ONLY namespace_details ALTER COLUMN id SET DEFAULT nextval('namespace_details_id_seq'::regclass);
-
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_seq'::regclass);
@@ -25083,7 +25073,7 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 ALTER TABLE ONLY namespace_ci_cd_settings
     ADD CONSTRAINT namespace_ci_cd_settings_pkey PRIMARY KEY (namespace_id);
 ALTER TABLE ONLY namespace_details
-    ADD CONSTRAINT namespace_details_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT namespace_details_pkey PRIMARY KEY (namespace_id);
 
 ALTER TABLE ONLY namespace_limits
     ADD CONSTRAINT namespace_limits_pkey PRIMARY KEY (namespace_id);
@@ -33482,6 +33472,9 @@ ALTER TABLE ONLY boards_epic_board_positions
 
 ALTER TABLE ONLY vulnerability_finding_links
     ADD CONSTRAINT fk_rails_cbdfde27ce FOREIGN KEY (vulnerability_occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY namespace_details
+    ADD CONSTRAINT fk_rails_cc11a451f8 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY clusters_integration_elasticstack
     ADD CONSTRAINT fk_rails_cc5ba8f658 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;

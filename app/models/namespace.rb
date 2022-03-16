@@ -46,6 +46,7 @@ class Namespace < ApplicationRecord
   has_many :project_statistics
   has_one :namespace_settings, inverse_of: :namespace, class_name: 'NamespaceSetting', autosave: true
   has_one :ci_cd_settings, inverse_of: :namespace, class_name: 'NamespaceCiCdSetting', autosave: true
+  has_one :namespace_details, inverse_of: :namespace, class_name: 'Namespace::Detail', autosave: true
   has_one :namespace_statistics
   has_one :namespace_route, foreign_key: :namespace_id, autosave: false, inverse_of: :namespace, class_name: 'Route'
   has_many :namespace_members, foreign_key: :member_namespace_id, inverse_of: :member_namespace, class_name: 'Member'
@@ -641,6 +642,30 @@ class Namespace < ApplicationRecord
     elsif group_namespace?
       errors.add(:parent_id, _('user namespace cannot be the parent of another namespace')) if parent.user_namespace?
     end
+  end
+
+  def ensure_namespace_details_in_sync
+    if Feature.enabled?(:namespace_details_feature_flag)
+      # create namespace_details when namespace is created
+      build_namespace_details if namespace_details_creation_enabled?
+
+      # we need to keep namespace and namespace_details in sync if there is one
+      sync_attributes(namespace_details) if sync_namespace_details?
+    end
+  end
+
+  def namespace_details_creation_enabled?
+    new_record? && !namespace_details
+  end
+
+  def sync_namespace_details?
+    (changes.keys & %w(description description_html cached_markdown_version)).any? && namespace_details.present?
+  end
+
+  def sync_attributes(namespace_details)
+    namespace_details.description = description
+    namespace_details.description_html = description_html
+    namespace_details.cached_markdown_version = cached_markdown_version
   end
 
   def sync_share_with_group_lock_with_parent

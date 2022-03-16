@@ -3107,14 +3107,23 @@ class Project < ApplicationRecord
     build_project_namespace if project_namespace_creation_enabled?
 
     sync_attributes(project_namespace) if sync_project_namespace?
+    sync_namespace_details_attributes(project_namespace.namespace_details) if sync_namespace_details?
   end
 
   def project_namespace_creation_enabled?
     new_record? && !project_namespace && self.namespace
   end
 
+  def namespace_details_creation_enabled?
+    new_record? && project_namespace && !project_namespace.namespace_details && self.namespace
+  end
+
   def sync_project_namespace?
     (changes.keys & %w(name path namespace_id namespace visibility_level shared_runners_enabled)).any? && project_namespace.present?
+  end
+
+  def sync_namespace_details?
+    Feature.enabled?(:namespace_details_feature_flag) && (changes.keys & %w(description description_html cached_markdown_version)).any? && project_namespace.present? && project_namespace.namespace_details.present?
   end
 
   def sync_attributes(project_namespace)
@@ -3136,6 +3145,12 @@ class Project < ApplicationRecord
     end
 
     project_namespace.assign_attributes(attributes_to_sync)
+  end
+
+  def sync_namespace_details_attributes(namespace_details)
+    namespace_details.description = description
+    namespace_details.description_html = description_html
+    namespace_details.cached_markdown_version = cached_markdown_version
   end
 
   # SyncEvents are created by PG triggers (with the function `insert_projects_sync_event`)
