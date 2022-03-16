@@ -94,6 +94,9 @@ The flow of a PQL lead is as follows:
 
 ### Lead flow on GitLab.com
 
+<div class="x-scrollable">
+<div style="width: 1800px;">
+
 ```mermaid
 sequenceDiagram
     HandRaiseForm Vue Component->>TrialsController#create_hand_raise_lead: GitLab.com frontend sends [lead] to backend
@@ -101,7 +104,8 @@ sequenceDiagram
     CreateHandRaiseLeadService->>SubscriptionPortalClient: [lead]
     SubscriptionPortalClient->>CustomersDot|TrialsController#create_hand_raise_lead: GitLab.com sends [lead] to CustomersDot
 ```      
-
+</div>
+</div>
 ### Lead flow on CustomersDot and later
 
 ```mermaid
