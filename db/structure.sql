@@ -17430,6 +17430,25 @@ CREATE TABLE namespace_ci_cd_settings (
     allow_stale_runner_pruning boolean DEFAULT false NOT NULL
 );
 
+CREATE TABLE namespace_details (
+    id bigint NOT NULL,
+    namespace_id integer,
+    description character varying,
+    description_html text,
+    cached_markdown_version integer,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+CREATE SEQUENCE namespace_details_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE namespace_details_id_seq OWNED BY namespace_details.id;
+
 CREATE TABLE namespace_limits (
     additional_purchased_storage_size bigint DEFAULT 0 NOT NULL,
     additional_purchased_storage_ends_on date,
@@ -23065,6 +23084,8 @@ ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_s
 
 ALTER TABLE ONLY namespace_admin_notes ALTER COLUMN id SET DEFAULT nextval('namespace_admin_notes_id_seq'::regclass);
 
+ALTER TABLE ONLY namespace_details ALTER COLUMN id SET DEFAULT nextval('namespace_details_id_seq'::regclass);
+
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_seq'::regclass);
@@ -25061,6 +25082,8 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 
 ALTER TABLE ONLY namespace_ci_cd_settings
     ADD CONSTRAINT namespace_ci_cd_settings_pkey PRIMARY KEY (namespace_id);
+ALTER TABLE ONLY namespace_details
+    ADD CONSTRAINT namespace_details_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY namespace_limits
     ADD CONSTRAINT namespace_limits_pkey PRIMARY KEY (namespace_id);
