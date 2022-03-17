@@ -71,8 +71,6 @@ export const FIELDS = [
   {
     key: FIELD_KEY_USER_CREATED_AT,
     label: __('Created on'),
-    thClass: 'col-user-created-at',
-    tdClass: 'col-user-created-at',
     sort: {
       asc: 'oldest_created_user',
       desc: 'recent_created_user',
@@ -81,8 +79,6 @@ export const FIELDS = [
   {
     key: FIELD_KEY_LAST_ACTIVITY_ON,
     label: __('Last activity'),
-    thClass: 'col-last-activity-on',
-    tdClass: 'col-last-activity-on',
     sort: {
       asc: 'oldest_last_activity',
       desc: 'recent_last_activity',
