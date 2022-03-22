@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Elastic::Client do
       let(:params) { { url: 'http://dummy-elastic:9200' } }
 
       it 'makes unsigned requests' do
-        stub_request(:get, 'http://dummy-elastic:9200/foo/_all/1')
+        stub_request(:post, 'http://dummy-elastic:9200/foo/_all/1')
           .with(headers: { 'Content-Type' => 'application/json' })
           .to_return(status: 200, body: [:fake_response])
 
@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Elastic::Client do
         allow(Labkit::Correlation::CorrelationId).to receive(:current_or_new_id).and_return('new-correlation-id')
 
         travel_to(Time.parse('20170303T133952Z')) do
-          stub_request(:get, 'http://example-elastic:9200/foo/_all/1')
+          stub_request(:post, 'http://example-elastic:9200/foo/_all/1')
             .with(
               headers: {
                 'Authorization'        => 'AWS4-HMAC-SHA256 Credential=0/20170303/us-east-1/es/aws4_request, SignedHeaders=content-type;host;user-agent;x-amz-content-sha256;x-amz-date;x-opaque-id, Signature=33a12f5ce6863009a29c856204935d454c32202fc9f321131e31fdd3ae5748c6',
