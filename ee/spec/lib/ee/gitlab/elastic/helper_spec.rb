@@ -111,19 +111,17 @@ RSpec.describe Gitlab::Elastic::Helper, :request_store do
   end
 
   describe '#default_mappings' do
-    it 'has only one type' do
-      expect(helper.default_mappings.keys).to match_array %i(doc)
-    end
-
     context 'custom analyzers' do
-      let(:custom_analyzers_mappings) { { doc: { properties: { title: { fields: { custom: true } } } } } }
+      let(:custom_analyzers_mappings) do
+        { properties: { title: { fields: { custom: true } } } }
+      end
 
       before do
         allow(::Elastic::Latest::CustomLanguageAnalyzers).to receive(:custom_analyzers_mappings).and_return(custom_analyzers_mappings)
       end
 
       it 'merges custom language analyzers mappings' do
-        expect(helper.default_mappings[:doc][:properties][:title]).to include(custom_analyzers_mappings[:doc][:properties][:title])
+        expect(helper.default_mappings[:properties][:title]).to include(custom_analyzers_mappings[:properties][:title])
       end
     end
   end
