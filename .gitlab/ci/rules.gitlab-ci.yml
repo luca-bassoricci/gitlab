@@ -1508,6 +1508,7 @@
   rules:
     - if: '$DAST_DISABLED || $GITLAB_FEATURES !~ /\bdast\b/'
       when: never
+    - <<: *if-merge-request
     - <<: *if-dot-com-ee-nightly-schedule-child-pipeline
 
 .reports:rules:package_hunter-yarn:
