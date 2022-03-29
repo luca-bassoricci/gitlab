@@ -7,23 +7,21 @@ require 'spec_helper'
 
 RSpec.describe Peek::Views::Elasticsearch, :elastic, :request_store do
   before do
+    ::Gitlab::Instrumentation::ElasticsearchTransport.detail_store # Create store in redis
     allow(::Gitlab::PerformanceBar).to receive(:enabled_for_request?).and_return(true)
     ensure_elasticsearch_index!
   end
 
   describe '#results' do
     let(:results) { described_class.new.results }
+
     let(:project) { create(:project, :repository) }
     let(:timeout) { '30s' }
 
-    before do
-      described_class.new.results # TODO not sure why this is necessary, but it is.
-    end
-
     it 'includes performance details' do
       ::Gitlab::SafeRequestStore.clear!
-
       project.repository.__elasticsearch__.elastic_search_as_found_blob('hello world')
+
       expect(results[:calls]).to be > 0
       expect(results[:duration]).to be_kind_of(String)
       expect(results[:details].last[:method]).to eq('POST')
