@@ -14,7 +14,6 @@ RSpec.describe Peek::Views::Elasticsearch, :elastic, :request_store do
 
   describe '#results' do
     let(:results) { described_class.new.results }
-
     let(:project) { create(:project, :repository) }
     let(:timeout) { '30s' }
 

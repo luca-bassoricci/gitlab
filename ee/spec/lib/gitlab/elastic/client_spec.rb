@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Elastic::Client do
         allow(Labkit::Correlation::CorrelationId).to receive(:current_or_new_id).and_return('new-correlation-id')
 
         travel_to(Time.parse('20170303T133952Z')) do
-          stub_request(:get, "http://example-elastic:9200/foo/_doc/1")
+          stub_request(:get, 'http://example-elastic:9200/foo/_doc/1')
             .with(
               headers: {
                 'Authorization'         => 'AWS4-HMAC-SHA256 Credential=0/20170303/us-east-1/es/aws4_request, SignedHeaders=content-type;host;user-agent;x-amz-content-sha256;x-amz-date;x-elastic-client-meta;x-opaque-id, Signature=e84fec5a6d9c6ac6a08db3df76b25f4492a0882f75d5a4b8ce8be96847a0e250',
