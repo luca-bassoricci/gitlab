@@ -1,5 +1,11 @@
 <script>
-import { GlTooltipDirective, GlIcon, GlSprintf, GlSkeletonLoader } from '@gitlab/ui';
+import {
+  GlTooltipDirective,
+  GlIcon,
+  GlSprintf,
+  GlSkeletonLoader,
+  GlFormCheckbox,
+} from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { n__ } from '~/locale';
 
@@ -23,6 +29,7 @@ export default {
   components: {
     ClipboardButton,
     DeleteButton,
+    GlFormCheckbox,
     GlSprintf,
     GlIcon,
     ListItem,
@@ -41,6 +48,11 @@ export default {
       type: Boolean,
       default: false,
       required: false,
+    },
+    selected: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   i18n: {
@@ -96,7 +108,11 @@ export default {
     }"
     v-bind="$attrs"
     :disabled="deleting"
+    :selected="selected"
   >
+    <template #left-action>
+      <gl-form-checkbox :checked="selected" @change="$emit('select')" />
+    </template>
     <template #left-primary>
       <router-link
         class="gl-text-body gl-font-weight-bold"

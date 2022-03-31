@@ -23,9 +23,27 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      selectedImages: {},
+    };
+  },
   computed: {
     showPagination() {
       return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
+    },
+    selectedItems() {
+      return this.images.filter(this.isSelected);
+    },
+  },
+  methods: {
+    selectItem(item) {
+      const { id } = item;
+      this.$set(this.selectedImages, id, !this.selectedImages[id]);
+    },
+    isSelected(item) {
+      const { id } = item;
+      return this.selectedImages[id];
     },
   },
 };
@@ -38,6 +56,8 @@ export default {
       :key="index"
       :item="listItem"
       :metadata-loading="metadataLoading"
+      :selected="isSelected(listItem)"
+      @select="selectItem(listItem)"
       @delete="$emit('delete', $event)"
     />
     <div class="gl-display-flex gl-justify-content-center">
