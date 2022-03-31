@@ -97,6 +97,14 @@ The token generated when you create an agent for Kubernetes. Use **agent access 
 - secret token
 - authentication token
 
+## air-gapped
+
+Use **offline** to refer to environments not connected
+[to the internet](../../../user/application_security/offline_deployments/index.md).
+Do not use **air gapped**, **air-gapped**, or **airgapped**. For example:
+
+- Offline environments have security policies that prevent them from accessing the internet.
+
 ## allow, enable
 
 Try to avoid **allow** and **enable**, unless you are talking about security-related features.
@@ -1023,7 +1031,7 @@ Do not use **yet** when talking about the product or its features. The documenta
 
 Sometimes you might need to use **yet** when writing a task. If you use
 **yet**, ensure the surrounding phrases are written
-in present tense, active voice. 
+in present tense, active voice.
 
 [View guidance about how to write about future features](index.md#promising-features-in-future-versions).
 ([Vale](../testing.md#vale) rule: [`CurrentStatus.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/CurrentStatus.yml))
