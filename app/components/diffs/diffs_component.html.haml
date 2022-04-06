@@ -1,0 +1,26 @@
+.content-block.oneline-block.files-changed.diff-files-changed.js-diff-files-changed
+  .files-changed-inner
+    .inline-parallel-buttons.gl-display-none.gl-md-display-flex
+      = expand_diffs_toggle
+      = whitespace_toggle
+
+      .btn-group.gl-ml-3
+        = inline_diff_btn
+        = parallel_diff_btn
+
+    = render Diffs::StatsComponent.new(diff_files: diff_files)
+
+- if render_overflow_warning?(diffs)
+  = render Diffs::OverflowWarningComponent.new(diff_files: diff_files, project: @project, commit: @commit, merge_request: @merge_request)
+
+.files{ data: { can_create_note: can_create_note? } }
+  - if load_diff_files_async
+    - url = url_for(safe_params.merge(action: 'diff_files'))
+    .js-diffs-batch{ data: { diff_files_path: url } }
+      .text-center
+        %span.gl-spinner.gl-spinner-md
+  - else
+    = render_diffs
+
+    - if paginate_diffs
+      = paginate(diff_files, theme: "gitlab")
