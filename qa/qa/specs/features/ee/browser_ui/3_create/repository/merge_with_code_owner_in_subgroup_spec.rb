@@ -44,7 +44,7 @@ module QA
           it_behaves_like 'code owner merge request'
         end
 
-        context 'and the code owner is a user', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347800' do
+        context 'and the code owner is a user', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/353905', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347800' do
           let(:codeowner) { approver.username }
           let(:group_or_project) { project }
 
