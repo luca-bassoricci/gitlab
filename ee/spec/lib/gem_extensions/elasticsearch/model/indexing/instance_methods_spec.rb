@@ -6,7 +6,7 @@ RSpec.describe GemExtensions::Elasticsearch::Model::Indexing::InstanceMethods do
   describe '#index_document' do
     let(:project) { Project.new(id: 1) }
 
-    it 'overrides _id without type' do
+    it 'overrides _id' do
       proxy = Elastic::Latest::ProjectInstanceProxy.new(project)
 
       expect(proxy.client).to receive(:index).with(
