@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spring/application"
+
 %w(
   .ruby-version
   .rbenv-vars
@@ -16,3 +18,19 @@ Spring.after_fork do
     end
   end
 end
+
+module DisconnectAllDatabases
+  def disconnect_database
+    ::Gitlab::Database.database_base_models.each do |_name, base_model|
+      base_model.remove_connection
+    end
+  end
+
+  def connect_database
+    ::Gitlab::Database.database_base_models.each do |_name, base_model|
+      base_model.establish_connection # rubocop:disable Database/EstablishConnection
+    end
+  end
+end
+
+Spring::Application.prepend(DisconnectAllDatabases)
