@@ -54,7 +54,7 @@ module QA
           end
         end
 
-        it 'by adding a home page to the wiki using git push', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347806' do
+        it 'by adding a home page to the wiki using git push', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/349931', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347806' do
           empty_wiki = Resource::Wiki::ProjectPage.new do |empty_wiki|
             empty_wiki.project = project
           end
