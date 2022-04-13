@@ -291,7 +291,7 @@
     - name: redis:6.0-alpine
     - name: opensearchproject/opensearch:1.2.4
       alias: elasticsearch
-      command: ["bin/opensearch", "-E", "discovery.type=single-node", "-E", "plugsins.security.disabled=true"]
+      command: ["bin/opensearch", "-E", "discovery.type=single-node", "-E", "plugins.security.disabled=true"]
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     PG_VERSION: "12"
