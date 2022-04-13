@@ -33,7 +33,7 @@ module QA
           end
         end
 
-        it 'by manipulating content on the page using git push', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347811' do
+        it 'by manipulating content on the page using git push', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/358828', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347811' do
           Resource::Repository::WikiPush.fabricate! do |push|
             push.file_content = new_wiki_content
             push.commit_message = commit_message
