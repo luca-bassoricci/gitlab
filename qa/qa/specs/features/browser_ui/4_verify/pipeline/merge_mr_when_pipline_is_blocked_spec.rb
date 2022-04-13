@@ -68,7 +68,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'can still merge MR successfully', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348080' do
+      it 'can still merge MR successfully', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/355297', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348080' do
         Page::MergeRequest::Show.perform do |show|
           # waiting for manual action status shows status badge 'blocked' on pipelines page
           show.has_pipeline_status?('waiting for manual action')
