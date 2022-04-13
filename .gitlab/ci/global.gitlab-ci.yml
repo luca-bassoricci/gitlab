@@ -279,7 +279,7 @@
       command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
     - name: redis:6.0-alpine
     - name: elasticsearch:8.1.0
-      command: ["/usr/bin/env", "xpack.security.enabled=false", "discovery.type=single-node", "/usr/share/local/docker-entrypoint.sh"]
+      command: ['env', '"xpack.security.enabled=false"', '"discovery.type=single-node"', 'bin/elasticsearch']
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     PG_VERSION: "12"
@@ -290,7 +290,8 @@
       command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
     - name: redis:6.0-alpine
     - name: opensearchproject/opensearch:1.2.4
-      command: ["/usr/bin/env", "plugsins.security.disabled=true", "discovery.type=single-node", "/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
+      alias: elasticsearch
+      command: ["bin/opensearch", "-E", "discovery.type=single-node", "-E", "plugsins.security.disabled=true"]
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     PG_VERSION: "12"
