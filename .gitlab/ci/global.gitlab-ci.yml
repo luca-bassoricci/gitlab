@@ -279,7 +279,7 @@
       command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
     - name: redis:6.0-alpine
     - name: elasticsearch:8.1.1
-      command: ['bash', '-c', '"./bin/elasticsearch -E discovery.type=single-node -E xpack.security.enabled=false"']
+      command: ['bash', '-c', '"/usr/share/elasticsearch/bin/elasticsearch -E discovery.type=single-node -E xpack.security.enabled=false"']
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     PG_VERSION: "12"
