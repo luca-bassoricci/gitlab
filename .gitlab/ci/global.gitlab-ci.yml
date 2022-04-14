@@ -280,9 +280,7 @@
     - name: redis:6.0-alpine
     - name: elasticsearch:8.1.1
       command:
-        - bash
-        - -c
-        - docker-entrypoint.sh elasticsearch -Ediscovery.type=single-node -Expack.security.enabled=false
+      command: ['env', '"xpack.security.enabled=false"', '"discovery.type=single-node"', 'bin/elasticsearch']
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     PG_VERSION: "12"
