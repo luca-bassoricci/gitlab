@@ -282,8 +282,8 @@
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     PG_VERSION: "12"
-    ES_SETTING_DISCOVERY_TYPE: single-node
-    ES_SETTING_XPACK_SECURITY_ENABLED: false
+    ES_SETTING_DISCOVERY_TYPE: "single-node"
+    ES_SETTING_XPACK_SECURITY_ENABLED: "false"
 
 .use-pg12-opensearch1-ee:
   services:
