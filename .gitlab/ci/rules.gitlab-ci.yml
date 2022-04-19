@@ -518,8 +518,7 @@
 
 .rails:rules:run-search-tests:
   rules:
-    <<: *if-merge-request-labels-run-search-tests
-    when: never
+    - <<: *if-merge-request-labels-run-search-tests
 
 .rails:rules:ee-and-foss-default-rules:
   rules:
