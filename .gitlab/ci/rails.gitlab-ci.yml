@@ -105,11 +105,13 @@
   extends:
     - .rspec-base
     - .use-pg12-es8-ee
+    - .rails:rules:run-search-tests
 
 .rspec-ee-base-pg12-opensearch1:
   extends:
     - .rspec-base
     - .use-pg12-opensearch1-ee
+    - .rails:rules:run-search-tests
 
 .rspec-jh-base-pg12:
   extends:
@@ -801,12 +803,14 @@ rspec-ee unit pg12 es8:
     - .rspec-ee-base-pg12-es8
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-parallel
+    - .rails:rules:run-search-tests
 
 rspec-ee unit pg12 opensearch1:
   extends:
     - .rspec-ee-base-pg12-opensearch1
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-parallel
+    - .rails:rules:run-search-tests
 
 rspec-ee unit pg12 minimal:
   extends:
@@ -831,12 +835,14 @@ rspec-ee integration pg12 es8:
     - .rspec-ee-base-pg12-es8
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
+    - .rails:rules:run-search-tests
 
 rspec-ee integration pg12 opensearch1:
   extends:
     - .rspec-ee-base-pg12-opensearch1
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
+    - .rails:rules:run-search-tests
 
 rspec-ee integration pg12 minimal:
   extends:
@@ -861,12 +867,14 @@ rspec-ee system pg12 es8:
     - .rspec-ee-base-pg12-es8
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
+    - .rails:rules:run-search-tests
 
 rspec-ee system pg12 opensearch1:
   extends:
     - .rspec-ee-base-pg12-opensearch1
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
+    - .rails:rules:run-search-tests
 
 rspec-ee system pg12 minimal:
   extends:
