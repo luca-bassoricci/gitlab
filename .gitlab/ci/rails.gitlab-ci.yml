@@ -826,6 +826,18 @@ rspec-ee integration pg12:
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
 
+rspec-ee integration pg12 es8:
+  extends:
+    - .rspec-ee-base-pg12-es8
+    - .rails:rules:ee-only-integration
+    - .rspec-ee-integration-parallel
+
+rspec-ee integration pg12 opensearch1:
+  extends:
+    - .rspec-ee-base-pg12-opensearch1
+    - .rails:rules:ee-only-integration
+    - .rspec-ee-integration-parallel
+
 rspec-ee integration pg12 minimal:
   extends:
     - rspec-ee integration pg12
@@ -841,6 +853,18 @@ rspec-ee integration pg12 single-db:
 rspec-ee system pg12:
   extends:
     - .rspec-ee-base-pg12
+    - .rails:rules:ee-only-system
+    - .rspec-ee-system-parallel
+
+rspec-ee system pg12 es8:
+  extends:
+    - .rspec-ee-base-pg12-es8
+    - .rails:rules:ee-only-system
+    - .rspec-ee-system-parallel
+
+rspec-ee system pg12 opensearch1:
+  extends:
+    - .rspec-ee-base-pg12-opensearch1
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
 
