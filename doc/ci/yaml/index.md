@@ -3131,6 +3131,7 @@ docker build:
 - If the pipeline is a merge request pipeline, check `Dockerfile` for changes.
 - If `Dockerfile` has changed, add the job to the pipeline as a manual job, and the pipeline
   continues running even if the job is not triggered (`allow_failure: true`).
+- A maximum of 50 patterns or file paths can be defined.
 - If `Dockerfile` has not changed, do not add job to any pipeline (same as `when: never`).
 
 **Additional details**:
@@ -3172,10 +3173,11 @@ job:
 
 - Glob patterns are interpreted with Ruby [`File.fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
   with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
-- For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns or
-  file paths. After the 10,000th check, rules with patterned globs always match.
-  In other words, the `exists` rule always assumes a match in projects with more
-  than 10,000 files.
+- For performance reasons, GitLab performs a maximum of 10,000  checks against
+  `exists` patterns or file paths. After the 10,000th check, rules with patterned
+  globs always match. In other words, the `exists` rule always assumes a match in
+  projects with more than 10,000 files.
+- A maximum of 50 patterns or file paths can be defined.
 - `exists` resolves to `true` if any of the listed files are found (an `OR` operation).
 
 #### `rules:allow_failure`
