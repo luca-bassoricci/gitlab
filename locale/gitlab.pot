@@ -9306,9 +9306,6 @@ msgstr ""
 msgid "Commit deleted"
 msgstr ""
 
-msgid "Commit email"
-msgstr ""
-
 msgid "Commit message"
 msgstr ""
 
@@ -30936,9 +30933,6 @@ msgid "Public Access Help"
 msgstr ""
 
 msgid "Public deploy keys"
-msgstr ""
-
-msgid "Public email"
 msgstr ""
 
 msgid "Public pipelines"
