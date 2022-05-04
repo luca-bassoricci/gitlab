@@ -35,6 +35,7 @@
   artifacts:
     paths:
       - gl-dast-report.json  # GitLab-specific
+      - gl-dast-debug-auth-report.html
     reports:
       dast: gl-dast-report.json
     expire_in: 1 week  # GitLab-specific
