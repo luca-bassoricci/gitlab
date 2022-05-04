@@ -10,7 +10,7 @@
   variables:
     DAST_USERNAME_FIELD: "user[login]"
     DAST_PASSWORD_FIELD: "user[password]"
-    DAST_SUBMIT_FIELD: "button"
+    DAST_SUBMIT_FIELD: "name:button"
     DAST_FULL_SCAN_ENABLED: "true"
     DAST_VERSION: 2
     GIT_STRATEGY: none
