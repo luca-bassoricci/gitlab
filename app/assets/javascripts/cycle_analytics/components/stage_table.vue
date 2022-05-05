@@ -7,6 +7,7 @@ import {
   GlPagination,
   GlTable,
   GlBadge,
+  GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
 import { __ } from '~/locale';
@@ -47,6 +48,9 @@ export default {
     GlBadge,
     TotalTime,
     FormattedStageCount,
+  },
+  directives: {
+    GlTooltip,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -138,6 +142,8 @@ export default {
         },
       ].map((field) => ({
         ...field,
+        thClass: 'gl-tooltip',
+        thAttr: { title: 'test title tooltip', 'v-gl-tooltip.top': true, isRowHeader: true },
         sortable: this.sortable,
       }));
     },
