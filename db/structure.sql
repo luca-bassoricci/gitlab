@@ -214,6 +214,39 @@ RETURN NULL;
 END
 $$;
 
+CREATE FUNCTION update_namespace_details_from_namespaces() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+INSERT INTO
+  namespace_details (
+    description,
+    description_html,
+    cached_markdown_version,
+    updated_at,
+    created_at,
+    namespace_id
+  )
+VALUES
+  (
+    NEW.description,
+    NEW.description_html,
+    NEW.cached_markdown_version,
+    NEW.updated_at,
+    NEW.updated_at,
+    NEW.id
+  ) ON CONFLICT (namespace_id) DO
+UPDATE
+SET
+  description = NEW.description,
+  description_html = NEW.description_html,
+  cached_markdown_version = NEW.cached_markdown_version
+WHERE
+  namespace_details.namespace_id = NEW.id;RETURN NULL;
+
+END
+$$;
+
 CREATE FUNCTION update_vulnerability_reads_from_vulnerability() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -25072,6 +25105,7 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 
 ALTER TABLE ONLY namespace_ci_cd_settings
     ADD CONSTRAINT namespace_ci_cd_settings_pkey PRIMARY KEY (namespace_id);
+
 ALTER TABLE ONLY namespace_details
     ADD CONSTRAINT namespace_details_pkey PRIMARY KEY (namespace_id);
 
@@ -31323,6 +31357,8 @@ CREATE TRIGGER trigger_namespaces_parent_id_on_update AFTER UPDATE ON namespaces
 CREATE TRIGGER trigger_projects_parent_id_on_insert AFTER INSERT ON projects FOR EACH ROW EXECUTE FUNCTION insert_projects_sync_event();
 
 CREATE TRIGGER trigger_projects_parent_id_on_update AFTER UPDATE ON projects FOR EACH ROW WHEN ((old.namespace_id IS DISTINCT FROM new.namespace_id)) EXECUTE FUNCTION insert_projects_sync_event();
+
+CREATE TRIGGER trigger_update_details_on_namespace_update AFTER UPDATE ON namespaces FOR EACH ROW WHEN ((((old.description)::text IS DISTINCT FROM (new.description)::text) OR (old.description_html IS DISTINCT FROM new.description_html) OR (old.cached_markdown_version IS DISTINCT FROM new.cached_markdown_version))) EXECUTE FUNCTION update_namespace_details_from_namespaces();
 
 CREATE TRIGGER trigger_update_has_issues_on_vulnerability_issue_links_delete AFTER DELETE ON vulnerability_issue_links FOR EACH ROW EXECUTE FUNCTION unset_has_issues_on_vulnerability_reads();
 

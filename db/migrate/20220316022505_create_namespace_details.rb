@@ -9,11 +9,11 @@ class CreateNamespaceDetails < Gitlab::Database::Migration[1.0]
   def up
     with_lock_retries do
       create_table :namespace_details, id: false do |t|
+        t.references :namespace, primary_key: true, null: false, default: nil, type: :bigint, index: false, foreign_key: { on_delete: :cascade } # rubocop:disable Layout/LineLength
         t.timestamps_with_timezone null: false
+        t.integer :cached_markdown_version
         t.text :description, limit: 255
         t.text :description_html, limit: 255
-        t.integer :cached_markdown_version
-        t.references :namespace, primary_key: true, null: false, default: nil, type: :bigint, index: false, foreign_key: { on_delete: :cascade } # rubocop:disable Layout/LineLength
       end
     end
   end
