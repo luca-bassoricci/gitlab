@@ -107,6 +107,7 @@ RSpec.describe EE::SecurityOrchestrationHelper do
           environment_id: environment&.id,
           policy: policy&.to_json,
           policy_type: policy_type,
+          new_policy_path: kind_of(String),
           scan_policy_documentation_path: kind_of(String),
           scan_result_approvers: approvers&.to_json
         }

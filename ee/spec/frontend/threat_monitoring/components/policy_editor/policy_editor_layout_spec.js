@@ -7,6 +7,7 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 describe('PolicyEditorLayout component', () => {
   let wrapper;
   let glTooltipDirectiveMock;
+  const newPolicyPath = '/threat-monitoring/policies/new';
   const policiesPath = '/threat-monitoring';
 
   const factory = ({ propsData = {} } = {}) => {
@@ -20,6 +21,7 @@ describe('PolicyEditorLayout component', () => {
       },
       provide: {
         policiesPath,
+        newPolicyPath,
       },
       stubs: { PolicyYamlEditor: true },
     });
@@ -32,6 +34,8 @@ describe('PolicyEditorLayout component', () => {
   const findRuleModeSection = () => wrapper.findByTestId('rule-editor');
   const findRuleModePreviewSection = () => wrapper.findByTestId('rule-editor-preview');
   const findSavePolicyButton = () => wrapper.findByTestId('save-policy');
+  const findBackButton = () => wrapper.findByTestId('back-button');
+  const findCancelButton = () => wrapper.findByTestId('cancel-button');
 
   afterEach(() => {
     wrapper.destroy();
@@ -81,6 +85,13 @@ describe('PolicyEditorLayout component', () => {
       expect(saveButton.attributes('disabled')).toBe(undefined);
       expect(saveButton.text()).toBe('Create policy');
     });
+
+    it('does display a back to step 1 button text', () => {
+      const backButton = findBackButton();
+      expect(backButton.attributes('href')).toBe(newPolicyPath);
+      expect(backButton.attributes('disabled')).toBe(undefined);
+      expect(backButton.text()).toBe('Back to Step 1');
+    });
   });
 
   describe('editing a policy', () => {
@@ -96,6 +107,17 @@ describe('PolicyEditorLayout component', () => {
     it('emits properly when the delete modal is closed', () => {
       findDeletePolicyModal().vm.$emit('secondary');
       expect(wrapper.emitted('remove-policy')).toStrictEqual([[]]);
+    });
+
+    it('does not display a back to step 1 button', () => {
+      expect(findBackButton().exists()).toBe(false);
+    });
+
+    it('does display a cancel button', () => {
+      const cancelButton = findCancelButton();
+      expect(cancelButton.attributes('href')).toBe(policiesPath);
+      expect(cancelButton.attributes('disabled')).toBe(undefined);
+      expect(cancelButton.text()).toBe('Cancel');
     });
   });
 

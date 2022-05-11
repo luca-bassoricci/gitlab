@@ -7,6 +7,8 @@ export const PARSING_ERROR_MESSAGE = s__(
   'SecurityOrchestration|Rule mode is unavailable for this policy. In some cases, we cannot parse the YAML file back into the rules editor.',
 );
 
+export const BACK_TO_STEP_1_MESSAGE = s__('SecurityOrchestration|Back to Step 1');
+
 export const EDITOR_MODES = [
   { value: EDITOR_MODE_RULE, text: s__('SecurityOrchestration|Rule mode') },
   { value: EDITOR_MODE_YAML, text: s__('SecurityOrchestration|.yaml mode') },

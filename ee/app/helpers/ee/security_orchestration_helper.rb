@@ -33,6 +33,7 @@ module EE::SecurityOrchestrationHelper
       policy_editor_empty_state_svg_path: image_path('illustrations/monitoring/unable_to_connect.svg'),
       policy_type: policy_type,
       policies_path: security_policies_path(container),
+      new_policy_path: new_project_security_policy_path(container),
       scan_policy_documentation_path: help_page_path('user/application_security/policies/index')
     }
 

@@ -1,11 +1,18 @@
 <script>
 import { GlButtonGroup, GlButton, GlModal, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import { DELETE_MODAL_CONFIG, EDITOR_MODES, EDITOR_MODE_RULE, EDITOR_MODE_YAML } from './constants';
+import {
+  DELETE_MODAL_CONFIG,
+  EDITOR_MODES,
+  EDITOR_MODE_RULE,
+  EDITOR_MODE_YAML,
+  BACK_TO_STEP_1_MESSAGE,
+} from './constants';
 
 export default {
   i18n: {
     DELETE_MODAL_CONFIG,
+    BACK_TO_STEP_1_MESSAGE,
   },
   components: {
     GlButton,
@@ -15,7 +22,7 @@ export default {
       import(/* webpackChunkName: 'policy_yaml_editor' */ '../policy_yaml_editor.vue'),
   },
   directives: { GlModal: GlModalDirective, GlTooltip: GlTooltipDirective },
-  inject: ['policiesPath'],
+  inject: ['policiesPath', 'newPolicyPath'],
   props: {
     customSaveButtonText: {
       type: String,
@@ -163,7 +170,7 @@ export default {
     <div class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-lg-display-block">
       <span
         v-gl-tooltip.hover.focus="{ disabled: disableTooltip }"
-        class="gl-pt-2"
+        class="gl-pt-2 gl-mr-3"
         :title="saveTooltipText"
         data-testid="save-policy-tooltip"
       >
@@ -178,19 +185,32 @@ export default {
           {{ saveButtonText }}
         </gl-button>
       </span>
+      <template v-if="isEditing">
+        <gl-button
+          v-gl-modal="'delete-modal'"
+          class="gl-mt-5 gl-lg-mt-0"
+          category="secondary"
+          variant="danger"
+          data-testid="delete-policy"
+          :loading="isRemovingPolicy"
+          >{{ s__('SecurityOrchestration|Delete policy') }}</gl-button
+        >
+        <gl-button
+          class="gl-mt-5 gl-lg-mt-0"
+          category="secondary"
+          :href="policiesPath"
+          data-testid="cancel-button"
+        >
+          {{ __('Cancel') }}
+        </gl-button>
+      </template>
       <gl-button
-        v-if="isEditing"
-        v-gl-modal="'delete-modal'"
+        v-else
         class="gl-mt-5 gl-lg-mt-0"
-        category="secondary"
-        variant="danger"
-        data-testid="delete-policy"
-        :loading="isRemovingPolicy"
-        >{{ s__('SecurityOrchestration|Delete policy') }}</gl-button
+        :href="newPolicyPath"
+        data-testid="back-button"
+        >{{ $options.i18n.BACK_TO_STEP_1_MESSAGE }}</gl-button
       >
-      <gl-button class="gl-mt-5 gl-lg-mt-0" category="secondary" :href="policiesPath">
-        {{ __('Cancel') }}
-      </gl-button>
     </div>
     <gl-modal
       modal-id="delete-modal"
