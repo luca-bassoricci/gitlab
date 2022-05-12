@@ -7,8 +7,8 @@ import {
   GlPagination,
   GlTable,
   GlBadge,
-  GlTooltip,
-  // GlTooltipDirective as GlTooltip,
+  // GlTooltip,
+  GlTooltipDirective,
 } from '@gitlab/ui';
 import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
 import { __ } from '~/locale';
@@ -49,11 +49,11 @@ export default {
     GlBadge,
     TotalTime,
     FormattedStageCount,
-    GlTooltip,
+    // GlTooltip,
   },
-  // directives: {
-  //   GlTooltip,
-  // },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   mixins: [Tracking.mixin()],
   props: {
     selectedStage: {
@@ -144,9 +144,10 @@ export default {
         },
       ].map((field) => ({
         ...field,
-        thAttr: {
-          ref: field.key,
-        },
+        // thAttr: {
+        //   dataTitle: 'blah blaaaah',
+        // },
+        title: 'blah blaaaah',
         sortable: this.sortable,
       }));
     },
@@ -217,11 +218,12 @@ export default {
       @sort-changed="onSort"
     >
       <template v-if="stageCount" #head(end_event)="data">
-        <gl-tooltip :target="() => $refs.end_event">{{ 'This is a title' }}</gl-tooltip>
-        <span>{{ data.label }}</span
-        ><gl-badge class="gl-ml-2" size="sm"
-          ><formatted-stage-count :stage-count="stageCount"
-        /></gl-badge>
+        <div v-gl-tooltip.viewport :title="data.title" class="fakr">
+          <span v-gl-tooltip.viewport :title="data.title">{{ data.label }}</span
+          ><gl-badge class="gl-ml-2" size="sm"
+            ><formatted-stage-count :stage-count="stageCount"
+          /></gl-badge>
+        </div>
       </template>
       <template #head(duration)="data">
         <span data-testid="vsa-stage-header-duration">{{ data.label }}</span>
