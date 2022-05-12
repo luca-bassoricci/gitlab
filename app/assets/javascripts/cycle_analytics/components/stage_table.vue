@@ -7,8 +7,7 @@ import {
   GlPagination,
   GlTable,
   GlBadge,
-  // GlTooltip,
-  GlTooltipDirective,
+  GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
 import { __ } from '~/locale';
@@ -49,10 +48,9 @@ export default {
     GlBadge,
     TotalTime,
     FormattedStageCount,
-    // GlTooltip,
   },
   directives: {
-    GlTooltip: GlTooltipDirective,
+    GlTooltip,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -144,10 +142,6 @@ export default {
         },
       ].map((field) => ({
         ...field,
-        // thAttr: {
-        //   dataTitle: 'blah blaaaah',
-        // },
-        title: 'blah blaaaah',
         sortable: this.sortable,
       }));
     },
@@ -157,12 +151,6 @@ export default {
     nextPage() {
       return this.pagination.hasNextPage ? this.pagination.page + 1 : null;
     },
-  },
-  mounted() {
-    console.log('mounted::refs', this.$refs);
-  },
-  updated() {
-    console.log('updated::refs', this.$refs);
   },
   methods: {
     isMrLink(url = '') {
@@ -218,8 +206,8 @@ export default {
       @sort-changed="onSort"
     >
       <template v-if="stageCount" #head(end_event)="data">
-        <div v-gl-tooltip.viewport :title="data.title" class="fakr">
-          <span v-gl-tooltip.viewport :title="data.title">{{ data.label }}</span
+        <div v-gl-tooltip.viewport :title="'This is a title'">
+          <span>{{ data.label }}</span
           ><gl-badge class="gl-ml-2" size="sm"
             ><formatted-stage-count :stage-count="stageCount"
           /></gl-badge>
