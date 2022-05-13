@@ -645,13 +645,11 @@ class Namespace < ApplicationRecord
   end
 
   def ensure_namespace_details_in_sync
-    if Feature.enabled?(:namespace_details_feature_flag)
-      # create namespace_details when namespace is created
-      build_namespace_details if namespace_details_creation_enabled?
+    # create namespace_details when namespace is created
+    build_namespace_details if namespace_details_creation_enabled?
 
-      # we need to keep namespace and namespace_details in sync if there is one
-      sync_attributes(namespace_details) if sync_namespace_details?
-    end
+    # we need to keep namespace and namespace_details in sync if there is one
+    sync_attributes(namespace_details) if sync_namespace_details?
   end
 
   def namespace_details_creation_enabled?

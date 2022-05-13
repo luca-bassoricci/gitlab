@@ -3123,7 +3123,7 @@ class Project < ApplicationRecord
   end
 
   def sync_namespace_details?
-    Feature.enabled?(:namespace_details_feature_flag) && (changes.keys & %w(description description_html cached_markdown_version)).any? && project_namespace.present? && project_namespace.namespace_details.present?
+    (changes.keys & %w(description description_html cached_markdown_version)).any? && project_namespace.present? && project_namespace.namespace_details.present?
   end
 
   def sync_attributes(project_namespace)

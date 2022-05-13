@@ -30,7 +30,8 @@ class CreateSyncNamespaceDetailsTrigger < Gitlab::Database::Migration[2.0]
           SET
             description = NEW.description,
             description_html = NEW.description_html,
-            cached_markdown_version = NEW.cached_markdown_version
+            cached_markdown_version = NEW.cached_markdown_version,
+            updated_at = NEW.updated_at
           WHERE
             namespace_details.namespace_id = NEW.id;RETURN NULL;
       SQL
