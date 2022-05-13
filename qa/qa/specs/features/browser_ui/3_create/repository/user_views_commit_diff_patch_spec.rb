@@ -43,7 +43,7 @@ module QA
         find('pre').text
       end
 
-      it 'user views raw email patch', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347755' do
+      it 'user views raw email patch', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/362176', type: :investigating, only: { pipeline: :nightly } }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347755' do
         view_commit
 
         Page::Project::Commit::Show.perform(&:select_email_patches)
