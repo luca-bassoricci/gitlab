@@ -115,10 +115,7 @@ export default {
         sortDesc: direction === PAGINATION_SORT_DIRECTION_DESC,
       };
     }
-    return { sort: null, direction: null, sortDesc: null, thElms };
-  },
-  created() {
-    console.log('created::refs', this.$refs.vsaTable);
+    return { sort: null, direction: null, sortDesc: null, thElms: null };
   },
   mounted() {
     console.log('mounted::refs', this.$refs.vsaTable);
@@ -225,65 +222,25 @@ export default {
       <!-- @sort-changed="onSort" -->
       <template v-if="stageCount" #head(end_event)="data">
         <!-- <div
-          v-gl-tooltip="{
-            trigger: 'click hover',
+          v-gl-tooltip.bottomleft="{
+            trigger: 'hover',
             title: 'This is a title',
-            placement: 'right',
-            offset: '0, 150',
             boundary: 'body',
+            container: () => thElms[0],
           }"
         > -->
-        <!-- placement: 'topright',
-            offset: '20, 120', -->
-        <gl-tooltip
-          :target="() => thElms[0]"
-          placement="right"
-          :style="{ position: 'absolute', right: '150px' }"
-          >{{ 'blah blah blah' }}</gl-tooltip
-        >
         <span>{{ data.label }}</span
         ><gl-badge class="gl-ml-2" size="sm"
           ><formatted-stage-count :stage-count="stageCount"
         /></gl-badge>
+        <gl-tooltip :target="() => thElms[0]" placement="top" offset="-300, 50">{{
+          'blah blah blah'
+        }}</gl-tooltip>
         <!-- </div> -->
       </template>
       <template #head(duration)="data">
         <span data-testid="vsa-stage-header-duration">{{ data.label }}</span>
-        <gl-tooltip
-          :target="() => thElms[1]"
-          placement="right"
-          :style="{ position: 'absolute', right: '150px' }"
-          >{{ 'blah blah blah' }}</gl-tooltip
-        >
       </template>
-      <!-- <template #thead-top>
-        <tr>
-          <th
-            v-gl-tooltip="{
-              trigger: 'hover',
-              title: 'This is a crazy thing',
-              placement: 'topright',
-              offset: 0,
-              boundary: 'body',
-            }"
-            aria-sort="ascending"
-          >
-            One
-          </th>
-          <th
-            v-gl-tooltip="{
-              trigger: 'hover',
-              title: 'This is a crazy thing',
-              placement: 'topright',
-              offset: 0,
-              boundary: 'body',
-            }"
-            aria-sort="descending"
-          >
-            Two
-          </th>
-        </tr>
-      </template> -->
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
           <div v-if="item.id" data-testid="vsa-stage-content">
