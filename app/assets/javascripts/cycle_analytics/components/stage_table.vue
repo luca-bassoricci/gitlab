@@ -181,6 +181,11 @@ export default {
       this.$emit('handleUpdatePagination', { sort: sortBy, direction });
       this.track('click_button', { label: `sort_${sortBy}_${direction}` });
     },
+    calcOffset(args) {
+      console.log('calcOffset::args', args);
+      const { placement, reference, popper } = args;
+      console.log(placement, reference, popper);
+    },
   },
 };
 </script>
@@ -206,7 +211,13 @@ export default {
       @sort-changed="onSort"
     >
       <template v-if="stageCount" #head(end_event)="data">
-        <div v-gl-tooltip.viewport :title="'This is a title'">
+        <div
+          v-gl-tooltip="{
+            offset: [250, -50],
+            title: 'This is a title',
+            placement: 'topleft',
+          }"
+        >
           <span>{{ data.label }}</span
           ><gl-badge class="gl-ml-2" size="sm"
             ><formatted-stage-count :stage-count="stageCount"
