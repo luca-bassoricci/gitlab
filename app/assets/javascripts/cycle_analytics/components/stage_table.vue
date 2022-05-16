@@ -7,7 +7,8 @@ import {
   GlPagination,
   GlTable,
   GlBadge,
-  GlTooltipDirective as GlTooltip,
+  // GlTooltipDirective as GlTooltip,
+  GlTooltip,
 } from '@gitlab/ui';
 import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
 import { __ } from '~/locale';
@@ -48,10 +49,11 @@ export default {
     GlBadge,
     TotalTime,
     FormattedStageCount,
-  },
-  directives: {
     GlTooltip,
   },
+  // directives: {
+  //   GlTooltip,
+  // },
   mixins: [Tracking.mixin()],
   props: {
     selectedStage: {
@@ -113,7 +115,16 @@ export default {
         sortDesc: direction === PAGINATION_SORT_DIRECTION_DESC,
       };
     }
-    return { sort: null, direction: null, sortDesc: null };
+    return { sort: null, direction: null, sortDesc: null, thElms };
+  },
+  created() {
+    console.log('created::refs', this.$refs.vsaTable);
+  },
+  mounted() {
+    console.log('mounted::refs', this.$refs.vsaTable);
+    console.log('mounted::refs', this.$refs.vsaTable.$el.querySelectorAll('th'));
+
+    this.thElms = this.$refs.vsaTable.$el.querySelectorAll('th');
   },
   computed: {
     isEmptyStage() {
@@ -200,6 +211,8 @@ export default {
     />
     <gl-table
       v-else
+      ref="vsaTable"
+      head-variant="white"
       stacked="lg"
       show-empty
       :sort-by.sync="sort"
@@ -208,25 +221,69 @@ export default {
       :fields="fields"
       :items="stageEvents"
       :empty-text="emptyStateMessage"
-      @sort-changed="onSort"
     >
+      <!-- @sort-changed="onSort" -->
       <template v-if="stageCount" #head(end_event)="data">
-        <div
+        <!-- <div
           v-gl-tooltip="{
-            offset: [250, -50],
+            trigger: 'click hover',
             title: 'This is a title',
-            placement: 'topleft',
+            placement: 'right',
+            offset: '0, 150',
+            boundary: 'body',
           }"
+        > -->
+        <!-- placement: 'topright',
+            offset: '20, 120', -->
+        <gl-tooltip
+          :target="() => thElms[0]"
+          placement="right"
+          :style="{ position: 'absolute', right: '150px' }"
+          >{{ 'blah blah blah' }}</gl-tooltip
         >
-          <span>{{ data.label }}</span
-          ><gl-badge class="gl-ml-2" size="sm"
-            ><formatted-stage-count :stage-count="stageCount"
-          /></gl-badge>
-        </div>
+        <span>{{ data.label }}</span
+        ><gl-badge class="gl-ml-2" size="sm"
+          ><formatted-stage-count :stage-count="stageCount"
+        /></gl-badge>
+        <!-- </div> -->
       </template>
       <template #head(duration)="data">
         <span data-testid="vsa-stage-header-duration">{{ data.label }}</span>
+        <gl-tooltip
+          :target="() => thElms[1]"
+          placement="right"
+          :style="{ position: 'absolute', right: '150px' }"
+          >{{ 'blah blah blah' }}</gl-tooltip
+        >
       </template>
+      <!-- <template #thead-top>
+        <tr>
+          <th
+            v-gl-tooltip="{
+              trigger: 'hover',
+              title: 'This is a crazy thing',
+              placement: 'topright',
+              offset: 0,
+              boundary: 'body',
+            }"
+            aria-sort="ascending"
+          >
+            One
+          </th>
+          <th
+            v-gl-tooltip="{
+              trigger: 'hover',
+              title: 'This is a crazy thing',
+              placement: 'topright',
+              offset: 0,
+              boundary: 'body',
+            }"
+            aria-sort="descending"
+          >
+            Two
+          </th>
+        </tr>
+      </template> -->
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
           <div v-if="item.id" data-testid="vsa-stage-content">
