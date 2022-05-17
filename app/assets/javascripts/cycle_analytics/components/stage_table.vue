@@ -37,6 +37,21 @@ const WORKFLOW_COLUMN_TITLES = {
 const fullProjectPath = ({ namespaceFullPath = '', projectPath }) =>
   namespaceFullPath.split('/').length > 1 ? `${namespaceFullPath}/${projectPath}` : projectPath;
 
+const SORTING_DESCRIPTIONS = {
+  alpha: {
+    desc: 'a→z',
+    asc: 'z→a',
+  },
+  num: {
+    desc: 'low→high',
+    asc: 'high→low',
+  },
+  time: {
+    desc: 'new→old',
+    asc: 'old→new',
+  },
+};
+
 export default {
   name: 'StageTable',
   components: {
@@ -117,12 +132,6 @@ export default {
     }
     return { sort: null, direction: null, sortDesc: null, thElms: null };
   },
-  mounted() {
-    console.log('mounted::refs', this.$refs.vsaTable);
-    console.log('mounted::refs', this.$refs.vsaTable.$el.querySelectorAll('th'));
-
-    this.thElms = this.$refs.vsaTable.$el.querySelectorAll('th');
-  },
   computed: {
     isEmptyStage() {
       return !this.selectedStage || !this.stageEvents.length;
@@ -147,6 +156,7 @@ export default {
           key: PAGINATION_SORT_FIELD_DURATION,
           label: __('Time'),
           thClass: 'gl-w-half',
+          sortingTooltip: SORTING_DESCRIPTIONS.time.desc,
         },
       ].map((field) => ({
         ...field,
@@ -159,6 +169,11 @@ export default {
     nextPage() {
       return this.pagination.hasNextPage ? this.pagination.page + 1 : null;
     },
+  },
+  updated() {
+    if (this.$refs.vsaTable && !this.thElms) {
+      this.thElms = this.$refs.vsaTable.$el.querySelectorAll('th');
+    }
   },
   methods: {
     isMrLink(url = '') {
@@ -189,10 +204,11 @@ export default {
       this.$emit('handleUpdatePagination', { sort: sortBy, direction });
       this.track('click_button', { label: `sort_${sortBy}_${direction}` });
     },
-    calcOffset(args) {
-      console.log('calcOffset::args', args);
-      const { placement, reference, popper } = args;
-      console.log(placement, reference, popper);
+    findTooltipTarget(index) {
+      if (this.thElms) {
+        return this.thElms[index];
+      }
+      return null;
     },
   },
 };
@@ -218,28 +234,22 @@ export default {
       :fields="fields"
       :items="stageEvents"
       :empty-text="emptyStateMessage"
+      @sort-changed="onSort"
     >
-      <!-- @sort-changed="onSort" -->
       <template v-if="stageCount" #head(end_event)="data">
-        <!-- <div
-          v-gl-tooltip.bottomleft="{
-            trigger: 'hover',
-            title: 'This is a title',
-            boundary: 'body',
-            container: () => thElms[0],
-          }"
-        > -->
         <span>{{ data.label }}</span
         ><gl-badge class="gl-ml-2" size="sm"
           ><formatted-stage-count :stage-count="stageCount"
         /></gl-badge>
-        <gl-tooltip :target="() => thElms[0]" placement="top" offset="-300, 50">{{
-          'blah blah blah'
+        <gl-tooltip v-if="data.field && data.field.sortable" :target="() => findTooltipTarget(0)">{{
+          `Sort ${data.field.sortingTooltip}`
         }}</gl-tooltip>
-        <!-- </div> -->
       </template>
       <template #head(duration)="data">
         <span data-testid="vsa-stage-header-duration">{{ data.label }}</span>
+        <gl-tooltip v-if="data.field && data.field.sortable" :target="() => findTooltipTarget(1)">{{
+          `Sort ${data.field.sortingTooltip}`
+        }}</gl-tooltip>
       </template>
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
