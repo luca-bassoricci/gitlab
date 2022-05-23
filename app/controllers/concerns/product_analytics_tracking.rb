@@ -20,8 +20,16 @@ module ProductAnalyticsTracking
   def route_events_to(destinations, name, &block)
     track_unique_redis_hll_event(name, &block) if destinations.include?(:redis_hll)
 
-    if destinations.include?(:snowplow) && Feature.enabled?(:route_hll_to_snowplow, tracking_namespace_source)
+    if destinations.include?(:snowplow) && event_enabled?(name)
       Gitlab::Tracking.event(self.class.to_s, name, namespace: tracking_namespace_source, user: current_user)
     end
+  end
+
+  def event_enabled?(event)
+    events_to_ff = {
+      g_analytics_valuestream: :route_hll_to_snowplow,
+      users_viewing_analytics_group_devops_adoption: :route_hll_to_snowplow_phase2
+    }
+    Feature.enabled?(events_to_ff[event.to_sym], tracking_namespace_source)
   end
 end
