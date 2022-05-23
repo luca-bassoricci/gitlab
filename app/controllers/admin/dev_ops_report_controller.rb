@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 class Admin::DevOpsReportController < Admin::ApplicationController
-  include RedisTracking
+  include ProductAnalyticsTracking
 
   helper_method :show_adoption?
 
-  track_redis_hll_event :show, name: 'i_analytics_dev_ops_score', if: -> { should_track_devops_score? }
+  # blocked by https://gitlab.com/gitlab-org/gitlab/-/issues/362274#note_955902819
+  # track_event :show, name: 'i_analytics_dev_ops_score', conditions: -> { should_track_devops_score? },
+  #   destinations: [:redis_hll, :snowplow]
 
   feature_category :devops_reports
 
