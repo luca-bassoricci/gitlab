@@ -14,7 +14,7 @@ RSpec.describe Projects::Analytics::MergeRequestAnalyticsController do
     stub_licensed_features(feature_name => true)
   end
 
-  describe 'GET #show' do
+  describe 'GET #show', :snowplow do
     subject { get :show, params: { namespace_id: group, project_id: project } }
 
     before do
@@ -26,6 +26,29 @@ RSpec.describe Projects::Analytics::MergeRequestAnalyticsController do
     it_behaves_like 'tracking unique visits', :show do
       let(:request_params) { { namespace_id: group, project_id: project } }
       let(:target_id) { 'p_analytics_merge_request' }
+    end
+
+    it 'tracks Snowplow event' do
+      subject
+
+      expect_snowplow_event(
+        category: 'Projects::Analytics::MergeRequestAnalyticsController',
+        action: 'p_analytics_merge_request',
+        namespace: group,
+        user: current_user
+      )
+    end
+
+    context 'when FF route_hll_to_snowplow_phase2 is disabled' do
+      before do
+        stub_feature_flags(route_hll_to_snowplow_phase2: false)
+      end
+
+      it 'doesnt track Snowplow event' do
+        subject
+
+        expect_no_snowplow_event
+      end
     end
 
     context 'when license is missing' do

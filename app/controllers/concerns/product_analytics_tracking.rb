@@ -28,7 +28,9 @@ module ProductAnalyticsTracking
   def event_enabled?(event)
     events_to_ff = {
       g_analytics_valuestream: :route_hll_to_snowplow,
-      users_viewing_analytics_group_devops_adoption: :route_hll_to_snowplow_phase2
+
+      users_viewing_analytics_group_devops_adoption: :route_hll_to_snowplow_phase2,
+      p_analytics_merge_request: :route_hll_to_snowplow_phase2
     }
     Feature.enabled?(events_to_ff[event.to_sym], tracking_namespace_source)
   end
