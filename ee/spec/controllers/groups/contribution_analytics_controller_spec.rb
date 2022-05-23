@@ -211,7 +211,7 @@ RSpec.describe Groups::ContributionAnalyticsController do
       end
     end
 
-    describe 'GET #show' do
+    describe 'GET #show', :snowplow do
       subject { get :show, params: { group_id: group.to_param } }
 
       it_behaves_like 'disabled when using an external authorization service'
@@ -219,6 +219,29 @@ RSpec.describe Groups::ContributionAnalyticsController do
       it_behaves_like 'tracking unique visits', :show do
         let(:request_params) { { group_id: group.to_param } }
         let(:target_id) { 'g_analytics_contribution' }
+      end
+
+      it 'tracks devops_adoption usage Snowplow event' do
+        subject
+
+        expect_snowplow_event(
+          category: described_class.to_s,
+          action: 'g_analytics_contribution',
+          namespace: group,
+          user: user
+        )
+      end
+
+      context 'when FF route_hll_to_snowplow_phase2 is disable' do
+        before do
+          stub_feature_flags(route_hll_to_snowplow_phase2: false)
+        end
+
+        it 'doesnt track Snowplow event' do
+          subject
+
+          expect_no_snowplow_event
+        end
       end
     end
   end

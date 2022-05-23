@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 class Groups::ContributionAnalyticsController < Groups::ApplicationController
-  include RedisTracking
+  include ProductAnalyticsTracking
 
   before_action :group
   before_action :authorize_read_contribution_analytics!
 
   layout 'group'
 
-  track_redis_hll_event :show, name: 'g_analytics_contribution'
+  track_event :show, name: 'g_analytics_contribution', destinations: [:redis_hll, :snowplow]
 
   feature_category :value_stream_management
 
@@ -47,4 +47,6 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
   def user_has_access_to_feature?
     can?(current_user, :read_group_contribution_analytics, @group)
   end
+
+  alias_method :tracking_namespace_source, :group
 end
