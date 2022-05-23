@@ -41,7 +41,7 @@ RSpec.describe Groups::Analytics::DevopsAdoptionController do
       end
     end
 
-    context 'when the user is a group maintainer' do
+    context 'when the user is a group maintainer', :snowplow do
       before do
         group.add_maintainer(current_user)
       end
@@ -64,11 +64,34 @@ RSpec.describe Groups::Analytics::DevopsAdoptionController do
         end
       end
 
-      it 'tracks devops_adoption usage event' do
+      it 'tracks devops_adoption usage Snowplow event' do
+        subject
+
+        expect_snowplow_event(
+          category: 'Groups::Analytics::DevopsAdoptionController',
+          action: 'users_viewing_analytics_group_devops_adoption',
+          namespace: group,
+          user: current_user
+        )
+      end
+
+      it 'tracks devops_adoption usage Redis event' do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter)
           .to receive(:track_event).with('users_viewing_analytics_group_devops_adoption', values: kind_of(String))
 
         subject
+      end
+
+      context 'when FF route_hll_to_snowplow_phase2 is disable' do
+        before do
+          stub_feature_flags(route_hll_to_snowplow_phase2: false)
+        end
+
+        it 'doesnt track Snowplow event' do
+          subject
+
+          expect_no_snowplow_event
+        end
       end
     end
   end
