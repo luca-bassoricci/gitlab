@@ -2,12 +2,12 @@
 
 class Groups::InsightsController < Groups::ApplicationController
   include InsightsActions
-  include RedisTracking
+  include ProductAnalyticsTracking
 
   before_action :authorize_read_group!
   before_action :authorize_read_insights_config_project!
 
-  track_redis_hll_event :show, name: 'g_analytics_insights'
+  track_event :show, name: 'g_analytics_insights', destinations: [:redis_hll, :snowplow]
 
   feature_category :value_stream_management
 
@@ -28,4 +28,6 @@ class Groups::InsightsController < Groups::ApplicationController
   def insights_entity
     group
   end
+
+  alias_method :tracking_namespace_source, :insights_entity
 end

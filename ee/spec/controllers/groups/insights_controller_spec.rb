@@ -119,10 +119,33 @@ RSpec.describe Groups::InsightsController do
         it_behaves_like '200 status'
       end
 
-      describe 'GET #show' do
+      describe 'GET #show', :snowplow do
         it_behaves_like 'tracking unique visits', :show do
           let(:request_params) { params.merge(group_id: parent_group.to_param) }
           let(:target_id) { 'g_analytics_insights' }
+        end
+
+        it 'tracks devops_adoption usage Snowplow event' do
+          subject
+
+          expect_snowplow_event(
+            category: described_class.to_s,
+            action: 'g_analytics_insights',
+            namespace: parent_group,
+            user: user
+          )
+        end
+
+        context 'when FF route_hll_to_snowplow_phase2 is disable' do
+          before do
+            stub_feature_flags(route_hll_to_snowplow_phase2: false)
+          end
+
+          it 'doesnt track Snowplow event' do
+            subject
+
+            expect_no_snowplow_event
+          end
         end
       end
     end
