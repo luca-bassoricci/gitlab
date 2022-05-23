@@ -9,7 +9,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'user rebases source branch of merge request', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347735' do
+      it 'user rebases source branch of merge request', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/362994', type: :investigating, only: { pipeline: :nightly } }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347735' do
         merge_request.project.visit!
 
         Page::Project::Menu.perform(&:go_to_general_settings)
