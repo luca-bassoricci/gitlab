@@ -57,7 +57,7 @@ module CachingArrayResolver
       if keys.size == 1
         # We can avoid the union entirely.
         k = keys.first
-        limit(query_for(k)).each { |item| found(loader, k, item) }
+        limit(query_for(k).preload(preload)).each { |item| found(loader, k, item) }
       else
         queries = keys.map { |key| query_for(key) }
 

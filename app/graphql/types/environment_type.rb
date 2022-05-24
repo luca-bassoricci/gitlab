@@ -12,6 +12,9 @@ module Types
     field :name, GraphQL::Types::String, null: false,
           description: 'Human-readable name of the environment.'
 
+    field :slug, GraphQL::Types::String, null: false,
+          description: 'URL slug of the environment.'
+
     field :id, GraphQL::Types::ID, null: false,
           description: 'ID of the environment.'
 
@@ -20,6 +23,9 @@ module Types
 
     field :path, GraphQL::Types::String, null: false,
           description: 'Path to the environment.'
+
+    field :tier, Types::DeploymentTierEnum, null: false,
+          description: 'Tier of the environment.'
 
     field :metrics_dashboard, Types::Metrics::DashboardType, null: true,
           description: 'Metrics dashboard schema for the environment.',

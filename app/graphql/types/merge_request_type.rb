@@ -202,6 +202,7 @@ module Types
           description: 'Indicates if squash on merge is enabled.'
     field :timelogs, Types::TimelogType.connection_type, null: false,
           description: 'Timelogs on the merge request.'
+    field :deployments, resolver: MergeRequests::DeploymentsResolver
 
     markdown_field :title_html, null: true
     markdown_field :description_html, null: true
