@@ -2,7 +2,8 @@
 class CreateSyncNamespaceDetailsTrigger < Gitlab::Database::Migration[2.0]
   include Gitlab::Database::SchemaHelpers
 
-  TRIGGER_NAME = 'trigger_update_details_on_namespace_update'
+  UPDATE_TRIGGER_NAME = 'trigger_update_details_on_namespace_update'
+  INSERT_TRIGGER_NAME = 'trigger_update_details_on_namespace_insert'
   FUNCTION_NAME = 'update_namespace_details_from_namespaces'
 
   def up
@@ -38,7 +39,7 @@ class CreateSyncNamespaceDetailsTrigger < Gitlab::Database::Migration[2.0]
     end
 
     execute(<<~SQL)
-        CREATE TRIGGER #{TRIGGER_NAME}
+        CREATE TRIGGER #{UPDATE_TRIGGER_NAME}
         AFTER UPDATE ON namespaces
         FOR EACH ROW
         WHEN (
@@ -48,10 +49,18 @@ class CreateSyncNamespaceDetailsTrigger < Gitlab::Database::Migration[2.0]
         )
         EXECUTE PROCEDURE #{FUNCTION_NAME}();
     SQL
+
+    execute(<<~SQL)
+        CREATE TRIGGER #{INSERT_TRIGGER_NAME}
+        AFTER INSERT ON namespaces
+        FOR EACH ROW
+        EXECUTE PROCEDURE #{FUNCTION_NAME}();
+    SQL
   end
 
   def down
-    drop_trigger(:namespaces, TRIGGER_NAME)
+    drop_trigger(:namespaces, UPDATE_TRIGGER_NAME)
+    drop_trigger(:namespaces, INSERT_TRIGGER_NAME)
     drop_function(FUNCTION_NAME)
   end
 end

@@ -119,6 +119,7 @@ class Namespace < ApplicationRecord
            to: :namespace_settings, allow_nil: true
 
   after_save :schedule_sync_event_worker, if: -> { saved_change_to_id? || saved_change_to_parent_id? }
+  after_save :reload_namespace_details
 
   after_commit :refresh_access_of_projects_invited_groups, on: :update, if: -> { previous_changes.key?('share_with_group_lock') }
 
@@ -644,26 +645,10 @@ class Namespace < ApplicationRecord
     end
   end
 
-  def ensure_namespace_details_in_sync
-    # create namespace_details when namespace is created
-    build_namespace_details if namespace_details_creation_enabled?
+  def reload_namespace_details
+    return unless (changes.keys && %w(description description_html cached_markdown_version).any?) && namespace_details.present?
 
-    # we need to keep namespace and namespace_details in sync if there is one
-    sync_attributes(namespace_details) if sync_namespace_details?
-  end
-
-  def namespace_details_creation_enabled?
-    new_record? && !namespace_details
-  end
-
-  def sync_namespace_details?
-    (changes.keys & %w(description description_html cached_markdown_version)).any? && namespace_details.present?
-  end
-
-  def sync_attributes(namespace_details)
-    namespace_details.description = description
-    namespace_details.description_html = description_html
-    namespace_details.cached_markdown_version = cached_markdown_version
+    namespace_details.reload
   end
 
   def sync_share_with_group_lock_with_parent

@@ -240,7 +240,8 @@ UPDATE
 SET
   description = NEW.description,
   description_html = NEW.description_html,
-  cached_markdown_version = NEW.cached_markdown_version
+  cached_markdown_version = NEW.cached_markdown_version,
+  updated_at = NEW.updated_at
 WHERE
   namespace_details.namespace_id = NEW.id;RETURN NULL;
 
@@ -263,26 +264,6 @@ RETURN NULL;
 END
 $$;
 
-CREATE TABLE audit_events (
-    id bigint NOT NULL,
-    author_id integer NOT NULL,
-    entity_id integer NOT NULL,
-    entity_type character varying NOT NULL,
-    details text,
-    ip_address inet,
-    author_name text,
-    entity_path text,
-    target_details text,
-    created_at timestamp without time zone NOT NULL,
-    target_type text,
-    target_id bigint,
-    CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
-    CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
-    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
-    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
-)
-PARTITION BY RANGE (created_at);
-
 CREATE TABLE batched_background_migration_job_transition_logs (
     id bigint NOT NULL,
     batched_background_migration_job_id bigint NOT NULL,
@@ -297,26 +278,6 @@ CREATE TABLE batched_background_migration_job_transition_logs (
 )
 PARTITION BY RANGE (created_at);
 
-CREATE TABLE incident_management_pending_alert_escalations (
-    id bigint NOT NULL,
-    rule_id bigint NOT NULL,
-    alert_id bigint NOT NULL,
-    process_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
-)
-PARTITION BY RANGE (process_at);
-
-CREATE TABLE incident_management_pending_issue_escalations (
-    id bigint NOT NULL,
-    rule_id bigint NOT NULL,
-    issue_id bigint NOT NULL,
-    process_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
-)
-PARTITION BY RANGE (process_at);
-
 CREATE TABLE loose_foreign_keys_deleted_records (
     id bigint NOT NULL,
     partition bigint DEFAULT 1 NOT NULL,
@@ -329,36 +290,6 @@ CREATE TABLE loose_foreign_keys_deleted_records (
     CONSTRAINT check_1a541f3235 CHECK ((char_length(fully_qualified_table_name) <= 150))
 )
 PARTITION BY LIST (partition);
-
-CREATE TABLE verification_codes (
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    visitor_id_code text NOT NULL,
-    code text NOT NULL,
-    phone text NOT NULL,
-    CONSTRAINT check_9b84e6aaff CHECK ((char_length(code) <= 8)),
-    CONSTRAINT check_ccc542256b CHECK ((char_length(visitor_id_code) <= 64)),
-    CONSTRAINT check_f5684c195b CHECK ((char_length(phone) <= 50))
-)
-PARTITION BY RANGE (created_at);
-
-COMMENT ON TABLE verification_codes IS 'JiHu-specific table';
-
-CREATE TABLE web_hook_logs (
-    id bigint NOT NULL,
-    web_hook_id integer NOT NULL,
-    trigger character varying,
-    url character varying,
-    request_headers text,
-    request_data text,
-    response_headers text,
-    response_body text,
-    response_status character varying,
-    execution_duration double precision,
-    internal_error_message character varying,
-    updated_at timestamp without time zone NOT NULL,
-    created_at timestamp without time zone NOT NULL
-)
-PARTITION BY RANGE (created_at);
 
 CREATE TABLE analytics_cycle_analytics_issue_stage_events (
     stage_event_hash_id bigint NOT NULL,
@@ -11649,6 +11580,26 @@ CREATE SEQUENCE atlassian_identities_user_id_seq
 
 ALTER SEQUENCE atlassian_identities_user_id_seq OWNED BY atlassian_identities.user_id;
 
+CREATE TABLE audit_events (
+    id bigint NOT NULL,
+    author_id integer NOT NULL,
+    entity_id integer NOT NULL,
+    entity_type character varying NOT NULL,
+    details text,
+    ip_address inet,
+    author_name text,
+    entity_path text,
+    target_details text,
+    created_at timestamp without time zone NOT NULL,
+    target_type text,
+    target_id bigint,
+    CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
+    CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
+    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
+    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
+)
+PARTITION BY RANGE (created_at);
+
 CREATE TABLE audit_events_external_audit_event_destinations (
     id bigint NOT NULL,
     namespace_id bigint NOT NULL,
@@ -16154,6 +16105,16 @@ CREATE SEQUENCE incident_management_oncall_shifts_id_seq
 
 ALTER SEQUENCE incident_management_oncall_shifts_id_seq OWNED BY incident_management_oncall_shifts.id;
 
+CREATE TABLE incident_management_pending_alert_escalations (
+    id bigint NOT NULL,
+    rule_id bigint NOT NULL,
+    alert_id bigint NOT NULL,
+    process_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+)
+PARTITION BY RANGE (process_at);
+
 CREATE SEQUENCE incident_management_pending_alert_escalations_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -16162,6 +16123,16 @@ CREATE SEQUENCE incident_management_pending_alert_escalations_id_seq
     CACHE 1;
 
 ALTER SEQUENCE incident_management_pending_alert_escalations_id_seq OWNED BY incident_management_pending_alert_escalations.id;
+
+CREATE TABLE incident_management_pending_issue_escalations (
+    id bigint NOT NULL,
+    rule_id bigint NOT NULL,
+    issue_id bigint NOT NULL,
+    process_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+)
+PARTITION BY RANGE (process_at);
 
 CREATE SEQUENCE incident_management_pending_issue_escalations_id_seq
     START WITH 1
@@ -17464,12 +17435,12 @@ CREATE TABLE namespace_ci_cd_settings (
 );
 
 CREATE TABLE namespace_details (
+    namespace_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    cached_markdown_version integer,
     description text,
     description_html text,
-    cached_markdown_version integer,
-    namespace_id bigint NOT NULL,
     CONSTRAINT check_2df620eaf6 CHECK ((char_length(description_html) <= 255)),
     CONSTRAINT check_2f563eec0f CHECK ((char_length(description) <= 255))
 );
@@ -21785,6 +21756,19 @@ CREATE SEQUENCE users_statistics_id_seq
 
 ALTER SEQUENCE users_statistics_id_seq OWNED BY users_statistics.id;
 
+CREATE TABLE verification_codes (
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    visitor_id_code text NOT NULL,
+    code text NOT NULL,
+    phone text NOT NULL,
+    CONSTRAINT check_9b84e6aaff CHECK ((char_length(code) <= 8)),
+    CONSTRAINT check_ccc542256b CHECK ((char_length(visitor_id_code) <= 64)),
+    CONSTRAINT check_f5684c195b CHECK ((char_length(phone) <= 50))
+)
+PARTITION BY RANGE (created_at);
+
+COMMENT ON TABLE verification_codes IS 'JiHu-specific table';
+
 CREATE TABLE vulnerabilities (
     id bigint NOT NULL,
     milestone_id bigint,
@@ -22266,6 +22250,23 @@ CREATE SEQUENCE vulnerability_user_mentions_id_seq
     CACHE 1;
 
 ALTER SEQUENCE vulnerability_user_mentions_id_seq OWNED BY vulnerability_user_mentions.id;
+
+CREATE TABLE web_hook_logs (
+    id bigint NOT NULL,
+    web_hook_id integer NOT NULL,
+    trigger character varying,
+    url character varying,
+    request_headers text,
+    request_data text,
+    response_headers text,
+    response_body text,
+    response_status character varying,
+    execution_duration double precision,
+    internal_error_message character varying,
+    updated_at timestamp without time zone NOT NULL,
+    created_at timestamp without time zone NOT NULL
+)
+PARTITION BY RANGE (created_at);
 
 CREATE SEQUENCE web_hook_logs_id_seq
     START WITH 1
@@ -31357,6 +31358,8 @@ CREATE TRIGGER trigger_namespaces_parent_id_on_update AFTER UPDATE ON namespaces
 CREATE TRIGGER trigger_projects_parent_id_on_insert AFTER INSERT ON projects FOR EACH ROW EXECUTE FUNCTION insert_projects_sync_event();
 
 CREATE TRIGGER trigger_projects_parent_id_on_update AFTER UPDATE ON projects FOR EACH ROW WHEN ((old.namespace_id IS DISTINCT FROM new.namespace_id)) EXECUTE FUNCTION insert_projects_sync_event();
+
+CREATE TRIGGER trigger_update_details_on_namespace_insert AFTER INSERT ON namespaces FOR EACH ROW EXECUTE FUNCTION update_namespace_details_from_namespaces();
 
 CREATE TRIGGER trigger_update_details_on_namespace_update AFTER UPDATE ON namespaces FOR EACH ROW WHEN ((((old.description)::text IS DISTINCT FROM (new.description)::text) OR (old.description_html IS DISTINCT FROM new.description_html) OR (old.cached_markdown_version IS DISTINCT FROM new.cached_markdown_version))) EXECUTE FUNCTION update_namespace_details_from_namespaces();
 
