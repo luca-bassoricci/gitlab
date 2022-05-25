@@ -16,6 +16,16 @@ import { isString } from 'lodash';
 import stringHash from 'string-hash';
 import { v4 } from 'uuid';
 
+const getRandomUUIDFunction = () => window.crypto.randomUUID.bind(window.crypto);
+
+function arrayOf(length) {
+  return {
+    using(generator) {
+      return Array(length).fill(0).map(generator);
+    },
+  };
+}
+
 function getSeed(seeds) {
   return seeds.reduce((seedling, seed, i) => {
     let thisSeed = 0;
@@ -36,7 +46,9 @@ function getPseudoRandomNumberGenerator(...seeds) {
   if (seeds.length) {
     seedNumber = getSeed(seeds);
   } else {
-    seedNumber = Math.floor(Math.random() * 10 ** 15);
+    throw new Error(
+      'Seeding the random number generator requires initial seed values' /* eslint-disable-line @gitlab/require-i18n-strings */,
+    );
   }
 
   return new MersenneTwister(seedNumber);
@@ -57,6 +69,26 @@ function randomValuesForUuid(prng) {
   return randomValues;
 }
 
+function generate({ version, seeds, count = 1 }) {
+  const unimplemented = (v, t) => {
+    throw new Error(`${t} v${v} uuids are not yet implemented`);
+  };
+  const versions = {
+    4: {
+      random: () => arrayOf(count).using(getRandomUUIDFunction()),
+      seeded: ({ seeds: seedValues }) => {
+        const rng = getPseudoRandomNumberGenerator(...seedValues);
+
+        return arrayOf(count).using(() => v4({ random: randomValuesForUuid(rng) }));
+      },
+    },
+  };
+  const type = seeds.length ? 'seeded' : 'random';
+  const generator = versions[version]?.[type] ?? (() => unimplemented(version, type));
+
+  return generator({ seeds });
+}
+
 /**
  * Get an array of UUIDv4s
  * @param {Object} [options={}]
@@ -65,12 +97,7 @@ function randomValuesForUuid(prng) {
  * @returns {UUIDv4[]} An array of UUIDv4s
  */
 export function uuids({ seeds = [], count = 1 } = {}) {
-  const rng = getPseudoRandomNumberGenerator(...seeds);
-  return (
-    // Create an array the same size as the number of UUIDs requested
-    Array(count)
-      .fill(0)
-      // Replace each slot in the array with a UUID which needs 16 (pseudo)random values to generate
-      .map(() => v4({ random: randomValuesForUuid(rng) }))
-  );
+  const version = 4; // The only one we handle right now; also the only one the browser provides for free
+
+  return generate({ version, seeds, count });
 }

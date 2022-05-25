@@ -55,11 +55,17 @@ describe('UUIDs Util', () => {
     );
 
     describe('unseeded UUID randomness', () => {
-      const nonRandom = Array(6)
-        .fill(0)
-        .map((_, i) => uuids({ seeds: [i] })[0]);
-      const random = uuids({ count: 6 });
-      const moreRandom = uuids({ count: 6 });
+      let nonRandom;
+      let random;
+      let moreRandom;
+
+      beforeAll(() => {
+        nonRandom = Array(6)
+          .fill(0)
+          .map((_, i) => uuids({ seeds: [i] })[0]);
+        random = uuids({ count: 6 });
+        moreRandom = uuids({ count: 6 });
+      });
 
       it('is different from a seeded result', () => {
         random.forEach((id, i) => {
