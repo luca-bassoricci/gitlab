@@ -1,4 +1,5 @@
 /* Common setup for both unit and integration test environments */
+import crypto from 'crypto';
 import { config as testUtilsConfig } from '@vue/test-utils';
 import * as jqueryMatchers from 'custom-jquery-matchers';
 import Vue from 'vue';
@@ -68,6 +69,9 @@ Object.assign(global, {
   },
   cancelIdleCallback(id) {
     clearTimeout(id);
+  },
+  crypto: {
+    randomUUID: crypto.webcrypto.randomUUID,
   },
 });
 
