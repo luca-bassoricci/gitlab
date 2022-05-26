@@ -195,6 +195,51 @@ field populated.
 
 ![Incident alert details](img/incident_alert_details_v13_4.png)
 
+### Timeline events
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/344059) in GitLab 15.1.
+
+Incident timelines are an important part of record keeping for incidents.
+They give a high-level overview, to executives and external viewers, of what happened during the incident,
+and the steps that were taken for it to be resolved.
+You can add timeline events in the **Timeline** tab:
+
+![Incident timeline event empty tab](img/empty_timeline_tab.png)
+
+#### Creating timeline events manually
+
+Incident timeline events can be created manually using the timeline event form.
+You can select the date of the event from the date selector, input the time in UTC,
+add timeline text, and click on **Save** button:
+
+![Incident timeline event form](img/timeline_event_form.png)
+
+You can format the timeline text using `Bold`, `Italic`, `code`, and `links` formatting options.
+
+If you would like to add another event, you can do so by clicking the
+**Add new timeline event** button or by clicking on **Save and add another event**
+while adding the previous event:
+
+![Incident timeline event second form](img/second_timeline_event_form.png)
+
+#### List timeline events
+
+Incident timeline events are listed in ascending order of the date and time.
+They are grouped with dates and are listed in ascending order of the time when they occured:
+
+![Incident timeline events list](img/multiple_events.png)
+
+#### Deleting timeline events
+
+Incident timeline events can be deleted by using the option in the menu.
+Click on ellipsis to see the menu:
+
+![Incident timeline events delete menu](img/delete_events_1.png)
+
+Once clicked you will be asked for confirmation to delete the timeline event:
+
+![Incident timeline events delete confirm](img/delete_events_2.png)
+
 ### Recent updates view **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227836) in GitLab 13.5.
