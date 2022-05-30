@@ -21,7 +21,7 @@ RSpec.describe SystemCheck::App::SearchCheck do
     context 'opensearch' do
       it 'returns `opensearch`' do
         allow(described_class).to receive(:info).and_return({
-          'distribution' => 'opensearch'
+          'version' => { 'distribution' => 'opensearch' }
         })
         expect(described_class.distribution).to eq('opensearch')
       end
@@ -90,7 +90,7 @@ RSpec.describe SystemCheck::App::SearchCheck do
         info = { 'version' => { 'number' => version } }
 
         # Only opensearch includes the distribution key
-        info['distribution'] = 'opensearch' if distribution == 'opensearch'
+        info['version']['distribution'] = 'opensearch' if distribution == 'opensearch'
 
         allow(described_class).to receive(:info).and_return(info)
       end

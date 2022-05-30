@@ -13,7 +13,7 @@ module SystemCheck
       end
 
       def self.distribution
-        info.fetch('distribution', 'elasticsearch')
+        info.fetch('version', {}).fetch('distribution', 'elasticsearch')
       end
 
       def self.current_version
