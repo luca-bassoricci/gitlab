@@ -125,7 +125,7 @@ class GroupSeeder
       name: FFaker::Name.name,
       email: FFaker::Internet.email,
       confirmed_at: DateTime.now,
-      password: Devise.friendly_token
+      password: "#{::Devise.friendly_token}_1aA"
     )
   end
 

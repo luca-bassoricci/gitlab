@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe TrialRegistrationsController do
+  include PasswordComplexityHelper
+
   let(:com) { true }
 
   before do
@@ -82,7 +84,7 @@ RSpec.describe TrialRegistrationsController do
         last_name: 'Doe',
         email: 'johnd2019@local.dev',
         username: 'johnd',
-        password: 'abcd1234'
+        password: random_complex_password
       }
     end
 

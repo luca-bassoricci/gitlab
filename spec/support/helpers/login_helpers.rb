@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 require_relative 'devise_helpers'
+require_relative 'password_complexity_helper'
 
 module LoginHelpers
   include DeviseHelpers
+  include PasswordComplexityHelper
 
   # Overriding Devise::Test::IntegrationHelpers#sign_in to store @current_user
   # since we may need it in LiveDebugger#live_debug.
@@ -96,7 +98,7 @@ module LoginHelpers
     visit new_user_session_path
 
     fill_in "user_login", with: user.email
-    fill_in "user_password", with: (password || "12345678")
+    fill_in "user_password", with: (password || user.password || random_complex_password)
     check 'user_remember_me' if remember
 
     find('[data-testid="sign-in-button"]:enabled').click

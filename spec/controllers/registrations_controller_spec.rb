@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe RegistrationsController do
   include TermsHelper
+  include PasswordComplexityHelper
 
   before do
     stub_application_setting(require_admin_approval_after_user_signup: false)
@@ -25,7 +26,7 @@ RSpec.describe RegistrationsController do
     end
 
     let_it_be(:base_user_params) do
-      { first_name: 'first', last_name: 'last', username: 'new_username', email: 'new@user.com', password: 'Any_password' }
+      { first_name: 'first', last_name: 'last', username: 'new_username', email: 'new@user.com', password: random_complex_password }
     end
 
     let_it_be(:user_params) { { user: base_user_params } }
@@ -222,7 +223,7 @@ RSpec.describe RegistrationsController do
         context 'when the registration fails' do
           let_it_be(:member) { create(:project_member, :invited) }
           let_it_be(:missing_user_params) do
-            { username: '', email: member.invite_email, password: 'Any_password' }
+            { username: '', email: member.invite_email, password: random_complex_password }
           end
 
           let_it_be(:user_params) { { user: missing_user_params } }
@@ -535,7 +536,7 @@ RSpec.describe RegistrationsController do
       end
 
       it 'succeeds if password is confirmed' do
-        post :destroy, params: { password: '12345678' }
+        post :destroy, params: { password: user.password }
 
         expect_success
       end
@@ -576,7 +577,7 @@ RSpec.describe RegistrationsController do
           end
 
           it 'fails' do
-            delete :destroy, params: { password: '12345678' }
+            delete :destroy, params: { password: user.password }
 
             expect_failure(s_('Profiles|You must transfer ownership or delete groups you are an owner of before you can delete your account'))
           end

@@ -1791,9 +1791,10 @@ RSpec.describe User do
 
   describe '#generate_password' do
     it 'does not generate password by default' do
-      user = create(:user, password: 'abcdefghe')
+      password = User.random_password
+      user = create(:user, password: password)
 
-      expect(user.password).to eq('abcdefghe')
+      expect(user.password).to eq(password)
     end
   end
 
@@ -5996,8 +5997,9 @@ RSpec.describe User do
     end
 
     context 'user with a bcrypt password hash' do
-      # Plaintext password 'eiFubohV6iro'
-      let(:encrypted_password) { '$2a$10$xLTxCKOa75IU4RQGqqOrTuZOgZdJEzfSzjG6ZSEi/C31TB/yLZYpi' }
+      # Manually set a 'known' encrypted password
+      let(:password) { User.random_password }
+      let(:encrypted_password) { Devise::Encryptor.digest(User, password) }
       let(:user) { create(:user, encrypted_password: encrypted_password) }
 
       shared_examples 'not re-encrypting with PBKDF2' do
@@ -6009,7 +6011,9 @@ RSpec.describe User do
       end
 
       context 'using the wrong password' do
+        # password 'WRONG PASSWORD' will not match the bcrypt hash
         let(:password) { 'WRONG PASSWORD' }
+        let(:encrypted_password) { Devise::Encryptor.digest(User, User.random_password) }
 
         it { is_expected.to be_falsey }
         it_behaves_like 'not re-encrypting with PBKDF2'
@@ -6025,8 +6029,6 @@ RSpec.describe User do
       end
 
       context 'using the correct password' do
-        let(:password) { 'eiFubohV6iro' }
-
         it { is_expected.to be_truthy }
 
         it 'validates the password and re-encrypts with PBKDF2' do
@@ -6060,8 +6062,11 @@ RSpec.describe User do
     end
 
     context 'user with password hash that is neither PBKDF2 nor BCrypt' do
-      let(:user) { create(:user, encrypted_password: '$argon2i$v=19$m=512,t=4,p=2$eM+ZMyYkpDRGaI3xXmuNcQ$c5DeJg3eb5dskVt1mDdxfw') }
-      let(:password) { 'password' }
+      # Manually calculated PasswordComplexityHelper#random_complex_password
+      let(:password) { "e5TX2JW8w_5ry3emm5q5_1aA" }
+      # Created with https://argon2.online/ using 'aaaaaaaa' as the salt
+      let(:encrypted_password) { "$argon2i$v=19$m=512,t=4,p=2$YWFhYWFhYWE$D4K3UJcyAxMankFg5tZ4xQ" }
+      let(:user) { create(:user, encrypted_password: encrypted_password) }
 
       it { is_expected.to be_falsey }
 
@@ -6078,7 +6083,7 @@ RSpec.describe User do
   # These entire test section can be removed once the :pbkdf2_password_encryption feature flag is removed.
   describe '#password=' do
     let(:user) { create(:user) }
-    let(:password) { 'Oot5iechahqu' }
+    let(:password) { User.random_password }
 
     def compare_bcrypt_password(user, password)
       Devise::Encryptor.compare(User, user.encrypted_password, password)

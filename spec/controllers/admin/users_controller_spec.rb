@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Admin::UsersController do
+  include PasswordComplexityHelper
+
   let(:user) { create(:user) }
 
   let_it_be(:admin) { create(:admin) }
@@ -612,8 +614,8 @@ RSpec.describe Admin::UsersController do
       end
 
       context 'when the new password does not match the password confirmation' do
-        let(:password) { 'some_password' }
-        let(:password_confirmation) { 'not_same_as_password' }
+        let(:password) { random_complex_password }
+        let(:password_confirmation) { random_complex_password }
 
         it 'shows the edit page again' do
           update_password(user, password, password_confirmation)

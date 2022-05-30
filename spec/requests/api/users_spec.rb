@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::Users do
+  include PasswordComplexityHelper
+
   let_it_be(:admin) { create(:admin) }
   let_it_be(:user, reload: true) { create(:user, username: 'user.withdot') }
   let_it_be(:key) { create(:key, user: user) }
@@ -1184,7 +1186,7 @@ RSpec.describe API::Users do
       post api('/users', admin),
         params: {
           email: 'invalid email',
-          password: 'password',
+          password: random_complex_password,
           name: 'test'
         }
       expect(response).to have_gitlab_http_status(:bad_request)
@@ -1250,7 +1252,7 @@ RSpec.describe API::Users do
         post api('/users', admin),
           params: {
             email: 'test@example.com',
-            password: 'password',
+            password: random_complex_password,
             username: 'test',
             name: 'foo'
           }
@@ -1262,7 +1264,7 @@ RSpec.describe API::Users do
             params: {
               name: 'foo',
               email: 'test@example.com',
-              password: 'password',
+              password: random_complex_password,
               username: 'foo'
             }
         end.to change { User.count }.by(0)
@@ -1276,7 +1278,7 @@ RSpec.describe API::Users do
             params: {
               name: 'foo',
               email: 'foo@example.com',
-              password: 'password',
+              password: random_complex_password,
               username: 'test'
             }
         end.to change { User.count }.by(0)
@@ -1290,7 +1292,7 @@ RSpec.describe API::Users do
             params: {
               name: 'foo',
               email: 'foo@example.com',
-              password: 'password',
+              password: random_complex_password,
               username: 'TEST'
             }
         end.to change { User.count }.by(0)
@@ -1325,7 +1327,7 @@ RSpec.describe API::Users do
     end
 
     context 'updating password' do
-      def update_password(user, admin, password = User.random_password)
+      def update_password(user, admin, password = random_complex_password)
         put api("/users/#{user.id}", admin), params: { password: password }
       end
 
@@ -1635,8 +1637,8 @@ RSpec.describe API::Users do
 
     context "with existing user" do
       before do
-        post api("/users", admin), params: { email: 'test@example.com', password: 'password', username: 'test', name: 'test' }
-        post api("/users", admin), params: { email: 'foo@bar.com', password: 'password', username: 'john', name: 'john' }
+        post api("/users", admin), params: { email: 'test@example.com', password: random_complex_password, username: 'test', name: 'test' }
+        post api("/users", admin), params: { email: 'foo@bar.com', password: random_complex_password, username: 'john', name: 'john' }
         @user = User.all.last
       end
 

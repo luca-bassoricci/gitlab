@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Users::CreateService do
+  include PasswordComplexityHelper
+
   let_it_be(:current_user) { create(:admin) }
 
   let(:params) do
@@ -10,7 +12,7 @@ RSpec.describe Users::CreateService do
       name: 'John Doe',
       username: 'jduser',
       email: 'jd@example.com',
-      password: 'mydummypass'
+      password: random_complex_password
     }
   end
 

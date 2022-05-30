@@ -3,12 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe API::Scim do
+  include PasswordComplexityHelper
+
   let(:user) { create(:user) }
   let(:scim_token) { create(:scim_oauth_access_token, group: group) }
   let(:group) { identity.group }
 
-  let_it_be(:password) { 'secret_pass' }
-  let_it_be(:access_token) { 'secret_token' }
+  let_it_be(:password) { random_complex_password }
+  let_it_be(:access_token) { random_complex_password }
 
   before do
     stub_licensed_features(group_allowed_email_domains: true, group_saml: true)

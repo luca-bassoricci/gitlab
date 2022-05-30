@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Users::UpdateService do
-  let(:password) { 'longsecret987!' }
-  let(:user) { create(:user, password: password, password_confirmation: password) }
+  let(:user) { create(:user) }
 
   describe '#execute' do
     it 'updates time preferences' do
@@ -19,7 +18,7 @@ RSpec.describe Users::UpdateService do
     it 'returns an error result when record cannot be updated' do
       result = {}
       expect do
-        result = update_user(user, { email: 'invalid', validation_password: password })
+        result = update_user(user, { email: 'invalid', validation_password: user.password })
       end.not_to change { user.reload.email }
       expect(result[:status]).to eq(:error)
       expect(result[:message]).to eq('Email is invalid')
@@ -66,7 +65,7 @@ RSpec.describe Users::UpdateService do
     context 'updating canonical email' do
       context 'if email was changed' do
         subject do
-          update_user(user, email: 'user+extrastuff@example.com', validation_password: password)
+          update_user(user, email: 'user+extrastuff@example.com', validation_password: user.password)
         end
 
         it 'calls canonicalize_email' do
@@ -160,7 +159,7 @@ RSpec.describe Users::UpdateService do
 
     it 'raises an error when record cannot be updated' do
       expect do
-        update_user(user, email: 'invalid', validation_password: password)
+        update_user(user, email: 'invalid', validation_password: user.password)
       end.to raise_error(ActiveRecord::RecordInvalid)
     end
 

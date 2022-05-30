@@ -5,7 +5,10 @@ FactoryBot.define do
     email { generate(:email) }
     name { generate(:name) }
     username { generate(:username) }
-    password { "12345678" }
+
+    # TODO: How to replace this with a reference to spec/support/helpers/password_complexity_helper.rb
+    password { "#{::Devise.friendly_token}_1aA" }
+
     role { 'software_developer' }
     confirmed_at { Time.now }
     confirmation_token { nil }

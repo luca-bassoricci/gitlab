@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 RSpec.describe Users::UpdateService do
+  include PasswordComplexityHelper
+
   let(:user) { create(:user) }
 
   describe '#execute' do
@@ -177,7 +179,7 @@ RSpec.describe Users::UpdateService do
 
       let(:service) { described_class.new(admin_user, ActionController::Parameters.new(params).permit!) }
       let(:params) do
-        { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass' }
+        { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: random_complex_password }
       end
 
       context 'allowed params' do
