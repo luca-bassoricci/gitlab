@@ -12,6 +12,7 @@ This document lists the configuration options for your GitLab `.gitlab-ci.yml` f
 - For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/index.md).
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/index.md).
 - To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab-ci.yml).
+- To learn more about variable expansion in different keywords, see [Where variables can be used](../variables/where_variables_can_be_used.md).
 
 When you are editing your `.gitlab-ci.yml` file, you can validate it with the
 [CI Lint](../lint.md) tool.
