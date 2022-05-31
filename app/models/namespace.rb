@@ -648,7 +648,7 @@ class Namespace < ApplicationRecord
   def reload_namespace_details
     return unless (changes.keys && %w(description description_html cached_markdown_version).any?) && namespace_details.present?
 
-    namespace_details.reload
+    namespace_details.reset
   end
 
   def sync_share_with_group_lock_with_parent
