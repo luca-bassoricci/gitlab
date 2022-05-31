@@ -59,8 +59,8 @@ class CreateSyncProjectNamespaceDetailsTrigger < Gitlab::Database::Migration[2.0
     end
   
     def down
-      drop_trigger(:namespaces, UPDATE_TRIGGER_NAME)
-      drop_trigger(:namespaces, INSERT_TRIGGER_NAME)
+      drop_trigger(:projects, UPDATE_TRIGGER_NAME)
+      drop_trigger(:projects, INSERT_TRIGGER_NAME)
       drop_function(FUNCTION_NAME)
     end
   end
