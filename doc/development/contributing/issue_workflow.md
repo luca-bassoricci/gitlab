@@ -198,7 +198,7 @@ or for measurements (such as time to close). An example of a facet label is the
 
 The current department labels are:
 
-- ~UX
+- ~UX: This label is for issues and MRs that introduce UI changes and/or impact the user experience. 
 - ~Quality
 
 ### Team labels
