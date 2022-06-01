@@ -20,8 +20,8 @@ const getRandomUUIDFunction = () => window.crypto.randomUUID.bind(window.crypto)
 
 function arrayOf(length) {
   return {
-    using(generator) {
-      return Array(length).fill(0).map(generator);
+    using(uuidGenerator) {
+      return Array(length).fill(0).map(uuidGenerator);
     },
   };
 }
@@ -70,8 +70,8 @@ function randomValuesForUuid(prng) {
 }
 
 function generate({ version, seeds, count = 1 }) {
-  const unimplemented = (v, t) => {
-    throw new Error(`${t} v${v} uuids are not yet implemented`);
+  const unimplemented = (ver, type) => {
+    throw new Error(`${type} v${ver} uuids are not yet implemented`);
   };
   const versions = {
     4: {
