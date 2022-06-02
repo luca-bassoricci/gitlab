@@ -132,47 +132,6 @@ RSpec.describe Projects::Prometheus::MetricsController do
     end
   end
 
-  describe 'POST #create' do
-    context 'metric is valid' do
-      let(:valid_metric) { { prometheus_metric: { title: 'title', query: 'query', group: 'business', y_label: 'label', unit: 'u', legend: 'legend' } } }
-
-      it 'shows a success flash message' do
-        post :create, params: project_params(valid_metric)
-
-        expect(flash[:notice]).to include('Metric was successfully added.')
-
-        expect(response).to redirect_to(edit_project_settings_integration_path(project, ::Integrations::Prometheus))
-      end
-    end
-
-    context 'metric is invalid' do
-      let(:invalid_metric) { { prometheus_metric: { title: 'title' } } }
-
-      it 'renders new metric page' do
-        post :create, params: project_params(invalid_metric)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template('new')
-      end
-    end
-  end
-
-  describe 'PUT #update' do
-    context 'metric is updated' do
-      let_it_be(:metric) { create(:prometheus_metric, project: project) }
-
-      let(:metric_params) { { prometheus_metric: { title: 'new_title' }, id: metric.id } }
-
-      it 'shows a success flash message' do
-        put :update, params: project_params(metric_params)
-
-        expect(metric.reload.title).to eq('new_title')
-        expect(flash[:notice]).to include('Metric was successfully updated.')
-        expect(response).to redirect_to(edit_project_settings_integration_path(project, ::Integrations::Prometheus))
-      end
-    end
-  end
-
   describe 'DELETE #destroy' do
     context 'format html' do
       let!(:metric) { create(:prometheus_metric, project: project) }

@@ -529,7 +529,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
-        resources :metrics, constraints: { id: %r{[^\/]+} }, only: [:index, :new, :create, :edit, :update, :destroy] do # rubocop: disable Cop/PutProjectRoutesUnderScope
+        resources :metrics, constraints: { id: %r{[^\/]+} }, only: [:index, :destroy] do # rubocop: disable Cop/PutProjectRoutesUnderScope
           get :active_common, on: :collection # rubocop:todo Cop/PutProjectRoutesUnderScope
           post :validate_query, on: :collection # rubocop:todo Cop/PutProjectRoutesUnderScope
         end

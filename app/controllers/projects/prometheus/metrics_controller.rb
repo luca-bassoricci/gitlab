@@ -37,10 +37,6 @@ module Projects
         end
       end
 
-      def new
-        @metric = project.prometheus_metrics.new
-      end
-
       def index
         respond_to do |format|
           format.json do
@@ -59,34 +55,6 @@ module Projects
             render json: response
           end
         end
-      end
-
-      def create
-        @metric = project.prometheus_metrics.create(
-          metrics_params.to_h.symbolize_keys
-        )
-
-        if @metric.persisted?
-          redirect_to edit_project_settings_integration_path(project, ::Integrations::Prometheus),
-                      notice: _('Metric was successfully added.')
-        else
-          render 'new'
-        end
-      end
-
-      def update
-        @metric = prometheus_metric
-
-        if @metric.update(metrics_params)
-          redirect_to edit_project_settings_integration_path(project, ::Integrations::Prometheus),
-                      notice: _('Metric was successfully updated.')
-        else
-          render 'edit'
-        end
-      end
-
-      def edit
-        @metric = prometheus_metric
       end
 
       def destroy
