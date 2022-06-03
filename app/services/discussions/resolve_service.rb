@@ -27,7 +27,6 @@ module Discussions
     def noteable_is_same?
       return true unless discussions.size > 1
 
-      # Perform this check without fetching extra records
       discussions.all? do |discussion|
         discussion.noteable_type == first_discussion.noteable_type &&
           discussion.noteable_id == first_discussion.noteable_id
