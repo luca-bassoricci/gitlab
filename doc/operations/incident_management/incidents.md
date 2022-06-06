@@ -243,15 +243,15 @@ Prerequisites:
 
 To delete a timeline event:
 
-1. Click on ellipsis to see the menu:
+1. Select the ellipsis to see the menu:
 
   ![Incident timeline events delete menu](img/delete_events_1.png)
 
-1. Click **Delete**. Once clicked, you sell a confirmation modal:
+1. Select **Delete**. Once selected, you sell a confirmation modal:
 
   ![Incident timeline events delete confirm](img/delete_events_2.png)
 
-1. Click on **Delete Event** to confirm the deletion.
+1. Select **Delete Event** to confirm the deletion.
 
 ### Recent updates view **(PREMIUM)**
 
