@@ -206,21 +206,25 @@ You can add timeline events in the **Timeline** tab:
 
 ![Incident timeline event empty tab](img/empty_timeline_tab.png)
 
-#### Creating timeline events manually
+#### Create a timeline event
 
-Incident timeline events can be created manually using the timeline event form.
-You can select the date of the event from the date selector, input the time in UTC,
-add timeline text, and click on **Save** button:
+Create a timeline event manually using the form.
+
+Prerequisites:
+
+- You must have at least the Developer role for the project.
+
+To create a timeline event:
+
+1. Navigate to **Monitor > Incidents** and select an incident.
+1. Select the **Timeline** tab.
+1. Select **Add new timeline event**.
+1. Fill the required details.
+1. Select **Save** to save the event or select **Save and add another event** to add more timeline events.
 
 ![Incident timeline event form](img/timeline_event_form.png)
 
 You can format the timeline text using `Bold`, `Italic`, `code`, and `links` formatting options.
-
-If you would like to add another event, you can do so by clicking the
-**Add new timeline event** button or by clicking on **Save and add another event**
-while adding the previous event:
-
-![Incident timeline event second form](img/second_timeline_event_form.png)
 
 #### List timeline events
 
@@ -229,16 +233,25 @@ They are grouped with dates and are listed in ascending order of the time when t
 
 ![Incident timeline events list](img/multiple_events.png)
 
-#### Deleting timeline events
+#### Delete a timeline event
 
-Incident timeline events can be deleted by using the option in the menu.
-Click on ellipsis to see the menu:
+Delete a timeline event manually.
+
+Prerequisites:
+
+- You must have at least the Developer role for the project.
+
+To delete a timeline event:
+
+1. Click on ellipsis to see the menu:
 
 ![Incident timeline events delete menu](img/delete_events_1.png)
 
-Once clicked you will be asked for confirmation to delete the timeline event:
+2. Click **Delete**. Once clicked, you sell a confirmation modal:
 
 ![Incident timeline events delete confirm](img/delete_events_2.png)
+
+3. Click on **Delete Event** to confirm the deletion.
 
 ### Recent updates view **(PREMIUM)**
 
