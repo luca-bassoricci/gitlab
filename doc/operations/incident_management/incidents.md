@@ -202,9 +202,20 @@ field populated.
 Incident timelines are an important part of record keeping for incidents.
 They give a high-level overview, to executives and external viewers, of what happened during the incident,
 and the steps that were taken for it to be resolved.
-You can add timeline events in the **Timeline** tab:
 
-![Incident timeline event empty tab](img/empty_timeline_tab.png)
+#### View the event timeline
+
+Incident timeline events are listed in ascending order of the date and time.
+They are grouped with dates and are listed in ascending order of the time when they occured:
+
+![Incident timeline events list](img/timeline_events_v15_1.png)
+
+To view the event timeline of an incident:
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Monitor > Incidents**.
+1. Select an incident.
+1. Select the **Timeline** tab.
 
 #### Create a timeline event
 
@@ -216,26 +227,17 @@ Prerequisites:
 
 To create a timeline event:
 
-1. Navigate to **Monitor > Incidents** and select an incident.
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Monitor > Incidents**.
+1. Select an incident.
 1. Select the **Timeline** tab.
 1. Select **Add new timeline event**.
-1. Fill the required details.
-1. Select **Save** to save the event or select **Save and add another event** to add more timeline events.
-
-![Incident timeline event form](img/timeline_event_form.png)
-
-You can format the timeline text using `Bold`, `Italic`, `code`, and `links` formatting options.
-
-#### List timeline events
-
-Incident timeline events are listed in ascending order of the date and time.
-They are grouped with dates and are listed in ascending order of the time when they occured:
-
-![Incident timeline events list](img/multiple_events.png)
+1. Complete the required fields.
+1. Select **Save** or **Save and add another event**.
 
 #### Delete a timeline event
 
-Delete a timeline event manually.
+You can also delete timeline events.
 
 Prerequisites:
 
@@ -243,15 +245,8 @@ Prerequisites:
 
 To delete a timeline event:
 
-1. Select the ellipsis to see the menu:
-
-  ![Incident timeline events delete menu](img/delete_events_1.png)
-
-1. Select **Delete**. Once selected, you sell a confirmation modal:
-
-  ![Incident timeline events delete confirm](img/delete_events_2.png)
-
-1. Select **Delete Event** to confirm the deletion.
+1. Select the three-dot menu (**{ellipsis_v}**) and then select **Delete**.
+1. To confirm, select **Delete Event**.
 
 ### Recent updates view **(PREMIUM)**
 
