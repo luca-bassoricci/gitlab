@@ -245,6 +245,10 @@ Prerequisites:
 
 To delete a timeline event:
 
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Monitor > Incidents**.
+1. Select an incident.
+1. Select the **Timeline** tab.
 1. Select the three-dot menu (**{ellipsis_v}**) and then select **Delete**.
 1. To confirm, select **Delete Event**.
 
