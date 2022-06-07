@@ -24289,12 +24289,6 @@ msgstr ""
 msgid "Method call threshold (ms)"
 msgstr ""
 
-msgid "Metric was successfully added."
-msgstr ""
-
-msgid "Metric was successfully updated."
-msgstr ""
-
 msgid "Metric:"
 msgstr ""
 
@@ -30522,9 +30516,6 @@ msgid "PrometheusService|Monitor application health with Prometheus metrics and 
 msgstr ""
 
 msgid "PrometheusService|More information"
-msgstr ""
-
-msgid "PrometheusService|New metric"
 msgstr ""
 
 msgid "PrometheusService|No %{docsUrlStart}common metrics%{docsUrlEnd} were found"

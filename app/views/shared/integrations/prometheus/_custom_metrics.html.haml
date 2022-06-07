@@ -11,7 +11,6 @@
       %strong
         = s_('PrometheusService|Custom metrics')
       = gl_badge_tag 0, nil, class: 'js-custom-monitored-count'
-      = link_to s_('PrometheusService|New metric'), new_project_prometheus_metric_path(project), class: 'btn gl-button btn-confirm gl-ml-auto js-new-metric-button hidden', data: { qa_selector: 'new_metric_button' }
     .card-body
       .flash-container.hidden
         .flash-warning
