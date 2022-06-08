@@ -36,6 +36,7 @@ module Gitlab
         return false if max_include_depth < 1
         return false if target_http?(target) && !allow_uri_read
         return false if included.size >= max_includes
+
         true
       end
 
