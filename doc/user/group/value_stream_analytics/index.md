@@ -103,16 +103,17 @@ is always later than commit time.
 ### View the DORA metrics **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340150) in GitLab 14.5.
+
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/359060) in GitLab 15.0.
 
 The [DevOps Research and Assessment (DORA)](https://www.devops-research.com/research.html) team developed a list of four metrics that are straightforward, focused, and easy to implement. They form an excellent foundation for engineering metrics initiatives, helping improve DevOps efficiency while also building a bridge to business stakeholders. 
 
 These four DORA metrics are:
 
-- [Deployment Frequency](https://docs.gitlab.com/ee/user/analytics/#deployment-frequency)
-- [Lead time for changes](https://docs.gitlab.com/ee/user/analytics/#lead-time-for-changes)
-- [Mean Time to Recover](https://docs.gitlab.com/ee/user/analytics/#time-to-restore-service)
-- [Change Failure Rate](https://docs.gitlab.com/ee/user/analytics/#change-failure-rate)
+- [Deployment Frequency](https://docs.gitlab.com/ee/user/analytics/index.md#deployment-frequency)
+- [Lead time for changes](https://docs.gitlab.com/ee/user/analytics/index.md#lead-time-for-changes)
+- [Mean Time to Recover](https://docs.gitlab.com/ee/user/analytics/index.md#time-to-restore-service)
+- [Change Failure Rate](https://docs.gitlab.com/ee/user/analytics/index.md#change-failure-rate)
 
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
@@ -193,7 +194,7 @@ Each pre-defined stages of value stream analytics is further described in the ta
 | Review    | The median time taken to review a merge request that has a closing issue pattern, between its creation and until it's merged. |
 | Staging   | The median time between merging a merge request that has a closing issue pattern until the very first deployment to a [production environment](#how-value-stream-analytics-identifies-the-production-environment). If there isn't a production environment, this is not tracked. |
 
-For information on how Value stream analytics calculates stage see our [Value stream analytics development guide](https://docs.gitlab.com/ee/development/value_stream_analytics.html#validating-start-and-end-events)
+For information on how Value stream analytics calculates stage see our [Value stream analytics development guide](https://docs.gitlab.com/ee/development/value_stream_analytics.md#validating-start-and-end-events)
 
 ### Example workflow
 
