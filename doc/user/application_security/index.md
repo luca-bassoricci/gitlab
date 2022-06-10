@@ -32,6 +32,10 @@ schedule. Coverage includes:
 - Vulnerabilities in a running web application.
 - Infrastructure as code configuration.
 
+Each of the security scanners is applicable to one or more of the application development phases.
+
+![Illustration of security scanners and the applicable application development phases.](img/security_scanners_and_their_development_phases.png)
+
 ### Source code analysis
 
 Source code analysis occurs on every code commit. Details of vulnerabilities detected are provided
@@ -75,12 +79,6 @@ against this, infrastructure analysis occurs on every merge request. Checks are 
 
 - Infrastructure as Code (IaC) configuration files that define your application's deployment
   environment - [Infrastructure as Code (IaC) Scanning](iac_scanning/index.md).
-
-## Application development phases
-
-Each of the security scanners is relevant at one or more of the application development phases.
-
-![Illustration of in which application development phases each security scanner is relevant](security_scanners_and_their_development_phases.png)
 
 ## Vulnerability scanner maintenance
 
