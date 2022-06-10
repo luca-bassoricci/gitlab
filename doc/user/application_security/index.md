@@ -76,6 +76,12 @@ against this, infrastructure analysis occurs on every merge request. Checks are 
 - Infrastructure as Code (IaC) configuration files that define your application's deployment
   environment - [Infrastructure as Code (IaC) Scanning](iac_scanning/index.md).
 
+## Application development phases
+
+Each of the security scanners is relevant at one or more of the application development phases.
+
+![Illustration of in which application development phases each security scanner is relevant](security_scanners_and_their_development_phases.png)
+
 ## Vulnerability scanner maintenance
 
 The following vulnerability scanners and their databases are regularly updated:
