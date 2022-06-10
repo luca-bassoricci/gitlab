@@ -77,27 +77,27 @@ module Gitlab
             # This is a stub, used for indexing. The method is dynamically generated.
           end
 
-          # @note Defined as +link :buy_storage+
-          # Clicks +buy_storage+
-          def buy_storage
+          # @note Defined as +link :purchase_storage+
+          # Clicks +purchase_storage+
+          def purchase_storage
             # This is a stub, used for indexing. The method is dynamically generated.
           end
 
           # @example
           #   Gitlab::Page::Group::Settings::UsageQuota.perform do |usage_quota|
-          #     expect(usage_quota.buy_storage_element).to exist
+          #     expect(usage_quota.purchase_storage_element).to exist
           #   end
           # @return [Watir::Link] The raw +Link+ element
-          def buy_storage_element
+          def purchase_storage_element
             # This is a stub, used for indexing. The method is dynamically generated.
           end
 
           # @example
           #   Gitlab::Page::Group::Settings::UsageQuota.perform do |usage_quota|
-          #     expect(usage_quota).to be_buy_storage
+          #     expect(usage_quota).to be_purchase_storage
           #   end
-          # @return [Boolean] true if the +buy_storage+ element is present on the page
-          def buy_storage?
+          # @return [Boolean] true if the +purchase_storage+ element is present on the page
+          def purchase_storage?
             # This is a stub, used for indexing. The method is dynamically generated.
           end
 
