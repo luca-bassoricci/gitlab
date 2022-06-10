@@ -9,6 +9,8 @@ module Gitlab
     class IncludeProcessor < Asciidoctor::IncludeExt::IncludeProcessor
       extend ::Gitlab::Utils::Override
 
+      NoData = Class.new(StandardError)
+
       def initialize(context)
         super(logger: Gitlab::AppLogger)
 
@@ -16,6 +18,7 @@ module Gitlab
         @repository = context[:repository] || context[:project].try(:repository)
         @max_includes = context[:max_includes].to_i
         @included = []
+        @included_content = {}
 
         # Note: Asciidoctor calls #freeze on extensions, so we can't set new
         # instance variables after initialization.
@@ -53,18 +56,15 @@ module Gitlab
 
       override :read_lines
       def read_lines(filename, selector)
-        if Gitlab::Git::Blob.find(repository, ref, filename)
-          blob = read_blob(ref, filename)
-          content = blob.data
-        else
-          # filename is not in the repository so read as standard include
-          content = Gitlab::HTTP.get(filename)
-        end
+        content = read_content(filename)
+        raise NoData, filename if content.nil?
+
+        included << filename
 
         if selector
           content.each_line.select.with_index(1, &selector)
         else
-          content
+          content.lines
         end
       end
 
@@ -75,7 +75,17 @@ module Gitlab
 
       private
 
-      attr_reader :context, :repository, :cache, :max_includes, :included
+      attr_reader :context, :repository, :cache, :max_includes, :included, :included_content
+
+      def read_content(filename)
+        included_content[filename] if included_content.key?(filename)
+
+        included_content[filename] = if target_http?(filename)
+                                       read_uri(filename)
+                                     else
+                                       read_blob(ref, filename)
+                                     end
+      end
 
       # Gets a Blob at a path for a specific revision.
       # This method will check that the Blob exists and contains readable text.
@@ -83,16 +93,22 @@ module Gitlab
       # revision - The String SHA1.
       # path     - The String file path.
       #
-      # Returns a Blob
+      # Returns a string containing the blob content
       def read_blob(ref, filename)
         blob = repository&.blob_at(ref, filename)
 
-        raise 'Blob not found' unless blob
-        raise 'File is not readable' unless blob.readable_text?
+        raise NoData, 'Blob not found' unless blob
+        raise NoData, 'File is not readable' unless blob.readable_text?
 
-        included << filename
+        blob.data
+      end
 
-        blob
+      def read_uri(uri)
+        r = Gitlab::HTTP.get(uri)
+
+        raise NoData, uri unless r.success?
+
+        r.body
       end
 
       # Resolves the given relative path of file in repository into canonical
