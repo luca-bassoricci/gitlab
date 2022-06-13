@@ -104,7 +104,7 @@ is always later than commit time.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340150) in GitLab 14.5.
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/359060) in GitLab 15.0.
+> - DORA and key metrics were [separated into distinct rows in the UI](https://gitlab.com/gitlab-org/gitlab/-/issues/359060) in GitLab 15.0.
 
 The [DevOps Research and Assessment (DORA)](https://www.devops-research.com/research.html) team developed a list of four metrics that are straightforward, focused, and easy to implement. They form an excellent foundation for engineering metrics initiatives, helping improve DevOps efficiency while also building a bridge to business stakeholders. 
 
