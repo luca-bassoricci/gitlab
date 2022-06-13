@@ -70,7 +70,7 @@ The table shows a list of related workflow items for the selected stage. Based o
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/323982) in GitLab 13.12.
 
-Value stream analytics overview metrics dashboard shows key measurements of the end-to-end software workstream, with DORA metrcis of teams performance. Based on the filtering selected by the user, the metrics overview dashboard will automatically aggregate the metric tiles, displaying the current status of the value stream. 
+The **Overview** dashboard in value stream analytics shows key metrics and DORA metrics of group performance. Based on the filter you select, the dashboard automatically aggregates DORA metrics and displays the current status of the value stream.
 
 To view the overview metrics dashboard:
 
