@@ -10,17 +10,12 @@ module QA
 
             view 'app/views/shared/integrations/prometheus/_custom_metrics.html.haml' do
               element :custom_metrics_container
-              element :new_metric_button
             end
 
             def click_on_custom_metric(custom_metric)
               within_element :custom_metrics_container do
                 click_on custom_metric
               end
-            end
-
-            def click_on_new_metric
-              click_element :new_metric_button
             end
 
             def has_custom_metric?(custom_metric)
