@@ -69,26 +69,6 @@ function randomValuesForUuid(prng) {
   return randomValues;
 }
 
-function generate({ version, seeds, count = 1 }) {
-  const unimplemented = (ver, type) => {
-    throw new Error(`${type} v${ver} uuids are not yet implemented`);
-  };
-  const versions = {
-    4: {
-      random: () => arrayOf(count).using(getRandomUUIDFunction()),
-      seeded: ({ seeds: seedValues }) => {
-        const rng = getPseudoRandomNumberGenerator(...seedValues);
-
-        return arrayOf(count).using(() => v4({ random: randomValuesForUuid(rng) }));
-      },
-    },
-  };
-  const type = seeds.length ? 'seeded' : 'random';
-  const generator = versions[version]?.[type] ?? (() => unimplemented(version, type));
-
-  return generator({ seeds });
-}
-
 /**
  * Get an array of UUIDv4s
  * @param {Object} [options={}]
@@ -97,7 +77,15 @@ function generate({ version, seeds, count = 1 }) {
  * @returns {UUIDv4[]} An array of UUIDv4s
  */
 export function uuids({ seeds = [], count = 1 } = {}) {
-  const version = 4; // The only one we handle right now; also the only one the browser provides for free
+  const versionFour = {
+    random: () => arrayOf(count).using(getRandomUUIDFunction()),
+    seeded: ({ seeds: seedValues }) => {
+      const rng = getPseudoRandomNumberGenerator(...seedValues);
 
-  return generate({ version, seeds, count });
+      return arrayOf(count).using(() => v4({ random: randomValuesForUuid(rng) }));
+    },
+  };
+  const type = seeds.length ? 'seeded' : 'random';
+
+  return versionFour[type]({ seeds });
 }
