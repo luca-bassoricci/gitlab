@@ -23,8 +23,6 @@ Use value stream analytics to identify:
 - Detecting long-running issues or merge requests.
 - Factors that cause your software development lifecycle to slow down.
 
-![Value stream analytics ](img/vsa_overview.png "Value stream analytics")
-
 Value stream analytics is also available for [projects](../../analytics/value_stream_analytics.md).
 
 ## View value stream analytics
