@@ -150,6 +150,11 @@ If a user is a:
 - Direct member of a project, the **Expiration** and **Max role** fields can be updated directly on the project.
 - Inherited member from a parent group, the **Expiration** and **Max role** fields must be updated on the parent group.
 
+It is possible for a user to be both an inherited member from a parent group and a member of a 
+group that the project is [shared with](share_project_with_groups.md#share-a-project-with-a-group-of-users). 
+If the user's **Max role** in the parent group is higher than the user's **Max role** in the shared
+ group, the higher role in the parent group will be honored. 
+
 ## Remove a member from a project
 
 If a user is a direct member of a project, you can remove them.
