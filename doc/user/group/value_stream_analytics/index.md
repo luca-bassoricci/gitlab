@@ -108,10 +108,10 @@ The [DevOps Research and Assessment (DORA)](https://www.devops-research.com/rese
 
 These [four DORA metrics](../../../user/analytics/index.md) are:
 
-- Deployment Frequency
-- Lead time for changes
-- Mean Time to Recover
-- Change Failure Rate
+ - Deployment Frequency
+ - Lead time for changes
+ - Mean Time to Recover
+ - Change Failure Rate
 
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
