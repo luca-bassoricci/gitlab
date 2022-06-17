@@ -237,12 +237,12 @@ To create a timeline event:
 
 ##### Formatting rules
 
-The Incident Timeline uses a subset of [GitLab Flavored Markdown](doc/user/markdown.html)
+The Incident Timeline uses a subset of [GitLab Flavored Markdown](../../user/markdown.md)
 
 Supported are:
- - [Emphasis](doc/user/markdown.html#emphasis)
- - [Links](doc/user/markdown.html#links)
- - [GitLab-specific references](doc/user/markdown.html#gitlab-specific-references)
+ - [Emphasis](../../user/markdown.md#emphasis)
+ - [Links](../../user/markdown.md#links)
+ - [GitLab-specific references](../../user/markdown.md#gitlab-specific-references)
 
 #### Delete a timeline event
 
