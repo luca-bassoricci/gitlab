@@ -235,6 +235,15 @@ To create a timeline event:
 1. Complete the required fields.
 1. Select **Save** or **Save and add another event**.
 
+##### Formatting rules
+
+The Incident Timeline uses a subset of [GitLab Flavored Markdown](doc/user/markdown.html)
+
+Supported are:
+ - [Emphasis](doc/user/markdown.html#emphasis)
+ - [Links](doc/user/markdown.html#links)
+ - [GitLab-specific references](doc/user/markdown.html#gitlab-specific-references)
+
 #### Delete a timeline event
 
 You can also delete timeline events.
