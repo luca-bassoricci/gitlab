@@ -31,7 +31,7 @@ module QA
         end.project.visit!
       end
 
-      it 'tests reindexing after push', retry: 3,
+      it 'tests reindexing after push', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/365091', type: :investigating, only: { pipeline: :nightly } }, retry: 3,
          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348040',
          quarantine: {
            issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/365091',
