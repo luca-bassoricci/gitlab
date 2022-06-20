@@ -104,12 +104,7 @@ is always later than commit time.
 
 The [DevOps Research and Assessment (DORA)](https://www.devops-research.com/research.html) team developed a list of four metrics that are straightforward, focused, and easy to implement. They form an excellent foundation for engineering metrics initiatives, helping improve DevOps efficiency while also building a bridge to business stakeholders. 
 
-These [four DORA metrics](../../../user/analytics/index.md) are:
-- Deployment Frequency
-- Lead time for changes
-- Mean Time to Recover
-- Change Failure Rate
-
+These [four DORA metrics](../../../user/analytics/index.md) are: Deployment Frequency, Lead time for changes, Mean Time to Recover and Change Failure Rate.
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
 
