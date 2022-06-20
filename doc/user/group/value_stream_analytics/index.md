@@ -182,7 +182,7 @@ Each pre-defined stages of value stream analytics is further described in the ta
 | Review    | The median time taken to review a merge request that has a closing issue pattern, between its creation and until it's merged. |
 | Staging   | The median time between merging a merge request that has a closing issue pattern until the very first deployment to a [production environment](#how-value-stream-analytics-identifies-the-production-environment). If there isn't a production environment, this is not tracked. |
 
-For information on how Value stream analytics calculates stage see our [Value stream analytics development guide](../../../ee/development/value_stream_analytics.md)
+For information on how Value stream analytics calculates stage see our [Value stream analytics development guide](../../../development/value_stream_analytics.md)
 
 ### Example workflow
 
