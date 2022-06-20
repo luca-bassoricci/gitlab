@@ -88,7 +88,6 @@ The Overview metrics dashboard display below the **Filter results** text box.
 
 ### View the key value stream metrics
 
-
 - Lead time: Median time from when the issue was created to when it was closed.
 - Cycle time: Median time from first commit to issue closed. GitLab measures cycle time from the earliest
 commit of a [linked issue's merge request](../../project/issues/crosslinking_issues.md#from-commit-messages) to when that issue is closed. The cycle time approach underestimates the lead time because merge request creation
@@ -99,7 +98,6 @@ is always later than commit time.
 
 
 ### View the DORA metrics **(ULTIMATE)**
-
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340150) lead time for changes DORA metric in GitLab 14.5.
 > - DORA API-based deployment metrics for value stream analytics for groups were [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/337256) from GitLab Ultimate to GitLab Premium in GitLab 14.3.
 > - DORA and key metrics were [separated into distinct rows in the UI](https://gitlab.com/gitlab-org/gitlab/-/issues/359060) in GitLab 15.0.
@@ -107,11 +105,10 @@ is always later than commit time.
 The [DevOps Research and Assessment (DORA)](https://www.devops-research.com/research.html) team developed a list of four metrics that are straightforward, focused, and easy to implement. They form an excellent foundation for engineering metrics initiatives, helping improve DevOps efficiency while also building a bridge to business stakeholders. 
 
 These [four DORA metrics](../../../user/analytics/index.md) are:
-
- - Deployment Frequency
- - Lead time for changes
- - Mean Time to Recover
- - Change Failure Rate
+- Deployment Frequency
+- Lead time for changes
+- Mean Time to Recover
+- Change Failure Rate
 
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
