@@ -90,6 +90,7 @@ Key metrics and DORA metrics display below the **Filter results** text box.
 ### Key metrics in the value stream
 
 The **Overview** dashboard shows the following key metrics that measure team performance:
+
 - Lead time: Median time from when the issue was created to when it was closed.
 - Cycle time: Median time from first commit to issue closed. GitLab measures cycle time from the earliest commit of a [linked issue's merge request](../../project/issues/crosslinking_issues.md#from-commit-messages) to when that issue is closed. The cycle time approach underestimates the lead time because merge request creation is always later than commit time.
 - New issues: Number of new issues created.
