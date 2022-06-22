@@ -107,7 +107,6 @@ These [four DORA metrics](../../../user/analytics/index.md) are: Deployment Freq
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
 
-
 To view deployment metrics, you must have a
 [production environment configured](../../../ci/environments/index.md#deployment-tier-of-environments).
 
@@ -182,7 +181,7 @@ Each pre-defined stages of value stream analytics is further described in the ta
 | Review    | The median time taken to review a merge request that has a closing issue pattern, between its creation and until it's merged. |
 | Staging   | The median time between merging a merge request that has a closing issue pattern until the very first deployment to a [production environment](#how-value-stream-analytics-identifies-the-production-environment). If there isn't a production environment, this is not tracked. |
 
-For information about how value stream analytics calculates each stage, see the [Value stream analytics development guide](../../../ee/development/value_stream_analytics.md).
+For information about how value stream analytics calculates each stage, see the [Value stream analytics development guide](../../../development/value_stream_analytics.md).
 
 ### Example workflow
 
