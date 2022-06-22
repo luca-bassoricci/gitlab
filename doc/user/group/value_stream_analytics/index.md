@@ -86,7 +86,7 @@ The Overview metrics dashboard display below the **Filter results** text box.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/wQU-mWvNSiI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-### View the key value stream metrics
+### Key metrics in the value stream
 
 - Lead time: Median time from when the issue was created to when it was closed.
 - Cycle time: Median time from first commit to issue closed. GitLab measures cycle time from the earliest
