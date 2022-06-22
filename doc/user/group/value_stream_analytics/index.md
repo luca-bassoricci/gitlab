@@ -63,7 +63,7 @@ The table shows a list of related workflow items for the selected stage. Based o
 - Merge requests
 - Pipelines
 
-## Overview metrics dashboard
+## View DORA metrics and key metrics for a group
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/323982) in GitLab 13.12.
