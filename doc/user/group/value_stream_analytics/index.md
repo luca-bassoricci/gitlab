@@ -89,9 +89,9 @@ Key metrics and DORA metrics display below the **Filter results** text box.
 
 ### Key metrics in the value stream
 
+The **Overview** dashboard shows the following key metrics that measure team performance:
 - Lead time: Median time from when the issue was created to when it was closed.
-- Cycle time: Median time from first commit to issue closed. GitLab measures cycle time from the earliest
-commit of a [linked issue's merge request](../../project/issues/crosslinking_issues.md#from-commit-messages) to when that issue is closed. The cycle time approach underestimates the lead time because merge request creation is always later than commit time.
+- Cycle time: Median time from first commit to issue closed. GitLab measures cycle time from the earliest commit of a [linked issue's merge request](../../project/issues/crosslinking_issues.md#from-commit-messages) to when that issue is closed. The cycle time approach underestimates the lead time because merge request creation is always later than commit time.
 - New issues: Number of new issues created.
 - Deploys: Total number of deployments to production.
 
@@ -103,7 +103,7 @@ commit of a [linked issue's merge request](../../project/issues/crosslinking_iss
 
 The value stream analytics **Overview** dashboard displays the following [DORA](../../../user/analytics/index.md) metrics:
 
-These [four DORA metrics](../../../user/analytics/index.md) are: Deployment Frequency, Lead time for changes, Mean Time to Recover and Change Failure Rate.
+These [four DORA metrics](../../../user/analytics/index.md) are: Deployment Frequency, Lead time for changes, Time to restore service and Change failure rate.
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
 
@@ -182,7 +182,7 @@ Each pre-defined stages of value stream analytics is further described in the ta
 | Review    | The median time taken to review a merge request that has a closing issue pattern, between its creation and until it's merged. |
 | Staging   | The median time between merging a merge request that has a closing issue pattern until the very first deployment to a [production environment](#how-value-stream-analytics-identifies-the-production-environment). If there isn't a production environment, this is not tracked. |
 
-For information on how Value stream analytics calculates stage see our [Value stream analytics development guide](../../../development/value_stream_analytics.md)
+For information about how value stream analytics calculates each stage, see the [Value stream analytics development guide](../../../ee/development/value_stream_analytics.md).
 
 ### Example workflow
 
