@@ -125,11 +125,6 @@ class ProjectPolicy < BasePolicy
   end
 
   with_scope :subject
-  condition(:forking_allowed) do
-    @subject.feature_available?(:forking, @user)
-  end
-
-  with_scope :subject
   condition(:metrics_dashboard_allowed) do
     access_allowed_to?(:metrics_dashboard)
   end
@@ -197,21 +192,7 @@ class ProjectPolicy < BasePolicy
 
   condition(:work_items_enabled, scope: :subject) { project&.work_items_feature_flag_enabled? }
 
-  features = %w[
-    merge_requests
-    issues
-    repository
-    snippets
-    wiki
-    builds
-    pages
-    metrics_dashboard
-    analytics
-    operations
-    security_and_compliance
-  ]
-
-  features.each do |f|
+  ProjectFeature::FEATURES.each do |f|
     # these are scored high because they are unlikely
     desc "Project has #{f} disabled"
     condition(:"#{f}_disabled", score: 32) { !access_allowed_to?(f.to_sym) }
@@ -354,7 +335,11 @@ class ProjectPolicy < BasePolicy
     enable :build_read_container_image
   end
 
-  rule { (can?(:public_user_access) | can?(:reporter_access)) & forking_allowed }.policy do
+  rule { forking_disabled }.policy do
+    prevent(:fork_project)
+  end
+
+  rule { (can?(:public_user_access) | can?(:reporter_access)) }.policy do
     enable :fork_project
   end
 
@@ -857,14 +842,7 @@ class ProjectPolicy < BasePolicy
   def access_allowed_to?(feature)
     return false unless project.project_feature
 
-    case project.project_feature.access_level(feature)
-    when ProjectFeature::DISABLED
-      false
-    when ProjectFeature::PRIVATE
-      can?(:read_all_resources) || team_access_level >= ProjectFeature.required_minimum_access_level(feature)
-    else
-      true
-    end
+    project.project_feature.feature_available?(feature, @user)
   end
 
   def resource_access_token_feature_available?
