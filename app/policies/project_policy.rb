@@ -832,11 +832,8 @@ class ProjectPolicy < BasePolicy
   end
 
   def lookup_access_level!
-    return ::Gitlab::Access::REPORTER if alert_bot?
-    return ::Gitlab::Access::REPORTER if support_bot? && service_desk_enabled?
-
-    # NOTE: max_member_access has its own cache
-    project.team.max_member_access(@user.id)
+    # NOTE: max_member_access_for_user has its own cache
+    project.team.max_member_access_for_user(@user)
   end
 
   def access_allowed_to?(feature)
