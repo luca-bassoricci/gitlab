@@ -70,10 +70,11 @@ The table shows a list of related workflow items for the selected stage. Based o
 
 The **Overview** dashboard in value stream analytics shows key metrics and DORA metrics of group performance. Based on the filter you select, the dashboard automatically aggregates DORA metrics and displays the current status of the value stream.
 
-To view the overview metrics dashboard:
+To view the DORA metrics and key metrics:
 
 1. On the top bar, select **Menu > Groups** and find your group.
 1. On the left sidebar, select **Analytics > Value stream**.
+1. Select **Overview**.
 1. Optional. Filter the results:
    1. Select the **Filter results** text box.
    1. Select a parameter.
@@ -82,7 +83,7 @@ To view the overview metrics dashboard:
       - In the **From** field, select a start date.
       - In the **To** field, select an end date.
 
-The Overview metrics dashboard display below the **Filter results** text box.
+Key metrics and DORA metrics display below the **Filter results** text box.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/wQU-mWvNSiI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -91,22 +92,21 @@ The Overview metrics dashboard display below the **Filter results** text box.
 - Lead time: Median time from when the issue was created to when it was closed.
 - Cycle time: Median time from first commit to issue closed. GitLab measures cycle time from the earliest
 commit of a [linked issue's merge request](../../project/issues/crosslinking_issues.md#from-commit-messages) to when that issue is closed. The cycle time approach underestimates the lead time because merge request creation is always later than commit time.
-- New Issues: Number of new issues created
-- Deploys: Total number of deploys to production
+- New issues: Number of new issues created.
+- Deploys: Total number of deployments to production.
 
-### View the DORA metrics **(ULTIMATE)**
+### DORA metrics **(ULTIMATE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/340150) lead time for changes DORA metric in GitLab 14.5.
 > - DORA API-based deployment metrics for value stream analytics for groups were [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/337256) from GitLab Ultimate to GitLab Premium in GitLab 14.3.
 > - DORA and key metrics were [separated into distinct rows in the UI](https://gitlab.com/gitlab-org/gitlab/-/issues/359060) in GitLab 15.0.
 
-The [DevOps Research and Assessment (DORA)](https://www.devops-research.com/research.html) team developed a list of four metrics that are straightforward, focused, and easy to implement. They form an excellent foundation for engineering metrics initiatives, helping improve DevOps efficiency while also building a bridge to business stakeholders. 
+The value stream analytics **Overview** dashboard displays the following [DORA](../../../user/analytics/index.md) metrics:
 
 These [four DORA metrics](../../../user/analytics/index.md) are: Deployment Frequency, Lead time for changes, Mean Time to Recover and Change Failure Rate.
 DORA metrics are calculated based on data from the
 [DORA API](../../../api/dora/metrics.md#devops-research-and-assessment-dora-key-metrics-api).
 
-> DORA API-based deployment metrics for value stream analytics for groups were [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/337256) from GitLab Ultimate to GitLab Premium in 14.3.
 
 To view deployment metrics, you must have a
 [production environment configured](../../../ci/environments/index.md#deployment-tier-of-environments).
@@ -116,8 +116,8 @@ The date range selector filters items by the event time. This is the time when t
 selected stage finished for the given item.
 
 NOTE:
-In GitLab 13.9 and later, metrics are calculated based on when the deployment was finished.
-In GitLab 13.8 and earlier, metrics are calculated based on when the deployment was created.
+In GitLab 13.9 and later, deployment frequency metrics are calculated based on when the deployment was finished.
+In GitLab 13.8 and earlier, deployment frequency metrics are calculated based on when the deployment was created.
 
 ### How value stream analytics aggregates data
 
