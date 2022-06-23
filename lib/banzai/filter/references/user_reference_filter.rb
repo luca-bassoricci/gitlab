@@ -95,7 +95,7 @@ module Banzai
         def link_to_all(link_content: nil)
           author = context[:author]
 
-          if author && !team_member?(author)
+          if author && (author.bot? || !team_member?(author))
             link_content
           else
             parent_url(link_content, author)
