@@ -832,14 +832,24 @@ class ProjectPolicy < BasePolicy
   end
 
   def lookup_access_level!
-    # NOTE: max_member_access_for_user has its own cache
-    project.team.max_member_access_for_user(@user)
+    return ::Gitlab::Access::REPORTER if alert_bot?
+    return ::Gitlab::Access::REPORTER if support_bot? && service_desk_enabled?
+
+    # NOTE: max_member_access has its own cache
+    project.team.max_member_access(@user.id)
   end
 
   def access_allowed_to?(feature)
     return false unless project.project_feature
 
-    project.project_feature.feature_available?(feature, @user)
+    case project.project_feature.access_level(feature)
+    when ProjectFeature::DISABLED
+      false
+    when ProjectFeature::PRIVATE
+      can?(:read_all_resources) || team_access_level >= ProjectFeature.required_minimum_access_level(feature)
+    else
+      true
+    end
   end
 
   def resource_access_token_feature_available?

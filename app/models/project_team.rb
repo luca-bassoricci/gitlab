@@ -168,7 +168,7 @@ class ProjectTeam
   def member?(user, min_access_level = Gitlab::Access::GUEST)
     return false unless user
 
-    max_member_access_for_user(user) >= min_access_level
+    max_member_access(user.id) >= min_access_level
   end
 
   def human_max_access(user_id)
@@ -195,13 +195,6 @@ class ProjectTeam
 
   def purge_member_access_cache_for_user_id(user_id)
     project.purge_resource_id_from_request_store(User, user_id)
-  end
-
-  def max_member_access_for_user(user)
-    return Gitlab::Access::REPORTER if user.support_bot? && project.service_desk_enabled?
-    return Gitlab::Access::REPORTER if user.alert_bot?
-
-    max_member_access(user.id)
   end
 
   def max_member_access(user_id)
