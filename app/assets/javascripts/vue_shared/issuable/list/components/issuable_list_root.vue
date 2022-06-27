@@ -1,14 +1,19 @@
 <script>
 import { GlAlert, GlKeysetPagination, GlSkeletonLoader, GlPagination } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import PageSizeSelector from '~/vue_shared/components/page_size_selector.vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
+import { PAGE_SIZE_STORAGE_KEY } from '~/issues/list/constants';
 import { DEFAULT_SKELETON_COUNT } from '../constants';
 import IssuableBulkEditSidebar from './issuable_bulk_edit_sidebar.vue';
 import IssuableItem from './issuable_item.vue';
 import IssuableTabs from './issuable_tabs.vue';
+
+export const DEFAULT_PAGE_SIZE = 20;
 
 const VueDraggable = () => import('vuedraggable');
 
@@ -29,6 +34,8 @@ export default {
     IssuableBulkEditSidebar,
     GlPagination,
     VueDraggable,
+    PageSizeSelector,
+    LocalStorageSync,
   },
   props: {
     namespace: {
@@ -173,10 +180,16 @@ export default {
       required: false,
       default: false,
     },
+    showPageSizeChangeControls: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
       checkedIssuables: {},
+      pageSize: DEFAULT_PAGE_SIZE,
     };
   },
   computed: {
@@ -262,7 +275,11 @@ export default {
     handleVueDraggableUpdate({ newIndex, oldIndex }) {
       this.$emit('reorder', { newIndex, oldIndex });
     },
+    handlePageSizeChange(newPageSize) {
+      this.$emit('page-size-change', newPageSize);
+    },
   },
+  PAGE_SIZE_STORAGE_KEY,
 };
 </script>
 
@@ -353,24 +370,37 @@ export default {
       <slot v-else name="empty-state"></slot>
     </template>
 
-    <div v-if="showPaginationControls && useKeysetPagination" class="gl-text-center gl-mt-3">
+    <div class="gl-text-center gl-mt-6 gl-relative">
       <gl-keyset-pagination
+        v-if="showPaginationControls && useKeysetPagination"
         :has-next-page="hasNextPage"
         :has-previous-page="hasPreviousPage"
         @next="$emit('next-page')"
         @prev="$emit('previous-page')"
       />
+      <gl-pagination
+        v-else-if="showPaginationControls"
+        :per-page="defaultPageSize"
+        :total-items="totalItems"
+        :value="currentPage"
+        :prev-page="previousPage"
+        :next-page="nextPage"
+        align="center"
+        class="gl-pagination gl-mt-3"
+        @input="$emit('page-change', $event)"
+      />
+
+      <local-storage-sync
+        v-if="showPageSizeChangeControls"
+        v-model="pageSize"
+        :storage-key="$options.PAGE_SIZE_STORAGE_KEY"
+      >
+        <page-size-selector
+          v-model="pageSize"
+          class="gl-absolute gl-right-0"
+          @input="handlePageSizeChange"
+        />
+      </local-storage-sync>
     </div>
-    <gl-pagination
-      v-else-if="showPaginationControls"
-      :per-page="defaultPageSize"
-      :total-items="totalItems"
-      :value="currentPage"
-      :prev-page="previousPage"
-      :next-page="nextPage"
-      align="center"
-      class="gl-pagination gl-mt-3"
-      @input="$emit('page-change', $event)"
-    />
   </div>
 </template>

@@ -29,6 +29,7 @@ import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_ro
 import { IssuableListTabs, IssuableStates } from '~/vue_shared/issuable/list/constants';
 import IssuesListApp from '~/issues/list/components/issues_list_app.vue';
 import NewIssueDropdown from '~/issues/list/components/new_issue_dropdown.vue';
+
 import {
   CREATED_DESC,
   RELATIVE_POSITION,
@@ -753,9 +754,19 @@ describe('CE IssuesListApp component', () => {
     });
 
     describe.each`
-      event              | params
-      ${'next-page'}     | ${{ page_after: 'endCursor', page_before: undefined, first_page_size: 20, last_page_size: undefined }}
-      ${'previous-page'} | ${{ page_after: undefined, page_before: 'startCursor', first_page_size: undefined, last_page_size: 20 }}
+      event | params
+      ${'next-page'} | ${{
+  page_after: 'endCursor',
+  page_before: undefined,
+  first_page_size: 20,
+  last_page_size: undefined,
+}}
+      ${'previous-page'} | ${{
+  page_after: undefined,
+  page_before: 'startCursor',
+  first_page_size: undefined,
+  last_page_size: 20,
+}}
     `('when "$event" event is emitted by IssuableList', ({ event, params }) => {
       beforeEach(() => {
         wrapper = mountComponent({
@@ -1030,4 +1041,41 @@ describe('CE IssuesListApp component', () => {
       expect(mockQuery).toHaveBeenCalledWith(expect.objectContaining({ hideUsers }));
     });
   });
+
+  describe.each`
+    event | params
+    ${'page-size-change'} | ${{
+  first_page_size: 20,
+  last_page_size: undefined,
+  page_after: null,
+  page_before: null,
+}}
+  `(
+    'when "$event" event is emitted by IssuableList when page size change called',
+    ({ event, params }) => {
+      beforeEach(() => {
+        wrapper = mountComponent({
+          data: {
+            pageInfo: {
+              endCursor: 'endCursor',
+              startCursor: 'startCursor',
+            },
+          },
+        });
+        jest.spyOn(wrapper.vm.$router, 'push');
+
+        findIssuableList().vm.$emit(event);
+      });
+
+      it('scrolls to the top when page size change called', () => {
+        expect(scrollUp).toHaveBeenCalled();
+      });
+
+      it(`updates url when page size change called`, () => {
+        expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
+          query: expect.objectContaining(params),
+        });
+      });
+    },
+  );
 });

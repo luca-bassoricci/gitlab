@@ -9,6 +9,8 @@ import IssuableItem from '~/vue_shared/issuable/list/components/issuable_item.vu
 import IssuableListRoot from '~/vue_shared/issuable/list/components/issuable_list_root.vue';
 import IssuableTabs from '~/vue_shared/issuable/list/components/issuable_tabs.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import PageSizeSelector from '~/vue_shared/components/page_size_selector.vue';
 
 import { mockIssuableListProps, mockIssuables } from '../mock_data';
 
@@ -44,6 +46,8 @@ describe('IssuableListRoot', () => {
   const findIssuableItem = () => wrapper.findComponent(IssuableItem);
   const findIssuableTabs = () => wrapper.findComponent(IssuableTabs);
   const findVueDraggable = () => wrapper.findComponent(VueDraggable);
+  const findPageSizeSelector = () => wrapper.findComponent(PageSizeSelector);
+  const findLocalStorageSync = () => wrapper.findComponent(LocalStorageSync);
 
   afterEach(() => {
     wrapper.destroy();
@@ -481,6 +485,28 @@ describe('IssuableListRoot', () => {
       it('does not render VueDraggable component', () => {
         expect(findVueDraggable().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('page size selector', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        props: {
+          showPageSizeChangeControls: true,
+        },
+      });
+    });
+
+    it('has the page size change component', async () => {
+      expect(findPageSizeSelector().exists()).toBe(true);
+    });
+
+    it('sets up the local storage sync correctly', async () => {
+      const pageSize = 123;
+      findPageSizeSelector().vm.$emit('input', pageSize);
+      await nextTick();
+
+      expect(findLocalStorageSync().props('value')).toBe(pageSize);
     });
   });
 });

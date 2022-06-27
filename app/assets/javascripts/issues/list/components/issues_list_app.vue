@@ -70,6 +70,7 @@ import {
   UPDATED_DESC,
   urlSortParams,
 } from '../constants';
+
 import eventHub from '../eventhub';
 import reorderIssuesMutation from '../queries/reorder_issues.mutation.graphql';
 import searchLabelsQuery from '../queries/search_labels.query.graphql';
@@ -168,6 +169,7 @@ export default {
       showBulkEditSidebar: false,
       sortKey: CREATED_DESC,
       state: IssuableStates.Opened,
+      pageSize: PAGE_SIZE,
     };
   },
   apollo: {
@@ -564,18 +566,20 @@ export default {
       this.$router.push({ query: this.urlParams });
     },
     handleNextPage() {
+      const { pageSize } = this;
       this.pageParams = {
         afterCursor: this.pageInfo.endCursor,
-        firstPageSize: PAGE_SIZE,
+        firstPageSize: pageSize,
       };
       scrollUp();
 
       this.$router.push({ query: this.urlParams });
     },
     handlePreviousPage() {
+      const { pageSize } = this;
       this.pageParams = {
         beforeCursor: this.pageInfo.startCursor,
-        lastPageSize: PAGE_SIZE,
+        lastPageSize: pageSize,
       };
       scrollUp();
 
@@ -664,6 +668,33 @@ export default {
     toggleBulkEditSidebar(showBulkEditSidebar) {
       this.showBulkEditSidebar = showBulkEditSidebar;
     },
+    handlePageSizeChange(newPageSize) {
+      /** make sure the page number is preserved so that the current context is not lost* */
+      const lastPageSize = getParameterByName(PARAM_LAST_PAGE_SIZE);
+      const pageAfter = getParameterByName(PARAM_PAGE_AFTER);
+      const pageBefore = getParameterByName(PARAM_PAGE_BEFORE);
+      let pageParamsObject = {};
+      let pageNumberSize = 'firstPageSize';
+      let pageCursor;
+      pageNumberSize = lastPageSize ? 'lastPageSize' : 'firstPageSize';
+      /** page param cursor * */
+      pageParamsObject = {
+        [pageNumberSize]: newPageSize,
+      };
+
+      /** page after or before * */
+      if (pageAfter || pageBefore) {
+        pageCursor = pageAfter ? 'afterCursor' : 'beforeCursor';
+        pageParamsObject[pageCursor] = pageAfter || pageBefore;
+      }
+
+      /** depending upon what page or page size we are dynamically set pageParams * */
+      this.pageParams = pageParamsObject;
+      this.pageSize = newPageSize;
+      scrollUp();
+
+      this.$router.push({ query: this.urlParams });
+    },
     updateData(sortValue) {
       const firstPageSize = getParameterByName(PARAM_FIRST_PAGE_SIZE);
       const lastPageSize = getParameterByName(PARAM_LAST_PAGE_SIZE);
@@ -734,6 +765,7 @@ export default {
       :show-pagination-controls="showPaginationControls"
       sync-filter-and-sort
       use-keyset-pagination
+      show-page-size-change-controls
       :has-next-page="pageInfo.hasNextPage"
       :has-previous-page="pageInfo.hasPreviousPage"
       @click-tab="handleClickTab"
@@ -744,6 +776,7 @@ export default {
       @reorder="handleReorder"
       @sort="handleSort"
       @update-legacy-bulk-edit="handleUpdateLegacyBulkEdit"
+      @page-size-change="handlePageSizeChange"
     >
       <template #nav-actions>
         <gl-button
