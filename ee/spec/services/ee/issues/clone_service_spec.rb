@@ -71,7 +71,8 @@ RSpec.describe Issues::CloneService do
         end
 
         it 'tracks usage data for changed epic action' do
-          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user,
+                                                                                                                          project: new_project)
 
           subject
         end

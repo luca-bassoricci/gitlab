@@ -35,7 +35,8 @@ RSpec.describe ::SystemNotes::TimeTrackingService do
       end
 
       it 'tracks the issue event in usage ping' do
-        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_due_date_changed_action).with(author: author)
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_due_date_changed_action)
+                                                                           .with(author: author, project: project)
 
         subject
       end
@@ -45,7 +46,8 @@ RSpec.describe ::SystemNotes::TimeTrackingService do
       let_it_be(:noteable) { create(:merge_request, source_project: project) }
 
       it 'does not track the issue event in usage ping' do
-        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_due_date_changed_action).with(author: author)
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_due_date_changed_action)
+                                                                               .with(author: author, project: project)
 
         subject
       end
@@ -89,7 +91,8 @@ RSpec.describe ::SystemNotes::TimeTrackingService do
       end
 
       it 'tracks the issue event in usage ping' do
-        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_time_estimate_changed_action).with(author: author)
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_time_estimate_changed_action)
+                                                                           .with(author: author, project: project)
 
         subject
       end
@@ -99,7 +102,8 @@ RSpec.describe ::SystemNotes::TimeTrackingService do
       let_it_be(:noteable) { create(:merge_request, source_project: project) }
 
       it 'does not track the issue event in usage ping' do
-        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_time_estimate_changed_action).with(author: author)
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_time_estimate_changed_action)
+                                                                               .with(author: author, project: project)
 
         subject
       end
@@ -181,7 +185,8 @@ RSpec.describe ::SystemNotes::TimeTrackingService do
         end
 
         it 'tracks the issue event in usage ping' do
-          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_time_spent_changed_action).with(author: author)
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_time_spent_changed_action)
+                                                                             .with(author: author, project: project)
 
           spend_time!(277200)
 
@@ -193,7 +198,8 @@ RSpec.describe ::SystemNotes::TimeTrackingService do
         let_it_be(:noteable) { create(:merge_request, source_project: project) }
 
         it 'does not track the issue event in usage ping' do
-          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_time_estimate_changed_action).with(author: author)
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_time_estimate_changed_action)
+                                                                                 .with(author: author, project: project)
 
           spend_time!(277200)
 

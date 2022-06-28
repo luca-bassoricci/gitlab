@@ -53,7 +53,8 @@ RSpec.describe ResourceEvents::ChangeWeightService do
   end
 
   it 'tracks issue usage data counters' do
-    expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_weight_changed_action).with(author: user)
+    expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_weight_changed_action)
+                                                                       .with(author: user, project: issue.project)
 
     subject
   end

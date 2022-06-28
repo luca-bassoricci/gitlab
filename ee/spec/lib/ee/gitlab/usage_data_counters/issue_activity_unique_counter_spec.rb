@@ -5,13 +5,14 @@ require 'spec_helper'
 RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_gitlab_redis_shared_state do
   let_it_be(:user1) { build(:user, id: 1) }
   let_it_be(:user2) { build(:user, id: 2) }
+  let_it_be(:project) { build(:project) }
 
   context 'for Issue health status changed actions' do
     it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_HEALTH_STATUS_CHANGED }
 
       def track_action(params)
-        described_class.track_issue_health_status_changed_action(**params)
+        described_class.track_issue_health_status_changed_action(**params, project: project)
       end
     end
   end
@@ -21,7 +22,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
       let(:action) { described_class::ISSUE_ITERATION_CHANGED }
 
       def track_action(params)
-        described_class.track_issue_iteration_changed_action(**params)
+        described_class.track_issue_iteration_changed_action(**params, project: project)
       end
     end
   end
@@ -31,7 +32,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
       let(:action) { described_class::ISSUE_WEIGHT_CHANGED }
 
       def track_action(params)
-        described_class.track_issue_weight_changed_action(**params)
+        described_class.track_issue_weight_changed_action(**params, project: project)
       end
     end
   end
@@ -41,7 +42,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
       let(:action) { described_class::ISSUE_ADDED_TO_EPIC}
 
       def track_action(params)
-        described_class.track_issue_added_to_epic_action(**params)
+        described_class.track_issue_added_to_epic_action(**params, project: project)
       end
     end
   end
@@ -51,7 +52,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
       let(:action) { described_class::ISSUE_REMOVED_FROM_EPIC}
 
       def track_action(params)
-        described_class.track_issue_removed_from_epic_action(**params)
+        described_class.track_issue_removed_from_epic_action(**params, project: project)
       end
     end
   end
@@ -61,7 +62,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
       let(:action) { described_class::ISSUE_CHANGED_EPIC}
 
       def track_action(params)
-        described_class.track_issue_changed_epic_action(**params)
+        described_class.track_issue_changed_epic_action(**params, project: project)
       end
     end
   end

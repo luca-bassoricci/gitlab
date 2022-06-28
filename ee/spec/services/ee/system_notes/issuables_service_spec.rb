@@ -41,7 +41,8 @@ RSpec.describe ::SystemNotes::IssuablesService do
     end
 
     it 'tracks the issue event in usage ping' do
-      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_health_status_changed_action).with(author: author)
+      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_health_status_changed_action)
+                                                                         .with(author: author, project: project)
 
       subject
     end

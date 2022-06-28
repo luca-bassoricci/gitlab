@@ -690,7 +690,7 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
         it 'does not tracks usage' do
           expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
-            .not_to receive(:track_issue_cloned_action).with(author: author)
+            .not_to receive(:track_issue_cloned_action).with(author: author, project: project)
 
           subject
         end
@@ -701,7 +701,7 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
         it 'tracks usage' do
           expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
-            .to receive(:track_issue_cloned_action).with(author: author)
+            .to receive(:track_issue_cloned_action).with(author: author, project: project)
 
           subject
         end

@@ -26,7 +26,10 @@ module ResourceEvents
       ApplicationRecord.legacy_bulk_insert(ResourceLabelEvent.table_name, labels) # rubocop:disable Gitlab/BulkInsert
       resource.expire_note_etag_cache
 
-      Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_label_changed_action(author: user) if resource.is_a?(Issue)
+      if resource.is_a?(Issue)
+        Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_label_changed_action(author: user,
+                                                                                               project: resource.project)
+      end
     end
 
     private

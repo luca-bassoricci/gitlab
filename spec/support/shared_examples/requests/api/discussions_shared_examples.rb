@@ -129,9 +129,11 @@ RSpec.shared_examples 'discussions API' do |parent_type, noteable_type, id_name,
       end
 
       it 'does not track any events', :snowplow do
+        allow(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_created_action)
+
         post api("/#{parent_type}/#{parent.id}/#{noteable_type}/#{noteable[id_name]}/discussions"), params: { body: 'hi!' }
 
-        expect_no_snowplow_event
+        expect_no_snowplow_event(category: 'Notes::CreateService', action: 'execute')
       end
     end
 

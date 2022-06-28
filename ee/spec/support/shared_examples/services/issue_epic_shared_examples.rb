@@ -67,8 +67,8 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       end
 
       it 'tracks usage data for added to epic action' do
-        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
-
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action)
+                                                                           .with(author: user, project: project)
         execute
       end
     end
@@ -113,7 +113,8 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       end
 
       it 'tracks usage data for added to epic action' do
-        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action)
+                                                                           .with(author: user, project: project)
 
         execute
       end

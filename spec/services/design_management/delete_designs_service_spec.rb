@@ -110,7 +110,8 @@ RSpec.describe DesignManagement::DeleteDesignsService do
         end
 
         it 'updates UsageData for removed designs' do
-          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_designs_removed_action).with(author: user)
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_designs_removed_action)
+                                                                             .with(author: user, project: project)
 
           run_service
         end

@@ -18,8 +18,16 @@ RSpec.shared_examples 'a daily tracked issuable event' do
     end
   end
 
-  it 'does not track edit actions if author is not present' do
-    expect(track_action(author: nil)).to be_nil
+  context 'when author not present', :snowplow do
+    let(:author) { nil }
+
+    it 'does not track edit actions' do
+      expect(track_action(author: nil)).to be_nil
+    end
+
+    it 'does not track Snowplow action' do
+      expect_no_snowplow_event
+    end
   end
 end
 
