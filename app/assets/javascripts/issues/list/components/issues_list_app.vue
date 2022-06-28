@@ -435,8 +435,8 @@ export default {
         ...this.urlFilterParams,
         first_page_size: this.pageParams.firstPageSize,
         last_page_size: this.pageParams.lastPageSize,
-        page_after: this.pageParams.afterCursor,
-        page_before: this.pageParams.beforeCursor,
+        page_after: this.pageParams.afterCursor ?? undefined,
+        page_before: this.pageParams.beforeCursor ?? undefined,
       };
     },
   },
@@ -545,7 +545,7 @@ export default {
     },
     handleClickTab(state) {
       if (this.state !== state) {
-        this.pageParams = getInitialPageParams(this.sortKey);
+        this.pageParams = getInitialPageParams(this.pageSize);
       }
       this.state = state;
 
@@ -560,26 +560,24 @@ export default {
         return;
       }
 
-      this.pageParams = getInitialPageParams(this.sortKey);
+      this.pageParams = getInitialPageParams(this.pageSize);
       this.filterTokens = filter;
 
       this.$router.push({ query: this.urlParams });
     },
     handleNextPage() {
-      const { pageSize } = this;
       this.pageParams = {
         afterCursor: this.pageInfo.endCursor,
-        firstPageSize: pageSize,
+        firstPageSize: this.pageSize,
       };
       scrollUp();
 
       this.$router.push({ query: this.urlParams });
     },
     handlePreviousPage() {
-      const { pageSize } = this;
       this.pageParams = {
         beforeCursor: this.pageInfo.startCursor,
-        lastPageSize: pageSize,
+        lastPageSize: this.pageSize,
       };
       scrollUp();
 
@@ -628,7 +626,7 @@ export default {
       }
 
       if (this.sortKey !== sortKey) {
-        this.pageParams = getInitialPageParams(sortKey);
+        this.pageParams = getInitialPageParams(this.pageSize);
       }
       this.sortKey = sortKey;
 
@@ -671,25 +669,9 @@ export default {
     handlePageSizeChange(newPageSize) {
       /** make sure the page number is preserved so that the current context is not lost* */
       const lastPageSize = getParameterByName(PARAM_LAST_PAGE_SIZE);
-      const pageAfter = getParameterByName(PARAM_PAGE_AFTER);
-      const pageBefore = getParameterByName(PARAM_PAGE_BEFORE);
-      let pageParamsObject = {};
-      let pageNumberSize = 'firstPageSize';
-      let pageCursor;
-      pageNumberSize = lastPageSize ? 'lastPageSize' : 'firstPageSize';
-      /** page param cursor * */
-      pageParamsObject = {
-        [pageNumberSize]: newPageSize,
-      };
-
-      /** page after or before * */
-      if (pageAfter || pageBefore) {
-        pageCursor = pageAfter ? 'afterCursor' : 'beforeCursor';
-        pageParamsObject[pageCursor] = pageAfter || pageBefore;
-      }
-
+      const pageNumberSize = lastPageSize ? 'lastPageSize' : 'firstPageSize';
       /** depending upon what page or page size we are dynamically set pageParams * */
-      this.pageParams = pageParamsObject;
+      this.pageParams[pageNumberSize] = newPageSize;
       this.pageSize = newPageSize;
       scrollUp();
 
@@ -727,7 +709,7 @@ export default {
       this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
       this.filterTokens = isSearchDisabled ? [] : getFilterTokens(window.location.search);
       this.pageParams = getInitialPageParams(
-        sortKey,
+        this.pageSize,
         isPositiveInteger(firstPageSize) ? parseInt(firstPageSize, 10) : undefined,
         isPositiveInteger(lastPageSize) ? parseInt(lastPageSize, 10) : undefined,
         pageAfter,
@@ -763,6 +745,7 @@ export default {
       :is-manual-ordering="isManualOrdering"
       :show-bulk-edit-sidebar="showBulkEditSidebar"
       :show-pagination-controls="showPaginationControls"
+      :default-page-size="pageSize"
       sync-filter-and-sort
       use-keyset-pagination
       show-page-size-change-controls

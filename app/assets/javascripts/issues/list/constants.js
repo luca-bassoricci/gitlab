@@ -56,14 +56,9 @@ export const i18n = {
   upvotes: __('Upvotes'),
 };
 
-export const PAGE_SIZE_STORAGE_KEY = 'issuable_list_page_size';
-
-const defaultPageSize = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
-
 export const ISSUE_REFERENCE = /^#\d+$/;
 export const MAX_LIST_SIZE = 10;
-export const PAGE_SIZE_DEFAULT = 20;
-export const PAGE_SIZE = parseInt(defaultPageSize, 10) || PAGE_SIZE_DEFAULT;
+export const PAGE_SIZE = 20;
 export const PAGE_SIZE_MANUAL = 100;
 export const PARAM_ASSIGNEE_ID = 'assignee_id';
 export const PARAM_FIRST_PAGE_SIZE = 'first_page_size';

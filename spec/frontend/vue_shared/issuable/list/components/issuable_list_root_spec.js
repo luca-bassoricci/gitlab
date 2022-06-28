@@ -296,6 +296,7 @@ describe('IssuableListRoot', () => {
       });
 
       expect(findGlKeysetPagination().exists()).toBe(false);
+      expect(findPageSizeSelector().exists()).toBe(false);
       expect(findGlPagination().props()).toMatchObject({
         perPage: 20,
         value: 1,

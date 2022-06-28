@@ -1042,40 +1042,17 @@ describe('CE IssuesListApp component', () => {
     });
   });
 
-  describe.each`
-    event | params
-    ${'page-size-change'} | ${{
-  first_page_size: 20,
-  last_page_size: undefined,
-  page_after: null,
-  page_before: null,
-}}
-  `(
-    'when "$event" event is emitted by IssuableList when page size change called',
-    ({ event, params }) => {
-      beforeEach(() => {
-        wrapper = mountComponent({
-          data: {
-            pageInfo: {
-              endCursor: 'endCursor',
-              startCursor: 'startCursor',
-            },
-          },
-        });
-        jest.spyOn(wrapper.vm.$router, 'push');
+  describe('when "page-size-change" event is emitted by IssuableList', () => {
+    it('updates IssuableList with url params when page size event is called', async () => {
+      wrapper = mountComponent();
+      jest.spyOn(wrapper.vm.$router, 'push');
 
-        findIssuableList().vm.$emit(event);
-      });
+      findIssuableList().vm.$emit('page-size-change', 50);
+      await nextTick();
 
-      it('scrolls to the top when page size change called', () => {
-        expect(scrollUp).toHaveBeenCalled();
+      expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
+        query: expect.objectContaining({ first_page_size: 50 }),
       });
-
-      it(`updates url when page size change called`, () => {
-        expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
-          query: expect.objectContaining(params),
-        });
-      });
-    },
-  );
+    });
+  });
 });

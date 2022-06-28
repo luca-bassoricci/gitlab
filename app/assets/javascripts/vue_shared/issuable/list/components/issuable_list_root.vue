@@ -7,8 +7,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
-import { PAGE_SIZE_STORAGE_KEY } from '~/issues/list/constants';
-import { DEFAULT_SKELETON_COUNT } from '../constants';
+import { DEFAULT_SKELETON_COUNT, PAGE_SIZE_STORAGE_KEY } from '../constants';
 import IssuableBulkEditSidebar from './issuable_bulk_edit_sidebar.vue';
 import IssuableItem from './issuable_item.vue';
 import IssuableTabs from './issuable_tabs.vue';
@@ -189,7 +188,6 @@ export default {
   data() {
     return {
       checkedIssuables: {},
-      pageSize: DEFAULT_PAGE_SIZE,
     };
   },
   computed: {
@@ -392,11 +390,12 @@ export default {
 
       <local-storage-sync
         v-if="showPageSizeChangeControls"
-        v-model="pageSize"
+        :value="defaultPageSize"
         :storage-key="$options.PAGE_SIZE_STORAGE_KEY"
+        @input="handlePageSizeChange"
       >
         <page-size-selector
-          v-model="pageSize"
+          :value="defaultPageSize"
           class="gl-absolute gl-right-0"
           @input="handlePageSizeChange"
         />

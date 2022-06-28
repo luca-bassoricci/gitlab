@@ -21,6 +21,7 @@ import {
   MILESTONE_DUE_DESC,
   NORMAL_FILTER,
   PAGE_SIZE,
+  PAGE_SIZE_MANUAL,
   PARAM_ASSIGNEE_ID,
   POPULARITY_ASC,
   POPULARITY_DESC,
@@ -43,13 +44,16 @@ import {
   urlSortParams,
   WEIGHT_ASC,
   WEIGHT_DESC,
-  CLOSED_ASC,
-  CLOSED_DESC,
+  PAGE_SIZE_STORAGE_KEY,
 } from './constants';
 
+const defaultPageSize = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
+
 export const getInitialPageParams = (
-  pageSize,
-  firstPageSize = pageSize ?? PAGE_SIZE,
+  sortKey,
+  firstPageSize = sortKey === RELATIVE_POSITION_ASC
+    ? PAGE_SIZE_MANUAL
+    : parseInt(defaultPageSize, 10) || PAGE_SIZE,
   lastPageSize,
   afterCursor,
   beforeCursor,
@@ -93,14 +97,6 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
     },
     {
       id: 4,
-      title: __('Closed date'),
-      sortDirection: {
-        ascending: CLOSED_ASC,
-        descending: CLOSED_DESC,
-      },
-    },
-    {
-      id: 5,
       title: __('Milestone due date'),
       sortDirection: {
         ascending: MILESTONE_DUE_ASC,
@@ -108,7 +104,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       },
     },
     {
-      id: 6,
+      id: 5,
       title: __('Due date'),
       sortDirection: {
         ascending: DUE_DATE_ASC,
@@ -116,7 +112,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       },
     },
     {
-      id: 7,
+      id: 6,
       title: __('Popularity'),
       sortDirection: {
         ascending: POPULARITY_ASC,
@@ -124,7 +120,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       },
     },
     {
-      id: 8,
+      id: 7,
       title: __('Label priority'),
       sortDirection: {
         ascending: LABEL_PRIORITY_ASC,
@@ -132,7 +128,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       },
     },
     {
-      id: 9,
+      id: 8,
       title: __('Manual'),
       sortDirection: {
         ascending: RELATIVE_POSITION_ASC,
@@ -140,7 +136,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       },
     },
     {
-      id: 10,
+      id: 9,
       title: __('Title'),
       sortDirection: {
         ascending: TITLE_ASC,
