@@ -57,6 +57,12 @@ class ProjectPolicy < BasePolicy
 
   condition(:default_issues_tracker, scope: :subject) { project.default_issues_tracker? }
 
+  ProjectFeature::FEATURES.each do |f|
+    # these are scored high because they are unlikely
+    desc "Project has #{f} disabled"
+    condition(:"#{f}_disabled", score: 32) { !access_allowed_to?(f.to_sym) }
+  end
+
   desc "Container registry is disabled"
   condition(:container_registry_disabled, scope: :subject) do
     if user.is_a?(DeployToken)
@@ -191,12 +197,6 @@ class ProjectPolicy < BasePolicy
   condition(:packages_disabled) { !@subject.packages_enabled }
 
   condition(:work_items_enabled, scope: :subject) { project&.work_items_feature_flag_enabled? }
-
-  ProjectFeature::FEATURES.each do |f|
-    # these are scored high because they are unlikely
-    desc "Project has #{f} disabled"
-    condition(:"#{f}_disabled", score: 32) { !access_allowed_to?(f.to_sym) }
-  end
 
   condition(:project_runner_registration_allowed) do
     Feature.disabled?(:runner_registration_control) || Gitlab::CurrentSettings.valid_runner_registrars.include?('project')
