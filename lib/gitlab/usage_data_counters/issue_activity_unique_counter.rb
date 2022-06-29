@@ -126,16 +126,19 @@ module Gitlab
           track_unique_action(ISSUE_TIME_SPENT_CHANGED, author)
         end
 
-        def track_issue_comment_added_action(author:)
+        def track_issue_comment_added_action(author:, project:)
           track_unique_action(ISSUE_COMMENT_ADDED, author)
+          send_event_to_snowplow(ISSUE_COMMENT_ADDED, author, project)
         end
 
-        def track_issue_comment_edited_action(author:)
+        def track_issue_comment_edited_action(author:, project:)
           track_unique_action(ISSUE_COMMENT_EDITED, author)
+          send_event_to_snowplow(ISSUE_COMMENT_EDITED, author, project)
         end
 
-        def track_issue_comment_removed_action(author:)
+        def track_issue_comment_removed_action(author:, project:)
           track_unique_action(ISSUE_COMMENT_REMOVED, author)
+          send_event_to_snowplow(ISSUE_COMMENT_REMOVED, author, project)
         end
 
         def track_issue_cloned_action(author:)
@@ -148,6 +151,19 @@ module Gitlab
           return unless author
 
           Gitlab::UsageDataCounters::HLLRedisCounter.track_event(action, values: author.id)
+        end
+
+        def send_event_to_snowplow(action, author, project)
+          return unless Feature.enabled?(:route_hll_to_snowplow_phase2)
+          return unless author
+
+            Gitlab::Tracking.event(
+              ISSUE_CATEGORY,
+              action.to_s,
+              project: project,
+              namespace: project&.namespace,
+              user: author
+            )
         end
       end
     end

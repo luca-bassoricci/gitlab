@@ -30,7 +30,7 @@ RSpec.describe Notes::DestroyService do
       event = Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_COMMENT_REMOVED
       counter = Gitlab::UsageDataCounters::HLLRedisCounter
 
-      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_comment_removed_action).with(author: user).and_call_original
+      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_comment_removed_action).with(author: user, project: project).and_call_original
       expect do
         described_class.new(project, user).execute(note)
       end.to change { counter.unique_events(event_names: event, start_date: 1.day.ago, end_date: 1.day.from_now) }.by(1)
