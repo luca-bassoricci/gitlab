@@ -29,14 +29,11 @@ import {
 import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
 
 describe('getInitialPageParams', () => {
-  it.each(Object.keys(urlSortParams))(
-    'returns the correct page params for sort key %s',
-    (sortKey) => {
-      const firstPageSize = PAGE_SIZE;
+  it('returns the correct page params for page size %s', () => {
+    const firstPageSize = PAGE_SIZE;
 
-      expect(getInitialPageParams(PAGE_SIZE)).toEqual({ firstPageSize });
-    },
-  );
+    expect(getInitialPageParams(PAGE_SIZE)).toEqual({ firstPageSize });
+  });
 
   it.each(Object.keys(urlSortParams))(
     'returns the correct page params for sort key %s with afterCursor',
@@ -57,24 +54,21 @@ describe('getInitialPageParams', () => {
     },
   );
 
-  it.each(Object.keys(urlSortParams))(
-    'returns the correct page params for sort key %s with beforeCursor',
-    (sortKey) => {
-      const firstPageSize = undefined;
-      const lastPageSize = PAGE_SIZE;
-      const afterCursor = undefined;
-      const beforeCursor = 'anotherRandomCursorString';
-      const pageParams = getInitialPageParams(
-        PAGE_SIZE,
-        firstPageSize,
-        lastPageSize,
-        afterCursor,
-        beforeCursor,
-      );
+  it('returns the correct page params for sort key %s with beforeCursor', () => {
+    const firstPageSize = undefined;
+    const lastPageSize = PAGE_SIZE;
+    const afterCursor = undefined;
+    const beforeCursor = 'anotherRandomCursorString';
+    const pageParams = getInitialPageParams(
+      PAGE_SIZE,
+      firstPageSize,
+      lastPageSize,
+      afterCursor,
+      beforeCursor,
+    );
 
-      expect(pageParams).toEqual({ lastPageSize, beforeCursor });
-    },
-  );
+    expect(pageParams).toEqual({ lastPageSize, beforeCursor });
+  });
 });
 
 describe('getSortKey', () => {
