@@ -543,15 +543,15 @@ RSpec.describe Projects::CreateService, '#execute' do
       end
 
       context 'with legacy storage' do
-        let(:raw_fake_repo) { Gitlab::Git::Repository.new('default', File.join(user.namespace.full_path, 'existing.git'), nil, nil) }
+        let(:fake_repo_path) { File.join(TestEnv.repos_path, user.namespace.full_path, 'existing.git') }
 
         before do
           stub_application_setting(hashed_storage_enabled: false)
-          raw_fake_repo.create_repository
+          TestEnv.create_bare_repository(fake_repo_path)
         end
 
         after do
-          raw_fake_repo.remove
+          FileUtils.rm_rf(fake_repo_path)
         end
 
         it 'does not allow to create a project when path matches existing repository on disk' do
@@ -578,15 +578,15 @@ RSpec.describe Projects::CreateService, '#execute' do
       context 'with hashed storage' do
         let(:hash) { '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b' }
         let(:hashed_path) { '@hashed/6b/86/6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b' }
-        let(:raw_fake_repo) { Gitlab::Git::Repository.new('default', "#{hashed_path}.git", nil, nil) }
+        let(:fake_repo_path) { File.join(TestEnv.repos_path, "#{hashed_path}.git") }
 
         before do
           allow(Digest::SHA2).to receive(:hexdigest) { hash }
-          raw_fake_repo.create_repository
+          TestEnv.create_bare_repository(fake_repo_path)
         end
 
         after do
-          raw_fake_repo.remove
+          FileUtils.rm_rf(fake_repo_path)
         end
 
         it 'does not allow to create a project when path matches existing repository on disk' do

@@ -372,16 +372,16 @@ RSpec.describe Projects::TransferService do
   end
 
   context 'namespace which contains orphan repository with same projects path name' do
-    let(:raw_fake_repo) { Gitlab::Git::Repository.new('default', File.join(group.full_path, "#{project.path}.git"), nil, nil) }
+    let(:fake_repo_path) { File.join(TestEnv.repos_path, group.full_path, "#{project.path}.git") }
 
     before do
       group.add_owner(user)
 
-      raw_fake_repo.create_repository
+      TestEnv.create_bare_repository(fake_repo_path)
     end
 
     after do
-      raw_fake_repo.remove
+      FileUtils.rm_rf(fake_repo_path)
     end
 
     it 'does not allow the project transfer' do

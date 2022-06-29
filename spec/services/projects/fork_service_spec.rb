@@ -156,16 +156,16 @@ RSpec.describe Projects::ForkService do
       end
 
       context 'repository in legacy storage already exists' do
-        let(:raw_fake_repo) { Gitlab::Git::Repository.new('default', File.join(@to_user.namespace.full_path, "#{@from_project.path}.git"), nil, nil) }
+        let(:fake_repo_path) { File.join(TestEnv.repos_path, @to_user.namespace.full_path, "#{@from_project.path}.git") }
         let(:params) { { namespace: @to_user.namespace, using_service: true } }
 
         before do
           stub_application_setting(hashed_storage_enabled: false)
-          raw_fake_repo.create_repository
+          TestEnv.create_bare_repository(fake_repo_path)
         end
 
         after do
-          raw_fake_repo.remove
+          FileUtils.rm_rf(fake_repo_path)
         end
 
         subject { fork_project(@from_project, @to_user, params) }
