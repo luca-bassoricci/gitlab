@@ -184,6 +184,10 @@ module QA
         "#{api_get_path}/repository/branches"
       end
 
+      def api_repository_size_path
+        "#{api_get_path}/repository_size"
+      end
+
       def api_repository_tags_path
         "#{api_get_path}/repository/tags"
       end
@@ -358,6 +362,10 @@ module QA
 
       def create_repository_tag(tag_name, ref = default_branch)
         api_post_to(api_repository_tags_path, tag_name: tag_name, ref: ref)
+      end
+
+      def calculate_repository_size
+        api_post_to(api_repository_size_path, nil)
       end
 
       def repository_tree

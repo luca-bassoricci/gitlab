@@ -23,6 +23,22 @@ module QA
 
       attr_reader :primary_node, :secondary_node, :tertiary_node, :postgres
 
+      def git_config_disable_alternate_refs
+        [primary_node].each do |node|
+          # [primary_node, secondary_node, tertiary_node].each { |node|
+          shell %{docker exec #{node} bash -c 'git config  --system --unset-all core.alternateRefsCommand || true'}
+          shell %{docker exec #{node} bash -c "sed -i 's/^[^#]*alternateRefsCommand/#&/' /var/opt/gitlab/.gitconfig"}
+        end
+      end
+
+      def git_config_enable_alternate_refs
+        [primary_node].each do |node|
+          # [primary_node, secondary_node, tertiary_node].each { |node|
+          shell %{docker exec #{node} bash -c 'git config  --system --add core.alternateRefsCommand "exit 0 #" || true'}
+          shell %{docker exec #{node} bash -c "sed -i '/#        alternateRefsCommand/s/^#//g' /var/opt/gitlab/.gitconfig"}
+        end
+      end
+
       # Executes the praefect `dataloss` command.
       #
       # @return [Boolean] whether dataloss has occurred
