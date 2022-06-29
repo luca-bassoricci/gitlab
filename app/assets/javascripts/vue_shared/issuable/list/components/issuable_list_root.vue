@@ -12,8 +12,6 @@ import IssuableBulkEditSidebar from './issuable_bulk_edit_sidebar.vue';
 import IssuableItem from './issuable_item.vue';
 import IssuableTabs from './issuable_tabs.vue';
 
-export const DEFAULT_PAGE_SIZE = 20;
-
 const VueDraggable = () => import('vuedraggable');
 
 export default {

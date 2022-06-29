@@ -32,9 +32,9 @@ describe('getInitialPageParams', () => {
   it.each(Object.keys(urlSortParams))(
     'returns the correct page params for sort key %s',
     (sortKey) => {
-      const firstPageSize = sortKey === RELATIVE_POSITION_ASC ? PAGE_SIZE_MANUAL : PAGE_SIZE;
+      const firstPageSize = PAGE_SIZE;
 
-      expect(getInitialPageParams(sortKey)).toEqual({ firstPageSize });
+      expect(getInitialPageParams(PAGE_SIZE)).toEqual({ firstPageSize });
     },
   );
 
@@ -46,7 +46,7 @@ describe('getInitialPageParams', () => {
       const afterCursor = 'randomCursorString';
       const beforeCursor = undefined;
       const pageParams = getInitialPageParams(
-        sortKey,
+        PAGE_SIZE,
         firstPageSize,
         lastPageSize,
         afterCursor,
@@ -65,7 +65,7 @@ describe('getInitialPageParams', () => {
       const afterCursor = undefined;
       const beforeCursor = 'anotherRandomCursorString';
       const pageParams = getInitialPageParams(
-        sortKey,
+        PAGE_SIZE,
         firstPageSize,
         lastPageSize,
         afterCursor,

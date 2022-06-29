@@ -1043,7 +1043,7 @@ describe('CE IssuesListApp component', () => {
   });
 
   describe('when "page-size-change" event is emitted by IssuableList', () => {
-    it('updates IssuableList with url params when page size event is called', async () => {
+    it('updates url params with new page size', async () => {
       wrapper = mountComponent();
       jest.spyOn(wrapper.vm.$router, 'push');
 
