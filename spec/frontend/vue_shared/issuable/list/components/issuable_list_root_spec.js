@@ -500,10 +500,9 @@ describe('IssuableListRoot', () => {
       expect(findPageSizeSelector().exists()).toBe(true);
     });
 
-    it('emits "page-size-change" event when its input is changed', async () => {
+    it('emits "page-size-change" event when its input is changed', () => {
       const pageSize = 123;
       findPageSizeSelector().vm.$emit('input', pageSize);
-      await nextTick();
       expect(wrapper.emitted('page-size-change')).toEqual([[pageSize]]);
     });
   });

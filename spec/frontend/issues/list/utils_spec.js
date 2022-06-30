@@ -10,12 +10,7 @@ import {
   urlParams,
   urlParamsWithSpecialValues,
 } from 'jest/issues/list/mock_data';
-import {
-  PAGE_SIZE,
-  PAGE_SIZE_MANUAL,
-  RELATIVE_POSITION_ASC,
-  urlSortParams,
-} from '~/issues/list/constants';
+import { PAGE_SIZE, urlSortParams } from '~/issues/list/constants';
 import {
   convertToApiParams,
   convertToSearchQuery,
