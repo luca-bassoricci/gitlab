@@ -500,7 +500,7 @@ describe('IssuableListRoot', () => {
       expect(findPageSizeSelector().exists()).toBe(true);
     });
 
-    it('makes sure that page-size-change event is emitted by the component when input is changed', async () => {
+    it('emits "page-size-change" event when its input is changed', async () => {
       const pageSize = 123;
       findPageSizeSelector().vm.$emit('input', pageSize);
       await nextTick();

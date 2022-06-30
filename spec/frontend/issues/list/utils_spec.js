@@ -29,38 +29,22 @@ import {
 import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
 
 describe('getInitialPageParams', () => {
-  it('returns the correct page params for page size %s', () => {
-    const firstPageSize = PAGE_SIZE;
-
-    expect(getInitialPageParams(PAGE_SIZE)).toEqual({ firstPageSize });
+  it('returns page params with a default page size when no arguments are given', () => {
+    expect(getInitialPageParams()).toEqual({ firstPageSize: PAGE_SIZE });
   });
 
-  it.each(Object.keys(urlSortParams))(
-    'returns the correct page params for sort key %s with afterCursor',
-    (sortKey) => {
-      const firstPageSize = sortKey === RELATIVE_POSITION_ASC ? PAGE_SIZE_MANUAL : PAGE_SIZE;
-      const lastPageSize = undefined;
-      const afterCursor = 'randomCursorString';
-      const beforeCursor = undefined;
-      const pageParams = getInitialPageParams(
-        PAGE_SIZE,
-        firstPageSize,
-        lastPageSize,
-        afterCursor,
-        beforeCursor,
-      );
+  it('returns page params with the given page size', () => {
+    const pageSize = 100;
+    expect(getInitialPageParams(pageSize)).toEqual({ firstPageSize: pageSize });
+  });
 
-      expect(pageParams).toEqual({ firstPageSize, afterCursor });
-    },
-  );
-
-  it('returns the correct page params for sort key %s with beforeCursor', () => {
-    const firstPageSize = undefined;
-    const lastPageSize = PAGE_SIZE;
+  it('does not return firstPageSize when lastPageSize is provided', () => {
+    const firstPageSize = 100;
+    const lastPageSize = 50;
     const afterCursor = undefined;
-    const beforeCursor = 'anotherRandomCursorString';
+    const beforeCursor = 'randomCursorString';
     const pageParams = getInitialPageParams(
-      PAGE_SIZE,
+      100,
       firstPageSize,
       lastPageSize,
       afterCursor,
