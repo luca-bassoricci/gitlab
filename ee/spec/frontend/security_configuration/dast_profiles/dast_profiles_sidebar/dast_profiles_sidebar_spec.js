@@ -99,6 +99,7 @@ describe('DastProfilesSidebar', () => {
 
       expect(wrapper.emitted()).toEqual({
         'reopen-drawer': [[{ mode: SIDEBAR_VIEW_MODE.READING_MODE, profileType: SITE_TYPE }]],
+        'reset-active-profile': [[]],
       });
     });
   });

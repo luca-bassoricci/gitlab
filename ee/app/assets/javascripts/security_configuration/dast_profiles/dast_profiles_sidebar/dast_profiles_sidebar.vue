@@ -170,6 +170,7 @@ export default {
       const event = this.referral === REFERRAL.PARENT ? 'close-drawer' : 'reopen-drawer';
 
       this.$emit(event, { profileType: this.profileType, mode: SIDEBAR_VIEW_MODE.READING_MODE });
+      this.$emit('reset-active-profile');
       this.resetEditingMode();
     },
     profileCreated(profile) {
@@ -232,6 +233,7 @@ export default {
           @cancel="cancelEditingMode"
           @created="profileCreated"
           @edited="profileEdited"
+          v-on="$listeners"
         />
 
         <!-- Profile list - reading mode -->

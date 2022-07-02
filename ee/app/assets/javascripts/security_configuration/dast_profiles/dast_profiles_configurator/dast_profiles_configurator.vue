@@ -5,6 +5,7 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import { TYPE_SCANNER_PROFILE, TYPE_SITE_PROFILE } from '~/graphql_shared/constants';
+import DastProfilesConfiguratorModal from 'ee/security_configuration/dast_profiles/dast_profiles_configurator/dast_profiles_configurator_modal.vue';
 import DastProfilesSidebar from 'ee/security_configuration/dast_profiles/dast_profiles_sidebar/dast_profiles_sidebar.vue';
 import ScannerProfileSelector from 'ee/security_configuration/dast_profiles/dast_profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from 'ee/security_configuration/dast_profiles/dast_profile_selector/site_profile_selector.vue';
@@ -59,6 +60,7 @@ export default {
   components: {
     GlLink,
     GlSprintf,
+    DastProfilesConfiguratorModal,
     DastProfilesSidebar,
     ScannerProfileSelector,
     SiteProfileSelector,
@@ -173,14 +175,15 @@ export default {
       : this.selectedScannerProfileId;
   },
   methods: {
-    enableEditingMode(type) {
-      this.selectActiveProfile(type);
-      this.openProfileDrawer({ profileType: type, mode: SIDEBAR_VIEW_MODE.EDITING_MODE });
+    enableEditingMode({ profileType, mode }) {
+      this.resetActiveProfile();
+      this.selectActiveProfile(profileType);
+      this.openProfileDrawer({ profileType, mode });
     },
     openProfileDrawer({ profileType, mode }) {
+      this.profileType = profileType;
       this.isSideDrawerOpen = false;
       this.sidebarViewMode = mode;
-      this.profileType = profileType;
       this.$nextTick(() => {
         this.isSideDrawerOpen = true;
       });
@@ -228,69 +231,91 @@ export default {
       const type = `${profileType}Profiles`;
       this.$apollo.queries[type].refetch();
     },
+    resetActiveProfile() {
+      this.activeProfile = {};
+    },
   },
 };
 </script>
 
 <template>
   <div>
-    <section-layout
-      v-if="!failedToLoadProfiles"
-      :heading="configurationHeader || $options.i18n.dastConfigurationHeader"
-      :is-loading="isLoadingProfiles"
+    <dast-profiles-configurator-modal
+      @enable-editing-mode-proxy="enableEditingMode"
+      @close-drawer-proxy="closeProfileDrawer"
+      @profile-submitted-proxy="onScannerProfileCreated"
+      @open-drawer-proxy="openProfileDrawer"
     >
-      <template #description>
-        <slot name="description">
-          <gl-sprintf :message="$options.i18n.dastConfigurationDescription">
-            <template #link="{ content }">
-              <gl-link :href="$options.dastConfigurationHelpPath">{{ content }}</gl-link>
-            </template>
-          </gl-sprintf>
-        </slot>
-      </template>
-      <template #features>
-        <scanner-profile-selector
-          class="gl-mb-6"
-          :selected-profile="selectedScannerProfile"
-          :profile-id-in-use="savedScannerProfileId"
-          @open-drawer="
-            openProfileDrawer({
-              profileType: $options.SCANNER_TYPE,
-              mode: $options.SIDEBAR_VIEW_MODE.READING_MODE,
-            })
-          "
-          @edit="enableEditingMode($options.SCANNER_TYPE)"
-        />
+      <template
+        #default="{
+          enableEditingModeProxy,
+          closeProfileDrawerProxy,
+          openProfileDrawerProxy,
+          profileSubmittedProxy,
+          onFormTouchedProxy,
+        }"
+      >
+        <section-layout
+          v-if="!failedToLoadProfiles"
+          :heading="configurationHeader || $options.i18n.dastConfigurationHeader"
+          :is-loading="isLoadingProfiles"
+        >
+          <template #description>
+            <slot name="description">
+              <gl-sprintf :message="$options.i18n.dastConfigurationDescription">
+                <template #link="{ content }">
+                  <gl-link :href="$options.dastConfigurationHelpPath">{{ content }}</gl-link>
+                </template>
+              </gl-sprintf>
+            </slot>
+          </template>
+          <template #features>
+            <scanner-profile-selector
+              class="gl-mb-6"
+              :selected-profile="selectedScannerProfile"
+              :profile-id-in-use="savedScannerProfileId"
+              @open-drawer="
+                openProfileDrawerProxy({
+                  profileType: $options.SCANNER_TYPE,
+                  mode: $options.SIDEBAR_VIEW_MODE.READING_MODE,
+                })
+              "
+              @edit="enableEditingModeProxy($options.SCANNER_TYPE)"
+            />
 
-        <site-profile-selector
-          class="gl-mb-2"
-          :selected-profile="selectedSiteProfile"
-          :profile-id-in-use="savedSiteProfileId"
-          @open-drawer="
-            openProfileDrawer({
-              profileType: $options.SITE_TYPE,
-              mode: $options.SIDEBAR_VIEW_MODE.READING_MODE,
-            })
-          "
-          @edit="enableEditingMode($options.SITE_TYPE)"
+            <site-profile-selector
+              class="gl-mb-2"
+              :selected-profile="selectedSiteProfile"
+              :profile-id-in-use="savedSiteProfileId"
+              @open-drawer="
+                openProfileDrawerProxy({
+                  profileType: $options.SITE_TYPE,
+                  mode: $options.SIDEBAR_VIEW_MODE.READING_MODE,
+                })
+              "
+              @edit="enableEditingModeProxy($options.SITE_TYPE)"
+            />
+          </template>
+        </section-layout>
+
+        <dast-profiles-sidebar
+          :profiles="selectedProfiles"
+          :profile-id-in-use="profileIdInUse"
+          :active-profile="activeProfile"
+          :library-link="libraryLink"
+          :profile-type="profileType"
+          :is-open="isSideDrawerOpen"
+          :is-loading="isLoadingProfiles"
+          :selected-profile-id="selectedProfileId"
+          :sidebar-view-mode="sidebarViewMode"
+          @close-drawer="closeProfileDrawerProxy"
+          @reopen-drawer="openProfileDrawerProxy"
+          @select-profile="selectProfile"
+          @profile-submitted="profileSubmittedProxy"
+          @touched="onFormTouchedProxy"
+          @reset-active-profile="resetActiveProfile"
         />
       </template>
-    </section-layout>
-
-    <dast-profiles-sidebar
-      :profiles="selectedProfiles"
-      :profile-id-in-use="profileIdInUse"
-      :active-profile="activeProfile"
-      :library-link="libraryLink"
-      :profile-type="profileType"
-      :is-open="isSideDrawerOpen"
-      :is-loading="isLoadingProfiles"
-      :selected-profile-id="selectedProfileId"
-      :sidebar-view-mode="sidebarViewMode"
-      @close-drawer="closeProfileDrawer"
-      @reopen-drawer="openProfileDrawer"
-      @select-profile="selectProfile"
-      @profile-submitted="onScannerProfileCreated"
-    />
+    </dast-profiles-configurator-modal>
   </div>
 </template>

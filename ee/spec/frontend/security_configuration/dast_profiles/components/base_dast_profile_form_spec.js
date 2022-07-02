@@ -145,10 +145,6 @@ describe('BaseDastProfileForm', () => {
         },
       });
     });
-
-    it('passes props to the modal', () => {
-      expect(findCancelModal().props()).toEqual(expect.objectContaining(modalProps));
-    });
   });
 
   describe('when submitting the form', () => {
@@ -252,6 +248,7 @@ describe('BaseDastProfileForm', () => {
         createComponent({
           propsData: {
             formTouched: true,
+            showInternalModal: true,
           },
           stubs: { GlModal },
         });

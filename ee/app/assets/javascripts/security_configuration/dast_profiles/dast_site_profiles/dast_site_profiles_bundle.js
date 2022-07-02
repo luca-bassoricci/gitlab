@@ -17,7 +17,7 @@ export default () => {
     dastConfigurationPath,
   } = el.dataset;
 
-  const props = { projectFullPath };
+  const props = { projectFullPath, showInternalModal: true };
 
   if (el.dataset.siteProfile) {
     props.profile = convertObjectPropsToCamelCase(JSON.parse(el.dataset.siteProfile));

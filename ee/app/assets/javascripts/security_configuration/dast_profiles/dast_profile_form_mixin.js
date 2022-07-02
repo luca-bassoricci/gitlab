@@ -21,6 +21,11 @@ export default () => ({
       required: false,
       default: false,
     },
+    showInternalModal: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     isEdit() {
@@ -31,6 +36,11 @@ export default () => ({
     },
     isPolicyProfile() {
       return Boolean(this.profile.referencedInSecurityPolicies?.length);
+    },
+  },
+  watch: {
+    formTouched(newVal) {
+      this.$emit('touched', newVal);
     },
   },
 });

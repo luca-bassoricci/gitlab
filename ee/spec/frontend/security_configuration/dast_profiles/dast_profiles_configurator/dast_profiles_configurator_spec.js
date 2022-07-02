@@ -7,6 +7,7 @@ import siteProfilesFixtures from 'test_fixtures/graphql/security_configuration/d
 import scannerProfilesFixtures from 'test_fixtures/graphql/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql.basic.json';
 import { s__ } from '~/locale';
 import DastProfilesConfigurator from 'ee/security_configuration/dast_profiles/dast_profiles_configurator/dast_profiles_configurator.vue';
+import DastProfilesConfiguratorModal from 'ee/security_configuration/dast_profiles/dast_profiles_configurator/dast_profiles_configurator_modal.vue';
 import ScannerProfileSelector from 'ee/security_configuration/dast_profiles/dast_profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from 'ee/security_configuration/dast_profiles/dast_profile_selector/site_profile_selector.vue';
 import ScannerProfileSummary from 'ee/security_configuration/dast_profiles/dast_profile_selector/scanner_profile_summary.vue';
@@ -20,6 +21,7 @@ import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/gr
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
 import createApolloProvider from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { SCANNER_TYPE, SIDEBAR_VIEW_MODE, REFERRAL_EVENT } from 'ee/on_demand_scans/constants';
 import {
   siteProfiles,
   scannerProfiles,
@@ -46,6 +48,7 @@ describe('DastProfilesConfigurator', () => {
     ]);
   };
 
+  const findModal = () => wrapper.findByTestId('discard-changes-modal');
   const findNewScanButton = () => wrapper.findByTestId('new-profile-button');
   const findOpenDrawerButton = () => wrapper.findByTestId('select-profile-action-btn');
   const findCancelButton = () => wrapper.findByTestId('dast-profile-form-cancel-button');
@@ -58,6 +61,7 @@ describe('DastProfilesConfigurator', () => {
   const findDastProfileSidebar = () => wrapper.findComponent(DastProfilesSidebar);
   const findDastProfilesSidebarList = () => wrapper.findComponent(DastProfilesSidebarList);
   const findDastProfilesSidebarForm = () => wrapper.findComponent(DastProfilesSidebarForm);
+  const findDastProfilesSidebarModal = () => wrapper.findComponent(DastProfilesConfiguratorModal);
 
   const createComponentFactory = (mountFn = shallowMount) => (options = {}, withHandlers) => {
     localVue = createLocalVue();
@@ -89,6 +93,8 @@ describe('DastProfilesConfigurator', () => {
               SectionLayout,
               ScannerProfileSelector,
               SiteProfileSelector,
+              DastProfilesConfiguratorModal,
+              GlModal: true,
             },
             provide: {
               projectPath,
@@ -238,6 +244,50 @@ describe('DastProfilesConfigurator', () => {
       await nextTick();
 
       expect(findDastProfilesSidebarList().exists()).toBe(true);
+    });
+  });
+
+  describe('warning modal', () => {
+    beforeEach(async () => {
+      createComponent();
+      findOpenDrawerButton().vm.$emit('click');
+      await nextTick();
+    });
+
+    it.each`
+      event              | expectedResult
+      ${'reopen-drawer'} | ${'true'}
+      ${'close-drawer'}  | ${'true'}
+    `('should show warning modal when changes are unsaved', async ({ event, expectedResult }) => {
+      findDastProfileSidebar().vm.$emit('touched', true);
+      await nextTick();
+
+      findDastProfileSidebar().vm.$emit(event, {
+        mode: SIDEBAR_VIEW_MODE.READING_MODE,
+        profileType: SCANNER_TYPE,
+      });
+      await nextTick();
+
+      expect(findModal().attributes('visible')).toBe(expectedResult);
+    });
+
+    it('should emit events up if there are no unsaved changes', async () => {
+      findDastProfileSidebar().vm.$emit('touched', false);
+      await nextTick();
+
+      findDastProfileSidebar().vm.$emit('reopen-drawer', {
+        mode: SIDEBAR_VIEW_MODE.READING_MODE,
+        profileType: SCANNER_TYPE,
+      });
+      await nextTick();
+
+      expect(findModal().attributes('visible')).toBe(undefined);
+      expect(findDastProfilesSidebarModal().emitted()).toEqual({
+        [REFERRAL_EVENT.OPEN]: [
+          [{ mode: SIDEBAR_VIEW_MODE.READING_MODE, profileType: SCANNER_TYPE }],
+          [{ mode: SIDEBAR_VIEW_MODE.READING_MODE, profileType: SCANNER_TYPE }],
+        ],
+      });
     });
   });
 });

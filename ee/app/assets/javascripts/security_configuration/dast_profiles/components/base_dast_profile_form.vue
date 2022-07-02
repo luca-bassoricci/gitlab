@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlButton, GlForm, GlModal } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -8,6 +9,21 @@ export default {
     GlButton,
     GlForm,
     GlModal,
+  },
+  i18n: {
+    discardChangesHeader: s__('OnDemandScans|You have unsaved changes'),
+    discardChangesText: s__(
+      'OnDemandScans|Do you want to discard the changes or keep editing this profile? Unsaved changes will be lost.',
+    ),
+  },
+  modal: {
+    actionPrimary: {
+      text: s__('OnDemandScans|Discard changes'),
+      attributes: { variant: 'danger', 'data-testid': 'form-touched-warning' },
+    },
+    actionCancel: {
+      text: s__('OnDemandScans|Keep editing'),
+    },
   },
   props: {
     profile: {
@@ -47,9 +63,10 @@ export default {
       required: false,
       default: false,
     },
-    modalProps: {
-      type: Object,
-      required: true,
+    showInternalModal: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -101,6 +118,11 @@ export default {
         });
     },
     onCancelClicked() {
+      if (!this.showInternalModal) {
+        this.discard();
+        return;
+      }
+
       if (!this.formTouched) {
         this.discard();
       } else {
@@ -173,13 +195,18 @@ export default {
     </gl-button>
 
     <gl-modal
+      v-if="showInternalModal"
       :ref="$options.modalId"
+      size="sm"
       :modal-id="$options.modalId"
-      v-bind="modalProps"
+      :title="$options.i18n.discardChangesHeader"
+      :action-primary="$options.modal.actionPrimary"
+      :action-cancel="$options.modal.actionCancel"
       ok-variant="danger"
-      body-class="gl-display-none"
       data-testid="dast-profile-form-cancel-modal"
       @ok="discard"
-    />
+    >
+      {{ $options.i18n.discardChangesText }}
+    </gl-modal>
   </gl-form>
 </template>

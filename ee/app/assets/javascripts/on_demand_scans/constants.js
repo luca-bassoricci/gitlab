@@ -40,6 +40,13 @@ export const SIDEBAR_VIEW_MODE = {
   READING_MODE: 'reading_mode',
 };
 
+export const REFERRAL_EVENT = {
+  OPEN: 'open-drawer-proxy',
+  CLOSE: 'close-drawer-proxy',
+  EDIT: 'enable-editing-mode-proxy',
+  SUBMIT: 'profile-submitted-proxy',
+};
+
 const STATUS_COLUMN = {
   label: __('Status'),
   key: 'status',
