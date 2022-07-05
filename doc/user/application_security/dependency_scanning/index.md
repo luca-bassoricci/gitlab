@@ -313,6 +313,9 @@ table.supported-languages ul {
       Please see the backlog issue <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/336866">Android support for Dependency
       Scanning (gemnasium-maven)</a> for more details.
     </p>
+    <p>
+      Gradle projects are not supported when FIPS mode is enabled.
+    </p>
   </li>
   <li>
     <a id="notes-regarding-supported-languages-and-package-managers-3"></a>
@@ -689,6 +692,8 @@ Gemnasium scanning jobs automatically use FIPS-enabled image when FIPS mode is e
 ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/357922) in GitLab 15.0.)
 
 To manually switch to FIPS-enabled images, set the variable `DS_IMAGE_SUFFIX` to `"-fips"`.
+
+When FIPS mode is enabled, Gradle projects are not supported, and they don't have Dependency Scanning jobs.
 
 To ensure compliance with FIPS, the FIPS-enabled image of `gemnasium-maven` uses the OpenJDK packages for RedHat UBI.
 As a result, it only supports Java 8, 11, and 17.
