@@ -12,7 +12,7 @@ RSpec.describe Gitlab::I18n do
       stub_languages_translation_percentage(pt_BR: 0, en: 100, es: 65)
 
       expect(described_class.selectable_locales).to eq({
-        'en' => 'English',
+        'en' => 'English, United States',
         'es' => 'Spanish - español'
       })
     end

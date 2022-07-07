@@ -214,7 +214,7 @@ RSpec.describe PreferencesHelper do
       stub_user(preferred_language: :en)
 
       expect(helper.language_choices).to eq([
-        '<option selected="selected" value="en">English (100% translated)</option>',
+        '<option selected="selected" value="en">English, United States (100% translated)</option>',
         '<option value="es">Spanish - español (65% translated)</option>'
       ].join("\n"))
     end

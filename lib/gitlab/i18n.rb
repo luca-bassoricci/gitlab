@@ -9,7 +9,7 @@ module Gitlab
       'cs_CZ' => 'Czech - čeština',
       'da_DK' => 'Danish - dansk',
       'de' => 'German - Deutsch',
-      'en' => 'English',
+      'en' => 'English, United States',
       'eo' => 'Esperanto - esperanto',
       'es' => 'Spanish - español',
       'fil_PH' => 'Filipino',
