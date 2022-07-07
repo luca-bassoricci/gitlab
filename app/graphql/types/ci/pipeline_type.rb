@@ -125,9 +125,13 @@ module Types
             authorize: :read_build,
             description: 'Job where pipeline was triggered from.'
 
-      field :downstream, Types::Ci::PipelineType.connection_type, null: true,
+      field :downstreams, Types::Ci::PipelineType.connection_type, null: true,
             description: 'Pipelines this pipeline will trigger.',
             method: :triggered_pipelines_with_preloads
+
+      field :downstream, Types::Ci::PipelineType.connection_type, null: true,
+            description: 'Pipelines this pipeline will trigger.',
+            method: :latest_triggered_pipelines_with_preloads
 
       field :upstream, Types::Ci::PipelineType, null: true,
             description: 'Pipeline that triggered the pipeline.',

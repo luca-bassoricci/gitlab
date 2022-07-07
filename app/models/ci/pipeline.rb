@@ -503,6 +503,10 @@ module Ci
       false
     end
 
+    def latest_triggered_pipelines_with_preloads
+      triggered_pipelines.joins(:source_job).where.not(source_job: { retried: true }).preload(:source_job)
+    end
+
     def triggered_pipelines_with_preloads
       triggered_pipelines.preload(:source_job)
     end

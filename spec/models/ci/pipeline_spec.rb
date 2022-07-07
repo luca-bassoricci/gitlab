@@ -5351,4 +5351,20 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       end
     end
   end
+
+  describe '#latest_triggered_pipelines_with_preloads' do
+    it 'only returns triggered pipelines from bridges that have not been retried' do
+      pipeline = create(:ci_pipeline)
+      old_triggered_pipeline = create(:ci_pipeline)
+      new_triggered_pipeline = create(:ci_pipeline)
+      old_bridge = create(:ci_bridge, pipeline: pipeline, retried: true)
+      new_bridge = create(:ci_bridge, pipeline: pipeline)
+      create(:ci_sources_pipeline, pipeline: old_triggered_pipeline, source_pipeline: pipeline, source_job: old_bridge)
+      create(:ci_sources_pipeline, pipeline: new_triggered_pipeline, source_pipeline: pipeline, source_job: new_bridge)
+
+      latest_triggered = pipeline.latest_triggered_pipelines_with_preloads
+
+      expect(latest_triggered).to contain_exactly(new_triggered_pipeline)
+    end
+  end
 end
