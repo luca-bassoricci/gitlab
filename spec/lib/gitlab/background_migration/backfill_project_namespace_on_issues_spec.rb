@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-# this needs the schema to be before we introduce the not null constraint on routes#namespace_id
+# todo: this will need to specify schema version once we introduce the not null constraint on issues#namespace_id
+# https://gitlab.com/gitlab-org/gitlab/-/issues/367835
 RSpec.describe Gitlab::BackgroundMigration::BackfillProjectNamespaceOnIssues do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
@@ -33,7 +34,7 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillProjectNamespaceOnIssues do
       batch_column: :id,
       sub_batch_size: 2,
       pause_ms: 2,
-      connection: ActiveRecord::Base.connection
+      connection: ApplicationRecord.connection
     )
   end
 

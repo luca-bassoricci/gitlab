@@ -11,14 +11,14 @@ module Gitlab
           operation_name: :update_all,
           batching_scope: -> (relation) {
             relation.joins("INNER JOIN projects ON projects.id = issues.project_id")
-              .select("projects.id, projects.project_namespace_id").where(issues: { namespace_id: nil })
+              .select("issues.id AS issue_id, projects.project_namespace_id").where(issues: { namespace_id: nil })
           }
         ) do |sub_batch|
           ApplicationRecord.connection.execute <<~SQL
             UPDATE issues
             SET namespace_id = projects.project_namespace_id
-            FROM (#{sub_batch.to_sql}) as projects(id, project_namespace_id)
-            WHERE project_id = projects.id
+            FROM (#{sub_batch.to_sql}) AS projects(issue_id, project_namespace_id)
+            WHERE issues.id = issue_id
           SQL
         end
       end
