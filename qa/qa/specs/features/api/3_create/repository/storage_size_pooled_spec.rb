@@ -115,10 +115,8 @@ module QA
             project_size #{project_size} - fork_size #{fork_size}])
 
           if target_size == 0
-            puts "if if if"
-            project_size == target_size
+            project_size == 0
           else
-            puts "else else else"
             project_size != initial_size
           end
         end
