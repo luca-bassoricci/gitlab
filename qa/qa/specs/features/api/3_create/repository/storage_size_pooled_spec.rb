@@ -7,6 +7,7 @@ module QA
       flag_enabled ||= Runtime::Feature.enabled?(:gitaly_revlist_for_repo_size)
 
       let(:praefect_manager) { Service::PraefectManager.new }
+
       let(:data50kb) { SecureRandom.hex(50_000) }
       let(:data40kb) { SecureRandom.hex(40_000) }
       let(:data30kb) { SecureRandom.hex(30_000) }
