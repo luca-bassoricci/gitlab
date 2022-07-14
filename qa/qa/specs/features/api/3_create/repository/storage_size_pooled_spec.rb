@@ -2,27 +2,20 @@
 
 module QA
   RSpec.describe 'Create' do
-    describe 'Repository Usage Quota for Pooled Repos', :skip_live_env, :orchestrated,
+    describe 'Repository Usage Quota for Pooled Repos', :skip_live_env,
              feature_flag: { name: 'gitaly_revlist_for_repo_size', scope: :global } do
       flag_enabled ||= Runtime::Feature.enabled?(:gitaly_revlist_for_repo_size)
 
-      # alternateRefsCommand="exit 0 #"
-      # https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/6186
-      # # /var/opt/gitlab/.gitconfig
-
       let(:praefect_manager) { Service::PraefectManager.new }
-
-      let(:project) do
-        Resource::Project.fabricate_via_api! do |project|
-          project.name = "repository-usage-#{SecureRandom.hex(4)}"
-        end
-      end
-
       let(:data50kb) { SecureRandom.hex(50_000) }
       let(:data40kb) { SecureRandom.hex(40_000) }
       let(:data30kb) { SecureRandom.hex(30_000) }
 
-      let!(:flag_enabled) { Runtime::Feature.enabled?(:gitaly_revlist_for_repo_size) }
+      let(:project) do
+        Resource::Project.fabricate_via_api! do |project|
+          project.name = "gitaly_cluster-repository-usage-#{SecureRandom.hex(4)}"
+        end
+      end
 
       before do
         Runtime::Feature.enable(:gitaly_revlist_for_repo_size)
@@ -30,13 +23,14 @@ module QA
 
       after do
         Runtime::Feature.set({ gitaly_revlist_for_repo_size: flag_enabled })
-        praefect_manager.git_config_enable_alternate_refs
+        praefect_manager.reconfigure_gitaly_nodes
       end
 
       context 'when git does not have customised core.alternaterefscommand configuration' do
         before do
-          praefect_manager.git_config_disable_alternate_refs
+          praefect_manager.omnibus_config_disable_alternate_refs
         end
+
         it "calculates the repo size excluding pooled data",
            testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/TODO' do
           # Add a 50kb file
@@ -45,13 +39,14 @@ module QA
           # See https://docs.gitlab.com/ee/administration/repository_storage_types.html#hashed-object-pools
           fork = Resource::Fork.fabricate_via_api! do |fork|
             fork.upstream = project
-            fork.name = "repository-usage-#{SecureRandom.hex(4)}-fork"
+            fork.name = "gitaly_cluster-repository-usage-#{SecureRandom.hex(4)}-fork"
           end
 
           # Add some unique data to both projects
           commit_file_to_project(fork.project, 'data40kb.txt', data40kb)
           commit_file_to_project(project, 'data30kb.txt', data30kb)
 
+          praefect_manager.wait_for_empty_replication_queue
           # See https://docs.gitlab.com/ee/administration/housekeeping.html#how-housekeeping-handles-pool-repositories
           perform_housekeeping(project, fork, 0)
 
@@ -63,7 +58,9 @@ module QA
 
       context 'when git has a customised core.alternaterefscommand configuration' do
         before do
-          praefect_manager.git_config_enable_alternate_refs
+          # Omnibus is configured with a configuration `core.alternateRefsCommand "exit 0 #"`
+          # https://git-scm.com/docs/git-config/2.37.1#Documentation/git-config.txt-corealternateRefsCommand
+          praefect_manager.omnibus_config_enable_alternate_refs
         end
         it "calculates the repo size including pooled data",
            testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/TODO' do
@@ -80,6 +77,7 @@ module QA
           commit_file_to_project(fork.project, 'data40kb.txt', data40kb)
           commit_file_to_project(project, 'data30kb.txt', data30kb)
 
+          praefect_manager.wait_for_empty_replication_queue
           # See https://docs.gitlab.com/ee/administration/housekeeping.html#how-housekeeping-handles-pool-repositories
           perform_housekeeping(project, fork)
 

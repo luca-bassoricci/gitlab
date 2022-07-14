@@ -23,20 +23,28 @@ module QA
 
       attr_reader :primary_node, :secondary_node, :tertiary_node, :postgres
 
-      def git_config_disable_alternate_refs
-        [primary_node].each do |node|
-          # [primary_node, secondary_node, tertiary_node].each { |node|
+      def omnibus_config_disable_alternate_refs
+        [primary_node, secondary_node, tertiary_node].each do |node|
           shell %{docker exec #{node} bash -c 'git config  --system --unset-all core.alternateRefsCommand || true'}
           shell %{docker exec #{node} bash -c "sed -i 's/^[^#]*alternateRefsCommand/#&/' /var/opt/gitlab/.gitconfig"}
         end
       end
 
-      def git_config_enable_alternate_refs
-        [primary_node].each do |node|
-          # [primary_node, secondary_node, tertiary_node].each { |node|
+      def omnibus_config_enable_alternate_refs
+        [primary_node, secondary_node, tertiary_node].each do |node|
           shell %{docker exec #{node} bash -c 'git config  --system --add core.alternateRefsCommand "exit 0 #" || true'}
           shell %{docker exec #{node} bash -c "sed -i '/#        alternateRefsCommand/s/^#//g' /var/opt/gitlab/.gitconfig"}
         end
+      end
+
+      def reconfigure_gitaly_nodes
+        threads = []
+        [@praefect, @primary_node, @secondary_node, @tertiary_node].each do |node|
+          threads << Thread.new do
+            shell %{docker exec #{node} bash -c "gitlab-ctl reconfigure"}
+          end
+        end
+        threads.map(&:join)
       end
 
       # Executes the praefect `dataloss` command.
@@ -61,8 +69,9 @@ module QA
           end
           next false unless replicas
 
+          puts "replicas: #{replicas}"
           # We want to know if the checksums are identical
-          replicas&.split('|')&.map(&:strip)&.slice(1..3)&.uniq&.one?
+          replicas.split('|')&.map(&:strip)&.slice(1..3)&.uniq&.one?
         end
       end
 
@@ -445,7 +454,12 @@ module QA
       end
 
       def wait_for_replication(project_id)
-        Support::Waiter.wait_until(sleep_interval: 1) { replication_queue_incomplete_count == 0 && replicated?(project_id) }
+        wait_for_empty_replication_queue
+        Support::Waiter.wait_until(sleep_interval: 1) { replicated?(project_id) }
+      end
+
+      def wait_for_empty_replication_queue
+        Support::Waiter.wait_until(sleep_interval: 1) { replication_queue_incomplete_count == 0 }
       end
 
       def wait_for_replication_to_node(project_id, node)
