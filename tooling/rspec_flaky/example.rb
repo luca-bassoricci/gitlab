@@ -15,7 +15,7 @@ module RspecFlaky
     end
 
     def uid
-      @uid ||= Digest::MD5.hexdigest("#{description}-#{file}")
+      @uid ||= Digest::SHA256.hexdigest("#{description}-#{file}")
     end
 
     def example_id

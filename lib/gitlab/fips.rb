@@ -23,7 +23,18 @@ module Gitlab
       #
       # @return [Boolean]
       def enabled?
-        ::Labkit::FIPS.enabled?
+        true
+      end
+
+      def enable_fips_mode!
+        require 'digest'
+
+        ::Labkit::FIPS.enable_fips_mode!
+
+        %i(file base64digest hexdigest digest).each do |digest_method|
+          Digest::MD5.undef_method(digest_method) # rubocop:disable GitlabSecurity/PublicSend
+          # OpenSSL::Digest::MD5.undef_method(digest_method) # rubocop:disable GitlabSecurity/PublicSend
+        end
       end
     end
   end
