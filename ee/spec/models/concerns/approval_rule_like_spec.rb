@@ -3,32 +3,34 @@
 require 'spec_helper'
 
 RSpec.describe ApprovalRuleLike do
-  let(:user1) { create(:user) }
-  let(:user2) { create(:user) }
-  let(:user3) { create(:user) }
-  let(:group1) { create(:group) }
-  let(:group2) { create(:group) }
-
-  let(:merge_request) { create(:merge_request) }
+  let_it_be(:user1) { create(:user) }
+  let_it_be(:user2) { create(:user) }
+  let_it_be(:guest) { create(:user) }
+  let_it_be(:group1) { create(:group) }
+  let_it_be(:group2) { create(:group) }
+  let_it_be(:group2_1) { create(:group, parent: group2) }
 
   shared_examples 'approval rule like' do
     describe '#approvers' do
-      let(:group1_user) { create(:user) }
-      let(:group2_user) { create(:user) }
+      let_it_be(:group1_user) { create(:user) }
+      let_it_be(:group2_user) { create(:user) }
+      let_it_be(:group2_1_user) { create(:user) }
 
       before do
         subject.users << user1
         subject.users << user2
         subject.groups << group1
-        subject.groups << group2
+        subject.groups << group2_1
 
-        group1.add_guest(group1_user)
-        group2.add_guest(group2_user)
+        group1.add_developer(group1_user)
+        group1.add_guest(guest)
+        group2.add_maintainer(group2_user)
+        group2_1.add_owner(group2_1_user)
       end
 
       shared_examples 'approvers contains the right users' do
-        it 'contains users as direct members and group members' do
-          expect(subject.approvers).to contain_exactly(user1, user2, group1_user, group2_user)
+        it 'contains users as direct members, group members and inherited group members' do
+          expect(subject.approvers).to contain_exactly(user1, user2, group1_user, group2_user, group2_1_user)
         end
       end
 
@@ -48,14 +50,15 @@ RSpec.describe ApprovalRuleLike do
         it_behaves_like 'approvers contains the right users'
       end
 
-      context 'when user is both a direct member and a group member' do
+      context 'when user is both a direct member, a group member and a inherited group member' do
         before do
-          group1.add_guest(user1)
-          group2.add_guest(user2)
+          group1.add_developer(user1)
+          group2.add_developer(user2)
+          group2.add_developer(group2_1_user)
         end
 
         it 'contains only unique users' do
-          expect(subject.approvers).to contain_exactly(user1, user2, group1_user, group2_user)
+          expect(subject.approvers).to contain_exactly(user1, user2, group1_user, group2_user, group2_1_user)
         end
       end
     end
@@ -93,6 +96,8 @@ RSpec.describe ApprovalRuleLike do
 
   context 'MergeRequest' do
     subject { create(:approval_merge_request_rule, merge_request: merge_request) }
+
+    let_it_be(:merge_request) { create(:merge_request) }
 
     it_behaves_like 'approval rule like'
 
@@ -191,11 +196,39 @@ RSpec.describe ApprovalRuleLike do
     subject { create(:approval_project_rule) }
 
     it 'returns distinct users' do
-      group1.add_guest(user1)
-      group2.add_guest(user1)
+      group1.add_developer(user1)
+      group2.add_developer(user1)
       subject.groups = [group1, group2]
 
       expect(subject.group_users).to eq([user1])
+    end
+  end
+
+  describe '.group_users_with_inheritance' do
+    subject { create(:approval_project_rule) }
+
+    it 'returns indirect members of the group' do
+      subject.groups = [group2_1]
+
+      group2.add_developer(user1)
+      group2_1.add_developer(user2)
+
+      expect(subject.group_users_with_inheritance).to match_array([user1, user2])
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(use_inherited_permissions_for_approval_rules: false)
+      end
+
+      it 'returns only direct members of the group' do
+        subject.groups = [group2_1]
+
+        group2.add_developer(user1)
+        group2_1.add_developer(user2)
+
+        expect(subject.group_users_with_inheritance).to match_array([user2])
+      end
     end
   end
 end

@@ -23,8 +23,8 @@ RSpec.describe ApprovalRules::FinalizeService do
     subject { described_class.new(merge_request) }
 
     before do
-      group1.add_guest(group1_user)
-      group2.add_guest(group2_user)
+      group1.add_developer(group1_user)
+      group2.add_developer(group2_user)
 
       project_rule.users = [user1, user2]
       project_rule.groups << group1

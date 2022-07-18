@@ -24,7 +24,7 @@ RSpec.describe ApprovalRulePresenter do
 
     context 'user can see all groups' do
       before do
-        private_group.add_guest(user)
+        private_group.add_developer(user)
       end
 
       it { is_expected.to contain_exactly(user, private_member.user, public_member.user) }

@@ -9,6 +9,7 @@ module ApprovalRuleLike
   APPROVALS_REQUIRED_MAX = 100
   ALL_MEMBERS = 'All Members'
   NEWLY_DETECTED = 'newly_detected'
+  APPROVAL_ACCESS_LEVELS = [Gitlab::Access::OWNER, Gitlab::Access::MAINTAINER, Gitlab::Access::DEVELOPER].freeze
 
   included do
     has_and_belongs_to_many :users,
@@ -45,11 +46,33 @@ module ApprovalRuleLike
   # Users who are eligible to approve, including specified group members.
   # @return [Array<User>]
   def approvers
-    @approvers ||= if users.loaded? && group_users.loaded?
-                     users | group_users
+    @approvers ||= if users.loaded? && group_users_with_inheritance.loaded?
+                     users | group_users_with_inheritance
                    else
-                     User.from_union([users, group_users])
+                     User.from_union([users, group_users_with_inheritance])
                    end
+  end
+
+  # Returns users with inherited permissions to approval rules groups
+  #
+  # Example:
+  # When Group B is a subgroup of Group A
+  # When Group B is a approval rule group
+  # Then it will return [members of Group B + members of Group A]
+  #
+  # But `group_users` will return only members of Group B
+  def group_users_with_inheritance
+    @group_users_with_inheritance ||=
+      if Feature.enabled?(:use_inherited_permissions_for_approval_rules, project)
+        User.where(
+          id: GroupMember
+            .by_access_level(APPROVAL_ACCESS_LEVELS)
+            .of_groups(groups.self_and_ancestors)
+            .select(:user_id)
+        )
+      else
+        group_users
+      end
   end
 
   def code_owner?

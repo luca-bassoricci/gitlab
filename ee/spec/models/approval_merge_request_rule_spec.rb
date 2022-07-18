@@ -250,7 +250,7 @@ RSpec.describe ApprovalMergeRequestRule, factory_default: :keep do
   describe '#approvers' do
     before do
       create(:group) do |group|
-        group.add_guest(merge_request.author)
+        group.add_developer(merge_request.author)
         subject.groups << group
       end
     end
