@@ -4,6 +4,8 @@ module Gitlab
   module BackgroundMigration
     # Fix project name duplicates and backfill missing project namespace ids
     class FixDuplicateProjectNameAndPath
+      include Gitlab::Database::MigrationHelpers::GinIndexCleanup
+
       SUB_BATCH_SIZE = 10
       # isolated project active record
       class Project < ActiveRecord::Base
@@ -18,7 +20,7 @@ module Gitlab
       def perform(start_id, end_id)
         @project_ids = fetch_project_ids(start_id, end_id)
         backfill_project_namespaces_service = init_backfill_service(project_ids)
-        backfill_project_namespaces_service.cleanup_gin_index('projects')
+        cleanup_gin_index(ApplicationRecord.connection, 'projects')
 
         project_ids.each_slice(SUB_BATCH_SIZE) do |ids|
           ApplicationRecord.connection.execute(update_projects_name_and_path_sql(ids))

@@ -4,8 +4,10 @@ module Gitlab
   module BackgroundMigration
     # Back-fills the `issues.namespace_id` by setting it to corresponding project.project_namespace_id
     class BackfillProjectNamespaceOnIssues < BatchedMigrationJob
+      include Gitlab::Database::MigrationHelpers::GinIndexCleanup
+
       def perform
-        cleanup_gin_index('issues')
+        cleanup_gin_index(ApplicationRecord.connection, 'issues')
 
         each_sub_batch(
           operation_name: :update_all,
@@ -20,18 +22,6 @@ module Gitlab
             FROM (#{sub_batch.to_sql}) AS projects(issue_id, project_namespace_id)
             WHERE issues.id = issue_id
           SQL
-        end
-      end
-
-      private
-
-      def cleanup_gin_index(table_name)
-        index_names = ApplicationRecord.connection.select_values <<~SQL
-          select indexname::text from pg_indexes where tablename = '#{table_name}' and indexdef ilike '%using gin%'
-        SQL
-
-        index_names.each do |index_name|
-          ApplicationRecord.connection.execute("select gin_clean_pending_list('#{index_name}')")
         end
       end
     end

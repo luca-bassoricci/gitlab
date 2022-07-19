@@ -7,6 +7,8 @@ module Gitlab
       #
       # rubocop: disable Metrics/ClassLength
       class BackfillProjectNamespaces
+        include Gitlab::Database::MigrationHelpers::GinIndexCleanup
+
         attr_accessor :project_ids, :sub_batch_size
 
         SUB_BATCH_SIZE = 25
@@ -33,10 +35,10 @@ module Gitlab
         def backfill_project_namespaces
           project_ids.each_slice(sub_batch_size) do |project_ids|
             # cleanup gin indexes on namespaces table
-            cleanup_gin_index('namespaces')
+            cleanup_gin_index(ApplicationRecord.connection, 'namespaces')
 
             # cleanup gin indexes on projects table
-            cleanup_gin_index('projects')
+            cleanup_gin_index(ApplicationRecord.connection, 'projects')
 
             # We need to lock these project records for the period when we create project namespaces
             # and link them to projects so that if a project is modified in the time between creating
@@ -51,14 +53,6 @@ module Gitlab
               batch_update_projects(project_ids)
               batch_update_project_namespaces_traversal_ids(project_ids)
             end
-          end
-        end
-
-        def cleanup_gin_index(table_name)
-          index_names = ApplicationRecord.connection.select_values("select indexname::text from pg_indexes where tablename = '#{table_name}' and indexdef ilike '%using gin%'")
-
-          index_names.each do |index_name|
-            ApplicationRecord.connection.execute("select gin_clean_pending_list('#{index_name}')")
           end
         end
 
