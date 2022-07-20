@@ -759,13 +759,25 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
     end
 
     context 'when job is retryable' do
-      let(:job) { create(:ci_build, :retryable, pipeline: pipeline) }
+      context 'and the job is a bridge' do
+        let(:job) { create(:ci_bridge, :retryable, pipeline: pipeline) }
 
-      it 'redirects to the retried job page' do
-        post_retry
+        it 'redirects to the retried job page' do
+          post_retry
 
-        expect(response).to have_gitlab_http_status(:found)
-        expect(response).to redirect_to(namespace_project_job_path(id: Ci::Build.last.id))
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      context 'and the job is a build' do
+        let(:job) { create(:ci_build, :retryable, pipeline: pipeline) }
+
+        it 'redirects to the retried job page' do
+          post_retry
+
+          expect(response).to have_gitlab_http_status(:found)
+          expect(response).to redirect_to(namespace_project_job_path(id: Ci::Build.last.id))
+        end
       end
 
       shared_examples_for 'retried job has the same attributes' do
