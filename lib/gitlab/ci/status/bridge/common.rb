@@ -16,7 +16,7 @@ module Gitlab
           def details_path
             return unless can?(user, :read_pipeline, downstream_pipeline)
 
-             project_pipeline_path(downstream_project, downstream_pipeline)
+            project_pipeline_path(downstream_project, downstream_pipeline)
           end
 
           private

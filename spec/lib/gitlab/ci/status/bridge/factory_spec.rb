@@ -40,7 +40,8 @@ RSpec.describe Gitlab::Ci::Status::Bridge::Factory do
 
     it 'matches correct extended statuses' do
       expect(factory.extended_statuses)
-        .to eq [Gitlab::Ci::Status::Bridge::Failed]
+        .to eq [Gitlab::Ci::Status::Bridge::Failed,
+                Gitlab::Ci::Status::Bridge::Retryable]
     end
 
     it 'fabricates a failed bridge status' do
