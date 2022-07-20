@@ -61,6 +61,14 @@ FactoryBot.define do
       status { 'skipped' }
     end
 
+    trait :retried do
+      retried { true }
+    end
+
+    trait :retryable do
+      success
+    end
+
     trait :strategy_depend do
       options { { trigger: { strategy: 'depend' } } }
     end
