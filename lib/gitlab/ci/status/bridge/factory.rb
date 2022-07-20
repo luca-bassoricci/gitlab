@@ -10,6 +10,7 @@ module Gitlab
              [Status::Bridge::Manual],
              [Status::Bridge::WaitingForResource],
              [Status::Bridge::Play],
+             [Status::Bridge::Retryable],
              [Status::Bridge::Action]]
           end
 
