@@ -694,6 +694,25 @@ group = Group.find_by_full_path 'group'
 user.max_member_access_for_group group.id
 ```
 
+### Set expiration date for SSH keys
+
+This example sets `2022-12-31` as the expiration date for all SSH keys
+that are not set to expire.
+
+```ruby
+expire = Time.new(2022, 12, 31)
+
+Key.all.each do |k|
+    if k.expires_at == nil 
+        k.expires_at = expire
+        k.save
+    end
+end; nil
+```
+
+`Time.new(2022, 12, 31)` can be changed to `Time.now` to **immediately** expire 
+all SSH keys with no expiration date set.
+
 ## Groups
 
 ### Transfer group to another location
