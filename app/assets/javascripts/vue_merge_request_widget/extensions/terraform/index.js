@@ -5,6 +5,7 @@ import { EXTENSION_ICONS } from '../../constants';
 export default {
   name: 'WidgetTerraform',
   enablePolling: true,
+  telemetry: false,
   i18n: {
     label: s__('Terraform|Terraform reports'),
     loading: s__('Terraform|Loading Terraform reports...'),

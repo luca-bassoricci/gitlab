@@ -5,6 +5,7 @@ import { EXTENSION_ICONS } from '~/vue_merge_request_widget/constants';
 
 export default {
   name: 'WidgetBrowserPerformance',
+  telemetry: false,
   props: ['browserPerformance'],
   i18n: {
     label: s__('ciReport|Browser Performance'),

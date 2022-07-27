@@ -23,6 +23,7 @@ export default {
   props: ['licenseCompliance'],
   enablePolling: true,
   enableExpandedPolling: true,
+  telemetry: false,
   computed: {
     newLicenses() {
       return this.collapsedData.new_licenses || 0;

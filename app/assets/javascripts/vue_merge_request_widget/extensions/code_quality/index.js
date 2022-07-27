@@ -7,6 +7,7 @@ import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 
 export default {
   name: 'WidgetCodeQuality',
+  telemetry: false,
   props: ['codeQuality', 'blobPath'],
   i18n: {
     label: s__('ciReport|Code Quality'),

@@ -9,6 +9,7 @@ import { PASSED, PENDING } from 'ee/reports/status_checks_report/constants';
 
 export default {
   name: 'WidgetStatusChecks',
+  telemetry: false,
   i18n: {
     label: s__('StatusCheck|status checks'),
     loading: s__('StatusCheck|Status checks are being fetched'),

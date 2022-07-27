@@ -17,6 +17,7 @@ export default {
   },
   props: ['securityReportPaths'],
   enablePolling: true,
+  telemetry: false,
   i18n: {
     new: __('New'),
     fixed: __('Fixed'),

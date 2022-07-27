@@ -140,14 +140,18 @@ describe('Terraform extension', () => {
 
       findListItem(0).find('[data-testid="extension-actions-button"]').trigger('click');
 
-      expect(api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
-      expect(api.trackRedisHllUserEvent).toHaveBeenCalledWith(
-        'i_code_review_merge_request_widget_terraform_click_full_report',
-      );
-      expect(api.trackRedisCounterEvent).toHaveBeenCalledTimes(1);
-      expect(api.trackRedisCounterEvent).toHaveBeenCalledWith(
-        'i_code_review_merge_request_widget_terraform_count_click_full_report',
-      );
+      // Temporarily switch off telemetry until every event is instrumented
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/368651#note_1039768185
+      expect(api.trackRedisHllUserEvent).not.toHaveBeenCalled();
+      expect(api.trackRedisCounterEvent).not.toHaveBeenCalled();
+      // expect(api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
+      // expect(api.trackRedisHllUserEvent).toHaveBeenCalledWith(
+      //   'i_code_review_merge_request_widget_terraform_click_full_report',
+      // );
+      // expect(api.trackRedisCounterEvent).toHaveBeenCalledTimes(1);
+      // expect(api.trackRedisCounterEvent).toHaveBeenCalledWith(
+      //   'i_code_review_merge_request_widget_terraform_count_click_full_report',
+      // );
     });
   });
 

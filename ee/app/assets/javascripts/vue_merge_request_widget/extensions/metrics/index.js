@@ -7,6 +7,7 @@ export default {
   name: 'WidgetMetrics',
   props: ['metricsReportsPath'],
   enablePolling: true,
+  telemetry: false,
   i18n: {
     loading: s__('Reports|Metrics reports are loading'),
     error: s__('Reports|Metrics reports failed to load results'),
