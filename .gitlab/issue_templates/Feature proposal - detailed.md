@@ -63,6 +63,19 @@ Please consider performing a threat model for the code changes that are introduc
 Don't hesitate to reach out to the Application Security Team (`@gitlab-com/gl-security/appsec`) to discuss any security concerns.
 -->
 
+### Legal Review
+
+<!-- If youre ansser is yes to any of the questions below, creatie the [Product Feature and Version Development - Legal Review Questionnaire (LRQ)](https://gitlab.com/gitlab-com/legal-and-compliance/-/issues/new?issuable_template=legal-product-review) and it to this issue as a Related Issue. This issue needs to be created no later than the [Design Phase](LINK)as it enables the Product & Privacy Legal team to provide guidance on potential risks such as privacy, global trade compliance, licensing, and IP matters, at an early stage in the product development process, efficiently avoiding the potential for late-stage development delays that can arise due to unassessed legal concerns.
+
+**Does the proposed solution involve any changes that will have an impact on:**
+
+- the licensing of third-party software or dependencies;
+- trademarks or patents;
+- global trade compliance (or involve use of any new encryption algorithms or new key lengths);
+- data privacy including capturing consent or changes to the collection or use of personal data of users or others; or
+- anything else that should be raised with the Legal & Corporate Affairs team?
+-->
+
 ### Documentation
 
 <!-- See the Feature Change Documentation Workflow https://docs.gitlab.com/ee/development/documentation/workflow.html#for-a-product-change
