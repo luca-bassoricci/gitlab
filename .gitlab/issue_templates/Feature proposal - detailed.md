@@ -65,7 +65,9 @@ Don't hesitate to reach out to the Application Security Team (`@gitlab-com/gl-se
 
 ### Legal Review
 
-<!-- If your answer is yes to any of the questions below, create a [Product Feature and Version Development - Legal Review Questionnaire (LRQ)](https://gitlab.com/gitlab-com/legal-and-compliance/-/issues/new?issuable_template=legal-product-review) and link it to this issue as a Related Issue. If needed, the LRQ issue needs to be shared with the Product & Privacy Legal team no later than the [Validation Phase 3: Design](https://about.gitlab.com/handbook/product-development-flow/#validation-phase-3-design) as it enables them to provide guidance on potential risks such as privacy, global trade compliance, licensing, and IP matters, at an early stage in product development, avoiding the potential for late-stage development delays that can arise due to legal concerns.
+<!-- If your answer is yes to any of the questions below, create a [Product Feature and Version Development - Legal Review Questionnaire (LRQ)](https://gitlab.com/gitlab-com/legal-and-compliance/-/issues/new?issuable_template=legal-product-review) and link it to this issue as a Related Issue. If needed, the LRQ issue needs to be shared with the Product & Privacy Legal team no later than the [Validation Phase 3: Design](https://about.gitlab.com/handbook/product-development-flow/#validation-phase-3-design) as it enables them to provide guidance on potential risks such as privacy, global trade compliance, licensing, and IP matters, at an early stage in product development, avoiding the potential for late-stage development delays that can arise due to legal concerns.  
+
+If you have any questions about the questionnaire or have a legal question relating to a feature under consideration/development, feel free to reach out to the #legal channel on Slack  
 
 **Does the proposed solution involve any changes that will have an impact on:**
 
