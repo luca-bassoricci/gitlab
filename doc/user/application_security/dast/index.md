@@ -1422,20 +1422,6 @@ future.
 
 ## Optimizing DAST
 
-### Save on usage of CI minutes
-
-You can save on usage of CI minutes by excluding the DAST job when an MR is marked as a
-[draft](../../project/merge_requests/drafts.md). CI/CD pipelines are run on every commit, even those
-to a draft MR. Add the following to your `.gitlab-ci.yml` file to exclude the DAST job when the MR's
-title contains the text "Draft:", regardless of case:
-
-```yaml
-dast:
-  rules:
-    - if $CI_MERGE_REQUEST_TITLE =~ /^DRAFT:/
-      when: never
-```
-
 ### Don't download artifacts if they're not required
 
 By default, DAST downloads all artifacts defined by previous jobs in the pipeline. If your DAST job
@@ -1446,4 +1432,18 @@ following to your `.gitlab-ci.yml` file:
 ```yaml
 dast:
    dependencies: []
+```
+
+### Save on usage of CI minutes and shorten your pipeline
+
+You can save on usage of CI minutes and shorten your pipeline run time by excluding the DAST job
+when an MR is marked as a [draft](../../project/merge_requests/drafts.md). CI/CD pipelines are run
+on every commit, even those to a draft MR. Add the following to your `.gitlab-ci.yml` file to
+exclude the DAST job when the MR's title contains the text "Draft:", regardless of case:
+
+```yaml
+dast:
+  rules:
+    - if $CI_MERGE_REQUEST_TITLE =~ /^DRAFT:/
+      when: never
 ```
