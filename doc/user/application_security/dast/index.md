@@ -1422,27 +1422,26 @@ future.
 
 ## Optimizing DAST
 
-### Don't run DAST job for draft MRs
+### Save on usage of CI minutes
 
-You can mark a MR as [draft](../../project/merge_requests/drafts.md) to prevent it being merged
-before it's complete. However, CI/CD pipelines are still run on every commit, even to a draft MR. To
-save on usage of CI minutes, prevent the DAST job running on MRs where the title starts with the
-text "Draft:".
-
-Add the following to your `.gitlab-ci.yml` file to .
+You can save on usage of CI minutes by excluding the DAST job when an MR is marked as a
+[draft](../../project/merge_requests/drafts.md). CI/CD pipelines are run on every commit, even those
+to a draft MR. Add the following to your `.gitlab-ci.yml` file to exclude the DAST job when the MR's
+title contains the text "Draft:", regardless of case:
 
 ```yaml
-rules:
-  - if $CI_MERGE_REQUEST_TITLE =~ /^DRAFT:/
-    when: never
+dast:
+  rules:
+    - if $CI_MERGE_REQUEST_TITLE =~ /^DRAFT:/
+      when: never
 ```
 
-### Don't download artifacts
+### Don't download artifacts if they're not required
 
-By default, DAST downloads all artifacts defined by previous jobs in the pipeline. If
-your DAST job does not rely on `environment_url.txt` to define the URL under test or any other files created
-in previous jobs, we recommend you don't download artifacts. To avoid downloading
-artifacts, add the following to your `.gitlab-ci.yml` file:
+By default, DAST downloads all artifacts defined by previous jobs in the pipeline. If your DAST job
+does not rely on `environment_url.txt` to define the URL under test, or any other files created in
+previous jobs, we recommend you don't download artifacts. To avoid downloading artifacts, add the
+following to your `.gitlab-ci.yml` file:
 
 ```yaml
 dast:
