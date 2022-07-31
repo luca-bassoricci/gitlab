@@ -22,12 +22,15 @@ const (
 
 	// Signal header that indicates Workhorse should detect and set the content headers
 	GitlabWorkhorseDetectContentTypeHeader = "Gitlab-Workhorse-Detect-Content-Type"
+	// Content-Type based solely on filename
+	GitlabWorkhorseContentTypeFromFilenameHeader = "Gitlab-Workhorse-Filename-Content-Type"
 )
 
 var ResponseHeaders = []string{
 	XSendFileHeader,
 	GitlabWorkhorseSendDataHeader,
 	GitlabWorkhorseDetectContentTypeHeader,
+	GitlabWorkhorseContentTypeFromFilenameHeader,
 }
 
 func IsDetectContentTypeHeaderPresent(rw http.ResponseWriter) bool {
@@ -37,6 +40,10 @@ func IsDetectContentTypeHeaderPresent(rw http.ResponseWriter) bool {
 	}
 
 	return true
+}
+
+func GetFilenameContentTypeHeader(rw http.ResponseWriter) string {
+	return rw.Header().Get(GitlabWorkhorseContentTypeFromFilenameHeader)
 }
 
 // AnyResponseHeaderPresent checks in the ResponseWriter if there is any Response Header

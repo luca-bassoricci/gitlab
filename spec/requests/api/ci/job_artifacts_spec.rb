@@ -257,7 +257,8 @@ RSpec.describe API::Ci::JobArtifacts do
             .to include('Content-Type' => 'application/json',
                         'Gitlab-Workhorse-Send-Data' => /artifacts-entry/)
           expect(response.headers.to_h)
-            .not_to include('Gitlab-Workhorse-Detect-Content-Type' => 'true')
+            .not_to include('Gitlab-Workhorse-Detect-Content-Type' => 'true',
+                            'Gitlab-Workhorse-Filename-Content-Type' => 'image/gif')
           expect(response.parsed_body).to be_empty
         end
 
@@ -597,7 +598,8 @@ RSpec.describe API::Ci::JobArtifacts do
             expect(response.headers.to_h)
               .to include('Content-Type' => 'application/json',
                           'Gitlab-Workhorse-Send-Data' => /artifacts-entry/,
-                          'Gitlab-Workhorse-Detect-Content-Type' => 'true')
+                          'Gitlab-Workhorse-Detect-Content-Type' => 'true',
+                          'Gitlab-Workhorse-Filename-Content-Type' => 'image/gif')
           end
         end
 
@@ -668,7 +670,8 @@ RSpec.describe API::Ci::JobArtifacts do
           expect(response.headers.to_h)
             .to include('Content-Type' => 'application/json',
                         'Gitlab-Workhorse-Send-Data' => /artifacts-entry/,
-                        'Gitlab-Workhorse-Detect-Content-Type' => 'true')
+                        'Gitlab-Workhorse-Detect-Content-Type' => 'true',
+                        'Gitlab-Workhorse-Filename-Content-Type' => 'image/gif')
           expect(response.parsed_body).to be_empty
         end
       end

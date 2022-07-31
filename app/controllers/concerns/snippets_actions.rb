@@ -27,7 +27,8 @@ module SnippetsActions
   # it will only return the first blob found,
   # see: https://gitlab.com/gitlab-org/gitlab/-/issues/217775
   def raw
-    workhorse_set_content_type!
+    filename = Snippet.sanitized_file_name(blob.name)
+    workhorse_set_content_type!(filename)
 
     # Until we don't migrate all snippets to version
     # snippets we need to support old `SnippetBlob`
@@ -37,7 +38,7 @@ module SnippetsActions
         convert_line_endings(blob.data),
         type: 'text/plain; charset=utf-8',
         disposition: content_disposition,
-        filename: Snippet.sanitized_file_name(blob.name)
+        filename: filename
       )
     else
       send_snippet_blob(snippet, blob)

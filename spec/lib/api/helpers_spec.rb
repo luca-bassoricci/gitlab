@@ -5,7 +5,12 @@ require 'spec_helper'
 RSpec.describe API::Helpers do
   using RSpec::Parameterized::TableSyntax
 
-  subject(:helper) { Class.new.include(described_class).new }
+  subject(:helper) do
+    Class.new do
+      include API::Helpers
+      include Grape::DSL::Headers
+    end.new
+  end
 
   describe '#current_user' do
     include Rack::Test::Methods
@@ -538,7 +543,6 @@ RSpec.describe API::Helpers do
     before do
       allow(helper).to receive(:env).and_return({})
       allow(helper).to receive(:content_type)
-      allow(helper).to receive(:header).and_return({})
       allow(helper).to receive(:body).and_return('')
       allow(Gitlab::Workhorse).to receive(:send_git_blob)
     end
@@ -812,7 +816,6 @@ RSpec.describe API::Helpers do
   describe '#render_api_error_with_reason!' do
     before do
       allow(helper).to receive(:env).and_return({})
-      allow(helper).to receive(:header).and_return({})
       allow(helper).to receive(:error!)
     end
 

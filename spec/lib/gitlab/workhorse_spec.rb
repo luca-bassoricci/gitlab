@@ -414,6 +414,49 @@ RSpec.describe Gitlab::Workhorse do
     end
   end
 
+  describe '.set_detect_content_type!' do
+    let(:headers) { {} }
+
+    subject { described_class.set_detect_content_type!(headers, filename) }
+
+    context 'with YAML filename' do
+      let(:filename) { 'test.yaml' }
+
+      it 'sets Gitlab-Workhorse-Filename-Content-Type with YAML type' do
+        subject
+
+        expect(headers['Gitlab-Workhorse-Detect-Content-Type']).to eq('true')
+        expect(headers['Gitlab-Workhorse-Filename-Content-Type']).to eq('text/x-yaml')
+      end
+    end
+
+    context 'with unknown filename' do
+      let(:filename) { 'test.ya2912' }
+
+      it 'sets Gitlab-Workhorse-Filename-Content-Type with application/octet-stream' do
+        subject
+
+        expect(headers['Gitlab-Workhorse-Detect-Content-Type']).to eq('true')
+        expect(headers['Gitlab-Workhorse-Filename-Content-Type']).to eq('application/octet-stream')
+      end
+    end
+
+    context 'with use_content_type_from_filename feature flag disabled' do
+      before do
+        stub_feature_flags(use_content_type_from_filename: false)
+      end
+
+      let(:filename) { 'test.yaml' }
+
+      it 'sets only Gitlab-Workhorse-Detect-Content-Type' do
+        subject
+
+        expect(headers['Gitlab-Workhorse-Detect-Content-Type']).to eq('true')
+        expect(headers.keys).not_to include('Gitlab-Workhorse-Filename-Content-Type')
+      end
+    end
+  end
+
   describe '.send_git_blob' do
     include FakeBlobHelpers
 

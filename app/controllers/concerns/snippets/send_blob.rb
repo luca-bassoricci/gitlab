@@ -4,7 +4,7 @@ module Snippets::SendBlob
   include SendsBlob
 
   def send_snippet_blob(snippet, blob)
-    workhorse_set_content_type!
+    workhorse_set_content_type!(blob.name)
 
     send_blob(
       snippet.repository,

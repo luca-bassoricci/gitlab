@@ -15,11 +15,15 @@ module Gitlab
     NOTIFICATION_CHANNEL = 'workhorse:notifications'
     ALLOWED_GIT_HTTP_ACTIONS = %w[git_receive_pack git_upload_pack info_refs].freeze
     DETECT_HEADER = 'Gitlab-Workhorse-Detect-Content-Type'
+    CONTENT_TYPE_FROM_FILENAME_HEADER = 'Gitlab-Workhorse-Filename-Content-Type'
+
     ARCHIVE_FORMATS = %w(zip tar.gz tar.bz2 tar).freeze
 
     include JwtAuthenticatable
 
     class << self
+      include MimeHelper
+
       def git_http_ok(repository, repo_type, user, action, show_all_refs: false)
         raise "Unsupported action: #{action}" unless ALLOWED_GIT_HTTP_ACTIONS.include?(action.to_s)
 
@@ -230,6 +234,14 @@ module Gitlab
           Gitlab::Workhorse::DETECT_HEADER,
           'true'
         ]
+      end
+
+      def set_detect_content_type!(headers, filename)
+        headers[DETECT_HEADER] = "true"
+
+        return unless filename && Feature.enabled?(:use_content_type_from_filename)
+
+        headers[Gitlab::Workhorse::CONTENT_TYPE_FROM_FILENAME_HEADER] = guess_content_type(filename)
       end
 
       protected

@@ -17,6 +17,7 @@ type contentDisposition struct {
 	removedResponseHeaders bool
 	status                 int
 	sentStatus             bool
+	filenameContentType    string
 }
 
 // SetContentHeaders buffers the response if Gitlab-Workhorse-Detect-Content-Type
@@ -86,7 +87,7 @@ func (cd *contentDisposition) writeContentHeaders() {
 	}
 
 	cd.wroteHeader = true
-	contentType, contentDisposition := headers.SafeContentHeaders(cd.buf.Bytes(), cd.Header().Get(headers.ContentDispositionHeader))
+	contentType, contentDisposition := headers.SafeContentHeaders(cd.filenameContentType, cd.buf.Bytes(), cd.Header().Get(headers.ContentDispositionHeader))
 	cd.Header().Set(headers.ContentTypeHeader, contentType)
 	cd.Header().Set(headers.ContentDispositionHeader, contentDisposition)
 }
@@ -113,6 +114,7 @@ func (cd *contentDisposition) isUnbuffered() bool {
 			cd.active = true
 		}
 
+		cd.filenameContentType = headers.GetFilenameContentTypeHeader(cd.rw)
 		cd.removedResponseHeaders = true
 		// We ensure to clear any response header from the response
 		headers.RemoveResponseHeaders(cd.rw)

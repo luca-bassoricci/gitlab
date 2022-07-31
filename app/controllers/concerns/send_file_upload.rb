@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module SendFileUpload
+  include Gitlab::MimeHelper
+
   def send_upload(file_upload, send_params: {}, redirect_params: {}, attachment: nil, proxy: false, disposition: 'attachment')
     content_type = content_type_for(attachment)
 
@@ -38,16 +40,6 @@ module SendFileUpload
     return '' unless attachment
 
     guess_content_type(attachment)
-  end
-
-  def guess_content_type(filename)
-    types = MIME::Types.type_for(filename)
-
-    if types.present?
-      types.first.content_type
-    else
-      "application/octet-stream"
-    end
   end
 
   private

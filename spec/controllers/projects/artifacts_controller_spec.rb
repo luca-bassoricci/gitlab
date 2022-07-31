@@ -355,6 +355,7 @@ RSpec.describe Projects::ArtifactsController do
     context 'when the file exists' do
       let(:path) { 'ci_artifacts.txt' }
       let(:archive_matcher) { /build_artifacts.zip(\?[^?]+)?$/ }
+      let(:filename_content_type) { 'text/plain' }
 
       shared_examples 'a valid file' do
         it 'serves the file using workhorse' do
@@ -362,6 +363,7 @@ RSpec.describe Projects::ArtifactsController do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response.headers['Gitlab-Workhorse-Detect-Content-Type']).to eq('true')
+          expect(response.headers['Gitlab-Workhorse-Filename-Content-Type']).to eq(filename_content_type)
           expect(send_data).to start_with('artifacts-entry:')
 
           expect(params.keys).to eq(%w(Archive Entry))
@@ -414,6 +416,7 @@ RSpec.describe Projects::ArtifactsController do
           let(:path) { 'lsif/main.go.json' }
           let(:archive_matcher) { 'lsif.json.zip' }
           let(:query_params) { super().merge(file_type: :lsif, path: path) }
+          let(:filename_content_type) { 'application/json' }
 
           it_behaves_like 'a valid file' do
             let(:store) { ObjectStorage::Store::LOCAL }

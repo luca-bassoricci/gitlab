@@ -10,7 +10,7 @@ module WorkhorseHelper
     headers['Content-Disposition'] = content_disposition_for_blob(blob, inline)
 
     # If enabled, this will override the values set above
-    workhorse_set_content_type!
+    workhorse_set_content_type!(blob.name)
 
     render plain: ""
   end
@@ -37,8 +37,9 @@ module WorkhorseHelper
 
   # Send an entry from artifacts through Workhorse and set safe content type
   def send_artifacts_entry(file, entry)
+    workhorse_set_content_type!(entry.to_s)
+
     headers.store(*Gitlab::Workhorse.send_artifacts_entry(file, entry))
-    headers.store(*Gitlab::Workhorse.detect_content_type)
 
     head :ok
   end
@@ -56,8 +57,8 @@ module WorkhorseHelper
     headers['Content-Type'] = Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
   end
 
-  def workhorse_set_content_type!
-    headers[Gitlab::Workhorse::DETECT_HEADER] = "true"
+  def workhorse_set_content_type!(filename = nil)
+    Gitlab::Workhorse.set_detect_content_type!(headers, filename)
   end
 
   def content_disposition_for_blob(blob, inline)

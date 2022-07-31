@@ -21,6 +21,9 @@ var (
 
 	attachmentRegex = regexp.MustCompile(`^attachment`)
 	inlineRegex     = regexp.MustCompile(`^inline`)
+
+	applicationTypeRegex = regexp.MustCompile(`^application/.*`)
+	octetStreamRegex     = regexp.MustCompile(`^application/octet-stream$`)
 )
 
 // Mime types that can't be inlined. Usually subtypes of main types
@@ -40,9 +43,12 @@ const (
 	inlineDispositionText     = "inline"
 )
 
-func SafeContentHeaders(data []byte, contentDisposition string) (string, string) {
+func SafeContentHeaders(filenameContentType string, data []byte, contentDisposition string) (string, string) {
 	contentType := safeContentType(data)
 	contentDisposition = safeContentDisposition(contentType, contentDisposition)
+
+	contentType = attachmentContentType(contentDisposition, contentType, filenameContentType)
+
 	return contentType, contentDisposition
 }
 
@@ -95,6 +101,24 @@ func safeContentDisposition(contentType string, contentDisposition string) strin
 
 	// Anything else is set to attachment
 	return attachmentDisposition(contentDisposition)
+}
+
+func attachmentContentType(contentDisposition string, contentType string, filenameContentType string) string {
+	// If the final Content-Disposition is an attachment based on the
+	// scanned Content-Type, the Content-Type should not matter to the
+	// browser. The filename extension would likely be more accurate
+	// for application formats, such as application/zip (.docx, .odpb, .odt, etc.).
+	//
+	// In the future we may want to allow for specific subtypes as the Marcel
+	// gem does: https://github.com/rails/marcel/blob/fc69a19d17de4fedca354b2404b04834b16eacd8/lib/marcel/mime_type.rb#L77-L86
+	if attachmentRegex.MatchString(contentDisposition) &&
+		isType(filenameContentType, applicationTypeRegex) &&
+		!isType(filenameContentType, octetStreamRegex) &&
+		isType(contentType, applicationTypeRegex) {
+		return filenameContentType
+	}
+
+	return contentType
 }
 
 func attachmentDisposition(contentDisposition string) string {

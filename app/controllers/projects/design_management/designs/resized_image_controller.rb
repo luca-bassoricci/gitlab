@@ -25,7 +25,7 @@ module Projects
           return render_404 unless uploader.file # The image has not been processed
 
           if stale?(etag: action.cache_key)
-            workhorse_set_content_type!
+            workhorse_set_content_type!(design.filename)
 
             send_upload(uploader, attachment: design.filename)
           end

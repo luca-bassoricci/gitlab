@@ -733,8 +733,7 @@ module API
       header['Content-Disposition'] = ActionDispatch::Http::ContentDisposition.format(disposition: 'inline', filename: blob.name)
 
       # Let Workhorse examine the content and determine the better content disposition
-      header[Gitlab::Workhorse::DETECT_HEADER] = "true"
-
+      Gitlab::Workhorse.set_detect_content_type!(header, blob.name)
       header(*Gitlab::Workhorse.send_git_blob(repository, blob))
 
       body ''
@@ -754,8 +753,8 @@ module API
     end
 
     def send_artifacts_entry(file, entry)
+      Gitlab::Workhorse.set_detect_content_type!(header, entry.to_s)
       header(*Gitlab::Workhorse.send_artifacts_entry(file, entry))
-      header(*Gitlab::Workhorse.detect_content_type)
 
       body ''
     end
