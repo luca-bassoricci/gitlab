@@ -32,7 +32,7 @@ schedule. Coverage includes:
 - Vulnerabilities in a running web application.
 - Infrastructure as code configuration.
 
-Each of GitLab's application security tools is relevant to specific phases of the feature development phases.
+Each of the GitLab application security tools is relevant to specific phases of the feature development workflow.
 | Phase                        | First commit           | Build                  | Test                   | Deploy                 |
 |------------------------------|------------------------|------------------------|------------------------|------------------------|
 | SAST                         | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
