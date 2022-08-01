@@ -32,9 +32,17 @@ schedule. Coverage includes:
 - Vulnerabilities in a running web application.
 - Infrastructure as code configuration.
 
-Each of the security scanners is applicable to one or more of the application development phases.
-
-![Illustration of security scanners and the applicable application development phases.](img/security_scanners_and_their_development_phases.png)
+Each of GitLab's application security tools is relevant to specific phases of the feature development phases.
+| Phase                        | First commit           | Build                  | Test                   | Deploy                 |
+|------------------------------|------------------------|------------------------|------------------------|------------------------|
+| SAST                         | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
+| Secret Detection             | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
+| Coverage-guided Fuzz Testing | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
+| License Scanning             |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Dependency Scanning          |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Container Scannin            |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| API Security                 |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| DAST                         |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
 
 ### Source code analysis
 
