@@ -72,7 +72,7 @@ RSpec.describe Ci::PipelineArtifacts::CoverageReportService do
     end
 
     context 'when pipeline is running and coverage report does not exist' do
-      let(:pipeline) { create(:ci_pipeline, :running) }
+      let(:pipeline) { create(:ci_pipeline, :running, project: project) }
 
       it 'does not persist data' do
         expect { subject }.not_to change { Ci::PipelineArtifact.count }.from(0)

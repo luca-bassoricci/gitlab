@@ -8,8 +8,17 @@ module Gitlab
           InvalidXMLError = Class.new(Gitlab::Ci::Parsers::ParserError)
           InvalidLineInformationError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
-          def parse!(xml_data, coverage_report, project_path: nil, worktree_paths: nil)
-            Nokogiri::XML::SAX::Parser.new(SaxDocument.new(coverage_report, project_path, worktree_paths)).parse(xml_data)
+          def initialize(blob, report, **context)
+            @blob = blob
+            @report = report
+            @pipeline = context.delete(:pipeline)
+          end
+
+          def parse!
+            project_path = @pipeline.project.full_path
+            worktree_paths = @pipeline.all_worktree_paths
+
+            Nokogiri::XML::SAX::Parser.new(SaxDocument.new(@report, project_path, worktree_paths)).parse(@blob)
           end
         end
       end

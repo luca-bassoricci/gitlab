@@ -22,7 +22,7 @@ module Ci
 
       def report
         strong_memoize(:report) do
-          Gitlab::Ci::Reports::CoverageReportGenerator.new(pipeline).report
+          Gitlab::Ci::Reports::Factory.fabricate(report_type: :coverage, pipeline: pipeline)
         end
       end
 

@@ -17,6 +17,8 @@ RSpec.describe Gitlab::Ci::Parsers do
     context 'when file_type is cobertura' do
       let(:file_type) { 'cobertura' }
 
+      subject { described_class.fabricate!(file_type, double, double) }
+
       it 'fabricates the class' do
         is_expected.to be_a(described_class::Coverage::Cobertura)
       end
