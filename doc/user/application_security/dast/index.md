@@ -1434,12 +1434,14 @@ dast:
    dependencies: []
 ```
 
-### Save on usage of CI minutes and shorten your pipeline
+### Save on usage of CI/CD minutes and shorten your pipeline
 
-You can save on usage of CI minutes and shorten your pipeline run time by excluding the DAST job
+You can save on usage of CI/CD minutes and shorten your pipeline run time by excluding the DAST job
 when an MR is marked as a [draft](../../project/merge_requests/drafts.md). CI/CD pipelines are run
-on every commit, even those to a draft MR. Add the following to your `.gitlab-ci.yml` file to
-exclude the DAST job when the MR's title contains the text "Draft:", regardless of case:
+on every commit, even those to a draft MR.
+
+To exclude the DAST job when the MR's title contains the text "Draft:" (regardless of case), add the
+following to your `.gitlab-ci.yml` file :
 
 ```yaml
 dast:
