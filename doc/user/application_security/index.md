@@ -33,16 +33,44 @@ schedule. Coverage includes:
 - Infrastructure as code configuration.
 
 Each of the GitLab application security tools is relevant to specific phases of the feature development workflow.
-| Phase                        | First commit           | Build                  | Test                   | Deploy                 |
-|------------------------------|------------------------|------------------------|------------------------|------------------------|
-| SAST                         | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
-| Secret Detection             | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
-| Coverage-guided Fuzz Testing | **{check-circle}** Yes | **{check-circle}** Yes |                        |                        |
-| License Scanning             |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
-| Dependency Scanning          |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
-| Container Scannin            |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
-| API Security                 |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
-| DAST                         |                        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+
+- Commit
+  - SAST
+  - Secret Detection
+  - IaC Scanning
+  - Dependency Scanning
+  - License Scanning
+  - Coverage-guided Fuzz Testing
+- Build
+  - Container Scanning
+- Test
+  - API Security
+  - DAST
+- Deploy
+  - Operational Container Scanning
+
+```mermaid
+gantt
+  title CI/CD phases and GitLab application security tools
+  dateFormat  YYYY-MM-DD HH:mm
+  axisFormat %
+  section Phase
+  Commit: 2022-02-25 00:00, 15m
+  Build: 2022-02-25 00:15, 15m
+  Test: 2022-02-25 00:30, 15m
+  Deploy: 2022-02-25 00:45, 15m
+  section Scanning activity
+  SAST :a1, 2022-02-25 00:00, 15m
+  Secret Detection :a1, 2022-02-25 00:00, 15m
+  IaC Scanning :a1, 2022-02-25 00:00, 15m
+  Dependency Scanning :a1, 2022-02-25 00:00, 15m
+  License Scanning :a1, 2022-02-25 00:00, 15m
+  Coverage-guide Fuzz Testing :a1, 2022-02-25 00:00, 15m
+  Container Scanning :a1, 2022-02-25 00:15, 15m
+  API Security :a1, 2022-02-25 00:30, 15m
+  DAST :a1, 2022-02-25 00:30, 15m
+  Operational Container Scanning :a1, 2022-02-25 00:45, 15m
+```
 
 ### Source code analysis
 
@@ -60,7 +88,7 @@ Analysis of the web application occurs on every code commit. As part of the CI/C
 application is built, deployed to a test environment, and subjected to the following tests:
 
 - Test for known application vectors - [Dynamic Application Security Testing (DAST)](dast/index.md).
-- Analysis of APIs for known attack vectors - [DAST API](dast_api/index.md).
+- Analysis of APIs for known attack vectors - [API Security](dast_api/index.md).
 - Analysis of web APIs for unknown bugs and vulnerabilities - [API fuzzing](api_fuzzing/index.md).
 
 ### Dependency analysis
@@ -78,7 +106,7 @@ For more details, see
 [Dependency Scanning compared to Container Scanning](dependency_scanning/index.md#dependency-scanning-compared-to-container-scanning).
 
 Additionally, dependencies in operational container images can be analyzed for vulnerabilities
-on a regular schedule or cadence. For more details, see [Cluster Image Scanning](../clusters/agent/vulnerabilities.md).
+on a regular schedule or cadence. For more details, see [Operational Container Scanning](../../user/clusters/agent/vulnerabilities.md).
 
 ### Infrastructure analysis
 
@@ -498,6 +526,7 @@ Feedback is welcome on our vision for [unifying the user experience for these tw
 
 <!-- NOTE: The below subsection(`### Secure job failing with exit code 1`) documentation URL is referred in the [/gitlab-org/security-products/analyzers/command](https://gitlab.com/gitlab-org/security-products/analyzers/command/-/blob/main/command.go#L19) repository. If this section/subsection changes, please ensure to update the corresponding URL in the mentioned repository.
 -->
+
 ### Secure job failing with exit code 1
 
 WARNING:
