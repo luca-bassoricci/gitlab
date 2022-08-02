@@ -696,8 +696,8 @@ user.max_member_access_for_group group.id
 
 ### Set expiration date for SSH keys
 
-This example sets `2022-12-31` as the expiration date for all SSH keys
-that are not set to expire.
+The following example sets `2022-12-31` as the expiration date for all SSH keys
+that are not set to expire:
 
 ```ruby
 expire = Time.new(2022, 12, 31)
