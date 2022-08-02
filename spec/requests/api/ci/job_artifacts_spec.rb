@@ -322,31 +322,51 @@ RSpec.describe API::Ci::JobArtifacts do
           end
 
           context 'when job token is used' do
-            let(:other_job) { create(:ci_build, :running, user: user) }
-
             subject { get api("/projects/#{project.id}/jobs/#{job.id}/artifacts", job_token: other_job.token) }
 
-            before do
-              stub_licensed_features(cross_project_pipelines: true)
+            context 'when other job is in the same project' do
+              let(:other_job) { create(:ci_build, :running, user: user, project: project) }
+
+              it_behaves_like 'downloads artifact'
             end
 
-            it_behaves_like 'downloads artifact'
+            context 'when other job is in a different project' do
+              let(:other_job) { create(:ci_build, :running, user: user) }
 
-            context 'when job token scope is enabled' do
               before do
-                other_job.project.ci_cd_settings.update!(job_token_scope_enabled: true)
+                stub_licensed_features(cross_project_pipelines: true)
               end
 
-              it 'does not allow downloading artifacts' do
-                subject
+              it_behaves_like 'downloads artifact'
 
-                expect(response).to have_gitlab_http_status(:not_found)
+              context 'when job token scope is enabled' do
+                before do
+                  other_job.project.ci_cd_settings.update!(job_token_scope_enabled: true)
+                end
+
+                it 'does not allow downloading artifacts' do
+                  subject
+
+                  expect(response).to have_gitlab_http_status(:not_found)
+                end
+
+                context 'when project is added to the job token scope' do
+                  let!(:link) { create(:ci_job_token_project_scope_link, source_project: other_job.project, target_project: job.project) }
+
+                  it_behaves_like 'downloads artifact'
+                end
               end
 
-              context 'when project is added to the job token scope' do
-                let!(:link) { create(:ci_job_token_project_scope_link, source_project: other_job.project, target_project: job.project) }
+              context 'and cross_project_pipelines feature is not licensed' do
+                before do
+                  stub_licensed_features(cross_project_pipelines: false)
+                end
 
-                it_behaves_like 'downloads artifact'
+                it 'does not allow downloading artifacts' do
+                  subject
+
+                  expect(response).to have_gitlab_http_status(:not_found)
+                end
               end
             end
           end

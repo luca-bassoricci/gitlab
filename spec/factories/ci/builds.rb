@@ -8,6 +8,8 @@ FactoryBot.define do
     scheduling_type { 'stage' }
     pending
 
+    user { pipeline.user }
+
     options do
       {
         image: 'image:1.0',

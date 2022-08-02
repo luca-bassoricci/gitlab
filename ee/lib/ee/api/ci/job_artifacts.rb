@@ -14,9 +14,15 @@ module EE
             end
 
             def check_cross_project_pipelines_feature!
-              if job_token_authentication? && !user_project.licensed_feature_available?(:cross_project_pipelines)
+              return unless job_token_authentication?
+
+              if cross_project_request && !user_project.licensed_feature_available?(:cross_project_pipelines)
                 not_found!('Project')
               end
+            end
+
+            def cross_project_request
+              user_project != current_authenticated_job.project
             end
           end
         end
