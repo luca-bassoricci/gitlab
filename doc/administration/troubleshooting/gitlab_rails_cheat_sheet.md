@@ -710,9 +710,6 @@ Key.all.each do |k|
 end; nil
 ```
 
-`Time.new(2022, 12, 31)` can be changed to `Time.now` to **immediately** expire 
-all SSH keys with no expiration date set.
-
 ## Groups
 
 ### Transfer group to another location
