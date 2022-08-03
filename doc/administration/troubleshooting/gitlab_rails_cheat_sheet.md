@@ -700,7 +700,7 @@ The following example sets `2022-12-31` as the expiration date for all SSH keys
 that are not set to expire:
 
 ```ruby
-expire = Time.now + 60 * 24 * 30 * 6  # Expire in ca. 6 month
+expire = Time.now + 60 * 60 * 24 * 30  # Expire in 30 days
 
 Key.all.each do |k|
     if k.expires_at == nil 
