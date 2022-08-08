@@ -12,11 +12,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - Moved to GitLab Premium in 13.9.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) in GitLab 14.6. [Feature flag `group_iterations`](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) removed.
 
-WARNING:
-After [Iteration Cadences](#iteration-cadences) becomes generally available,
-manual iteration scheduling will be [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/356069) in GitLab 15.6.
-To enhance the role of iterations as time boundaries, we will also deprecate the title field.
-
 Iterations are a way to track issues over a period of time. This allows teams
 to track velocity and volatility metrics. Iterations can be used with [milestones](../../project/milestones/index.md)
 for tracking over different time periods.
@@ -255,15 +250,7 @@ To delete an iteration cadence:
 
 ### Manual iteration cadences
 
-When you **enable** the iteration cadences feature, all previously
-created iterations are added to a default iteration cadence.
-You can continue to add, edit, and remove iterations in
-this default cadence.
-
 #### Convert a manual cadence to use automatic scheduling
-
-WARNING:
-The upgrade is irreversible. After it's done, a new manual iteration cadence cannot be created.
 
 Prerequisites:
 
