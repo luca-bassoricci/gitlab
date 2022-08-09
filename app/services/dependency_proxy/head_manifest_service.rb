@@ -21,8 +21,8 @@ module DependencyProxy
       else
         error(response.body, response.code)
       end
-    rescue Timeout::Error => exception
-      error(exception.message, 599)
+    rescue Timeout::Error => e
+      error(e.message, 599)
     end
 
     private

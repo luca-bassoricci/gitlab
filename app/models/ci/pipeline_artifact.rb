@@ -65,8 +65,8 @@ module Ci
             expire_at: EXPIRATION_DATE.from_now
           )
         end
-      rescue ActiveRecord::ActiveRecordError => err
-        Gitlab::ErrorTracking.track_and_raise_exception(err, { pipeline_id: pipeline.id, file_type: file_type })
+      rescue ActiveRecord::ActiveRecordError => e
+        Gitlab::ErrorTracking.track_and_raise_exception(e, { pipeline_id: pipeline.id, file_type: file_type })
       end
     end
 

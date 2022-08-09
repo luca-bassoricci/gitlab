@@ -14,8 +14,8 @@ module Branches
       end
 
       success
-    rescue Gitlab::Git::PreReceiveError => ex
-      error(ex.message)
+    rescue Gitlab::Git::PreReceiveError => e
+      error(e.message)
     end
 
     private

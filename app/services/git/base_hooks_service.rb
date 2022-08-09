@@ -56,8 +56,8 @@ module Git
       Ci::CreatePipelineService
         .new(project, current_user, pipeline_params)
         .execute!(:push, pipeline_options)
-    rescue Ci::CreatePipelineService::CreateError => ex
-      log_pipeline_errors(ex)
+    rescue Ci::CreatePipelineService::CreateError => e
+      log_pipeline_errors(e)
     end
 
     def execute_project_hooks

@@ -41,8 +41,8 @@ module GoogleCloud
       save_user_ci_vars(existing_user)
 
       success
-    rescue Google::Apis::Error => err
-      error(message: err.to_json)
+    rescue Google::Apis::Error => e
+      error(message: e.to_json)
     end
 
     private

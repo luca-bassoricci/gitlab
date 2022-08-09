@@ -19,8 +19,8 @@ module Clusters
         helm_api.update(patch_command(values))
 
         ::ClusterWaitForAppUpdateWorker.perform_in(::ClusterWaitForAppUpdateWorker::INTERVAL, app.name, app.id)
-      rescue ::Kubeclient::HttpError => ke
-        app.make_update_errored!("Kubernetes error: #{ke.message}")
+      rescue ::Kubeclient::HttpError => e
+        app.make_update_errored!("Kubernetes error: #{e.message}")
       rescue StandardError => e
         app.make_update_errored!(e.message)
       end

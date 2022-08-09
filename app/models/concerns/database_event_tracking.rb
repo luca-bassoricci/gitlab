@@ -38,11 +38,11 @@ module DatabaseEventTracking
       property: name,
       **filtered_record_attributes
     )
-  rescue StandardError => err
+  rescue StandardError => e
     # this rescue should be a dead code due to utilization of AsyncEmitter, however
     # since this concern is expected to be included in every model, it is better to
     # prevent against any unexpected outcome
-    Gitlab::ErrorTracking.track_and_raise_for_dev_exception(err)
+    Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
   end
 
   def filtered_record_attributes

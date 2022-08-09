@@ -58,8 +58,8 @@ module Grafana
       )
 
       success(http_status: response.code, body: response.body)
-    rescue ::Grafana::Client::Error => error
-      service_unavailable_response(error)
+    rescue ::Grafana::Client::Error => e
+      service_unavailable_response(e)
     end
 
     # Required for ReactiveCaching; Usage overridden by

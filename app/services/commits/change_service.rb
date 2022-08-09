@@ -28,7 +28,7 @@ module Commits
         start_branch_name: @start_branch,
         dry_run: @dry_run
       )
-    rescue Gitlab::Git::Repository::CreateTreeError => ex
+    rescue Gitlab::Git::Repository::CreateTreeError => e
       act = action.to_s.dasherize
       type = @commit.change_type_title(current_user)
 
@@ -36,7 +36,7 @@ module Commits
         "This #{type} may already have been #{act}ed, or a more recent " \
         "commit may have updated some of its content."
 
-      raise ChangeError.new(error_msg, ex.error_code)
+      raise ChangeError.new(error_msg, e.error_code)
     end
   end
 end

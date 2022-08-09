@@ -173,8 +173,8 @@ module Issues
       begin
         yield batch_size
         retries = 0
-      rescue ActiveRecord::StatementTimeout, ActiveRecord::QueryCanceled => ex
-        raise ex if batch_size < exit_batch_size
+      rescue ActiveRecord::StatementTimeout, ActiveRecord::QueryCanceled => e
+        raise e if batch_size < exit_batch_size
 
         if (retries += 1) == RETRIES_LIMIT
           # shrink the batch size in half when RETRIES limit is reached and update still fails perhaps because batch size is still too big

@@ -14,8 +14,8 @@ module DependencyProxy
       else
         error('Expected 200 response code for an access token', response.code)
       end
-    rescue Timeout::Error => exception
-      error(exception.message, 599)
+    rescue Timeout::Error => e
+      error(e.message, 599)
     rescue JSON::ParserError
       error('Failed to parse a response body for an access token', 500)
     end

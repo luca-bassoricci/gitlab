@@ -12,8 +12,8 @@ module Groups
 
       success
 
-    rescue ActiveRecord::RecordInvalid, ArgumentError => error
-      error(error.message)
+    rescue ActiveRecord::RecordInvalid, ArgumentError => e
+      error(e.message)
     end
 
     private

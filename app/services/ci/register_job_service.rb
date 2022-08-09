@@ -201,13 +201,13 @@ module Ci
       @metrics.increment_queue_operation(:build_conflict_transition)
 
       Result.new(nil, nil, false)
-    rescue StandardError => ex
+    rescue StandardError => e
       @metrics.increment_queue_operation(:build_conflict_exception)
 
       # If an error (e.g. GRPC::DeadlineExceeded) occurred constructing
       # the result, consider this as a failure to be retried.
       scheduler_failure!(build)
-      track_exception_for_build(ex, build)
+      track_exception_for_build(e, build)
 
       # skip, and move to next one
       nil
@@ -275,12 +275,12 @@ module Ci
       Gitlab::OptimisticLocking.retry_lock(build, 3, name: 'register_job_scheduler_failure') do |subject|
         subject.drop!(:scheduler_failure)
       end
-    rescue StandardError => ex
+    rescue StandardError => e
       build.doom!
 
       # This requires extra exception, otherwise we would loose information
       # why we cannot perform `scheduler_failure`
-      track_exception_for_build(ex, build)
+      track_exception_for_build(e, build)
     end
 
     def track_exception_for_build(ex, build)

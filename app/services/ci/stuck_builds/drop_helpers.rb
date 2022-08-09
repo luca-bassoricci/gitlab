@@ -38,10 +38,10 @@ module Ci
         Gitlab::OptimisticLocking.retry_lock(build, 3, name: 'stuck_ci_jobs_worker_drop_build') do |b|
           b.drop(reason)
         end
-      rescue StandardError => ex
+      rescue StandardError => e
         build.doom!
 
-        track_exception_for_build(ex, build)
+        track_exception_for_build(e, build)
       end
 
       def track_exception_for_build(ex, build)

@@ -127,15 +127,15 @@ module Ci
         end
 
         success(artifact: artifact)
-      rescue ActiveRecord::RecordNotUnique => error
-        track_exception(error, params)
+      rescue ActiveRecord::RecordNotUnique => e
+        track_exception(e, params)
         error('another artifact of the same type already exists', :bad_request)
-      rescue *OBJECT_STORAGE_ERRORS => error
-        track_exception(error, params)
-        error(error.message, :service_unavailable)
-      rescue StandardError => error
-        track_exception(error, params)
-        error(error.message, :bad_request)
+      rescue *OBJECT_STORAGE_ERRORS => e
+        track_exception(e, params)
+        error(e.message, :service_unavailable)
+      rescue StandardError => e
+        track_exception(e, params)
+        error(e.message, :bad_request)
       end
 
       def sha256_matches_existing_artifact?(artifact_type, artifacts_file)
