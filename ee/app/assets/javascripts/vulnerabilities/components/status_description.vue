@@ -45,7 +45,7 @@ export default {
     time() {
       const { state } = this.vulnerability;
       return state === 'detected'
-        ? this.vulnerability.pipeline.createdAt
+        ? this.vulnerability.pipeline?.createdAt
         : this.vulnerability[`${this.vulnerability.state}At`];
     },
 
@@ -80,7 +80,7 @@ export default {
 <template>
   <span>
     <gl-skeleton-loader v-if="isLoadingVulnerability" :lines="2" class="h-auto" />
-    <gl-sprintf v-else :message="statusText">
+    <gl-sprintf v-else-if="time" :message="statusText">
       <template #status="{ content }">
         <span :class="{ 'gl-font-weight-bold': isStatusBolded }" data-testid="status">
           {{ content }}
