@@ -14,7 +14,6 @@ import { TYPE_ITERATIONS_CADENCE } from '~/graphql_shared/constants';
 import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__, __, sprintf } from '~/locale';
 import { getDayName } from '~/lib/utils/datetime_utility';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import createCadence from '../queries/cadence_create.mutation.graphql';
 import updateCadence from '../queries/cadence_update.mutation.graphql';
 import readCadence from '../queries/iteration_cadence.query.graphql';
@@ -76,9 +75,6 @@ const i18n = Object.freeze({
 });
 
 export default {
-  iterationCadencesHelpPagePath: helpPagePath('user/group/iterations/index.md', {
-    anchor: 'iteration-cadences',
-  }),
   availableDurations: [{ value: null, text: i18n.duration.placeholder }, 1, 2, 3, 4],
   availableUpcomingIterations: [
     { value: null, text: i18n.upcomingIterations.placeholder },
@@ -133,7 +129,6 @@ export default {
       if (this.startDate === null) return '';
 
       return sprintf(this.i18n.automationStartDate.description, {
-        automationStartDate: this.automationStartDate,
         weekday: getDayName(new Date(this.startDate)),
       });
     },
@@ -323,8 +318,9 @@ export default {
         });
     },
     updateAutomatic(value) {
-      this.clearValidation();
       if (!value) {
+        this.clearValidation();
+
         this.startDate = null;
         this.iterationsInAdvance = null;
         this.durationInWeeks = null;
