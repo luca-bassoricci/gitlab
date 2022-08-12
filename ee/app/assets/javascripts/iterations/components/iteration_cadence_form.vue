@@ -217,10 +217,7 @@ export default {
 
           this.validateAllFields();
         } else {
-          this.startDate = null;
-          this.durationInWeeks = null;
-          this.rollOver = false;
-          this.iterationsInAdvance = null;
+          this.clearAutomaticFields();
         }
       },
       error(error) {
@@ -267,6 +264,12 @@ export default {
       this.validationState.startDate = null;
       this.validationState.durationInWeeks = null;
       this.validationState.iterationsInAdvance = null;
+    },
+    clearAutomaticFields() {
+      this.startDate = null;
+      this.durationInWeeks = null;
+      this.rollOver = false;
+      this.iterationsInAdvance = null;
     },
     saveAndViewList() {
       return this.save()
@@ -318,14 +321,10 @@ export default {
         });
     },
     updateAutomatic(value) {
-      if (!value) {
-        this.clearValidation();
+      if (value) return;
 
-        this.startDate = null;
-        this.iterationsInAdvance = null;
-        this.durationInWeeks = null;
-        this.rollOver = false;
-      }
+      this.clearValidation();
+      this.clearAutomaticFields();
     },
   },
 };
