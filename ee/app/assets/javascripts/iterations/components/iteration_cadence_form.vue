@@ -135,6 +135,9 @@ export default {
     loadingCadence() {
       return this.$apollo.queries.group.loading;
     },
+    disableAutomationFields() {
+      return this.loadingCadence || !this.automatic;
+    },
     cadenceId() {
       return this.$router.currentRoute.params.cadenceId;
     },
@@ -408,7 +411,7 @@ export default {
               class="gl-datepicker-input"
               autocomplete="off"
               inputmode="none"
-              :disabled="loadingCadence || !automatic"
+              :disabled="disableAutomationFields"
               :state="validationState.startDate"
               data-qa-selector="iteration_cadence_start_date_field"
               @blur="validate('startDate')"
@@ -429,7 +432,7 @@ export default {
             v-model.number="durationInWeeks"
             :options="$options.availableDurations"
             class="gl-form-input-md"
-            :disabled="loadingCadence || !automatic"
+            :disabled="disableAutomationFields"
             data-qa-selector="iteration_cadence_duration_field"
             @change="validate('durationInWeeks')"
           />
@@ -447,7 +450,7 @@ export default {
           <gl-form-select
             id="cadence-schedule-upcoming-iterations"
             v-model.number="iterationsInAdvance"
-            :disabled="loadingCadence || !automatic"
+            :disabled="disableAutomationFields"
             :options="$options.availableUpcomingIterations"
             class="gl-form-input-md"
             data-qa-selector="iteration_cadence_upcoming_iterations_field"
@@ -465,7 +468,7 @@ export default {
           <gl-form-checkbox
             id="cadence-rollover-issues"
             v-model="rollOver"
-            :disabled="loadingCadence || !automatic"
+            :disabled="disableAutomationFields"
             @change="clearValidation"
           >
             <span>{{ i18n.rollOver.checkboxLabel }}</span>
