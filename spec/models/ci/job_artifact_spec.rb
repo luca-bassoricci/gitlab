@@ -128,6 +128,18 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '.scope_for_report' do
+    it 'returns the scope for the report type' do
+      expect(described_class.scope_for_report(:test)).to eq(described_class.test_reports)
+    end
+
+    context 'when given an unrecognized report type' do
+      it 'raises error' do
+        expect { described_class.scope_for_report(:blah) }.to raise_error(ArgumentError, /Unrecognized scope blah_reports/)
+      end
+    end
+  end
+
   describe '.file_types_for_report' do
     it 'returns the report file types for the report type' do
       expect(described_class.file_types_for_report(:test)).to match_array(%w[junit])

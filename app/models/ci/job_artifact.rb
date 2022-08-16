@@ -160,12 +160,6 @@ module Ci
       where(file_type: types)
     end
 
-    REPORT_FILE_TYPES.each do |report_type, file_types|
-      scope "#{report_type}_reports", -> do
-        with_file_types(file_types)
-      end
-    end
-
     scope :all_reports, -> do
       with_file_types(REPORT_TYPES.keys.map(&:to_s))
     end
@@ -240,10 +234,17 @@ module Ci
       unknown: 2
     }, _prefix: :artifact
 
-    def validate_file_format!
-      unless TYPE_AND_FORMAT_PAIRS[self.file_type&.to_sym] == self.file_format&.to_sym
-        errors.add(:base, _('Invalid file format with specified file type'))
+    REPORT_FILE_TYPES.each do |report_type, file_types|
+      scope "#{report_type}_reports", -> do
+        with_file_types(file_types)
       end
+    end
+
+    def self.scope_for_report(report_type)
+      method_name = "#{report_type}_reports"
+      raise ArgumentError, "Unrecognized scope #{method_name}" unless respond_to?(method_name)
+
+      method(method_name).call
     end
 
     def self.file_types_for_report(report_type)
@@ -286,6 +287,12 @@ module Ci
     # FastDestroyAll concerns
     def self.finalize_fast_destroy(service)
       service.update_statistics
+    end
+
+    def validate_file_format!
+      unless TYPE_AND_FORMAT_PAIRS[self.file_type&.to_sym] == self.file_format&.to_sym
+        errors.add(:base, _('Invalid file format with specified file type'))
+      end
     end
 
     def local_store?

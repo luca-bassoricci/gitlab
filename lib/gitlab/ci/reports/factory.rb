@@ -10,10 +10,6 @@ module Gitlab
           coverage: CoverageReport
         }.freeze
 
-        JOB_ARTIFACT_SCOPE = {
-          coverage: ::Ci::JobArtifact.coverage_reports
-        }.freeze
-
         def self.fabricate(report_type:, pipeline:)
           new(report_type: report_type, pipeline: pipeline).report
         end
@@ -43,13 +39,15 @@ module Gitlab
         private
 
         def report_builds
-          scope = JOB_ARTIFACT_SCOPE.fetch(@report_type)
-
-          @pipeline.latest_report_builds_in_self_and_descendants(scope)
+          @pipeline.latest_report_builds_in_self_and_descendants(job_artifact_scope)
         end
 
         def report_file_types
           ::Ci::JobArtifact.file_types_for_report(@report_type)
+        end
+
+        def job_artifact_scope
+          ::Ci::JobArtifact.scope_for_report(@report_type)
         end
       end
     end
