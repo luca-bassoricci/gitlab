@@ -288,4 +288,4 @@ To delete an iteration cadence:
 1. On the top bar, select **Menu > Groups** and find your group.
 1. On the left sidebar, select **Issues > Iterations**.
 1. Select the three-dot menu (**{ellipsis_v}**) > **Delete cadence** for the cadence you want to delete.
-1. Select **Delete cadence** in the confirmation modal.
+1. Select **Delete cadence**.
