@@ -182,7 +182,7 @@ To group issues by label:
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5077) in GitLab 14.1 [with a flag](../../../administration/feature_flags.md), named `iteration_cadences`. Disabled by default.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/354977) in GitLab 15.0: All scheduled iterations must start on the same day of the week as the cadence start day. Start date of cadence cannot be edited after the first iteration starts.
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/354878) in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/367493) in GitLab 15.3: A new automation start date can be selected for cadence. Upcoming iterations will be scheduled to start on the same day of the week as the changed start date. Iterations cadences can be manually managed by turning off the automatic scheduling feature.
+> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/367493) in GitLab 15.3: A new automation start date can be selected for cadence. Upcoming iterations will be scheduled to start on the same day of the week as the changed start date. Iteration cadences can be manually managed by turning off the automatic scheduling feature.
 
 Iteration cadences automate iteration scheduling. You can use them to
 automate creating iterations every 1, 2, 3, or 4 weeks. You can also
@@ -202,7 +202,7 @@ To create an iteration cadence:
 1. On the left sidebar, select **Issues > Iterations**.
 1. Select **New iteration cadence**.
 1. Enter the title and description of the iteration cadence.
-1. To manually manage the iteraitons cadence, uncheck the **Enable automatic scheduling** checkbox and skip the next step.
+1. To manually manage the iteration cadence, clear the **Enable automatic scheduling** checkbox and skip the next step.
 1. Complete the required fields to use automatic scheduling. 
    - Select the automation start date of the iteration cadence. Iterations will be scheduled to
      begin on the same day of the week as the day of the week of the start date.
@@ -248,7 +248,7 @@ When you want to manage your iterations cadence manually again, edit your cadenc
 
 #### Example of turning on automatic scheduling for manual iterations cadence
 
-Suppose it's Friday, April 15, and you have three iterations in a manual iterations cadence:
+Suppose it's Friday, April 15, and you have three iteration in a manual iterations cadence:
 
 - Monday, April 4 - Friday, April 8 (closed)
 - Tuesday, April 12 - Friday, April 15 (ongoing)
