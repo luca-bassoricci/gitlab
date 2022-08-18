@@ -4,7 +4,6 @@ import { scrollToElement, backOff } from '~/lib/utils/common_utils';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __, s__, sprintf } from '~/locale';
 import HelpPopover from '~/vue_shared/components/help_popover.vue';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   i18n: {
@@ -29,7 +28,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagMixin()],
   props: {
     size: {
       type: Number,
@@ -79,9 +77,6 @@ export default {
         size: numberToHumanSize(this.size),
       });
     },
-    showJumpToFailures() {
-      return this.glFeatures.jobLogJumpToFailures;
-    },
     hasFailures() {
       return this.failureCount > 0;
     },
@@ -94,17 +89,15 @@ export default {
   },
   methods: {
     checkFailureCount() {
-      if (this.glFeatures.jobLogJumpToFailures) {
-        backOff((next, stop) => {
-          this.failureCount = document.querySelectorAll('.term-fg-l-red').length;
+      backOff((next, stop) => {
+        this.failureCount = document.querySelectorAll('.term-fg-l-red').length;
 
-          if (this.hasFailures || (this.isComplete && !this.hasFailures)) {
-            stop();
-          } else {
-            next();
-          }
-        });
-      }
+        if (this.hasFailures || (this.isComplete && !this.hasFailures)) {
+          stop();
+        } else {
+          next();
+        }
+      });
     },
     handleScrollToNextFailure() {
       const failures = document.querySelectorAll('.term-fg-l-red');
@@ -226,7 +219,6 @@ export default {
 
       <!-- scroll buttons -->
       <gl-button
-        v-if="showJumpToFailures"
         v-gl-tooltip
         :title="$options.i18n.scrollToNextFailureButtonLabel"
         :aria-label="$options.i18n.scrollToNextFailureButtonLabel"

@@ -14,6 +14,8 @@ import StuckBlock from '~/jobs/components/stuck_block.vue';
 import UnmetPrerequisitesBlock from '~/jobs/components/unmet_prerequisites_block.vue';
 import createStore from '~/jobs/store';
 import axios from '~/lib/utils/axios_utils';
+import { backoffMockImplementation } from 'helpers/backoff_helper';
+import * as commonUtils from '~/lib/utils/common_utils';
 import job from '../mock_data';
 
 describe('Job App', () => {
@@ -79,11 +81,13 @@ describe('Job App', () => {
   beforeEach(() => {
     mock = new MockAdapter(axios);
     store = createStore();
+    jest.spyOn(commonUtils, 'backOff').mockImplementation(backoffMockImplementation);
   });
 
   afterEach(() => {
     wrapper.destroy();
     mock.restore();
+    commonUtils.backOff.mockReset();
   });
 
   describe('while loading', () => {

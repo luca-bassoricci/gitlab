@@ -34,16 +34,11 @@ describe('Job log controllers', () => {
     jobLog: mockJobLog,
   };
 
-  const createWrapper = (props, { jobLogJumpToFailures = false } = {}) => {
+  const createWrapper = (props) => {
     wrapper = mount(JobLogControllers, {
       propsData: {
         ...defaultProps,
         ...props,
-      },
-      provide: {
-        glFeatures: {
-          jobLogJumpToFailures,
-        },
       },
       data() {
         return {
@@ -203,14 +198,6 @@ describe('Job log controllers', () => {
     });
 
     describe('scroll to failure button', () => {
-      describe('with feature flag disabled', () => {
-        it('does not display button', () => {
-          createWrapper();
-
-          expect(findScrollFailure().exists()).toBe(false);
-        });
-      });
-
       describe('with red text failures on the page', () => {
         let firstFailure;
         let secondFailure;
@@ -218,7 +205,7 @@ describe('Job log controllers', () => {
         beforeEach(() => {
           jest.spyOn(document, 'querySelectorAll').mockReturnValueOnce(['mock-element']);
 
-          createWrapper({}, { jobLogJumpToFailures: true });
+          createWrapper();
 
           firstFailure = document.createElement('div');
           firstFailure.className = 'term-fg-l-red';
@@ -266,7 +253,7 @@ describe('Job log controllers', () => {
         beforeEach(() => {
           jest.spyOn(document, 'querySelectorAll').mockReturnValueOnce([]);
 
-          createWrapper({}, { jobLogJumpToFailures: true });
+          createWrapper();
         });
 
         it('is disabled', () => {
@@ -278,7 +265,7 @@ describe('Job log controllers', () => {
         beforeEach(() => {
           jest.spyOn(document, 'querySelectorAll').mockReturnValueOnce(['mock-element']);
 
-          createWrapper({ isComplete: false }, { jobLogJumpToFailures: true });
+          createWrapper({ isComplete: false });
         });
 
         it('is enabled', () => {
