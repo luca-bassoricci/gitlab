@@ -146,8 +146,8 @@ describe('GeoReplicable Store Actions', () => {
         const direction = null;
         const data = [];
 
-        it('should not error and pass empty values to the mutations', () => {
-          testAction(
+        it('should not error and pass empty values to the mutations', async () => {
+          await testAction(
             actions.fetchReplicableItemsGraphQl,
             direction,
             state,
@@ -182,8 +182,8 @@ describe('GeoReplicable Store Actions', () => {
           const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
           const data = registries.nodes;
 
-          it('should call mockGeoGqClient with no before/after variables as well as a first variable but no last variable', () => {
-            testAction(
+          it('should call mockGeoGqClient with no before/after variables as well as a first variable but no last variable', async () => {
+            await testAction(
               actions.fetchReplicableItemsGraphQl,
               direction,
               state,
@@ -209,8 +209,8 @@ describe('GeoReplicable Store Actions', () => {
           const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
           const data = registries.nodes;
 
-          it('should call mockGeoGqClient with after variable but no before variable as well as a first variable but no last variable', () => {
-            testAction(
+          it('should call mockGeoGqClient with after variable but no before variable as well as a first variable but no last variable', async () => {
+            await testAction(
               actions.fetchReplicableItemsGraphQl,
               direction,
               state,
@@ -241,8 +241,8 @@ describe('GeoReplicable Store Actions', () => {
           const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
           const data = registries.nodes;
 
-          it('should call mockGeoGqClient with before variable but no after variable as well as a last variable but no first variable', () => {
-            testAction(
+          it('should call mockGeoGqClient with before variable but no after variable as well as a last variable but no first variable', async () => {
+            await testAction(
               actions.fetchReplicableItemsGraphQl,
               direction,
               state,
@@ -303,8 +303,8 @@ describe('GeoReplicable Store Actions', () => {
           sync_status: null,
         };
 
-        it('should call getGeoReplicableItems with default queryParams', () => {
-          testAction(
+        it('should call getGeoReplicableItems with default queryParams', async () => {
+          await testAction(
             actions.fetchReplicableItemsRestful,
             {},
             state,
@@ -332,8 +332,8 @@ describe('GeoReplicable Store Actions', () => {
           state.currentFilterIndex = 2;
         });
 
-        it('should call getGeoReplicableItems with default queryParams', () => {
-          testAction(
+        it('should call getGeoReplicableItems with default queryParams', async () => {
+          await testAction(
             actions.fetchReplicableItemsRestful,
             {},
             state,
@@ -402,8 +402,8 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('receiveInitiateAllReplicableSyncsError', () => {
-    it('should commit mutation RECEIVE_INITIATE_ALL_REPLICABLE_SYNCS_ERROR', () => {
-      testAction(
+    it('should commit mutation RECEIVE_INITIATE_ALL_REPLICABLE_SYNCS_ERROR', async () => {
+      await testAction(
         actions.receiveInitiateAllReplicableSyncsError,
         ACTION_TYPES.RESYNC,
         state,
@@ -427,8 +427,8 @@ describe('GeoReplicable Store Actions', () => {
           .mockResolvedValue(MOCK_BASIC_POST_RESPONSE);
       });
 
-      it('should dispatch the request with correct replicable param and success actions', () => {
-        testAction(
+      it('should dispatch the request with correct replicable param and success actions', async () => {
+        await testAction(
           actions.initiateAllReplicableSyncs,
           action,
           state,
@@ -520,8 +520,8 @@ describe('GeoReplicable Store Actions', () => {
         jest.spyOn(Api, 'initiateGeoReplicableSync').mockResolvedValue(MOCK_BASIC_POST_RESPONSE);
       });
 
-      it('should dispatch the request with correct replicable param and success actions', () => {
-        testAction(
+      it('should dispatch the request with correct replicable param and success actions', async () => {
+        await testAction(
           actions.initiateReplicableSync,
           { projectId, name, action },
           state,

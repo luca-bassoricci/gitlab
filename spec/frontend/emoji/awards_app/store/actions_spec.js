@@ -119,7 +119,7 @@ describe('Awards app actions', () => {
           });
 
           it('adds an optimistic award, removes it, and then commits ADD_NEW_AWARD', async () => {
-            testAction(actions.toggleAward, null, { path: '/awards', awards: [] }, [
+            await testAction(actions.toggleAward, null, { path: '/awards', awards: [] }, [
               makeOptimisticAddMutation(),
               makeOptimisticRemoveMutation(),
               { type: 'ADD_NEW_AWARD', payload: { id: 1 } },
@@ -156,7 +156,7 @@ describe('Awards app actions', () => {
           });
 
           it('commits REMOVE_AWARD', async () => {
-            testAction(
+            await testAction(
               actions.toggleAward,
               'thumbsup',
               {

@@ -75,7 +75,13 @@ describe('ScanResultPolicies actions', () => {
       ${httpStatus.NOT_FOUND} | ${[{ type: types.INVALID_BRANCHES, payload: branchName }]}
     `('triggers $mutations.length mutation when status is $status', ({ status, mutations }) => {
       mock.onGet(apiEndpoint).replyOnce(status);
-      testAction(actions.fetchBranch, { branch: branchName, projectId }, state, mutations, []);
+      return testAction(
+        actions.fetchBranch,
+        { branch: branchName, projectId },
+        state,
+        mutations,
+        [],
+      );
     });
   });
 });

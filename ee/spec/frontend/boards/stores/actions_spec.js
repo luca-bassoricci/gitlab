@@ -143,8 +143,8 @@ describe('setFilters', () => {
         filterVariables: { iterationWildcardId: 'NONE', not: {} },
       },
     ],
-  ])('should commit mutation SET_FILTERS %s', (_, { filters, filterVariables }) => {
-    testAction(
+  ])('should commit mutation SET_FILTERS %s', async (_, { filters, filterVariables }) => {
+    await testAction(
       actions.setFilters,
       filters,
       state,
@@ -771,7 +771,7 @@ describe.each`
 });
 
 describe('moveIssue', () => {
-  it('should dispatch a correct set of actions with epic id', () => {
+  it('should dispatch a correct set of actions with epic id', async () => {
     const params = mockMoveIssueParams;
 
     const moveData = {
@@ -779,7 +779,7 @@ describe('moveIssue', () => {
       epicId: 'some-epic-id',
     };
 
-    testAction({
+    await testAction({
       action: actions.moveIssue,
       payload: {
         ...params,
@@ -848,8 +848,8 @@ describe('updateEpicForIssue', () => {
         ],
       },
     ],
-  ])(`commits UPDATE_BOARD_ITEM_BY_ID mutation %s`, (_, { payload, expectedMutations }) => {
-    testAction({
+  ])(`commits UPDATE_BOARD_ITEM_BY_ID mutation %s`, async (_, { payload, expectedMutations }) => {
+    await testAction({
       action: actions.updateEpicForIssue,
       payload,
       state: commonState,
@@ -1053,7 +1053,7 @@ describe('addListNewEpic', () => {
   });
 
   describe('when issue creation mutation request succeeds', () => {
-    it('dispatches a correct set of mutations', () => {
+    it('dispatches a correct set of mutations', async () => {
       jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
         data: {
           createEpic: {
@@ -1063,7 +1063,7 @@ describe('addListNewEpic', () => {
         },
       });
 
-      testAction({
+      await testAction({
         action: actions.addListNewEpic,
         payload: {
           epicInput: mockEpic,
@@ -1096,7 +1096,7 @@ describe('addListNewEpic', () => {
   });
 
   describe('when issue creation mutation request fails', () => {
-    it('dispatches a correct set of mutations', () => {
+    it('dispatches a correct set of mutations', async () => {
       jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
         data: {
           createEpic: {
@@ -1106,7 +1106,7 @@ describe('addListNewEpic', () => {
         },
       });
 
-      testAction({
+      await testAction({
         action: actions.addListNewEpic,
         payload: {
           epicInput: mockEpic,
@@ -1487,14 +1487,14 @@ describe('setActiveEpicLabels', () => {
     groupPath: 'h/b',
   };
 
-  it('should assign labels', () => {
+  it('should assign labels', async () => {
     const payload = {
       itemId: getters.activeBoardItem.id,
       prop: 'labels',
       value: labels,
     };
 
-    testAction(
+    await testAction(
       actions.setActiveEpicLabels,
       input,
       { ...state, ...getters },
@@ -1508,14 +1508,14 @@ describe('setActiveEpicLabels', () => {
     );
   });
 
-  it('should remove label', () => {
+  it('should remove label', async () => {
     const payload = {
       itemId: getters.activeBoardItem.id,
       prop: 'labels',
       value: [labels[1]],
     };
 
-    testAction(
+    await testAction(
       actions.setActiveEpicLabels,
       { ...input, removeLabelIds: [getIdFromGraphQLId(labels[0].id)] },
       { ...state, ...getters },
@@ -1687,14 +1687,14 @@ describe('setActiveEpicColor', () => {
     groupPath: 'h/b',
   };
 
-  it('should change color', () => {
+  it('should change color', async () => {
     const payload = {
       itemId: getters.activeBoardItem.id,
       prop: 'color',
       value: newColor.color,
     };
 
-    testAction(
+    await testAction(
       actions.setActiveEpicColor,
       input,
       { ...state, ...getters },

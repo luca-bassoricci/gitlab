@@ -24,7 +24,7 @@ describe('subscription actions', () => {
     it('should commit the correct mutuation', () => {
       const namespaceId = 1;
 
-      testAction(
+      return testAction(
         actions.setNamespaceId,
         namespaceId,
         mockedState,
@@ -53,7 +53,7 @@ describe('subscription actions', () => {
       });
 
       it('should dispatch the request and success actions', () => {
-        testAction(
+        return testAction(
           actions.fetchSubscription,
           {},
           mockedState,
@@ -75,7 +75,7 @@ describe('subscription actions', () => {
       });
 
       it('should dispatch the request and error actions', () => {
-        testAction(
+        return testAction(
           actions.fetchSubscription,
           {},
           mockedState,
@@ -88,7 +88,7 @@ describe('subscription actions', () => {
 
   describe('requestSubscription', () => {
     it('should commit the request mutation', () => {
-      testAction(
+      return testAction(
         actions.requestSubscription,
         {},
         state,
@@ -100,7 +100,7 @@ describe('subscription actions', () => {
 
   describe('receiveSubscriptionSuccess', () => {
     it('should commit the success mutation', () => {
-      testAction(
+      return testAction(
         actions.receiveSubscriptionSuccess,
         mockDataSubscription.gold,
         mockedState,
@@ -117,7 +117,7 @@ describe('subscription actions', () => {
 
   describe('receiveSubscriptionError', () => {
     it('should commit the error mutation', () => {
-      testAction(
+      return testAction(
         actions.receiveSubscriptionError,
         {},
         mockedState,

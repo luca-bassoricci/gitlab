@@ -319,7 +319,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('initItemChildrenFlags', () => {
     it('should set `state.childrenFlags` for every item in provided children param', () => {
-      testAction(
+      return testAction(
         actions.initItemChildrenFlags,
         { children: [{ id: '1' }] },
         {},
@@ -332,7 +332,7 @@ describe('Roadmap Vuex Actions', () => {
   describe('expandEpic', () => {
     const parentItemId = '41';
     it('should set `itemExpanded` to true on state.childrenFlags', () => {
-      testAction(
+      return testAction(
         actions.expandEpic,
         { parentItemId },
         {},
@@ -345,7 +345,7 @@ describe('Roadmap Vuex Actions', () => {
   describe('collapseEpic', () => {
     const parentItemId = '41';
     it('should set `itemExpanded` to false on state.childrenFlags', () => {
-      testAction(
+      return testAction(
         actions.collapseEpic,
         { parentItemId },
         {},
@@ -363,7 +363,7 @@ describe('Roadmap Vuex Actions', () => {
         itemExpanded: false,
       };
 
-      testAction(
+      return testAction(
         actions.toggleEpic,
         { parentItem },
         state,
@@ -444,7 +444,7 @@ describe('Roadmap Vuex Actions', () => {
         itemExpanded: false,
       };
 
-      testAction(
+      return testAction(
         actions.toggleEpic,
         { parentItem },
         state,
@@ -467,7 +467,7 @@ describe('Roadmap Vuex Actions', () => {
       };
       state.childrenEpics[parentItem.id] = ['foo'];
 
-      testAction(
+      return testAction(
         actions.toggleEpic,
         { parentItem },
         state,
@@ -486,7 +486,7 @@ describe('Roadmap Vuex Actions', () => {
         itemExpanded: true,
       };
 
-      testAction(
+      return testAction(
         actions.toggleEpic,
         { parentItem },
         state,

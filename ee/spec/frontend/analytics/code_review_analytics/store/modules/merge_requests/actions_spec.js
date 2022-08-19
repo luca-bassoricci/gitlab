@@ -70,7 +70,7 @@ describe('Code review analytics mergeRequests actions', () => {
       });
 
       it('dispatches success with received data', () => {
-        testAction(
+        return testAction(
           actions.fetchMergeRequests,
           null,
           state,
@@ -113,7 +113,7 @@ describe('Code review analytics mergeRequests actions', () => {
 
   describe('setPage', () => {
     it('commits SET_PAGE mutation', () => {
-      testAction(actions.setPage, 2, state, [{ type: types.SET_PAGE, payload: 2 }], []);
+      return testAction(actions.setPage, 2, state, [{ type: types.SET_PAGE, payload: 2 }], []);
     });
   });
 });

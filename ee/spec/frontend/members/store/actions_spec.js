@@ -74,7 +74,7 @@ describe('Vuex members actions', () => {
 
     describe('showLdapOverrideConfirmationModal', () => {
       it(`commits ${types.SHOW_LDAP_OVERRIDE_CONFIRMATION_MODAL} mutation`, () => {
-        testAction(showLdapOverrideConfirmationModal, member, state, [
+        return testAction(showLdapOverrideConfirmationModal, member, state, [
           {
             type: types.SHOW_LDAP_OVERRIDE_CONFIRMATION_MODAL,
             payload: member,
@@ -85,7 +85,7 @@ describe('Vuex members actions', () => {
 
     describe('hideLdapOverrideConfirmationModal', () => {
       it(`commits ${types.HIDE_LDAP_OVERRIDE_CONFIRMATION_MODAL} mutation`, () => {
-        testAction(hideLdapOverrideConfirmationModal, {}, state, [
+        return testAction(hideLdapOverrideConfirmationModal, {}, state, [
           {
             type: types.HIDE_LDAP_OVERRIDE_CONFIRMATION_MODAL,
           },

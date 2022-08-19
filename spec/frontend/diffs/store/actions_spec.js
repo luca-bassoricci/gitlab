@@ -185,7 +185,7 @@ describe('DiffsStoreActions', () => {
       ({ viewStyle, otherView }) => {
         const endpointBatch = '/fetch/diffs_batch';
 
-        diffActions
+        return diffActions
           .fetchDiffFilesBatch({
             commit: () => {},
             state: {

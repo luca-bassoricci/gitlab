@@ -133,7 +133,7 @@ describe('merge conflicts actions', () => {
 
   describe('setLoadingState', () => {
     it('commits the right mutation', () => {
-      testAction(
+      return testAction(
         actions.setLoadingState,
         true,
         {},
@@ -150,7 +150,7 @@ describe('merge conflicts actions', () => {
 
   describe('setErrorState', () => {
     it('commits the right mutation', () => {
-      testAction(
+      return testAction(
         actions.setErrorState,
         true,
         {},
@@ -167,7 +167,7 @@ describe('merge conflicts actions', () => {
 
   describe('setFailedRequest', () => {
     it('commits the right mutation', () => {
-      testAction(
+      return testAction(
         actions.setFailedRequest,
         'errors in the request',
         {},
@@ -206,7 +206,7 @@ describe('merge conflicts actions', () => {
 
   describe('setSubmitState', () => {
     it('commits the right mutation', () => {
-      testAction(
+      return testAction(
         actions.setSubmitState,
         true,
         {},
@@ -223,7 +223,7 @@ describe('merge conflicts actions', () => {
 
   describe('updateCommitMessage', () => {
     it('commits the right mutation', () => {
-      testAction(
+      return testAction(
         actions.updateCommitMessage,
         'some message',
         {},

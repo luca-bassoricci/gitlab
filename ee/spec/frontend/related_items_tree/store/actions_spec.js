@@ -56,7 +56,7 @@ describe('RelatedItemTree', () => {
 
       describe('setInitialConfig', () => {
         it('should set initial config on state', () => {
-          testAction(
+          return testAction(
             actions.setInitialConfig,
             mockInitialConfig,
             {},
@@ -68,7 +68,7 @@ describe('RelatedItemTree', () => {
 
       describe('setInitialParentItem', () => {
         it('should set initial parentItem on state', () => {
-          testAction(
+          return testAction(
             actions.setInitialParentItem,
             mockParentItem,
             {},
@@ -80,7 +80,7 @@ describe('RelatedItemTree', () => {
 
       describe('setChildrenCount', () => {
         it('should set initial descendantCounts on state', () => {
-          testAction(
+          return testAction(
             actions.setChildrenCount,
             mockParentItem.descendantCounts,
             {},
@@ -91,7 +91,7 @@ describe('RelatedItemTree', () => {
 
         it('should persist non overwritten descendantCounts state', () => {
           const descendantCounts = { openedEpics: 9 };
-          testAction(
+          return testAction(
             actions.setChildrenCount,
             descendantCounts,
             { descendantCounts: mockParentItem.descendantCounts },
@@ -112,7 +112,7 @@ describe('RelatedItemTree', () => {
         const mockIssuesWithType = mockIssues.map((item) => ({ ...item, type: ChildType.Issue }));
 
         it('should update openedEpics, by incrementing it', () => {
-          testAction(
+          return testAction(
             actions.updateChildrenCount,
             { item: mockEpicsWithType[0], isRemoved: false },
             { descendantCounts: mockParentItem.descendantCounts },
@@ -127,7 +127,7 @@ describe('RelatedItemTree', () => {
         });
 
         it('should update openedIssues, by incrementing it', () => {
-          testAction(
+          return testAction(
             actions.updateChildrenCount,
             { item: mockIssuesWithType[0], isRemoved: false },
             { descendantCounts: mockParentItem.descendantCounts },
@@ -142,7 +142,7 @@ describe('RelatedItemTree', () => {
         });
 
         it('should update openedEpics, by decrementing it', () => {
-          testAction(
+          return testAction(
             actions.updateChildrenCount,
             { item: mockEpicsWithType[0], isRemoved: true },
             { descendantCounts: mockParentItem.descendantCounts },
@@ -157,7 +157,7 @@ describe('RelatedItemTree', () => {
         });
 
         it('should update openedIssues, by decrementing it', () => {
-          testAction(
+          return testAction(
             actions.updateChildrenCount,
             { item: mockIssuesWithType[0], isRemoved: true },
             { descendantCounts: mockParentItem.descendantCounts },
@@ -174,13 +174,19 @@ describe('RelatedItemTree', () => {
 
       describe('expandItem', () => {
         it('should set `itemExpanded` to true on state.childrenFlags', () => {
-          testAction(actions.expandItem, {}, {}, [{ type: types.EXPAND_ITEM, payload: {} }], []);
+          return testAction(
+            actions.expandItem,
+            {},
+            {},
+            [{ type: types.EXPAND_ITEM, payload: {} }],
+            [],
+          );
         });
       });
 
       describe('collapseItem', () => {
         it('should set `itemExpanded` to false on state.childrenFlags', () => {
-          testAction(
+          return testAction(
             actions.collapseItem,
             {},
             {},
@@ -199,7 +205,7 @@ describe('RelatedItemTree', () => {
         };
 
         it('should set provided `children` values on state.children with provided parentItem.reference key', () => {
-          testAction(
+          return testAction(
             actions.setItemChildren,
             mockPayload,
             {},
@@ -216,7 +222,7 @@ describe('RelatedItemTree', () => {
         it('should set provided `children` values on state.children with provided parentItem.reference key and also dispatch action `expandItem` when isSubItem param is true', () => {
           mockPayload.isSubItem = true;
 
-          testAction(
+          return testAction(
             actions.setItemChildren,
             mockPayload,
             {},
@@ -238,7 +244,7 @@ describe('RelatedItemTree', () => {
 
       describe('setItemChildrenFlags', () => {
         it('should set `state.childrenFlags` for every item in provided children param', () => {
-          testAction(
+          return testAction(
             actions.setItemChildrenFlags,
             { children: [{ reference: '&1' }] },
             {},
@@ -252,7 +258,7 @@ describe('RelatedItemTree', () => {
         it('should set `epicEndCursor` and `hasMoreEpics` to `state.childrenFlags`', () => {
           const { pageInfo } = mockQueryResponse.data.group.epic.children;
 
-          testAction(
+          return testAction(
             actions.setEpicPageInfo,
             { parentItem: mockParentItem, pageInfo },
             {},
@@ -271,7 +277,7 @@ describe('RelatedItemTree', () => {
         it('should set `issueEndCursor` and `hasMoreIssues` to `state.childrenFlags`', () => {
           const { pageInfo } = mockQueryResponse.data.group.epic.issues;
 
-          testAction(
+          return testAction(
             actions.setIssuePageInfo,
             { parentItem: mockParentItem, pageInfo },
             {},
@@ -289,7 +295,7 @@ describe('RelatedItemTree', () => {
       describe('setWeightSum', () => {
         it('set weightSum', () => {
           const descendantWeightSum = mockQueryResponse.data.group.epic;
-          testAction(
+          return testAction(
             actions.setWeightSum,
             descendantWeightSum,
             {},
@@ -306,7 +312,7 @@ describe('RelatedItemTree', () => {
 
       describe('requestItems', () => {
         it('should set `state.itemsFetchInProgress` to true', () => {
-          testAction(
+          return testAction(
             actions.requestItems,
             {},
             {},
@@ -318,7 +324,7 @@ describe('RelatedItemTree', () => {
 
       describe('receiveItemsSuccess', () => {
         it('should set `state.itemsFetchInProgress` to false', () => {
-          testAction(
+          return testAction(
             actions.receiveItemsSuccess,
             {},
             {},
@@ -330,7 +336,7 @@ describe('RelatedItemTree', () => {
 
       describe('receiveItemsFailure', () => {
         it('should set `state.itemsFetchInProgress` to false', () => {
-          testAction(
+          return testAction(
             actions.receiveItemsFailure,
             {},
             {},
@@ -356,7 +362,7 @@ describe('RelatedItemTree', () => {
 
       describe('fetchItems', () => {
         it('should dispatch `requestItems` action', () => {
-          testAction(
+          return testAction(
             actions.fetchItems,
             { parentItem: mockParentItem, isSubItem: false },
             {},
@@ -387,7 +393,7 @@ describe('RelatedItemTree', () => {
             healthStatus,
           } = mockQueryResponse.data.group.epic;
 
-          testAction(
+          return testAction(
             actions.fetchItems,
             { parentItem: mockParentItem, isSubItem: false },
             {},
@@ -468,7 +474,7 @@ describe('RelatedItemTree', () => {
             issues: { pageInfo: issuesPageInfo },
           } = mockQueryResponse.data.group.epic;
 
-          testAction(
+          return testAction(
             actions.fetchItems,
             { parentItem: mockParentItem, isSubItem: true },
             {},
@@ -522,7 +528,7 @@ describe('RelatedItemTree', () => {
         it('should dispatch `receiveItemsFailure` on request failure', () => {
           jest.spyOn(epicUtils.gqClient, 'query').mockReturnValue(Promise.reject());
 
-          testAction(
+          return testAction(
             actions.fetchItems,
             { parentItem: mockParentItem, isSubItem: false },
             {},
@@ -571,7 +577,7 @@ describe('RelatedItemTree', () => {
           const epicPageInfo = mockQueryResponse.data.group.epic.children.pageInfo;
           const issuesPageInfo = mockQueryResponse.data.group.epic.issues.pageInfo;
 
-          testAction(
+          return testAction(
             actions.fetchNextPageItems,
             { parentItem: mockParentItem, isSubItem: false },
             { childrenFlags: { 'gitlab-org&1': {} } },
@@ -614,7 +620,7 @@ describe('RelatedItemTree', () => {
         it('should dispatch `receiveNextPageItemsFailure` on request failure', () => {
           jest.spyOn(epicUtils.gqClient, 'query').mockReturnValue(Promise.reject());
 
-          testAction(
+          return testAction(
             actions.fetchNextPageItems,
             { parentItem: mockParentItem, isSubItem: false },
             { childrenFlags: { 'gitlab-org&1': {} } },
@@ -643,7 +649,7 @@ describe('RelatedItemTree', () => {
             itemExpanded: false,
           };
 
-          testAction(
+          return testAction(
             actions.toggleItem,
             data,
             state,
@@ -663,7 +669,7 @@ describe('RelatedItemTree', () => {
           };
           state.children[data.parentItem.reference] = ['foo'];
 
-          testAction(
+          return testAction(
             actions.toggleItem,
             data,
             state,
@@ -682,7 +688,7 @@ describe('RelatedItemTree', () => {
             itemExpanded: true,
           };
 
-          testAction(
+          return testAction(
             actions.toggleItem,
             data,
             state,
@@ -699,7 +705,7 @@ describe('RelatedItemTree', () => {
 
       describe('setRemoveItemModalProps', () => {
         it('should set values on `state.removeItemModalProps` for initializing modal', () => {
-          testAction(
+          return testAction(
             actions.setRemoveItemModalProps,
             {},
             {},
@@ -711,7 +717,7 @@ describe('RelatedItemTree', () => {
 
       describe('requestRemoveItem', () => {
         it('should set `state.childrenFlags[ref].itemRemoveInProgress` to true', () => {
-          testAction(
+          return testAction(
             actions.requestRemoveItem,
             {},
             {},
@@ -723,7 +729,7 @@ describe('RelatedItemTree', () => {
 
       describe('receiveRemoveItemSuccess', () => {
         it('should set `state.childrenFlags[ref].itemRemoveInProgress` to false', () => {
-          testAction(
+          return testAction(
             actions.receiveRemoveItemSuccess,
             {},
             {},
@@ -735,7 +741,7 @@ describe('RelatedItemTree', () => {
 
       describe('receiveRemoveItemFailure', () => {
         it('should set `state.childrenFlags[ref].itemRemoveInProgress` to false', () => {
-          testAction(
+          return testAction(
             actions.receiveRemoveItemFailure,
             { item: { type: ChildType.Epic } },
             {},
@@ -783,7 +789,7 @@ describe('RelatedItemTree', () => {
         it('should dispatch `requestRemoveItem` and `receiveRemoveItemSuccess` actions on request success', () => {
           mock.onDelete(data.item.relationPath).replyOnce(200, {});
 
-          testAction(
+          return testAction(
             actions.removeItem,
             { ...data },
             state,
@@ -808,7 +814,7 @@ describe('RelatedItemTree', () => {
         it('should dispatch `requestRemoveItem` and `receiveRemoveItemFailure` actions on request failure', () => {
           mock.onDelete(data.item.relationPath).replyOnce(500, {});
 
-          testAction(
+          return testAction(
             actions.removeItem,
             { ...data },
             state,
@@ -829,7 +835,7 @@ describe('RelatedItemTree', () => {
 
       describe('toggleAddItemForm', () => {
         it('should set `state.showAddItemForm` to true', () => {
-          testAction(
+          return testAction(
             actions.toggleAddItemForm,
             {},
             {},
@@ -841,7 +847,7 @@ describe('RelatedItemTree', () => {
 
       describe('toggleCreateEpicForm', () => {
         it('should set `state.showCreateEpicForm` to true', () => {
-          testAction(
+          return testAction(
             actions.toggleCreateEpicForm,
             {},
             {},
@@ -853,7 +859,7 @@ describe('RelatedItemTree', () => {
 
       describe('toggleCreateIssueForm', () => {
         it('should set `state.showCreateIssueForm` to true and `state.showAddItemForm` to false', () => {
-          testAction(
+          return testAction(
             actions.toggleCreateIssueForm,
             {},
             {},
@@ -865,7 +871,7 @@ describe('RelatedItemTree', () => {
 
       describe('setPendingReferences', () => {
         it('should set param value to `state.pendingReference`', () => {
-          testAction(
+          return testAction(
             actions.setPendingReferences,
             {},
             {},
@@ -877,7 +883,7 @@ describe('RelatedItemTree', () => {
 
       describe('addPendingReferences', () => {
         it('should add param value to `state.pendingReference`', () => {
-          testAction(
+          return testAction(
             actions.addPendingReferences,
             {},
             {},
@@ -889,7 +895,7 @@ describe('RelatedItemTree', () => {
 
       describe('removePendingReference', () => {
         it('should remove param value to `state.pendingReference`', () => {
-          testAction(
+          return testAction(
             actions.removePendingReference,
             {},
             {},
@@ -901,7 +907,7 @@ describe('RelatedItemTree', () => {
 
       describe('setItemInputValue', () => {
         it('should set param value to `state.itemInputValue`', () => {
-          testAction(
+          return testAction(
             actions.setItemInputValue,
             {},
             {},
@@ -913,7 +919,7 @@ describe('RelatedItemTree', () => {
 
       describe('requestAddItem', () => {
         it('should set `state.itemAddInProgress` to true', () => {
-          testAction(actions.requestAddItem, {}, {}, [{ type: types.REQUEST_ADD_ITEM }], []);
+          return testAction(actions.requestAddItem, {}, {}, [{ type: types.REQUEST_ADD_ITEM }], []);
         });
       });
 
@@ -928,7 +934,7 @@ describe('RelatedItemTree', () => {
             userPermissions: { adminEpic: undefined },
           }));
 
-          testAction(
+          return testAction(
             actions.receiveAddItemSuccess,
             { rawItems: mockEpicsWithoutPerm },
             state,
@@ -973,7 +979,7 @@ describe('RelatedItemTree', () => {
 
       describe('receiveAddItemFailure', () => {
         it('should set `state.itemAddInProgress` to false', () => {
-          testAction(
+          return testAction(
             actions.receiveAddItemFailure,
             {
               itemAddFailureType: itemAddFailureTypesMap.NOT_FOUND,
@@ -994,7 +1000,7 @@ describe('RelatedItemTree', () => {
         });
 
         it('should set `state.itemAddInProgress` to false, no payload', () => {
-          testAction(
+          return testAction(
             actions.receiveAddItemFailure,
             undefined,
             {},
@@ -1028,7 +1034,7 @@ describe('RelatedItemTree', () => {
 
           mock.onPost(state.epicsEndpoint).replyOnce(200, { issuables: [mockEpic1] });
 
-          testAction(
+          return testAction(
             actions.addItem,
             {},
             state,
@@ -1077,7 +1083,7 @@ describe('RelatedItemTree', () => {
 
           mock.onPost(state.epicsEndpoint).replyOnce(500, {});
 
-          testAction(
+          return testAction(
             actions.addItem,
             {},
             state,
@@ -1117,7 +1123,7 @@ describe('RelatedItemTree', () => {
           state.issuableType = issuableTypesMap.EPIC;
           state.isEpic = true;
 
-          testAction(
+          return testAction(
             actions.receiveCreateItemSuccess,
             { rawItem: mockEpic1 },
             state,
@@ -1147,7 +1153,7 @@ describe('RelatedItemTree', () => {
 
       describe('receiveCreateItemFailure', () => {
         it('should set `state.itemCreateInProgress` to false', () => {
-          testAction(
+          return testAction(
             actions.receiveCreateItemFailure,
             {},
             {},
@@ -1544,7 +1550,7 @@ describe('RelatedItemTree', () => {
             oldIndex: 0,
           };
 
-          testAction(
+          return testAction(
             actions.moveItem,
             payload,
             state,

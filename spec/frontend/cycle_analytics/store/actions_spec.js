@@ -144,7 +144,7 @@ describe('Project Value Stream Analytics actions', () => {
     describe('without a selected stage', () => {
       it('will select the first stage from the value stream', () => {
         const [firstStage] = allowedStages;
-        testAction({
+        return testAction({
           action: actions.setInitialStage,
           state,
           payload: null,
@@ -157,7 +157,7 @@ describe('Project Value Stream Analytics actions', () => {
     describe('with no value stream stages available', () => {
       it('will return SET_NO_ACCESS_ERROR', () => {
         state = { ...state, stages: [] };
-        testAction({
+        return testAction({
           action: actions.setInitialStage,
           state,
           payload: null,
@@ -308,7 +308,7 @@ describe('Project Value Stream Analytics actions', () => {
     };
     const mockValueStreams = [mockValueStream, selectedValueStream];
     it('with data, will set the first value stream', () => {
-      testAction({
+      return testAction({
         action: actions.receiveValueStreamsSuccess,
         state,
         payload: mockValueStreams,
@@ -318,7 +318,7 @@ describe('Project Value Stream Analytics actions', () => {
     });
 
     it('without data, will set the default value stream', () => {
-      testAction({
+      return testAction({
         action: actions.receiveValueStreamsSuccess,
         state,
         payload: [],
