@@ -1081,7 +1081,7 @@ class Project < ApplicationRecord
   end
 
   def has_packages?(package_type)
-    packages.where(package_type: package_type).exists?
+    packages.where(package_type: package_type).where.not(status: "pending_destruction").exists?
   end
 
   def packages_cleanup_policy
