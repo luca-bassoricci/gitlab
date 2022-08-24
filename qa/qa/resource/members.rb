@@ -19,8 +19,8 @@ module QA
 
       def remove_member(user)
         QA::Runtime::Logger.info(%(Removing user #{user.username} from #{full_path} #{self.class.name}))
-
-        delete Runtime::API::Request.new(api_client, "#{api_members_path}/#{user.id}").url
+        path = "#{api_members_path}/#{user.id}\n"
+        delete Runtime::API::Request.new(api_client, path).url
       end
 
       def list_members
