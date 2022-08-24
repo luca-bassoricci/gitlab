@@ -928,14 +928,14 @@ RSpec.describe Repository do
       expect(repository.blob_at('master', 'new_dir/new_file.txt').data).to eq('File!')
     end
 
-    it 'respects the autocrlf setting' do
+    it 'respects the used line endings' do
       repository.create_file(user, 'hello.txt', "Hello,\r\nWorld",
                              message: 'Add hello world',
                              branch_name: 'master')
 
       blob = repository.blob_at('master', 'hello.txt')
 
-      expect(blob.data).to eq("Hello,\nWorld")
+      expect(blob.data).to eq("Hello,\r\nWorld")
     end
 
     context "when an author is specified" do
