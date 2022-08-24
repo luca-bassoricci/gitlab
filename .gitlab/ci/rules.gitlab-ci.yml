@@ -493,10 +493,11 @@
   - "lib/gitlab/ci/templates/**/*.gitlab-ci.yml"
 
 .static-analysis-patterns: &static-analysis-patterns
-  - ".{codeclimate,eslintrc,haml-lint,haml-lint_todo}.yml"
-  - ".rubocop.yml"
-  - ".rubocop_todo.yml"
+  - ".{codeclimate,eslintrc,haml-lint,haml-lint_todo,rubocop,rubocop_todo}.yml"
   - ".rubocop_todo/**/*.yml"
+  - "rubocop/**/*.rb"  # We might be changing custom cops
+  - "Gemfile.lock"  # This should include gitlab-styles, rubocop itself, and any plugins we might be using
+  - "lib/gitlab_edition.rb"  # This is required in RuboCop::CodeReuseHelpers
 
 .danger-patterns: &danger-patterns
   - "Dangerfile"
@@ -1429,8 +1430,10 @@
 
 .static-analysis:rules:ee-and-foss:
   rules:
-    - changes: *code-backstage-qa-patterns
     - changes: *static-analysis-patterns
+      variables:
+        RUN_ALL_RUBOCOP: "true"
+    - changes: *code-backstage-qa-patterns
 
 .static-analysis:rules:ee-and-foss-qa:
   rules:
