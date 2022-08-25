@@ -73,7 +73,7 @@ export default {
           class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
           :value="`${count.value}`"
           :title="count.label"
-          :should-animate="true"
+          should-animate
         />
       </template>
     </div>

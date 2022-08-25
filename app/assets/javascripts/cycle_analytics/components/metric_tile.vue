@@ -40,7 +40,7 @@ export default {
       :value="`${metric.value}`"
       :title="metric.label"
       :unit="metric.unit || ''"
-      :should-animate="true"
+      should-animate
       :animation-decimal-places="decimalPlaces"
       :class="{ 'gl-hover-cursor-pointer': hasLinks }"
       tabindex="0"

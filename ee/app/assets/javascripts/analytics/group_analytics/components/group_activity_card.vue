@@ -80,12 +80,7 @@ export default {
       class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
     >
       <gl-skeleton-loader v-if="isLoading" />
-      <gl-single-stat
-        v-else
-        :value="`${metric.value}`"
-        :title="metric.label"
-        :should-animate="true"
-      />
+      <gl-single-stat v-else :value="`${metric.value}`" :title="metric.label" should-animate />
     </div>
   </div>
 </template>

@@ -88,7 +88,7 @@ export default {
     <gl-form-group
       v-if="commitAction === value && showInput"
       :label="placeholderBranchName"
-      :label-sr-only="true"
+      label-sr-only
       class="gl-ml-6 gl-mb-0"
     >
       <gl-form-input

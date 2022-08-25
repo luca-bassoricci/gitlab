@@ -93,7 +93,7 @@ export default {
       <span class="media-body bold js-refresh-label"> {{ s__('mrWidget|Refreshing now') }} </span>
     </template>
     <template v-else>
-      <status-icon :show-disabled-button="true" status="warning" />
+      <status-icon show-disabled-button status="warning" />
       <div class="media-body space-children">
         <span class="bold">
           <span v-if="mr.mergeError" class="has-error-message" data-testid="merge-error">

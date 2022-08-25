@@ -394,7 +394,7 @@ export default {
       :items="tableItems"
       :fields="fields"
       :busy="isLoaderShown"
-      :show-empty="true"
+      show-empty
       data-testid="table"
       :empty-text="emptyText"
     >

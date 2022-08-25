@@ -189,9 +189,9 @@ export default {
     </template>
     <labels-select
       :allow-label-edit="canEditTestCase"
-      :allow-label-create="true"
-      :allow-multiselect="true"
-      :allow-scoped-labels="true"
+      allow-label-create
+      allow-multiselect
+      allow-scoped-labels
       :selected-labels="selectedLabels"
       :labels-select-in-progress="testCaseLabelsSelectInProgress"
       :labels-fetch-path="labelsFetchPath"

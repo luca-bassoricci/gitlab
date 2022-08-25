@@ -88,7 +88,7 @@ export default {
         unit="%"
         size="sm"
         :title="s__('DevopsReport|Your score')"
-        :should-animate="true"
+        should-animate
         :value="devopsScoreMetrics.averageScore.value"
         :meta-icon="devopsScoreMetrics.averageScore.scoreLevel.icon"
         :meta-text="devopsScoreMetrics.averageScore.scoreLevel.label"

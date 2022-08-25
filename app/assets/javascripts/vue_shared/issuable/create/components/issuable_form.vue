@@ -95,10 +95,10 @@ export default {
       <div class="col-12">
         <div class="issuable-form-select-holder">
           <labels-select
-            :allow-label-edit="true"
-            :allow-label-create="true"
-            :allow-multiselect="true"
-            :allow-scoped-labels="true"
+            allow-label-edit
+            allow-label-create
+            allow-multiselect
+            allow-scoped-labels
             :labels-fetch-path="labelsFetchPath"
             :labels-manage-path="labelsManagePath"
             :selected-labels="selectedLabels"

@@ -71,7 +71,7 @@ export default {
 </script>
 <template>
   <div class="mr-widget-body media">
-    <status-icon :show-disabled-button="true" status="warning" />
+    <status-icon show-disabled-button status="warning" />
 
     <div class="media-body space-children">
       <span class="gl-ml-0! gl-text-body! bold js-branch-text" data-testid="widget-content">

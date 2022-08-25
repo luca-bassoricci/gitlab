@@ -207,7 +207,7 @@ export default {
       :is-loading="isLoading"
       :selected="selected"
       :search-term="search"
-      :allow-multiselect="true"
+      allow-multiselect
       data-testid="labels-select-contents-list"
       @hide="hideDropdown"
       @set-option="selectLabel"

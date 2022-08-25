@@ -69,7 +69,7 @@ export default {
       @expand-sidebar="expandSidebar"
     />
     <labels-select
-      :allow-scoped-labels="true"
+      allow-scoped-labels
       :selected-labels="issue.labels"
       :labels-filter-base-path="issuesListPath"
       :labels-filter-param="$options.labelsFilterParam"

@@ -201,7 +201,7 @@ export default {
           :value="`${metric.value || '-'}`"
           :unit="metric.value ? metric.unit : null"
           :title="metric.label"
-          :should-animate="true"
+          should-animate
         />
         <gl-popover :key="`${metric.key}-popover`" :target="metric.key" :title="metric.label">
           <gl-sprintf :message="metric.popover(metric.value || 0)">

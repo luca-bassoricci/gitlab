@@ -138,7 +138,7 @@ export default {
         :iid="String(iid)"
         :full-path="fullPath"
         :allow-label-remove="canUpdate"
-        :allow-multiselect="true"
+        allow-multiselect
         :labels-filter-base-path="epicsWebUrl"
         variant="sidebar"
         issuable-type="epic"

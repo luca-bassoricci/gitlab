@@ -10,7 +10,7 @@ export default {
 </script>
 <template>
   <div class="mr-widget-body media">
-    <status-icon :show-disabled-button="true" status="loading" />
+    <status-icon show-disabled-button status="loading" />
     <div class="media-body space-children">
       <span class="gl-ml-0! gl-text-body! bold">
         {{ s__('mrWidget|Checking if merge request can be merged…') }}

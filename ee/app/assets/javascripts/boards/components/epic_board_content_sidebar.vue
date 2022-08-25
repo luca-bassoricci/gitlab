@@ -128,7 +128,7 @@ export default {
           :iid="activeBoardItem.iid"
           :full-path="fullPath"
           :allow-label-remove="canUpdate"
-          :allow-multiselect="true"
+          allow-multiselect
           :labels-filter-base-path="labelsFilterBasePath"
           :attr-workspace-path="fullPath"
           workspace-type="group"

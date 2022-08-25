@@ -32,7 +32,7 @@ export default {
         :value="stat.value"
         :title="stat.title"
         :unit="stat.unit"
-        :should-animate="true"
+        should-animate
       />
     </div>
   </div>

@@ -104,7 +104,7 @@ Text input examples:
 </gl-form-group>
 
 <!-- Input with hidden label -->
-<gl-form-group :label="__('Issue title')" label-for="issue-title" :label-sr-only="true">
+<gl-form-group :label="__('Issue title')" label-for="issue-title" label-sr-only>
   <gl-form-input id="issue-title" v-model="title" name="title" />
 </gl-form-group>
 ```
@@ -118,7 +118,7 @@ Textarea examples:
 </gl-form-group>
 
 <!-- Textarea with hidden label -->
-<gl-form-group :label="__('Issue description')" label-for="issue-description" :label-sr-only="true">
+<gl-form-group :label="__('Issue description')" label-for="issue-description" label-sr-only>
   <gl-form-textarea id="issue-description" v-model="description" name="description" />
 </gl-form-group>
 ```
@@ -146,7 +146,7 @@ Select input examples:
 </gl-form-group>
 
 <!-- Select input with hidden label -->
-<gl-form-group :label="__('Issue status')" label-for="issue-status" :label-sr-only="true">
+<gl-form-group :label="__('Issue status')" label-for="issue-status" label-sr-only>
   <gl-form-select id="issue-status" v-model="status" name="status" :options="options" />
 </gl-form-group>
 ```
@@ -182,13 +182,13 @@ Multiple checkboxes:
 </gl-form-group>
 
 <!-- Multiple labeled checkboxes grouped within a fieldset with hidden legend -->
-<gl-form-group :label="__('Task list')" :label-sr-only="true">
+<gl-form-group :label="__('Task list')" label-sr-only>
   <gl-form-checkbox name="task-list" value="task-1">{{ __('Task 1') }}</gl-form-checkbox>
   <gl-form-checkbox name="task-list" value="task-2">{{ __('Task 2') }}</gl-form-checkbox>
 </gl-form-group>
 
 <!-- Or -->
-<gl-form-group :label="__('Task list')" :label-sr-only="true">
+<gl-form-group :label="__('Task list')" label-sr-only>
   <gl-form-checkbox-group v-model="selected" :options="options" name="task-list" />
 </gl-form-group>
 ```
@@ -224,13 +224,13 @@ Multiple radio inputs:
 </gl-form-group>
 
 <!-- Multiple labeled radio inputs grouped within a fieldset with hidden legend -->
-<gl-form-group :label="__('Issue status')" :label-sr-only="true">
+<gl-form-group :label="__('Issue status')" label-sr-only>
   <gl-form-radio name="status" value="opened">{{ __('Opened') }}</gl-form-radio>
   <gl-form-radio name="status" value="closed">{{ __('Closed') }}</gl-form-radio>
 </gl-form-group>
 
 <!-- Or -->
-<gl-form-group :label="__('Issue status')" :label-sr-only="true">
+<gl-form-group :label="__('Issue status')" label-sr-only>
   <gl-form-radio-group v-model="selected" :options="options" name="status" />
 </gl-form-group>
 ```

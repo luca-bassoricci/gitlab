@@ -385,7 +385,7 @@ export default {
           class="error-list-table mt-3"
           :items="errors"
           :fields="$options.fields"
-          :show-empty="true"
+          show-empty
           fixed
           stacked="md"
           tbody-tr-class="table-row mb-4"

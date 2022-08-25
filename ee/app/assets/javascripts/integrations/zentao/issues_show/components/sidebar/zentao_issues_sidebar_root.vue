@@ -42,7 +42,7 @@ export default {
     <issue-due-date :due-date="issue.dueDate" />
     <issue-field icon="progress" :title="$options.i18n.statusTitle" :value="issue.status" />
     <labels-select
-      :allow-scoped-labels="true"
+      allow-scoped-labels
       :selected-labels="issue.labels"
       variant="sidebar"
       class="block labels"

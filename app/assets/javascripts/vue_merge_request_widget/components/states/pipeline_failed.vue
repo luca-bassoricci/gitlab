@@ -26,7 +26,7 @@ export default {
 
 <template>
   <div class="mr-widget-body media">
-    <status-icon :show-disabled-button="true" status="warning" />
+    <status-icon show-disabled-button status="warning" />
     <div class="media-body space-children">
       <span class="gl-ml-0! gl-text-body! bold">
         <gl-sprintf :message="$options.i18n.failedMessage">

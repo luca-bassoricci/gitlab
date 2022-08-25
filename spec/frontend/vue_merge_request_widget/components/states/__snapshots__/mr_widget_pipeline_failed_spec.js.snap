@@ -5,7 +5,7 @@ exports[`PipelineFailed should render error message with a disabled merge button
   class="mr-widget-body media"
 >
   <status-icon-stub
-    show-disabled-button="true"
+    show-disabled-button=""
     status="warning"
   />
    

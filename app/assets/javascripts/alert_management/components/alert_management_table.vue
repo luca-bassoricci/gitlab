@@ -315,7 +315,7 @@ export default {
               : [] /* eslint-disable-line @gitlab/vue-no-new-non-primitive-in-template */
           "
           :fields="$options.fields"
-          :show-empty="true"
+          show-empty
           :busy="loading"
           stacked="md"
           :tbody-tr-class="tbodyTrClass"

@@ -158,8 +158,8 @@ export default {
           <label class="gl-white-space-nowrap gl-mb-0 gl-mr-2">{{ __('Filter by label') }}</label>
           <labels-select
             :allow-label-create="false"
-            :allow-label-edit="true"
-            :allow-multiselect="true"
+            allow-label-edit
+            allow-multiselect
             :allow-scoped-labels="hasScopedLabelsFeature"
             :labels-fetch-path="labelsFetchPath"
             :selected-labels="selectedLabels"

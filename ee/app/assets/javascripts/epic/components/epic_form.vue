@@ -211,8 +211,8 @@ export default {
         <labels-select-widget
           class="block labels js-labels-block"
           :full-path="groupPath"
-          :allow-label-create="true"
-          :allow-multiselect="true"
+          allow-label-create
+          allow-multiselect
           :allow-scoped-labels="false"
           :labels-filter-base-path="groupEpicsPath"
           :attr-workspace-path="groupPath"

@@ -586,7 +586,7 @@ export default {
       <div class="mr-widget-grouped-section report-block">
         <template v-if="hasSastReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="sastStatusIcon"
             :popover-options="getPopover($options.i18n.sastPopover, sastHelpPath)"
             class="js-sast-widget"
@@ -609,7 +609,7 @@ export default {
 
         <template v-if="hasDependencyScanningReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="dependencyScanningStatusIcon"
             :popover-options="
               getPopover($options.i18n.dependencyScanningPopover, dependencyScanningHelpPath)
@@ -634,7 +634,7 @@ export default {
 
         <template v-if="hasContainerScanningReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="containerScanningStatusIcon"
             :popover-options="
               getPopover($options.i18n.containerScanningPopover, containerScanningHelpPath)
@@ -659,7 +659,7 @@ export default {
 
         <template v-if="hasDastReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="dastStatusIcon"
             :popover-options="getPopover($options.i18n.dastPopover, dastHelpPath)"
             class="js-dast-widget"
@@ -705,7 +705,7 @@ export default {
 
         <template v-if="hasSecretDetectionReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="secretDetectionStatusIcon"
             :popover-options="
               getPopover($options.i18n.secretDetectionPopover, secretDetectionHelpPath)
@@ -730,7 +730,7 @@ export default {
 
         <template v-if="hasCoverageFuzzingReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="coverageFuzzingStatusIcon"
             :popover-options="
               getPopover($options.i18n.coverageFuzzingPopover, coverageFuzzingHelpPath)
@@ -761,7 +761,7 @@ export default {
 
         <template v-if="hasApiFuzzingReports">
           <summary-row
-            :nested-summary="true"
+            nested-summary
             :status-icon="apiFuzzingStatusIcon"
             :popover-options="getPopover($options.i18n.apiFuzzingPopover, apiFuzzingHelpPath)"
             class="js-api-fuzzing-widget"

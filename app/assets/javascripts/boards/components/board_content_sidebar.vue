@@ -205,7 +205,7 @@ export default {
           :iid="activeBoardItem.iid"
           :full-path="projectPathForActiveIssue"
           :allow-label-remove="allowLabelEdit"
-          :allow-multiselect="true"
+          allow-multiselect
           :footer-create-label-title="createLabelTitle"
           :footer-manage-label-title="manageLabelTitle"
           :labels-create-title="createLabelTitle"
