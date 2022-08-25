@@ -492,12 +492,13 @@
   - "scripts/lint_templates_bash.rb"
   - "lib/gitlab/ci/templates/**/*.gitlab-ci.yml"
 
-.static-analysis-patterns: &static-analysis-patterns
+.rubocop-patterns: &rubocop-patterns
   - ".{codeclimate,eslintrc,haml-lint,haml-lint_todo,rubocop,rubocop_todo}.yml"
   - ".rubocop_todo/**/*.yml"
-  - "rubocop/**/*.rb"  # We might be changing custom cops
-  - "Gemfile.lock"  # This should include gitlab-styles, rubocop itself, and any plugins we might be using
+  - "{,ee/,jh/}rubocop/**/*"  # We might be changing custom cops
+  - "{,ee/,jh/}Gemfile.lock"  # This should include gitlab-styles, rubocop itself, and any plugins we might be using
   - "lib/gitlab_edition.rb"  # This is required in RuboCop::CodeReuseHelpers
+  - ".gitlab/ci/static-analysis.gitlab-ci.yml"
 
 .danger-patterns: &danger-patterns
   - "Dangerfile"
@@ -1428,26 +1429,30 @@
 # Static analysis rules #
 #########################
 
-.static-analysis:rules:ee-and-foss:
+.static-analysis:rules:static-analysis:
   rules:
-    - changes: *static-analysis-patterns
+    - changes: *code-backstage-qa-patterns
+
+.static-analysis:rules:rubocop:
+  rules:
+    - changes: *rubocop-patterns
       variables:
         RUN_ALL_RUBOCOP: "true"
     - changes: *code-backstage-qa-patterns
 
-.static-analysis:rules:ee-and-foss-qa:
+.static-analysis:rules:qa:metadata-lint:
   rules:
     - changes: *qa-patterns
-    - changes: *static-analysis-patterns
+    - changes: [".gitlab/ci/static-analysis.gitlab-ci.yml"]
 
-.static-analysis:rules:ee:
+.static-analysis:rules:haml-lint-ee:
   rules:
     - <<: *if-not-ee
       when: never
+    - changes: *rubocop-patterns
     - changes: *code-backstage-qa-patterns
-    - changes: *static-analysis-patterns
 
-.static-analysis:rules:as-if-foss:
+.static-analysis:rules:static-analysis-as-if-foss:
   rules:
     - <<: *if-not-ee
       when: never
@@ -1456,9 +1461,9 @@
     - <<: *if-security-merge-request
       changes: *code-backstage-qa-patterns
     - <<: *if-merge-request
-      changes: *ci-patterns
+      changes: [".gitlab/ci/static-analysis.gitlab-ci.yml"]
     - <<: *if-merge-request
-      changes: *static-analysis-patterns
+      changes: *rubocop-patterns
 
 #######################
 # Vendored gems rules #
