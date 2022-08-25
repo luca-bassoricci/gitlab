@@ -176,6 +176,16 @@ RSpec.describe 'Dashboard Merge Requests' do
       expect(find('.issues-filters')).to have_content('Created date')
     end
 
+    context 'filtering by Approved-By' do
+      it 'shows sorted merge requests by milestone', :js do
+        pajamas_sort_by(s_('SortOptions|Milestone due date'))
+
+        visit merge_requests_dashboard_path(approved_by_usernames: [current_user.username])
+
+        expect(find('.issues-filters')).to have_content('Milestone due date')
+      end
+    end
+
     it 'keeps sorting merge requests after visiting Projects MR page', :js do
       pajamas_sort_by(s_('SortOptions|Created date'))
 
