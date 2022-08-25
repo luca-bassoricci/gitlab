@@ -4,7 +4,6 @@ require 'carrierwave/orm/activerecord'
 
 class User < ApplicationRecord
   extend Gitlab::ConfigHelper
-
   include Gitlab::ConfigHelper
   include Gitlab::SQL::Pattern
   include AfterCommitQueue
