@@ -1,0 +1,9 @@
+---
+table_name: ci_pipelines_details
+classes:
+- Ci::PipelineDetails
+feature_categories:
+- continuous_integration
+description: TODO
+introduced_by_url:
+milestone: '15.4'

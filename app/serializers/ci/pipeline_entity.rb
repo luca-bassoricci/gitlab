@@ -19,6 +19,8 @@ class Ci::PipelineEntity < Grape::Entity
 
   expose :created_at, :updated_at
 
+  expose :title
+
   expose :path do |pipeline|
     project_pipeline_path(pipeline.project, pipeline)
   end

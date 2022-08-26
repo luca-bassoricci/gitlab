@@ -113,11 +113,25 @@ export default {
     commitTitle() {
       return this.pipeline?.commit?.title;
     },
+    pipelineTitle() {
+      return this.pipeline?.title;
+    },
   },
 };
 </script>
 <template>
   <div class="pipeline-tags" data-testid="pipeline-url-table-cell">
+    <div class="gl-mb-2">
+      <div class="icon-container gl-display-inline-block gl-mr-1">
+        <gl-icon
+          v-gl-tooltip
+          name="title"
+          title="Pipeline title"
+          data-testid="commit-icon-type"
+        />
+      </div>
+      {{ pipelineTitle }}
+    </div>
     <div class="commit-title gl-mb-2" data-testid="commit-title-container">
       <span v-if="commitTitle" class="gl-display-flex">
         <tooltip-on-truncate :title="commitTitle" class="gl-flex-grow-1 gl-text-truncate">

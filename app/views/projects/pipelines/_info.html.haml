@@ -6,6 +6,11 @@
       = preserve(markdown(commit.description, pipeline: :single_line))
 
 .info-well
+  .well-segment
+    .icon-container
+      = sprite_icon('title', css_class: 'gl-top-0!')
+    = @pipeline.title
+
   .well-segment.pipeline-info{ class: "gl-align-items-baseline!" }
     .icon-container
       = sprite_icon('clock', css_class: 'gl-top-0!')

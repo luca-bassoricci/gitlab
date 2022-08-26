@@ -11,6 +11,12 @@ module Gitlab
           def perform!
             @command.workflow_rules_result = workflow_rules_result
 
+            if @pipeline.pipeline_details.present?
+              @pipeline.pipeline_details.title = workflow_rules_result.title
+            else
+              @pipeline.build_pipeline_details(title: workflow_rules_result.title, project: @pipeline.project)
+            end
+
             error('Pipeline filtered out by workflow rules.') unless workflow_passed?
           end
 

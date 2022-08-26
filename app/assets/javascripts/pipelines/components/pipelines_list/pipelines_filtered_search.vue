@@ -6,6 +6,7 @@ import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/co
 import PipelineBranchNameToken from './tokens/pipeline_branch_name_token.vue';
 import PipelineSourceToken from './tokens/pipeline_source_token.vue';
 import PipelineStatusToken from './tokens/pipeline_status_token.vue';
+import PipelineTitleToken from './tokens/pipeline_title_token.vue';
 import PipelineTagNameToken from './tokens/pipeline_tag_name_token.vue';
 import PipelineTriggerAuthorToken from './tokens/pipeline_trigger_author_token.vue';
 
@@ -14,6 +15,7 @@ export default {
   branchType: 'ref',
   tagType: 'tag',
   statusType: 'status',
+  titleType: 'title',
   sourceType: 'source',
   defaultTokensLength: 1,
   components: {
@@ -89,6 +91,14 @@ export default {
           title: s__('Pipeline|Source'),
           unique: true,
           token: PipelineSourceToken,
+          operators: OPERATOR_IS_ONLY,
+        },
+        {
+          type: this.$options.titleType,
+          icon: 'title',
+          title: s__('Pipeline|Title'),
+          unique: true,
+          token: PipelineTitleToken,
           operators: OPERATOR_IS_ONLY,
         },
       ];

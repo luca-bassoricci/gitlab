@@ -341,7 +341,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def index_params
-    params.permit(:scope, :username, :ref, :status, :source)
+    params.permit(:scope, :username, :ref, :status, :source, :title)
   end
 
   def enable_runners_availability_section_experiment

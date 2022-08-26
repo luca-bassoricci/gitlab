@@ -110,6 +110,7 @@ module Ci
     has_one :source_bridge, through: :source_pipeline, source: :source_bridge
 
     has_one :pipeline_config, class_name: 'Ci::PipelineConfig', inverse_of: :pipeline
+    has_one :pipeline_details, class_name: 'Ci::PipelineDetails', inverse_of: :pipeline
 
     has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult', foreign_key: :last_pipeline_id
     has_many :latest_builds_report_results, through: :latest_builds, source: :report_results
@@ -482,6 +483,10 @@ module Ci
 
     def total_size
       statuses.count(:id)
+    end
+
+    def title
+      pipeline_details&.title
     end
 
     def tags_count

@@ -25,7 +25,7 @@ module Ci
         return Ci::Pipeline.none
       end
 
-      items = pipelines
+      items = pipelines.includes(:pipeline_details)
       items = items.no_child unless params[:iids].present?
       items = by_iids(items)
       items = by_scope(items)
@@ -36,6 +36,7 @@ module Ci
       items = by_yaml_errors(items)
       items = by_updated_at(items)
       items = by_source(items)
+      items = by_title(items)
 
       sort_items(items)
     end
@@ -60,6 +61,12 @@ module Ci
 
     def tags
       project.repository.tag_names
+    end
+
+    def by_title(items)
+      return items unless params[:title].present?
+
+      items.where(ci_pipeline_details: { title: params[:title] })
     end
 
     def by_iids(items)

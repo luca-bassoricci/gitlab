@@ -9,10 +9,10 @@ module Gitlab
           include ::Gitlab::Config::Entry::Configurable
           include ::Gitlab::Config::Entry::Attributable
 
-          ALLOWED_KEYS = %i[if changes exists when start_in allow_failure variables].freeze
+          ALLOWED_KEYS = %i[if changes exists when start_in allow_failure variables title].freeze
           ALLOWED_WHEN = %w[on_success on_failure always never manual delayed].freeze
 
-          attributes :if, :exists, :when, :start_in, :allow_failure
+          attributes :if, :exists, :when, :start_in, :allow_failure, :title
 
           entry :changes, Entry::Rules::Rule::Changes,
             description: 'File change condition rule.'
@@ -33,6 +33,7 @@ module Gitlab
               validates :exists, array_of_strings: true, length: { maximum: 50 }
               validates :when, allowed_values: { in: ALLOWED_WHEN }
               validates :allow_failure, boolean: true
+              validates :title, length: { maximum: 50 }
             end
 
             validate do

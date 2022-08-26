@@ -12946,6 +12946,13 @@ CREATE SEQUENCE ci_pipeline_chat_data_id_seq
 
 ALTER SEQUENCE ci_pipeline_chat_data_id_seq OWNED BY ci_pipeline_chat_data.id;
 
+CREATE TABLE ci_pipeline_details (
+    project_id bigint NOT NULL,
+    pipeline_id bigint NOT NULL,
+    title text NOT NULL,
+    CONSTRAINT check_387184db75 CHECK ((char_length(title) <= 50))
+);
+
 CREATE TABLE ci_pipeline_messages (
     id bigint NOT NULL,
     severity smallint DEFAULT 0 NOT NULL,
@@ -27912,6 +27919,12 @@ CREATE INDEX index_ci_pipeline_chat_data_on_chat_name_id ON ci_pipeline_chat_dat
 
 CREATE UNIQUE INDEX index_ci_pipeline_chat_data_on_pipeline_id ON ci_pipeline_chat_data USING btree (pipeline_id);
 
+CREATE INDEX index_ci_pipeline_details_on_pipeline_id_title ON ci_pipeline_details USING btree (pipeline_id, title);
+
+CREATE INDEX index_ci_pipeline_details_on_project_id ON ci_pipeline_details USING btree (project_id);
+
+CREATE INDEX index_ci_pipeline_details_on_title_include_project_id ON ci_pipeline_details USING btree (title) INCLUDE (project_id);
+
 CREATE INDEX index_ci_pipeline_messages_on_pipeline_id ON ci_pipeline_messages USING btree (pipeline_id);
 
 CREATE UNIQUE INDEX index_ci_pipeline_schedule_variables_on_schedule_id_and_key ON ci_pipeline_schedule_variables USING btree (pipeline_schedule_id, key);
@@ -33936,6 +33949,9 @@ ALTER TABLE ONLY clusters_applications_cert_managers
 ALTER TABLE ONLY timelog_categories
     ADD CONSTRAINT fk_rails_9f27b821a8 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipeline_details
+    ADD CONSTRAINT fk_rails_9f57bf35cf FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_a006df5590 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
@@ -34220,6 +34236,9 @@ ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
 
 ALTER TABLE ONLY operations_strategies_user_lists
     ADD CONSTRAINT fk_rails_ccb7e4bc0b FOREIGN KEY (user_list_id) REFERENCES operations_user_lists(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_details
+    ADD CONSTRAINT fk_rails_ce0f291ddd FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_cedf8cce4d FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
