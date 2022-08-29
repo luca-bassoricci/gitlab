@@ -96,7 +96,7 @@ export const mockFrequentProjects = [
     webUrl: `${TEST_HOST}/gitlab-org/gitlab-foss`,
     avatarUrl: null,
     frequency: 1,
-    lastAccessedOn: Date.now(),
+    lastAccessedOn: 1593993600000,
   },
   {
     id: 2,
@@ -105,7 +105,7 @@ export const mockFrequentProjects = [
     webUrl: `${TEST_HOST}/gitlab-org/gitlab-ci`,
     avatarUrl: null,
     frequency: 9,
-    lastAccessedOn: Date.now(),
+    lastAccessedOn: 1593993600000,
   },
   {
     id: 3,
@@ -114,7 +114,7 @@ export const mockFrequentProjects = [
     webUrl: `${TEST_HOST}/twitter/typeahead-js`,
     avatarUrl: '/uploads/-/system/project/avatar/7/TWBS.png',
     frequency: 2,
-    lastAccessedOn: Date.now(),
+    lastAccessedOn: 1593993600000,
   },
   {
     id: 4,
@@ -123,7 +123,7 @@ export const mockFrequentProjects = [
     webUrl: `${TEST_HOST}/platform/hardware/bsp/intel`,
     avatarUrl: null,
     frequency: 3,
-    lastAccessedOn: Date.now(),
+    lastAccessedOn: 1593993600000,
   },
   {
     id: 5,
@@ -132,7 +132,7 @@ export const mockFrequentProjects = [
     webUrl: `${TEST_HOST}/platform/hardware/bsp/kernel/common/v4.4`,
     avatarUrl: null,
     frequency: 8,
-    lastAccessedOn: Date.now(),
+    lastAccessedOn: 1593993600000,
   },
 ];
 

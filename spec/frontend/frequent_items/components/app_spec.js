@@ -76,13 +76,13 @@ describe('Frequent Items App Component', () => {
       createComponent();
     });
 
-    it('should fetch frequent items', () => {
+    it('fetches frequent items', () => {
       triggerDropdownOpen();
 
       expect(store.dispatch).toHaveBeenCalledWith(`${TEST_VUEX_MODULE}/fetchFrequentItems`);
     });
 
-    it('should not fetch frequent items if detroyed', () => {
+    it('does not fetch frequent items if detroyed', () => {
       wrapper.destroy();
       triggerDropdownOpen();
 
@@ -93,7 +93,7 @@ describe('Frequent Items App Component', () => {
       expect(findSearchInput().classes()).toEqual(['search-input-container']);
     });
 
-    it('should render loading animation', async () => {
+    it('renders loading animation', async () => {
       triggerDropdownOpen();
       store.state[TEST_VUEX_MODULE].isLoadingItems = true;
 
@@ -105,14 +105,14 @@ describe('Frequent Items App Component', () => {
       expect(loading.find('[aria-label="Loading projects"]').exists()).toBe(true);
     });
 
-    it('should render frequent projects list header', () => {
+    it('renders frequent projects list header', () => {
       const sectionHeader = findSectionHeader();
 
       expect(sectionHeader.exists()).toBe(true);
       expect(sectionHeader.text()).toBe('Frequently visited');
     });
 
-    it('should render frequent projects list', async () => {
+    it('renders frequent projects list', async () => {
       const expectedResult = getTopFrequentItems(mockFrequentProjects);
       localStorage.setItem(TEST_STORAGE_KEY, JSON.stringify(mockFrequentProjects));
 
@@ -131,7 +131,7 @@ describe('Frequent Items App Component', () => {
       });
     });
 
-    it('should render searched projects list', async () => {
+    it('renders searched projects list', async () => {
       mock.onGet(/\/api\/v4\/projects.json(.*)$/).replyOnce(200, mockSearchedProjects.data);
 
       setSearch('gitlab');
@@ -167,11 +167,9 @@ describe('Frequent Items App Component', () => {
   });
 
   describe('with searchClass', () => {
-    beforeEach(() => {
+    it('renders search input with searchClass', () => {
       createComponent({ searchClass: TEST_SEARCH_CLASS });
-    });
 
-    it('should render search input with searchClass', () => {
       expect(findSearchInput().classes()).toEqual(['search-input-container', TEST_SEARCH_CLASS]);
     });
   });
@@ -183,7 +181,7 @@ describe('Frequent Items App Component', () => {
       expect(getStoredProjects()).toEqual([
         expect.objectContaining({
           frequency: 1,
-          lastAccessedOn: Date.now(),
+          lastAccessedOn: 1593993600000,
         }),
       ]);
     });
@@ -199,13 +197,13 @@ describe('Frequent Items App Component', () => {
       it('should only log once', () => {
         expect(getStoredProjects()).toEqual([
           expect.objectContaining({
-            lastAccessedOn: Date.now(),
+            lastAccessedOn: 1593993600000,
             frequency: 1,
           }),
         ]);
       });
 
-      it('should increase frequency, when created 15 minutes later', () => {
+      it('increases frequency, when created 15 minutes later', () => {
         const fifteenMinutesLater = Date.now() + FIFTEEN_MINUTES_IN_MS + 1;
 
         jest.spyOn(Date, 'now').mockReturnValue(fifteenMinutesLater);
@@ -220,7 +218,7 @@ describe('Frequent Items App Component', () => {
       });
     });
 
-    it('should always update project metadata', () => {
+    it('always updates project metadata', () => {
       const oldProject = {
         ...TEST_PROJECT,
       };
@@ -243,7 +241,7 @@ describe('Frequent Items App Component', () => {
       expect(getStoredProjects()).toEqual([expect.objectContaining(newProject)]);
     });
 
-    it('should not add more than 20 projects in store', () => {
+    it('does not add more than 20 projects in store', () => {
       for (let id = 0; id < FREQUENT_ITEMS.MAX_COUNT + 10; id += 1) {
         const project = {
           ...TEST_PROJECT,
