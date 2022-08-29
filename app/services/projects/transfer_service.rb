@@ -63,7 +63,7 @@ module Projects
         raise TransferError, s_('TransferProject|Project cannot be transferred, because tags are present in its container registry')
       end
 
-      if project.has_packages?(:npm) && !new_namespace_has_same_root?(project)
+      if project.has_packages?(:npm, exclude_pending_destruction: true) && !new_namespace_has_same_root?(project)
         raise TransferError, s_("TransferProject|Root namespace can't be updated if project has NPM packages")
       end
 

@@ -7284,7 +7284,7 @@ RSpec.describe Project, factory_default: :keep do
   describe '#has_packages?' do
     let(:project) { create(:project, :public) }
 
-    subject { project.has_packages?(package_type) }
+    subject { project.has_packages?(package_type, exclude_pending_destruction: exclude_pending_destruction) }
 
     shared_examples 'has_package' do
       context 'package of package_type exists' do
@@ -7299,6 +7299,7 @@ RSpec.describe Project, factory_default: :keep do
 
       context 'package of package_type is pending_destruction' do
         let!(:package) { create("#{package_type}_package", project: project, status: "pending_destruction") }
+        let(:exclude_pending_destruction) { true }
 
         it { is_expected.to be false }
       end
@@ -7308,12 +7309,14 @@ RSpec.describe Project, factory_default: :keep do
       context "with #{pkg_type} package" do
         it_behaves_like 'has_package' do
           let(:package_type) { pkg_type.to_sym }
+          let(:exclude_pending_destruction) { false }
         end
       end
     end
 
     context 'calling has_package? with nil' do
       let(:package_type) { nil }
+      let(:exclude_pending_destruction) { false }
 
       it { is_expected.to be false }
     end

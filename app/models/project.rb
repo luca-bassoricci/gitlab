@@ -1080,8 +1080,12 @@ class Project < ApplicationRecord
     auto_devops_config[:scope] != :project && !auto_devops_config[:status]
   end
 
-  def has_packages?(package_type)
-    packages.where(package_type: package_type).where.not(status: "pending_destruction").exists?
+  def has_packages?(package_type, exclude_pending_destruction: false)
+    pkgs = packages.where(package_type: package_type)
+
+    pkgs = pkgs.not_pending_destruction if exclude_pending_destruction
+
+    pkgs.exists?
   end
 
   def packages_cleanup_policy

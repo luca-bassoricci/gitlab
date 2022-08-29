@@ -29,6 +29,17 @@ RSpec.describe Projects::TransferService do
       end
     end
 
+    context 'with pending destruction package' do
+      before do
+        package.pending_destruction!
+      end
+
+      it 'allows the transfer' do
+        expect(transfer_service.execute(group)).to be true
+        expect(project.errors[:new_namespace]).to be_empty
+      end
+    end
+
     context 'without a root namespace change' do
       let(:root) { create(:group) }
       let(:group) { create(:group, parent: root) }
