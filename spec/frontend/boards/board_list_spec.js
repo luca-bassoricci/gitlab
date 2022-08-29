@@ -1,7 +1,6 @@
 import Draggable from 'vuedraggable';
 import { nextTick } from 'vue';
 import { DraggableItemTypes } from 'ee_else_ce/boards/constants';
-import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import waitForPromises from 'helpers/wait_for_promises';
 import createComponent from 'jest/boards/board_list_helper';
 import BoardCard from '~/boards/components/board_card.vue';
@@ -31,8 +30,6 @@ describe('Board list component', () => {
   const endDrag = (params) => {
     findByTestId('tree-root-wrapper').vm.$emit('end', params);
   };
-
-  useFakeRequestAnimationFrame();
 
   afterEach(() => {
     wrapper.destroy();

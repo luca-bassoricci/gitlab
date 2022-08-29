@@ -2,7 +2,6 @@ import $ from 'jquery';
 import Cookies from '~/lib/utils/cookies';
 import { loadHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
 import { initEmojiMock, clearEmojiMock } from 'helpers/emoji';
-import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import loadAwardsHandler from '~/awards_handler';
 
 window.gl = window.gl || {};
@@ -12,8 +11,6 @@ let awardsHandler = null;
 const urlRoot = gon.relative_url_root;
 
 describe('AwardsHandler', () => {
-  useFakeRequestAnimationFrame();
-
   const emojiData = {
     '8ball': {
       c: 'activity',

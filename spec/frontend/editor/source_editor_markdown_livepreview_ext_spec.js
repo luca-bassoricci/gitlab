@@ -1,6 +1,5 @@
 import MockAdapter from 'axios-mock-adapter';
 import { Emitter } from 'monaco-editor';
-import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
@@ -87,8 +86,6 @@ describe('Markdown Live Preview Extension for Source Editor', () => {
   describe('onDidLayoutChange', () => {
     const emitter = new Emitter();
     let layoutSpy;
-
-    useFakeRequestAnimationFrame();
 
     beforeEach(() => {
       instance.unuse(extension);

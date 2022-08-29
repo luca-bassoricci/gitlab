@@ -72,6 +72,11 @@ Object.assign(global, {
   },
 });
 
+// TODO(vslobodin): Remove in Jest 28
+// See https://github.com/facebook/jest/issues/5147
+global.requestAnimationFrame = (cb) => cb();
+global.cancelAnimationFrame = (cb) => cb();
+
 beforeEach(() => {
   // make sure that each test actually tests something
   // see https://jestjs.io/docs/en/expect#expecthasassertions

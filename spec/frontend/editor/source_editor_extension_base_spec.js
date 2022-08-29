@@ -1,6 +1,5 @@
 import { Range } from 'monaco-editor';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
-import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import {
   EDITOR_TYPE_CODE,
@@ -94,8 +93,6 @@ describe('The basis for an Source Editor extension', () => {
       isWholeLine: true,
       className: 'active-line-text',
     };
-
-    useFakeRequestAnimationFrame();
 
     beforeEach(() => {
       setWindowLocation('https://localhost');
