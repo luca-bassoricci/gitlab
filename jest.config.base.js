@@ -181,7 +181,7 @@ module.exports = (path, options = {}) => {
       '^.+\\.(md|zip|png|yml|yaml)$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [`node_modules/(?!(${transformIgnoreNodeModules.join('|')}))`],
-    timers: 'legacy',
+    timers: 'modern',
     testEnvironment: '<rootDir>/spec/frontend/environment.js',
     testEnvironmentOptions: {
       IS_EE,
