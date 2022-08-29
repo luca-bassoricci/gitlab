@@ -1,5 +1,6 @@
 import { GlBadge } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { useRealDate } from 'helpers/fake_date';
 import RunnerStatusBadge from '~/runner/components/runner_status_badge.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import {
@@ -12,6 +13,8 @@ import {
 } from '~/runner/constants';
 
 describe('RunnerTypeBadge', () => {
+  useRealDate();
+
   let wrapper;
 
   const findBadge = () => wrapper.findComponent(GlBadge);
@@ -33,13 +36,10 @@ describe('RunnerTypeBadge', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers('modern');
     jest.setSystemTime(new Date('2021-01-01T00:00:00Z'));
   });
 
   afterEach(() => {
-    jest.useFakeTimers('legacy');
-
     wrapper.destroy();
   });
 

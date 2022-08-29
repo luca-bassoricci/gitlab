@@ -1,3 +1,4 @@
+import { useRealDate } from 'helpers/fake_date';
 import { PRESET_TYPES, DATE_RANGES } from 'ee/roadmap/constants';
 import {
   getEpicsTimeframeRange,
@@ -41,13 +42,13 @@ describe('getMonthsForDates', () => {
 });
 
 describe('getTimeframeForRangeType', () => {
+  useRealDate();
+
   beforeEach(() => {
-    jest.useFakeTimers('modern');
     jest.setSystemTime(new Date('2021-01-01'));
   });
 
   afterEach(() => {
-    jest.useFakeTimers('legacy');
     jest.runOnlyPendingTimers();
   });
 
