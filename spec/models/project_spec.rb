@@ -7304,21 +7304,11 @@ RSpec.describe Project, factory_default: :keep do
       end
     end
 
-    context 'with maven packages' do
-      it_behaves_like 'has_package' do
-        let(:package_type) { :maven }
-      end
-    end
-
-    context 'with npm packages' do
-      it_behaves_like 'has_package' do
-        let(:package_type) { :npm }
-      end
-    end
-
-    context 'with conan packages' do
-      it_behaves_like 'has_package' do
-        let(:package_type) { :conan }
+    Packages::Package.package_types.keys.each do |pkg_type|
+      context "with #{pkg_type} package" do
+        it_behaves_like 'has_package' do
+          let(:package_type) { pkg_type.to_sym }
+        end
       end
     end
 
