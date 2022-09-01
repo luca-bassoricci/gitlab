@@ -2862,6 +2862,14 @@ class Project < ApplicationRecord
       ).exists?
   end
 
+  def has_namespaced_npm_packages?
+    pkg = packages.with_package_type(:npm)
+      .not_pending_destruction
+      .find { |p| root_namespace.path == ::Packages::Npm.scope_of(p.name) }
+
+    pkg.nil? ? false : true
+  end
+
   def default_branch_or_main
     return default_branch if default_branch
 
