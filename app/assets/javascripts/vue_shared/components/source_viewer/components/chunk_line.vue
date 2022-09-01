@@ -2,6 +2,7 @@
 import { GlSafeHtmlDirective } from '@gitlab/ui';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { setAttributes } from '~/lib/utils/dom_utils';
+import { getPageNumberFromLineNumber } from '~/lib/utils/url_utility';
 import { BIDI_CHARS, BIDI_CHARS_CLASS_LIST, BIDI_CHAR_TOOLTIP } from '../constants';
 
 export default {
@@ -39,6 +40,11 @@ export default {
 
       return content;
     },
+    pageParam() {
+      return getPageNumberFromLineNumber(this.number)
+        ? `?page=${getPageNumberFromLineNumber(this.number)}`
+        : '';
+    },
   },
   methods: {
     wrapBidiChar(bidiChar) {
@@ -65,7 +71,7 @@ export default {
       <a
         v-if="glFeatures.fileLineBlame"
         class="gl-user-select-none gl-shadow-none! file-line-blame"
-        :href="`${blamePath}#L${number}`"
+        :href="`${blamePath}${pageParam}#L${number}`"
       ></a>
       <a
         :id="`L${number}`"

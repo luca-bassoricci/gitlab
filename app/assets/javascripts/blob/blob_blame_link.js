@@ -1,3 +1,5 @@
+import { getPageNumberFromLineNumber } from '../lib/utils/url_utility';
+
 function addBlameLink(containerSelector, linkClass) {
   const containerEl = document.querySelector(containerSelector);
 
@@ -16,7 +18,9 @@ function addBlameLink(containerSelector, linkClass) {
       const { blamePath } = document.querySelector('.line-numbers').dataset;
       const blameLink = document.createElement('a');
       blameLink.classList.add('file-line-blame');
-      blameLink.href = `${blamePath}#L${lineNumber}`;
+
+      const pageNumber = getPageNumberFromLineNumber(lineNumber);
+      blameLink.href = `${blamePath}${pageNumber ? `?page=${pageNumber}` : ''}#L${lineNumber}`;
 
       const wrapper = document.createElement('div');
       wrapper.classList.add('line-links', 'diff-line-num');

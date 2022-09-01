@@ -1,4 +1,4 @@
-import { getLocationHash } from '../lib/utils/url_utility';
+import { getLocationHash, getPageNumberFromLineNumber } from '../lib/utils/url_utility';
 
 const lineNumberRe = /^(L|LC)[0-9]+/;
 
@@ -16,7 +16,13 @@ const updateLineNumbersOnBlobPermalinks = (linksToUpdate) => {
           permalinkButton.dataset.originalHref = href;
           return href;
         })();
-      permalinkButton.setAttribute('href', `${baseHref}${hashUrlString}`);
+      const isPageParameterNeeded = permalinkButton.classList.contains('js-blob-blame-link');
+      const lineNum = hash.split('L')[1];
+      const page = getPageNumberFromLineNumber(lineNum);
+      permalinkButton.setAttribute(
+        'href',
+        `${baseHref}${isPageParameterNeeded ? `?page=${page}` : ''}${hashUrlString}`,
+      );
     });
   }
 };
