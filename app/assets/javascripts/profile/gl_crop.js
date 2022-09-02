@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape, no-underscore-dangle, func-names, no-return-assign, consistent-return, class-methods-use-this */
 
 import $ from 'jquery';
-import 'cropper';
+import Cropper from 'cropperjs';
 import { isString } from 'lodash';
 import { loadCSSFile } from '../lib/utils/css_utils';
 
@@ -30,7 +30,6 @@ import { loadCSSFile } from '../lib/utils/css_utils';
       this.onModalShow = this.onModalShow.bind(this);
       this.onPickImageClick = this.onPickImageClick.bind(this);
       this.fileInput = $(input);
-      this.modalCropImg = isString(this.modalCropImg) ? $(this.modalCropImg) : this.modalCropImg;
       this.fileInput
         .attr('name', `${this.fileInput.attr('name')}-trigger`)
         .attr('id', `${this.fileInput.attr('id')}-trigger`);
@@ -50,8 +49,8 @@ import { loadCSSFile } from '../lib/utils/css_utils';
       this.pickImageEl = this.getElement(pickImageEl);
       this.modalCrop = isString(modalCrop) ? $(modalCrop) : modalCrop;
       this.uploadImageBtn = isString(uploadImageBtn) ? $(uploadImageBtn) : uploadImageBtn;
-      this.modalCropImg = isString(modalCropImg) ? $(modalCropImg) : modalCropImg;
       this.cropActionsBtn = this.modalCrop.find('[data-method]');
+      this.cropperInstance = null;
       this.bindEvents();
     }
 
@@ -82,7 +81,7 @@ import { loadCSSFile } from '../lib/utils/css_utils';
 
     onModalShow() {
       const _this = this;
-      return this.modalCropImg.cropper({
+      this.cropperInstance = new Cropper(this.modalCropImg, {
         viewMode: 1,
         center: false,
         aspectRatio: 1,
@@ -99,11 +98,10 @@ import { loadCSSFile } from '../lib/utils/css_utils';
         cropBoxResizable: false,
         toggleDragModeOnDblclick: false,
         built() {
-          const $image = $(this);
-          const container = $image.cropper('getContainerData');
+          const container = this.cropperInstance.getContainerData();
           const { cropBoxWidth, cropBoxHeight } = _this;
 
-          return $image.cropper('setCropBoxData', {
+          return this.cropperInstance.setCropBoxData({
             width: cropBoxWidth,
             height: cropBoxHeight,
             left: (container.width - cropBoxWidth) / 2,
@@ -114,7 +112,7 @@ import { loadCSSFile } from '../lib/utils/css_utils';
     }
 
     onModalHide() {
-      this.modalCropImg.attr('src', '').cropper('destroy');
+      this.cropperInstance.destroy();
       const modalElement = document.querySelector('.modal-profile-crop');
       if (modalElement) modalElement.remove();
     }
@@ -129,8 +127,8 @@ import { loadCSSFile } from '../lib/utils/css_utils';
 
     onActionBtnClick(btn) {
       const data = $(btn).data();
-      if (this.modalCropImg.data('cropper') && data.method) {
-        return this.modalCropImg.cropper(data.method, data.option);
+      if (data.method) {
+        return this.cropperInstance[data.method](data.option);
       }
     }
 
@@ -142,7 +140,7 @@ import { loadCSSFile } from '../lib/utils/css_utils';
       const _this = this;
       const reader = new FileReader();
       reader.onload = () => {
-        _this.modalCropImg.attr('src', reader.result);
+        _this.modalCropImg.setAttribute('src', reader.result);
         return _this.modalCrop.modal('show');
       };
       return reader.readAsDataURL(input.files[0]);
@@ -169,8 +167,8 @@ import { loadCSSFile } from '../lib/utils/css_utils';
     }
 
     setBlob() {
-      this.dataURL = this.modalCropImg
-        .cropper('getCroppedCanvas', {
+      this.dataURL = this.cropperInstance
+        .getCroppedCanvas({
           width: 200,
           height: 200,
         })
