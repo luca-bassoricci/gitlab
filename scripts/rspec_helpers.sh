@@ -358,7 +358,7 @@ function rspec_fail_fast() {
 }
 
 function rspec_matched_foss_tests() {
-  local test_file_count_threshold=20
+  local test_file_count_threshold=40
   local matching_tests_file=${1}
   local foss_matching_tests_file="${matching_tests_file}-foss"
 
@@ -378,7 +378,7 @@ function rspec_matched_foss_tests() {
   local test_file_count=$(wc -w "${foss_matching_tests_file}" | awk {'print $1'})
 
   if [[ "${test_file_count}" -gt "${test_file_count_threshold}" ]]; then
-    echo "This job is intentionally failed because there are more than ${test_file_count_threshold} FOSS test files matched,"
+    echo "This job is intentionally failed because there are more than ${test_file_count_threshold} test files found that would impact FOSS,"
     echo "which would take too long to run in this job."
     echo "To reduce the likelihood of breaking FOSS pipelines,"
     echo "please add ~\"pipeline:run-as-if-foss\" label to the merge request and trigger a new pipeline."

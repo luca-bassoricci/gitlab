@@ -986,6 +986,7 @@ rspec foss-impact:
     expire_in: 7d
     paths:
       - tmp/capybara/
+  allow_failure: true
 
 fail-pipeline-early:
   extends:
