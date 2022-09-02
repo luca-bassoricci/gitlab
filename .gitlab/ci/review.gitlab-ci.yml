@@ -24,7 +24,7 @@ review-cleanup:
     - gcp_cleanup
 
 review-app-pipeline-generate:
-  image: ${GITLAB_DEPENDENCY_PROXY}ruby:${RUBY_VERSION}
+  image: ruby:${RUBY_VERSION}
   stage: prepare
   extends:
     - .review:rules:start-review-app-pipeline

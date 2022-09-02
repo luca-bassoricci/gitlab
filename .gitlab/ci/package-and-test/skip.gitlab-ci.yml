@@ -4,7 +4,7 @@ stages:
   - qa
 
 no-op:
-  image: ${GITLAB_DEPENDENCY_PROXY}alpine:latest
+  image: alpine:latest
   stage: qa
   variables:
     GIT_STRATEGY: none
