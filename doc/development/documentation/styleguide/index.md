@@ -1502,9 +1502,11 @@ Configuration procedures can require users to edit configuration files, reconfig
 GitLab, or restart GitLab. Use these styles to document these steps, replacing
 `PATH/TO` with the appropriate path:
 
-````markdown
-**For Omnibus installations**
+::Tabs
 
+:::Omnibus
+
+````markdown
 1. Edit `/etc/gitlab/gitlab.rb`:
 
    ```ruby
@@ -1513,11 +1515,11 @@ GitLab, or restart GitLab. Use these styles to document these steps, replacing
 
 1. Save the file and [reconfigure](PATH/TO/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
    GitLab for the changes to take effect.
+````
 
----
+:::Installations from source
 
-**For installations from source**
-
+````markdown
 1. Edit `config/gitlab.yml`:
 
    ```yaml
@@ -1528,6 +1530,8 @@ GitLab, or restart GitLab. Use these styles to document these steps, replacing
 1. Save the file and [restart](PATH/TO/administration/restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
 ````
+
+::EndTabs
 
 In this case:
 
