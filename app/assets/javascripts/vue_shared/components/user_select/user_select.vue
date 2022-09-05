@@ -1,14 +1,6 @@
 <script>
-import { debounce } from 'lodash';
-import {
-  GlDropdown,
-  GlDropdownForm,
-  GlDropdownDivider,
-  GlDropdownItem,
-  GlSearchBoxByType,
-  GlLoadingIcon,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { debounce, uniqBy } from 'lodash';
+import { GlDropdownDivider, GlTooltipDirective, GlListbox } from '@gitlab/ui';
 import { __ } from '~/locale';
 import SidebarParticipant from '~/sidebar/components/assignees/sidebar_participant.vue';
 import { IssuableType } from '~/issues/constants';
@@ -19,15 +11,12 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 export default {
   i18n: {
     unassigned: __('Unassigned'),
+    assignees: __('Assignees'),
   },
   components: {
-    GlDropdownForm,
-    GlDropdown,
     GlDropdownDivider,
-    GlDropdownItem,
-    GlSearchBoxByType,
     SidebarParticipant,
-    GlLoadingIcon,
+    GlListbox,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -89,6 +78,9 @@ export default {
       participants: [],
       searchUsers: [],
       isSearching: false,
+      selected: this.allowMultipleAssignees
+        ? this.value.map(({ username }) => username)
+        : this.value[0],
     };
   },
   apollo: {
@@ -108,6 +100,7 @@ export default {
       update(data) {
         return data.workspace?.issuable?.participants.nodes.map((node) => ({
           ...node,
+          value: node.username,
           canMerge: false,
         }));
       },
@@ -195,9 +188,6 @@ export default {
       const isCurrentUser = (user) => user.username === this.currentUser.username;
       return this.users.some(isCurrentUser);
     },
-    noUsersFound() {
-      return !this.isSearchEmpty && this.users.length === 0;
-    },
     showCurrentUser() {
       return this.currentUser.username && !this.isCurrentUserInList && this.isSearchEmpty;
     },
@@ -223,13 +213,23 @@ export default {
     unselectedFiltered() {
       return this.users?.filter(({ username }) => !this.selectedUserNames.includes(username)) || [];
     },
-    selectedIsEmpty() {
-      return this.selectedFiltered.length === 0;
+    displayUsers() {
+      const users = [...this.selectedFiltered];
+
+      if (this.showCurrentUser) {
+        users.push(this.currentUser);
+      }
+
+      if (this.showAuthor) {
+        users.push(this.issuableAuthor);
+      }
+
+      return users.concat(this.unselectedFiltered);
     },
   },
 
   watch: {
-    // We need to add this watcher to track the moment when user is alredy typing
+    // We need to add this watcher to track the moment when user is already typing
     // but query is still not started due to debounce
     search(newVal) {
       if (newVal) {
@@ -240,31 +240,27 @@ export default {
   created() {
     this.debouncedSearchKeyUpdate = debounce(this.setSearchKey, DEFAULT_DEBOUNCE_AND_THROTTLE_MS);
   },
+
   methods: {
-    selectAssignee(user) {
-      let selected = [...this.value];
-      if (!this.allowMultipleAssignees) {
-        selected = [user];
-        this.$emit('input', selected);
-        this.$refs.dropdown.hide();
-        this.$emit('toggle');
+    select() {
+      if (this.allowMultipleAssignees) {
+        const newSelected = this.users.filter(({ username }) => this.selected.includes(username));
+        const selectedUsers = uniqBy([...this.value, ...newSelected], 'username');
+
+        this.$emit('input', selectedUsers);
       } else {
-        selected.push(user);
-        this.$emit('input', selected);
+        this.$emit('input', this.selected);
+        this.$emit('toggle');
       }
     },
     unselect(name) {
       const selected = this.value.filter((user) => user.username !== name);
       this.$emit('input', selected);
     },
-    focusSearch() {
-      this.$refs.search.focusInput();
-    },
     showDropdown() {
-      this.$refs.dropdown.show();
-    },
-    showDivider(list) {
-      return list.length > 0 && this.isSearchEmpty;
+      setTimeout(() => {
+        this.$refs.listbox.open();
+      }, 0);
     },
     moveCurrentUserAndAuthorToStart(users = []) {
       let sortedUsers = [...users];
@@ -297,98 +293,34 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown ref="dropdown" :text="text" @toggle="$emit('toggle')" @shown="focusSearch">
+  <gl-listbox
+    ref="listbox"
+    v-model="selected"
+    class="gl-display-block"
+    :style="{ height: 400 }"
+    :items="displayUsers"
+    :toggle-text="$options.i18n.assignees"
+    :multiple="allowMultipleAssignees"
+    is-check-centered
+    is-filterable
+    :searching="isLoading"
+    primary-key="username"
+    @select="select"
+    @unselect="unselect"
+    @search="debouncedSearchKeyUpdate"
+  >
     <template #header>
       <p class="gl-font-weight-bold gl-text-center gl-mt-2 gl-mb-4">{{ headerText }}</p>
       <gl-dropdown-divider />
-      <gl-search-box-by-type
-        ref="search"
-        :value="search"
-        class="js-dropdown-input-field"
-        @input="debouncedSearchKeyUpdate"
-      />
     </template>
-    <gl-dropdown-form class="gl-relative gl-min-h-7">
-      <gl-loading-icon
-        v-if="isLoading"
-        data-testid="loading-participants"
-        size="md"
-        class="gl-absolute gl-left-0 gl-top-0 gl-right-0"
-      />
-      <template v-else>
-        <template v-if="shouldShowParticipants">
-          <gl-dropdown-item
-            v-if="isSearchEmpty"
-            :is-checked="selectedIsEmpty"
-            is-check-centered
-            data-testid="unassign"
-            @click.native.capture.stop="$emit('input', [])"
-          >
-            <span :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'" class="gl-font-weight-bold">{{
-              $options.i18n.unassigned
-            }}</span>
-          </gl-dropdown-item>
-        </template>
-        <gl-dropdown-divider v-if="showDivider(selectedFiltered)" />
-        <gl-dropdown-item
-          v-for="item in selectedFiltered"
-          :key="item.id"
-          v-gl-tooltip.left.viewport
-          :title="tooltipText(item)"
-          boundary="viewport"
-          is-checked
-          is-check-centered
-          data-testid="selected-participant"
-          @click.native.capture.stop="unselect(item.username)"
-        >
-          <sidebar-participant :user="item" :issuable-type="issuableType" />
-        </gl-dropdown-item>
-        <template v-if="showCurrentUser">
-          <gl-dropdown-divider />
-          <gl-dropdown-item
-            data-testid="current-user"
-            @click.native.capture.stop="selectAssignee(currentUser)"
-          >
-            <sidebar-participant
-              :user="currentUser"
-              :issuable-type="issuableType"
-              class="gl-pl-6!"
-            />
-          </gl-dropdown-item>
-        </template>
-        <gl-dropdown-item
-          v-if="showAuthor"
-          data-testid="issuable-author"
-          @click.native.capture.stop="selectAssignee(issuableAuthor)"
-        >
-          <sidebar-participant
-            :user="issuableAuthor"
-            :issuable-type="issuableType"
-            class="gl-pl-6!"
-          />
-        </gl-dropdown-item>
-        <gl-dropdown-item
-          v-for="unselectedUser in unselectedFiltered"
-          :key="unselectedUser.id"
-          v-gl-tooltip.left.viewport
-          :title="tooltipText(unselectedUser)"
-          boundary="viewport"
-          data-testid="unselected-participant"
-          @click.native.capture.stop="selectAssignee(unselectedUser)"
-        >
-          <sidebar-participant
-            :user="unselectedUser"
-            :issuable-type="issuableType"
-            class="gl-pl-6!"
-          />
-        </gl-dropdown-item>
-        <gl-dropdown-item v-if="noUsersFound" data-testid="empty-results" class="gl-pl-6!">
-          {{ __('No matching results') }}
-        </gl-dropdown-item>
-      </template>
-    </gl-dropdown-form>
+
+    <template #list-item="{ item }">
+      <sidebar-participant :user="item" :issuable-type="issuableType" />
+    </template>
+
     <template #footer>
+      <gl-dropdown-divider />
       <slot name="footer"></slot>
     </template>
-  </gl-dropdown>
+  </gl-listbox>
 </template>
