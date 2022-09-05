@@ -1851,6 +1851,9 @@ msgstr ""
 msgid "AWS Access Key"
 msgstr ""
 
+msgid "AWS OpenSearch IAM credentials"
+msgstr ""
+
 msgid "AWS Secret Access Key"
 msgstr ""
 
@@ -2910,7 +2913,7 @@ msgstr ""
 msgid "AdminSettings|Total number of jobs in currently active pipelines"
 msgstr ""
 
-msgid "AdminSettings|Use AWS hosted Elasticsearch with IAM credentials"
+msgid "AdminSettings|Use AWS OpenSearch Service with IAM credentials"
 msgstr ""
 
 msgid "AdminSettings|Users and groups must accept the invitation before they're added to a group or project."
@@ -3915,9 +3918,6 @@ msgstr ""
 msgid "Allowed"
 msgstr ""
 
-msgid "Allowed characters: +, 0-9, -, and spaces."
-msgstr ""
-
 msgid "Allowed email domain restriction only permitted for top-level groups"
 msgstr ""
 
@@ -4197,6 +4197,9 @@ msgstr ""
 msgid "An error occurred while loading all the files."
 msgstr ""
 
+msgid "An error occurred while loading branch rules. Please try again."
+msgstr ""
+
 msgid "An error occurred while loading chart data"
 msgstr ""
 
@@ -4334,9 +4337,6 @@ msgstr[1] ""
 msgid "An error occurred while saving your settings. Try saving them again."
 msgstr ""
 
-msgid "An error occurred while subscribing to notifications."
-msgstr ""
-
 msgid "An error occurred while triggering the job."
 msgstr ""
 
@@ -4350,9 +4350,6 @@ msgid "An error occurred while trying to run a new pipeline for this merge reque
 msgstr ""
 
 msgid "An error occurred while trying to unfollow this user, please try again."
-msgstr ""
-
-msgid "An error occurred while unsubscribing to notifications."
 msgstr ""
 
 msgid "An error occurred while updating approvers"
@@ -6243,12 +6240,6 @@ msgstr ""
 msgid "Billings|Shared runners cannot be enabled until a valid credit card is on file."
 msgstr ""
 
-msgid "Billings|The last owner cannot be removed from a seat."
-msgstr ""
-
-msgid "Billings|To make this member active, you must first remove an existing active member, or toggle them to over limit."
-msgstr ""
-
 msgid "Billings|To use free CI/CD minutes on shared runners, you’ll need to validate your account with a credit card. If you prefer not to provide one, you can run pipelines by bringing your own runners and disabling shared runners for your project. This is required to discourage and reduce abuse on GitLab infrastructure. %{strongStart}GitLab will not charge your card, it will only be used for validation.%{strongEnd} %{linkStart}Learn more%{linkEnd}."
 msgstr ""
 
@@ -6262,12 +6253,6 @@ msgid "Billings|Validate account"
 msgstr ""
 
 msgid "Billings|Validate user account"
-msgstr ""
-
-msgid "Billings|You can't change the seat status of a user who was invited via a group or project."
-msgstr ""
-
-msgid "Billings|You can't remove yourself from a seat, but you can leave the group."
 msgstr ""
 
 msgid "Billings|You'll now be able to take advantage of free CI/CD minutes on shared runners."
@@ -11048,9 +11033,6 @@ msgstr ""
 msgid "Create, update, or delete a merge request."
 msgstr ""
 
-msgid "Create/import your first project"
-msgstr ""
-
 msgid "CreateGroup|You don’t have permission to create a subgroup in this group."
 msgstr ""
 
@@ -11594,6 +11576,9 @@ msgstr ""
 msgid "CycleAnalytics|Average time to completion"
 msgstr ""
 
+msgid "CycleAnalytics|Average time to completion (days)"
+msgstr ""
+
 msgid "CycleAnalytics|Change Failure Rate"
 msgstr ""
 
@@ -12130,13 +12115,13 @@ msgstr ""
 msgid "DastProfiles|You cannot run an active scan against an unvalidated site."
 msgstr ""
 
-msgid "DastProfiles|folder/dast_example.har or https://example.com/dast_example.har"
+msgid "DastProfiles|https://example.com/dast_example.har"
 msgstr ""
 
-msgid "DastProfiles|folder/example.postman_collection.json or https://example.com/"
+msgid "DastProfiles|https://example.com/openapi.json"
 msgstr ""
 
-msgid "DastProfiles|folder/openapi.json or https://example.com/openapi.json"
+msgid "DastProfiles|https://example.com/postman_collection.json"
 msgstr ""
 
 msgid "DastSiteValidation|Copy HTTP header to clipboard"
@@ -14292,9 +14277,6 @@ msgstr ""
 msgid "Elapsed time"
 msgstr ""
 
-msgid "Elasticsearch AWS IAM credentials"
-msgstr ""
-
 msgid "Elasticsearch HTTP client timeout value in seconds."
 msgstr ""
 
@@ -14317,9 +14299,6 @@ msgid "Elasticsearch reindexing was not started: %{errors}"
 msgstr ""
 
 msgid "Elasticsearch zero-downtime reindexing"
-msgstr ""
-
-msgid "Elasticsearch's region."
 msgstr ""
 
 msgid "Elastic|None. Select namespaces to index."
@@ -15036,12 +15015,6 @@ msgstr ""
 msgid "Epics|Add an existing epic"
 msgstr ""
 
-msgid "Epics|An error occurred while saving the %{epicDateType} date"
-msgstr ""
-
-msgid "Epics|An error occurred while updating labels."
-msgstr ""
-
 msgid "Epics|Are you sure you want to remove %{bStart}%{targetIssueTitle}%{bEnd} from %{bStart}%{parentEpicTitle}%{bEnd}?"
 msgstr ""
 
@@ -15108,16 +15081,7 @@ msgstr ""
 msgid "Epics|This will also remove any descendents of %{bStart}%{targetEpicTitle}%{bEnd} from %{bStart}%{parentEpicTitle}%{bEnd}. Are you sure?"
 msgstr ""
 
-msgid "Epics|To schedule your epic's %{epicDateType} date based on milestones, assign a milestone with a %{epicDateType} date to any issue in the epic."
-msgstr ""
-
 msgid "Epics|Unable to save epic. Please try again"
-msgstr ""
-
-msgid "Epics|due"
-msgstr ""
-
-msgid "Epics|start"
 msgstr ""
 
 msgid "Erased"
@@ -15187,9 +15151,6 @@ msgid "Error loading branches."
 msgstr ""
 
 msgid "Error loading burndown chart data"
-msgstr ""
-
-msgid "Error loading countries data."
 msgstr ""
 
 msgid "Error loading file viewer."
@@ -19180,6 +19141,9 @@ msgstr ""
 msgid "HAR (HTTP Archive)"
 msgstr ""
 
+msgid "HAR file URL"
+msgstr ""
+
 msgid "HAR file path or URL"
 msgstr ""
 
@@ -20092,9 +20056,6 @@ msgid "Import|There is not a valid Git repository at this URL. If your HTTP repo
 msgstr ""
 
 msgid "Improve customer support with Service Desk"
-msgstr ""
-
-msgid "In a seat"
 msgstr ""
 
 msgid "In case of pull mirroring, your user will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches."
@@ -23240,9 +23201,6 @@ msgstr ""
 msgid "Learn GitLab"
 msgstr ""
 
-msgid "Learn GitLab - Ultimate trial"
-msgstr ""
-
 msgid "Learn More"
 msgstr ""
 
@@ -26363,9 +26321,6 @@ msgstr ""
 msgid "No deployments found"
 msgstr ""
 
-msgid "No due date"
-msgstr ""
-
 msgid "No email participants were added. Either none were provided, or they already exist."
 msgstr ""
 
@@ -26538,9 +26493,6 @@ msgid "No stack trace for this error"
 msgstr ""
 
 msgid "No starrers matched your search"
-msgstr ""
-
-msgid "No start date"
 msgstr ""
 
 msgid "No suggestions found"
@@ -26875,6 +26827,9 @@ msgid "Notify|%{member_link} requested %{member_role} access to the %{target_sou
 msgstr ""
 
 msgid "Notify|%{mr_highlight}Merge request%{highlight_end} %{mr_link} %{approved_highlight}was approved by%{highlight_end} %{approver_avatar} %{approver_link}"
+msgstr ""
+
+msgid "Notify|%{paragraph_start}Hi %{name}!%{paragraph_end} %{paragraph_start}A new public key was added to your account:%{paragraph_end} %{paragraph_start}title: %{key_title}%{paragraph_end} %{paragraph_start}If this key was added in error, you can remove it under %{removal_link}%{paragraph_end}"
 msgstr ""
 
 msgid "Notify|A new GPG key was added to your account:"
@@ -27601,7 +27556,13 @@ msgstr ""
 msgid "OpenAPI"
 msgstr ""
 
+msgid "OpenAPI Specification file URL"
+msgstr ""
+
 msgid "OpenAPI Specification file path or URL"
+msgstr ""
+
+msgid "OpenSearch's region."
 msgstr ""
 
 msgid "Opened"
@@ -29708,6 +29669,9 @@ msgid "Port"
 msgstr ""
 
 msgid "Postman collection"
+msgstr ""
+
+msgid "Postman collection file URL"
 msgstr ""
 
 msgid "Postman collection file path or URL"
@@ -33831,6 +33795,9 @@ msgstr ""
 msgid "Runners|Add notes, like who owns the runner or what it should be used for."
 msgstr ""
 
+msgid "Runners|Add your feedback in the issue"
+msgstr ""
+
 msgid "Runners|All"
 msgstr ""
 
@@ -34266,6 +34233,12 @@ msgstr ""
 msgid "Runners|View installation instructions"
 msgstr ""
 
+msgid "Runners|We want you to be able to manage your runners easily and efficiently from this page, and we are making changes to get there. Give us feedback on how we're doing!"
+msgstr ""
+
+msgid "Runners|We've made some changes and want your feedback"
+msgstr ""
+
 msgid "Runners|Windows 2019 Shell with manual scaling and optional scheduling. %{percentage} spot."
 msgstr ""
 
@@ -34287,15 +34260,6 @@ msgstr ""
 msgid "Runners|group"
 msgstr ""
 
-msgid "Runners|never contacted"
-msgstr ""
-
-msgid "Runners|offline"
-msgstr ""
-
-msgid "Runners|online"
-msgstr ""
-
 msgid "Runners|paused"
 msgstr ""
 
@@ -34303,15 +34267,6 @@ msgid "Runners|shared"
 msgstr ""
 
 msgid "Runners|specific"
-msgstr ""
-
-msgid "Runners|stale"
-msgstr ""
-
-msgid "Runners|upgrade available"
-msgstr ""
-
-msgid "Runners|upgrade recommended"
 msgstr ""
 
 msgid "Runner|Owner"
@@ -39649,6 +39604,9 @@ msgstr ""
 msgid "There are currently no events."
 msgstr ""
 
+msgid "There are currently no mirrored repositories."
+msgstr ""
+
 msgid "There are merge conflicts"
 msgstr ""
 
@@ -40526,9 +40484,6 @@ msgid "This project will be deleted on %{date}"
 msgstr ""
 
 msgid "This project will be deleted on %{date} since its parent group '%{parent_group_name}' has been scheduled for deletion."
-msgstr ""
-
-msgid "This project will live in your group %{strong_open}%{namespace}%{strong_close}. A project is where you store your files (repository), plan your work (issues), publish your documentation (wiki), and so much more."
 msgstr ""
 
 msgid "This release was created with a date in the past. Evidence collection at the moment of the release is unavailable."
@@ -41474,37 +41429,10 @@ msgstr ""
 msgid "Trial|Allowed characters: +, 0-9, -, and spaces."
 msgstr ""
 
-msgid "Trial|Company name"
-msgstr ""
-
 msgid "Trial|Continue"
 msgstr ""
 
-msgid "Trial|Continue using the basic features of GitLab for free."
-msgstr ""
-
-msgid "Trial|Country"
-msgstr ""
-
 msgid "Trial|Dismiss"
-msgstr ""
-
-msgid "Trial|GitLab Ultimate trial (optional)"
-msgstr ""
-
-msgid "Trial|Number of employees"
-msgstr ""
-
-msgid "Trial|Please select a country"
-msgstr ""
-
-msgid "Trial|Telephone number"
-msgstr ""
-
-msgid "Trial|Upgrade to Ultimate to keep using GitLab with advanced features."
-msgstr ""
-
-msgid "Trial|We will activate your trial on your group after you complete this step. After 30 days, you can:"
 msgstr ""
 
 msgid "Trial|Your GitLab Ultimate trial lasts for 30 days, but you can keep your free GitLab account forever. We just need some additional information to activate your trial."
@@ -42233,6 +42161,9 @@ msgstr ""
 msgid "UsageQuota|Gitlab-integrated Docker Container Registry for storing Docker Images. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
+msgid "UsageQuota|Group settings &gt; Usage quotas"
+msgstr ""
+
 msgid "UsageQuota|Includes artifacts, repositories, wiki, uploads, and other items."
 msgstr ""
 
@@ -42329,10 +42260,10 @@ msgstr ""
 msgid "UsageQuota|The %{strong_start}%{context_name}%{strong_end} project will be affected by this. "
 msgstr ""
 
-msgid "UsageQuota|The namespace is currently using %{strong_start}%{used_storage}%{strong_end} of namespace storage. Group owners can view namespace storage usage and purchase more from %{strong_start}Group settings &gt; Usage quotas%{strong_end}. %{docs_link_start}Learn more.%{link_end}"
+msgid "UsageQuota|The namespace is currently using %{strong_start}%{used_storage}%{strong_end} of namespace storage. Group owners can view namespace storage usage and purchase more from %{strong_start}%{usage_quotas_nav_instruction}%{strong_end}. %{docs_link_start}Learn more%{link_end}."
 msgstr ""
 
-msgid "UsageQuota|The namespace is currently using %{strong_start}%{used_storage}%{strong_end} of namespace storage. View and manage your usage from %{strong_start}User settings &gt; Usage quotas%{strong_end}. %{docs_link_start}Learn more%{link_end} about how to reduce your storage."
+msgid "UsageQuota|The namespace is currently using %{strong_start}%{used_storage}%{strong_end} of namespace storage. View and manage your usage from %{strong_start}%{usage_quotas_nav_instruction}%{strong_end}. %{docs_link_start}Learn more%{link_end} about how to reduce your storage."
 msgstr ""
 
 msgid "UsageQuota|The table below shows current period usage"
@@ -42396,6 +42327,9 @@ msgid "UsageQuota|Usage of resources across your projects"
 msgstr ""
 
 msgid "UsageQuota|Usage quotas help link"
+msgstr ""
+
+msgid "UsageQuota|User settings &gt; Usage quotas"
 msgstr ""
 
 msgid "UsageQuota|When you purchase additional storage, we automatically unlock projects that were locked when you reached the %{actualRepositorySizeLimit} limit."
@@ -44038,6 +43972,9 @@ msgstr ""
 msgid "Webhooks|A subgroup is created or removed."
 msgstr ""
 
+msgid "Webhooks|A webhook in this project was automatically disabled after being retried multiple times."
+msgstr ""
+
 msgid "Webhooks|A wiki page is created or updated."
 msgstr ""
 
@@ -44078,6 +44015,9 @@ msgid "Webhooks|Fails to connect"
 msgstr ""
 
 msgid "Webhooks|Feature flag events"
+msgstr ""
+
+msgid "Webhooks|Go to webhooks"
 msgstr ""
 
 msgid "Webhooks|Issues events"
@@ -44135,6 +44075,9 @@ msgid "Webhooks|URL must be percent-encoded if it contains one or more special c
 msgstr ""
 
 msgid "Webhooks|Used to validate received payloads. Sent with the request in the %{code_start}X-Gitlab-Token HTTP%{code_end} header."
+msgstr ""
+
+msgid "Webhooks|Webhook disabled"
 msgstr ""
 
 msgid "Webhooks|Webhook failed to connect"
@@ -45241,7 +45184,7 @@ msgstr ""
 msgid "You have successfully purchased %{product}. You'll receive a receipt by email. Your purchase may take a minute to sync, so refresh the page if you don't see it yet."
 msgstr ""
 
-msgid "You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email."
+msgid "You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email. It might take a moment for GitLab.com to fully reflect your purchase."
 msgstr ""
 
 msgid "You have unsaved changes"
@@ -45611,9 +45554,6 @@ msgid "Your device was successfully set up! Give it a name and register it with 
 msgstr ""
 
 msgid "Your file must contain a column named %{codeStart}title%{codeEnd}. A %{codeStart}description%{codeEnd} column is optional. The maximum file size allowed is 10 MB."
-msgstr ""
-
-msgid "Your first project"
 msgstr ""
 
 msgid "Your free group is now limited to %d member"

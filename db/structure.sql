@@ -15741,6 +15741,24 @@ CREATE SEQUENCE geo_reset_checksum_events_id_seq
 
 ALTER SEQUENCE geo_reset_checksum_events_id_seq OWNED BY geo_reset_checksum_events.id;
 
+CREATE TABLE ghost_user_migrations (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    initiator_user_id bigint,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    hard_delete boolean DEFAULT false NOT NULL
+);
+
+CREATE SEQUENCE ghost_user_migrations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ghost_user_migrations_id_seq OWNED BY ghost_user_migrations.id;
+
 CREATE TABLE gitlab_subscription_histories (
     id bigint NOT NULL,
     gitlab_subscription_created_at timestamp with time zone,
@@ -23470,6 +23488,8 @@ ALTER TABLE ONLY geo_repository_updated_events ALTER COLUMN id SET DEFAULT nextv
 
 ALTER TABLE ONLY geo_reset_checksum_events ALTER COLUMN id SET DEFAULT nextval('geo_reset_checksum_events_id_seq'::regclass);
 
+ALTER TABLE ONLY ghost_user_migrations ALTER COLUMN id SET DEFAULT nextval('ghost_user_migrations_id_seq'::regclass);
+
 ALTER TABLE ONLY gitlab_subscription_histories ALTER COLUMN id SET DEFAULT nextval('gitlab_subscription_histories_id_seq'::regclass);
 
 ALTER TABLE ONLY gitlab_subscriptions ALTER COLUMN id SET DEFAULT nextval('gitlab_subscriptions_id_seq'::regclass);
@@ -25366,6 +25386,9 @@ ALTER TABLE ONLY geo_repository_updated_events
 
 ALTER TABLE ONLY geo_reset_checksum_events
     ADD CONSTRAINT geo_reset_checksum_events_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ghost_user_migrations
+    ADD CONSTRAINT ghost_user_migrations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY gitlab_subscription_histories
     ADD CONSTRAINT gitlab_subscription_histories_pkey PRIMARY KEY (id);
@@ -28687,6 +28710,8 @@ CREATE INDEX index_geo_repository_updated_events_on_source ON geo_repository_upd
 
 CREATE INDEX index_geo_reset_checksum_events_on_project_id ON geo_reset_checksum_events USING btree (project_id);
 
+CREATE UNIQUE INDEX index_ghost_user_migrations_on_user_id ON ghost_user_migrations USING btree (user_id);
+
 CREATE INDEX index_gin_ci_namespace_mirrors_on_traversal_ids ON ci_namespace_mirrors USING gin (traversal_ids);
 
 CREATE INDEX index_gin_ci_pending_builds_on_namespace_traversal_ids ON ci_pending_builds USING gin (namespace_traversal_ids);
@@ -28917,8 +28942,6 @@ CREATE INDEX index_issues_on_confidential ON issues USING btree (confidential);
 
 CREATE INDEX index_issues_on_description_trigram ON issues USING gin (description gin_trgm_ops);
 
-CREATE INDEX index_issues_on_description_trigram_non_latin ON issues USING gin (description gin_trgm_ops) WHERE (((title)::text !~ similar_escape('[\u0000-\u218F]*'::text, NULL::text)) OR (description !~ similar_escape('[\u0000-\u218F]*'::text, NULL::text)));
-
 CREATE INDEX index_issues_on_duplicated_to_id ON issues USING btree (duplicated_to_id) WHERE (duplicated_to_id IS NOT NULL);
 
 CREATE INDEX index_issues_on_id_and_weight ON issues USING btree (id, weight);
@@ -28947,13 +28970,13 @@ CREATE INDEX index_issues_on_project_id_closed_at_desc_state_id_and_id ON issues
 
 CREATE INDEX index_issues_on_project_id_closed_at_state_id_and_id ON issues USING btree (project_id, closed_at, state_id, id);
 
+CREATE INDEX index_issues_on_project_id_health_status_created_at_id ON issues USING btree (project_id, health_status, created_at, id);
+
 CREATE INDEX index_issues_on_promoted_to_epic_id ON issues USING btree (promoted_to_epic_id) WHERE (promoted_to_epic_id IS NOT NULL);
 
 CREATE INDEX index_issues_on_sprint_id ON issues USING btree (sprint_id);
 
 CREATE INDEX index_issues_on_title_trigram ON issues USING gin (title gin_trgm_ops);
-
-CREATE INDEX index_issues_on_title_trigram_non_latin ON issues USING gin (title gin_trgm_ops) WHERE (((title)::text !~ similar_escape('[\u0000-\u218F]*'::text, NULL::text)) OR (description !~ similar_escape('[\u0000-\u218F]*'::text, NULL::text)));
 
 CREATE INDEX index_issues_on_updated_at ON issues USING btree (updated_at);
 
@@ -29674,6 +29697,8 @@ CREATE INDEX index_project_group_links_on_group_id_and_project_id ON project_gro
 CREATE INDEX index_project_group_links_on_project_id ON project_group_links USING btree (project_id);
 
 CREATE INDEX index_project_import_data_on_project_id ON project_import_data USING btree (project_id);
+
+CREATE INDEX index_project_members_on_id_temp ON members USING btree (id) WHERE ((source_type)::text = 'Project'::text);
 
 CREATE INDEX index_project_mirror_data_on_last_successful_update_at ON project_mirror_data USING btree (last_successful_update_at);
 
@@ -32222,6 +32247,9 @@ ALTER TABLE ONLY boards
 
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_1fbed67632 FOREIGN KEY (start_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ghost_user_migrations
+    ADD CONSTRAINT fk_202e642a2f FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY coverage_fuzzing_corpuses
     ADD CONSTRAINT fk_204d40056a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

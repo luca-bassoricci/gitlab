@@ -136,7 +136,7 @@ export default {
       );
     },
     textareaPlaceholder() {
-      return this.discussionNote?.confidential
+      return this.discussionNote?.internal
         ? this.$options.i18n.bodyPlaceholderInternal
         : this.$options.i18n.bodyPlaceholder;
     },
@@ -331,7 +331,7 @@ export default {
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
       <comment-field-layout
         :noteable-data="getNoteableData"
-        :is-internal-note="discussion.confidential"
+        :is-internal-note="discussion.internal"
       >
         <markdown-field
           :markdown-preview-path="markdownPreviewPath"
@@ -423,7 +423,7 @@ export default {
               category="primary"
               variant="confirm"
               data-qa-selector="reply_comment_button"
-              class="gl-mr-3 js-vue-issue-save js-comment-button"
+              class="gl-sm-mr-3 gl-xs-mb-3 js-vue-issue-save js-comment-button"
               @click="handleUpdate()"
             >
               {{ saveButtonTitle }}
@@ -432,7 +432,7 @@ export default {
               v-if="discussion.resolvable"
               category="secondary"
               variant="default"
-              class="gl-mr-3 js-comment-resolve-button"
+              class="gl-sm-mr-3 gl-xs-mb-3 js-comment-resolve-button"
               @click.prevent="handleUpdate(true)"
             >
               {{ resolveButtonTitle }}

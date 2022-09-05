@@ -15,6 +15,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { updateHistory } from '~/lib/utils/url_utility';
 import { upgradeStatusTokenConfig } from 'ee_else_ce/runner/components/search_tokens/upgrade_status_token_config';
 
+import RunnerStackedLayoutBanner from '~/runner/components/runner_stacked_layout_banner.vue';
 import RunnerTypeTabs from '~/runner/components/runner_type_tabs.vue';
 import RunnerFilteredSearchBar from '~/runner/components/runner_filtered_search_bar.vue';
 import RunnerList from '~/runner/components/runner_list.vue';
@@ -28,6 +29,9 @@ import {
   CREATED_ASC,
   CREATED_DESC,
   DEFAULT_SORT,
+  I18N_STATUS_ONLINE,
+  I18N_STATUS_OFFLINE,
+  I18N_STATUS_STALE,
   INSTANCE_TYPE,
   GROUP_TYPE,
   PARAM_KEY_PAUSED,
@@ -74,6 +78,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 describe('GroupRunnersApp', () => {
   let wrapper;
 
+  const findRunnerStackedLayoutBanner = () => wrapper.findComponent(RunnerStackedLayoutBanner);
   const findRunnerStats = () => wrapper.findComponent(RunnerStats);
   const findRunnerActionsCell = () => wrapper.findComponent(RunnerActionsCell);
   const findRegistrationDropdown = () => wrapper.findComponent(RegistrationDropdown);
@@ -122,6 +127,11 @@ describe('GroupRunnersApp', () => {
     wrapper.destroy();
   });
 
+  it('shows the feedback banner', () => {
+    createComponent();
+    expect(findRunnerStackedLayoutBanner().exists()).toBe(true);
+  });
+
   it('shows the runner tabs with a runner count for each type', async () => {
     await createComponent({ mountFn: mountExtended });
 
@@ -154,9 +164,9 @@ describe('GroupRunnersApp', () => {
     });
 
     const text = findRunnerStats().text();
-    expect(text).toContain(`${s__('Runners|Online')} ${mockGroupRunnersCount}`);
-    expect(text).toContain(`${s__('Runners|Offline')} ${mockGroupRunnersCount}`);
-    expect(text).toContain(`${s__('Runners|Stale')} ${mockGroupRunnersCount}`);
+    expect(text).toContain(`${I18N_STATUS_ONLINE} ${mockGroupRunnersCount}`);
+    expect(text).toContain(`${I18N_STATUS_OFFLINE} ${mockGroupRunnersCount}`);
+    expect(text).toContain(`${I18N_STATUS_STALE} ${mockGroupRunnersCount}`);
   });
 
   it('shows the runners list', async () => {

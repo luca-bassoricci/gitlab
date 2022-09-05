@@ -43,7 +43,6 @@ compile-production-assets:
       - webpack-report/
     when: always
   before_script:
-    - scripts/checkout-mr-source-sha
     - !reference [.default-before_script, before_script]
   after_script:
     - rm -f /etc/apt/sources.list.d/google*.list  # We don't need to update Chrome here
@@ -213,7 +212,15 @@ jest minimal:
     - !reference [jest, needs]
     - "detect-tests"
   script:
-    - run_timed_command "yarn jest:ci:minimal"
+    - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:minimal"; fi
+
+jest as-if-foss:
+  extends:
+    - .jest-base
+    - .frontend:rules:jest:as-if-foss
+    - .as-if-foss
+  needs: ["rspec-all frontend_fixture as-if-foss"]
+  parallel: 2
 
 jest minimal as-if-foss:
   extends:
@@ -224,7 +231,7 @@ jest minimal as-if-foss:
     - "rspec-all frontend_fixture as-if-foss"
     - "detect-tests"
   script:
-    - run_timed_command "yarn jest:ci:minimal"
+    - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:minimal"; fi
 
 jest-integration:
   extends:
@@ -235,14 +242,6 @@ jest-integration:
   needs:
     - job: "rspec-all frontend_fixture"
     - job: "graphql-schema-dump"
-
-jest-as-if-foss:
-  extends:
-    - .jest-base
-    - .frontend:rules:default-frontend-jobs-as-if-foss
-    - .as-if-foss
-  needs: ["rspec-all frontend_fixture as-if-foss"]
-  parallel: 2
 
 coverage-frontend:
   extends:
@@ -260,7 +259,9 @@ coverage-frontend:
   script:
     - run_timed_command "yarn node scripts/frontend/merge_coverage_frontend.js"
     # Removing the individual coverage results, as we just merged them.
-    - rm -r coverage-frontend/jest-*
+    - if ls coverage-frontend/jest-* > /dev/null 2>&1; then
+        rm -r coverage-frontend/jest-*;
+      fi
   coverage: '/^Statements\s*:\s*?(\d+(?:\.\d+)?)%/'
   artifacts:
     name: coverage-frontend

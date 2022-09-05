@@ -28,22 +28,6 @@ mentioned above, we recommend running these scripts under the supervision of a
 Support Engineer, who can also verify that they continue to work as they
 should and, if needed, update the script for the latest version of GitLab.
 
-## Find specific methods for an object
-
-```ruby
-Array.methods.select { |m| m.to_s.include? "sing" }
-Array.methods.grep(/sing/)
-```
-
-## Find method source
-
-```ruby
-instance_of_object.method(:foo).source_location
-
-# Example for when we would call project.private?
-project.method(:private?).source_location
-```
-
 ## Attributes
 
 View available attributes, formatted using pretty print (`pp`).
@@ -78,28 +62,6 @@ Notify.test_email(e, "Test email for #{n}", 'Test email').deliver_now
 Notify.test_email(u.email, "Test email for #{u.name}", 'Test email').deliver_now
 ```
 
-## Limiting output
-
-Adding a semicolon(`;`) and a follow-up statement at the end of a statement prevents the default implicit return output. This can be used if you are already explicitly printing details and potentially have a lot of return output:
-
-```ruby
-puts ActiveRecord::Base.descendants; :ok
-Project.select(&:pages_deployed?).each {|p| puts p.pages_url }; true
-```
-
-## Get or store the result of last operation
-
-Underscore(`_`) represents the implicit return of the previous statement. You can use this to quickly assign a variable from the output of the previous command:
-
-```ruby
-Project.last
-# => #<Project id:2537 root/discard>>
-project = _
-# => #<Project id:2537 root/discard>>
-project.id
-# => 2537
-```
-
 ## Open object in `irb`
 
 Sometimes it is easier to go through a method if you are in the context of the object. You can shim into the namespace of `Object` to let you open `irb` in the context of any object:
@@ -113,15 +75,6 @@ project.irb
 # Notice new context
 irb(#<Project>)> web_url
 # => "https://gitlab-example/root/discard"
-```
-
-## Query the database using an ActiveRecord Model
-
-```ruby
-m = Model.where('attribute like ?', 'ex%')
-
-# for example to query the projects
-projects = Project.where('path like ?', 'Oumua%')
 ```
 
 ## View all keys in cache
@@ -799,30 +752,6 @@ subgroup.requesters.map(&:errors).map(&:full_messages)
 subgroup.members.map(&:valid?)
 subgroup.members.map(&:errors).map(&:full_messages)
 subgroup.members_and_requesters.map(&:errors).map(&:full_messages)
-```
-
-## Authentication
-
-### Re-enable standard web sign-in form
-
-Re-enable the standard username and password-based sign-in form if it was disabled as a [Sign-in restriction](../../user/admin_area/settings/sign_in_restrictions.md#password-authentication-enabled).
-
-You can use this method when a configured external authentication provider (through SSO or an LDAP configuration) is facing an outage and direct sign-in access to GitLab is required.
-
-```ruby
-Gitlab::CurrentSettings.update!(password_authentication_enabled_for_web: true)
-```
-
-## SCIM
-
-### Find groups using an SQL query
-
-Find and store an array of groups based on an SQL query:
-
-```ruby
-# Finds groups and subgroups that end with '%oup'
-Group.find_by_sql("SELECT * FROM namespaces WHERE name LIKE '%oup'")
-=> [#<Group id:3 @test-group>, #<Group id:4 @template-group/template-subgroup>]
 ```
 
 ## Routes

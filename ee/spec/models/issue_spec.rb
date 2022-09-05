@@ -28,13 +28,34 @@ RSpec.describe Issue do
   end
 
   context 'scopes' do
-    describe '.counts_by_health_status' do
-      it 'returns counts grouped by health_status' do
-        create(:issue, health_status: :on_track)
-        create(:issue, health_status: :on_track)
-        create(:issue, health_status: :at_risk)
+    describe '.with_health_status' do
+      let_it_be(:issue1) { create(:issue, health_status: :on_track) }
+      let_it_be(:issue2) { create(:issue, health_status: :on_track) }
+      let_it_be(:issue3) { create(:issue, health_status: :at_risk) }
 
-        expect(Issue.counts_by_health_status).to eq({ 'on_track' => 2, 'at_risk' => 1 } )
+      before_all do
+        create(:issue, health_status: :needs_attention)
+        create(:issue, health_status: nil)
+      end
+
+      it 'returns the filtered by health issues' do
+        expect(described_class.with_health_status(:on_track)).to match_array([issue1, issue2])
+      end
+
+      context 'when using multiple health filter qualifications' do
+        it 'returns the filtered by health issues' do
+          expect(described_class.with_health_status([:at_risk, :on_track])).to match_array([issue1, issue2, issue3])
+        end
+      end
+    end
+
+    describe '.with_any_health_status' do
+      it 'only returns the issues with a health_status' do
+        create(:issue, health_status: nil)
+        issue1 = create(:issue, health_status: :on_track)
+        issue2 = create(:issue, health_status: :at_risk)
+
+        expect(described_class.with_any_health_status).to match_array([issue1, issue2])
       end
     end
 
@@ -1256,6 +1277,24 @@ RSpec.describe Issue do
 
         issue.save!
       end
+    end
+  end
+
+  describe "#has_epic?" do
+    let(:issue) { build(:issue, epic: epic) }
+
+    subject(:has_epic) { issue.has_epic? }
+
+    context 'when when there is no associated epic' do
+      let(:epic) { nil }
+
+      it { is_expected.to eq false }
+    end
+
+    context 'when when there is an associated epic' do
+      let(:epic) { build(:epic) }
+
+      it { is_expected.to eq true }
     end
   end
 end

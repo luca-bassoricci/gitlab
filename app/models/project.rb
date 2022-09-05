@@ -1565,9 +1565,7 @@ class Project < ApplicationRecord
   end
 
   def disabled_integrations
-    disabled_integrations = []
-    disabled_integrations << 'shimo' unless Feature.enabled?(:shimo_integration, self)
-    disabled_integrations
+    []
   end
 
   def find_or_initialize_integration(name)
@@ -2610,11 +2608,7 @@ class Project < ApplicationRecord
 
   def gitlab_deploy_token
     strong_memoize(:gitlab_deploy_token) do
-      if Feature.enabled?(:ci_variable_for_group_gitlab_deploy_token, self)
-        deploy_tokens.gitlab_deploy_token || group&.gitlab_deploy_token
-      else
-        deploy_tokens.gitlab_deploy_token
-      end
+      deploy_tokens.gitlab_deploy_token || group&.gitlab_deploy_token
     end
   end
 

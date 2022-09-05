@@ -203,7 +203,7 @@ module EE
                 geo_nodes: count(::GeoNode),
                 geo_event_log_max_id: alt_usage_data { maximum_id(Geo::EventLog) || 0 },
                 ldap_group_links: count(::LdapGroupLink),
-                issues_with_health_status: count(::Issue.with_health_status, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
+                issues_with_health_status: count(::Issue.with_any_health_status, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
                 merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
@@ -377,12 +377,6 @@ module EE
           results = {
             user_preferences_group_overview_security_dashboard: count(::User.active.group_view_security_dashboard.where(time_period))
           }
-
-          time_frame = metric_time_period(time_period)
-
-          SECURE_PRODUCT_TYPES.each do |secure_type, attribs|
-            results["#{prefix}#{attribs[:name]}".to_sym] = add_metric('CountUsersCreatingCiBuildsMetric', time_frame: time_frame, options: { secure_type: secure_type })
-          end
 
           results.merge!(count_secure_pipelines(time_period))
           results.merge!(count_secure_scans(time_period))
