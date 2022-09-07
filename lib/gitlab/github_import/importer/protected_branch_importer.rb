@@ -51,12 +51,25 @@ module Gitlab
 
         def update_project_settings
           update_setting_for_only_allow_merge_if_all_discussions_are_resolved
+          update_project_push_rule
         end
 
         def update_setting_for_only_allow_merge_if_all_discussions_are_resolved
           return unless protected_branch.required_conversation_resolution
 
           project.update(only_allow_merge_if_all_discussions_are_resolved: true)
+        end
+
+        def update_project_push_rule
+          return unless project.licensed_feature_available?(:push_rules)
+          return unless protected_branch.required_signatures
+
+          unless project.push_rule
+            push_rule = project.create_push_rule
+            project.project_setting.update(push_rule_id: push_rule.id)
+          end
+
+          project.push_rule.update(reject_unsigned_commits: true)
         end
       end
     end
