@@ -607,6 +607,7 @@ job3:
   stage: deploy
   script:
     - deploy_to_staging
+  environment: staging
 ```
 
 In this example, `job1` and `job2` run in parallel:
@@ -1384,7 +1385,7 @@ In this example:
   for the coverage number.
 - If there are multiple coverage numbers found in the matched fragment, the first number is used.
 - Leading zeros are removed.
-- Coverage output from [child pipelines](../pipelines/parent_child_pipelines.md)
+- Coverage output from [child pipelines](../pipelines/downstream_pipelines.md#parent-child-pipelines)
   is not recorded or displayed. Check [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/280818)
   for more details.
 
@@ -1478,6 +1479,7 @@ test linux:
 deploy:
   stage: deploy
   script: make deploy
+  environment: production
 ```
 
 In this example, two jobs have artifacts: `build osx` and `build linux`. When `test osx` is executed,
@@ -2120,6 +2122,7 @@ mac:rspec:
 production:
   stage: deploy
   script: echo "Running production..."
+  environment: production
 ```
 
 This example creates four paths of execution:
@@ -2283,14 +2286,14 @@ build_job:
 
 **Related topics**:
 
-- To download artifacts between [parent-child pipelines](../pipelines/parent_child_pipelines.md),
+- To download artifacts between [parent-child pipelines](../pipelines/downstream_pipelines.md#parent-child-pipelines),
   use [`needs:pipeline:job`](#needspipelinejob).
 
 #### `needs:pipeline:job`
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255983) in GitLab 13.7.
 
-A [child pipeline](../pipelines/parent_child_pipelines.md) can download artifacts from a job in
+A [child pipeline](../pipelines/downstream_pipelines.md#parent-child-pipelines) can download artifacts from a job in
 its parent pipeline or another child pipeline in the same parent-child pipeline hierarchy.
 
 **Keyword type**: Job keyword. You can use it only as part of a job.
@@ -2382,12 +2385,14 @@ deploy-job:
     - job: test-job2
       optional: true
     - job: test-job1
+  environment: production
 
 review-job:
   stage: deploy
   needs:
     - job: test-job2
       optional: true
+  environment: review
 ```
 
 In this example:
@@ -2668,6 +2673,7 @@ pages:
       - public
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment: production
 ```
 
 This example moves all files from the root of the project to the `public/` directory.
@@ -2749,6 +2755,7 @@ deploystacks:
         STACK: [monitoring, backup, app]
       - PROVIDER: [gcp, vultr]
         STACK: [data, processing]
+  environment: $PROVIDER/$STACK
 ```
 
 The example generates 10 parallel `deploystacks` jobs, each with different values
@@ -3718,6 +3725,7 @@ job4:
   stage: deploy
   script:
     - echo "This job deploys the code. It runs when the test stage completes."
+  environment: production
 ```
 
 **Additional details**:
@@ -3874,16 +3882,13 @@ test:
 
 ### `trigger`
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8997) in GitLab Premium 11.8.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
-
 Use `trigger` to declare that a job is a "trigger job" which starts a
 [downstream pipeline](../pipelines/downstream_pipelines.md) that is either:
 
 - [A multi-project pipeline](../pipelines/downstream_pipelines.md#multi-project-pipelines).
-- [A child pipeline](../pipelines/parent_child_pipelines.md).
+- [A child pipeline](../pipelines/downstream_pipelines.md#parent-child-pipelines).
 
-Trigger jobs can use only a limited set of the GitLab CI/CD configuration keywords.
+Trigger jobs can use only a limited set of GitLab CI/CD configuration keywords.
 The keywords available for use in trigger jobs are:
 
 - [`trigger`](#trigger).
@@ -3899,29 +3904,16 @@ The keywords available for use in trigger jobs are:
 
 **Possible inputs**:
 
-- For multi-project pipelines, path to the downstream project. CI/CD variables
-  [are supported](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
+- For multi-project pipelines, the path to the downstream project. CI/CD variables [are supported](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
   in GitLab 15.3 and later, but not [job-level persisted variables](../variables/where_variables_can_be_used.md#persisted-variables).
-- For child pipelines, path to the child pipeline CI/CD configuration file.
+  Alternatively, use [`trigger:project](#triggerproject).
+- For child pipelines, use [`trigger:include`](#triggerinclude).
 
-**Example of `trigger` for multi-project pipeline**:
-
-```yaml
-rspec:
-  stage: test
-  script: bundle exec rspec
-
-staging:
-  stage: deploy
-  trigger: my/deployment
-```
-
-**Example of `trigger` for child pipelines**:
+**Example of `trigger`**:
 
 ```yaml
-trigger_job:
-  trigger:
-    include: path/to/child-pipeline.yml
+trigger-multi-project-pipeline:
+  trigger: my-group/my-project
 ```
 
 **Additional details**:
@@ -3930,8 +3922,6 @@ trigger_job:
 - In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/201938), you
   can use [`when:manual`](#when) in the same job as `trigger`. In GitLab 13.4 and
   earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
-- In [GitLab 13.2 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/197140/), you can
-  view which job triggered a downstream pipeline in the [pipeline graph](../pipelines/index.md#visualize-pipelines).
 - [Manual pipeline variables](../variables/index.md#override-a-defined-cicd-variable)
   and [scheduled pipeline variables](../pipelines/schedules.md#add-a-pipeline-schedule)
   are not passed to downstream pipelines by default. Use [trigger:forward](#triggerforward)
@@ -3942,8 +3932,71 @@ trigger_job:
 **Related topics**:
 
 - [Multi-project pipeline configuration examples](../pipelines/downstream_pipelines.md#trigger-a-multi-project-pipeline-from-a-job-in-your-gitlab-ciyml-file).
-- [Child pipeline configuration examples](../pipelines/parent_child_pipelines.md#examples).
 - To run a pipeline for a specific branch, tag, or commit, you can use a [trigger token](../triggers/index.md)
+  to authenticate with the [pipeline triggers API](../../api/pipeline_triggers.md).
+  The trigger token is different than the `trigger` keyword.
+
+#### `trigger:include`
+
+Use `trigger:include` to declare that a job is a "trigger job" which starts a
+[child pipeline](../pipelines/downstream_pipelines.md#parent-child-pipelines).
+
+Use `trigger:include:artifact` to trigger a [dynamic child pipeline](../pipelines/downstream_pipelines.md#dynamic-child-pipelines).
+
+**Keyword type**: Job keyword. You can use it only as part of a job.
+
+**Possible inputs**:
+
+- The path to the child pipeline's configuration file.
+
+**Example of `trigger:include`**:
+
+```yaml
+trigger-child-pipeline:
+  trigger:
+    include: path/to/child-pipeline.gitlab-ci.yml
+```
+
+**Related topics**:
+
+- [Child pipeline configuration examples](../pipelines/downstream_pipelines.md#trigger-a-parent-child-pipeline).
+
+#### `trigger:project`
+
+Use `trigger:project` to declare that a job is a "trigger job" which starts a
+[multi-project pipeline](../pipelines/downstream_pipelines.md#multi-project-pipelines).
+
+By default, the multi-project pipeline triggers for the default branch. Use `trigger:branch`
+to specify a different branch.
+
+**Keyword type**: Job keyword. You can use it only as part of a job.
+
+**Possible inputs**:
+
+- The path to the downstream project. CI/CD variables [are supported](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
+  in GitLab 15.3 and later, but not [job-level persisted variables](../variables/where_variables_can_be_used.md#persisted-variables).
+
+**Example of `trigger:project`**:
+
+```yaml
+trigger-multi-project-pipeline:
+  trigger:
+    project: my-group/my-project
+```
+
+**Example of `trigger:project` for a different branch**:
+
+```yaml
+trigger-multi-project-pipeline:
+  trigger:
+    project: my-group/my-project
+    branch: development
+```
+
+**Related topics**:
+
+- [Multi-project pipeline configuration examples](../pipelines/downstream_pipelines.md#trigger-a-multi-project-pipeline-from-a-job-in-your-gitlab-ciyml-file).
+- To run a pipeline for a specific branch, tag, or commit, you can also use a [trigger token](../triggers/index.md)
   to authenticate with the [pipeline triggers API](../../api/pipeline_triggers.md).
   The trigger token is different than the `trigger` keyword.
 
@@ -3987,7 +4040,7 @@ successfully complete before starting.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/355572) in GitLab 15.1. [Feature flag `ci_trigger_forward_variables`](https://gitlab.com/gitlab-org/gitlab/-/issues/355572) removed.
 
 Use `trigger:forward` to specify what to forward to the downstream pipeline. You can control
-what is forwarded to both [parent-child pipelines](../pipelines/parent_child_pipelines.md)
+what is forwarded to both [parent-child pipelines](../pipelines/downstream_pipelines.md#parent-child-pipelines)
 and [multi-project pipelines](../pipelines/downstream_pipelines.md#multi-project-pipelines).
 
 **Possible inputs**:
@@ -4065,6 +4118,7 @@ deploy_job:
   stage: deploy
   script:
     - deploy-script --url $DEPLOY_SITE --path "/"
+  environment: production
 
 deploy_review_job:
   stage: deploy
@@ -4072,6 +4126,7 @@ deploy_review_job:
     REVIEW_PATH: "/review"
   script:
     - deploy-review-script --url $DEPLOY_SITE --path $REVIEW_PATH
+  environment: production
 ```
 
 **Additional details**:
@@ -4164,6 +4219,7 @@ deploy_job:
   script:
     - make deploy
   when: manual
+  environment: production
 
 cleanup_job:
   stage: cleanup

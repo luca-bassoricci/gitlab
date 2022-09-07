@@ -346,7 +346,7 @@ gem 'warning', '~> 1.3.0'
 group :development do
   gem 'lefthook', '~> 1.1.1', require: false
   gem 'rubocop'
-  gem 'solargraph', '~> 0.45.0', require: false
+  gem 'solargraph', '~> 0.46.0', require: false
 
   gem 'letter_opener_web', '~> 2.0.0'
   gem 'lookbook'
@@ -483,7 +483,7 @@ gem 'ssh_data', '~> 1.3'
 gem 'spamcheck', '~> 1.0.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 15.3.0-rc4'
+gem 'gitaly', '~> 15.4.0-rc2'
 
 # KAS GRPC protocol definitions
 gem 'kas-grpc', '~> 0.0.2'

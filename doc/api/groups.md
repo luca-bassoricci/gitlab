@@ -926,7 +926,7 @@ Transfer a group to a new parent group or turn a subgroup to a top-level group. 
 
 - With the Owner role for the group to transfer.
 - With permission to [create a subgroup](../user/group/subgroups/index.md#create-a-subgroup) in the new parent group if transferring a group.
-- With [permission to create a top-level group](../administration/user_settings.md#prevent-users-from-creating-top-level-groups) if turning a subgroup into a top-level group.
+- With [permission to create a top-level group](../administration/user_settings.md) if turning a subgroup into a top-level group.
 
 ```plaintext
 POST  /groups/:id/transfer
@@ -1116,10 +1116,10 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 
 Only available to group owners and administrators.
 
-This endpoint either:
+This endpoint:
 
-- Removes group, and queues a background job to delete all projects in the group as well.
-- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium](https://about.gitlab.com/pricing/) or higher tiers, marks a group for deletion. The deletion happens 7 days later by default, but this can be changed in the [instance settings](../user/admin_area/settings/visibility_and_access_controls.md#deletion-protection).
+- On Premium and higher tiers, marks the group for deletion. The deletion happens 7 days later by default, but you can change the retention period in the [instance settings](../user/admin_area/settings/visibility_and_access_controls.md#deletion-protection).
+- On Free tier, removes the group immediately and queues a background job to delete all projects in the group.
 - Deletes a subgroup immediately if the subgroup is marked for deletion (GitLab 15.4 and later). The endpoint does not immediately delete top-level groups.
 
 ```plaintext

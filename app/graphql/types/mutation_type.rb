@@ -120,10 +120,12 @@ module Types
       milestone: '15.0'
     }
     mount_mutation Mutations::Ci::ProjectCiCdSettingsUpdate
+    mount_mutation Mutations::Ci::Job::ArtifactsDestroy
     mount_mutation Mutations::Ci::Job::Play
     mount_mutation Mutations::Ci::Job::Retry
     mount_mutation Mutations::Ci::Job::Cancel
     mount_mutation Mutations::Ci::Job::Unschedule
+    mount_mutation Mutations::Ci::JobArtifact::Destroy
     mount_mutation Mutations::Ci::JobTokenScope::AddProject
     mount_mutation Mutations::Ci::JobTokenScope::RemoveProject
     mount_mutation Mutations::Ci::Runner::Update

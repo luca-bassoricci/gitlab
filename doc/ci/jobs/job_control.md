@@ -243,7 +243,7 @@ check the value of the `$CI_PIPELINE_SOURCE` variable:
 | `external`                    | When you use CI services other than GitLab.                                                                                                                                                                                        |
 | `external_pull_request_event` | When an external pull request on GitHub is created or updated. See [Pipelines for external pull requests](../ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).                                            |
 | `merge_request_event`         | For pipelines created when a merge request is created or updated. Required to enable [merge request pipelines](../pipelines/merge_request_pipelines.md), [merged results pipelines](../pipelines/merged_results_pipelines.md), and [merge trains](../pipelines/merge_trains.md). |
-| `parent_pipeline`             | For pipelines triggered by a [parent/child pipeline](../pipelines/parent_child_pipelines.md) with `rules`. Use this pipeline source in the child pipeline configuration so that it can be triggered by the parent pipeline.                |
+| `parent_pipeline`             | For pipelines triggered by a [parent/child pipeline](../pipelines/downstream_pipelines.md#parent-child-pipelines) with `rules`. Use this pipeline source in the child pipeline configuration so that it can be triggered by the parent pipeline.                |
 | `pipeline`                    | For [multi-project pipelines](../pipelines/downstream_pipelines.md#multi-project-pipelines) created by [using the API with `CI_JOB_TOKEN`](../pipelines/downstream_pipelines.md#trigger-a-multi-project-pipeline-by-using-the-api), or the [`trigger`](../yaml/index.md#trigger) keyword. |
 | `push`                        | For pipelines triggered by a `git push` event, including for branches and tags.                                                                                                                                                  |
 | `schedule`                    | For [scheduled pipelines](../pipelines/schedules.md).                                                                                                                                                                            |
@@ -645,6 +645,7 @@ timed rollout 10%:
   script: echo 'Rolling out 10% ...'
   when: delayed
   start_in: 30 minutes
+  environment: production
 ```
 
 To stop the active timer of a delayed job, select **Unschedule** (**{time-out}**).
@@ -698,6 +699,7 @@ deploystacks:
   parallel:
     matrix:
       - PROVIDER: [aws, ovh, gcp, vultr]
+  environment: production/$PROVIDER
 ```
 
 You can also [create a multi-dimensional matrix](../yaml/index.md#parallelmatrix).
@@ -722,6 +724,7 @@ deploystacks:
         STACK: [monitoring, backup]
       - PROVIDER: [gcp, vultr]
         STACK: [data]
+  environment: $PROVIDER/$STACK
 ```
 
 This example generates 6 parallel `deploystacks` trigger jobs, each with different values
@@ -754,6 +757,7 @@ deploystacks:
         STACK: [data]
   tags:
     - ${PROVIDER}-${STACK}
+  environment: $PROVIDER/$STACK
 ```
 
 #### Fetch artifacts from a `parallel:matrix` job
@@ -784,6 +788,7 @@ deploy:
   dependencies:
     - "ruby: [2.7, aws]"
   script: echo hello
+  environment: production
 ```
 
 Quotes around the `dependencies` entry are required.
