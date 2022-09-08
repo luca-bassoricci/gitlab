@@ -2,5 +2,6 @@
 - breadcrumb_title s_("SecurityOrchestration|Edit policy")
 - page_title s_("SecurityOrchestration|Edit policy")
 - data = orchestration_policy_data(@project, @policy_type, @policy, @approvers)
+- data[:license_scanning_scan_result_approvals] = Feature.enabled?(:license_scanning_scan_result_approvals, @project).to_s
 
 #js-policy-builder-app{ data: data }

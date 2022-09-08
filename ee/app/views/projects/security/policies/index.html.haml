@@ -8,4 +8,5 @@
   empty_filter_svg_path: image_path('illustrations/issues.svg'),
   empty_list_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
   namespace_path: project.full_path,
-  new_policy_path: new_project_security_policy_path(project) } }
+  new_policy_path: new_project_security_policy_path(project),
+  license_scanning_scan_result_approvals: Feature.enabled?(:license_scanning_scan_result_approvals, project) } }
