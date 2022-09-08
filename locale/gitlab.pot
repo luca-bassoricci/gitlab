@@ -15155,6 +15155,9 @@ msgstr ""
 msgid "Error deleting project. Check logs for error details."
 msgstr ""
 
+msgid "Error fetching branches"
+msgstr ""
+
 msgid "Error fetching burnup chart data"
 msgstr ""
 
@@ -24041,6 +24044,9 @@ msgid "Mailgun HTTP webhook signing key"
 msgstr ""
 
 msgid "Mailgun events"
+msgstr ""
+
+msgid "Main menu"
 msgstr ""
 
 msgid "Maintenance mode"
