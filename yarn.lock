@@ -1064,10 +1064,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-3.3.0.tgz#99b044484fcf3d5a6431281e320e2405540ff5a9"
   integrity sha512-S8Hqf+ms8aNrSgmci9SVoIyj/0qQnizU5uV5vUPAOwiufMDFDyI5qfcgn4EYZ6mnju3LiO+ReSL/PPTD4qNgHA==
 
-"@gitlab/ui@43.14.0":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/3002566776/artifacts/raw/gitlab-ui.leipert-highlight-radio-style-issues.tgz":
   version "43.14.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-43.14.0.tgz#3f68f73977ad1e5403326af3dc9f6569f527c06b"
-  integrity sha512-tUqJ4c77m0rr3py9yEJG3+kANzs0Kao03Yi/7aaNsYMjzYBtt5V0fm0iQrv9plUl+vli2k+TFNYqf5MVxu6XZA==
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/3002566776/artifacts/raw/gitlab-ui.leipert-highlight-radio-style-issues.tgz#68984914f059b80e24f641c7f40da5a669f54113"
   dependencies:
     "@popperjs/core" "^2.11.2"
     bootstrap-vue "2.20.1"
