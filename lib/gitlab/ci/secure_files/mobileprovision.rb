@@ -23,6 +23,10 @@ module Gitlab
           properties[key]
         end
 
+        def uuid
+          value_for('UUID')
+        end
+
         def name
           value_for('Name')
         end

@@ -8,7 +8,7 @@ module Gitlab
           @certificate_data = OpenSSL::X509::Certificate.new(data)
         end
 
-        def id
+        def serial
           @certificate_data.serial.to_s
         end
 
