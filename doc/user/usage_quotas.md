@@ -40,12 +40,12 @@ To prevent exceeding the namespace storage quota, you can:
 
 ### Namespace storage limit application schedule
 
-Information on when namespace-level storage limits will be applied is available on these FAQ pages for the [Free](https://about.gitlab.com/pricing/faq-efficient-free-tier/#storage-limits-on-gitlab-saas-free-tier) and [Paid](https://about.gitlab.com/pricing/faq-paid-storage-transfer/) tier.  
+Information on when namespace-level storage limits will be applied is available on these FAQ pages for the [Free](https://about.gitlab.com/pricing/faq-efficient-free-tier/#storage-limits-on-gitlab-saas-free-tier) and [Paid](https://about.gitlab.com/pricing/faq-paid-storage-transfer/) tier.
 
 ## Project storage limit
 
 Projects on GitLab SaaS have a 10GB storage limit on their Git repository and LFS storage.
-After namespace-level storage limits are applied, the project limit will be removed. A namespace has either a namespace-level storage limit or a project-level storage limit, but not both.
+After namespace-level storage limits are applied, the project limit will be removed. **A namespace has either a namespace-level storage limit or a project-level storage limit, but not both.**
 
 When a project's repository and LFS reaches the quota, the project is locked.
 You cannot push changes to a locked project. To monitor the size of each
