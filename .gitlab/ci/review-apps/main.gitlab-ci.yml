@@ -145,6 +145,7 @@ review-delete-deployment:
   extends:
     - .review-stop-base
     - .review:rules:review-delete-deployment
+  resource_group: review/${CI_COMMIT_REF_SLUG}${SCHEDULE_TYPE} # CI_ENVIRONMENT_SLUG is not available here and we want this to be the same as the environment
   stage: prepare
   script:
     - delete_release
