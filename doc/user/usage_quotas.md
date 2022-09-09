@@ -89,11 +89,15 @@ To manage your storage, if you are a namespace Owner you can [purchase more stor
 
 Depending on your role, you can also use the following methods to manage or reduce your storage:
 
-- [Reduce package registry storage](packages/package_registry/reduce_package_registry_storage.md).
-- [Reduce dependency proxy storage](packages/dependency_proxy/reduce_dependency_proxy_storage.md).
-- [Reduce repository size](project/repository/reducing_the_repo_size_using_git.md).
-- [Reduce container registry storage](packages/container_registry/reduce_container_registry_storage.md).
-- [Reduce wiki repository size](../administration/wikis/index.md#reduce-wiki-repository-size).
+- [Reduce package registry storage](packages/package_registry/reduce_package_registry_storage.md)
+- [Reduce dependency proxy storage](packages/dependency_proxy/reduce_dependency_proxy_storage.md)
+- [Reduce repository size](project/repository/reducing_the_repo_size_using_git.md)
+- [Reduce container registry storage](packages/container_registry/reduce_container_registry_storage.md)
+- [Reduce container registry data transfers](packages/container_registry/reduce_container_registry_data_transfer.md)
+- [Reduce wiki repository size](../administration/wikis/index.md#reduce-wiki-repository-size)
+- [Reduce snippets repository size](../user/snippets.md#reduce-snippets-repository-size)
+
+For [CI/CD artifacts](../ci/caching/index.md#artifacts) storage type including artifacts generated from like those from a pipeline or job, they will expire after 30 days, but you can define a [custom expiration time](../ci/yaml/index.md#artifactsexpire_in) to reduce storage usage on an ongoing basis. If a specific job artifact was updated via the [keep artifact API](../api/job_artifacts.html#keep-artifacts) then that artifact will not be marked for deletion even if the expiration duration is set. Job artifacts can be deleted via the [artifacts API](../api/job_artifacts.html#delete-job-artifacts).
 
 ## Excess storage usage
 
