@@ -101,7 +101,7 @@ For [CI/CD artifacts](../ci/caching/index.md#artifacts) storage type including a
 
 ## Excess storage usage
 
-Excess storage usage is the amount that a project's repository and LFS exceeds the [project storage limit](#project-storage-limit). If no
+Excess storage usage is the amount that a project repository including LFS exceeds the [project storage limit](#project-storage-limit). If no
 purchased storage is available the project is locked. You cannot push changes to a locked project.
 To unlock a project you must [purchase more storage](../subscriptions/gitlab_com/index.md#purchase-more-storage-and-transfer)
 for the namespace. When the purchase is completed, locked projects are automatically unlocked. The
