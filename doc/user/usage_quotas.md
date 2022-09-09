@@ -17,14 +17,14 @@ This limit is not visible on the Usage quotas page, but will be prior to the lim
 
 Storage types that add to the total namespace storage are:
 
-- Git repository
-- Git LFS
-- Artifacts
-- Container registry
-- Package registry
-- Dependency proxy
-- Wiki
-- Snippets
+- [Git repository](../user/project/repository/index.md#repository-size)
+- [Git LFS](../topics/git/lfs/index.md#git-large-file-storage-lfs)
+- Artifacts ([pipeline](../ci/pipelines/pipeline_artifacts.md#pipeline-artifacts), [job](../ci/pipelines/job_artifacts.md#job-artifacts), [reports](../ci/yaml/artifacts_reports.md#gitlab-cicd-artifacts-reports-types), etc.)
+- [Container Registry](../user/packages/container_registry/index.md#gitlab-container-registry)
+- [Package Registry](../user/packages/package_registry/index.md#package-registry)
+- [Dependency Proxy](../user/packages/dependency_proxy/index.md#dependency-proxy)
+- [Wiki](../user/project/wiki/index.md#wiki)
+- [Snippets](../user/snippets.md#snippets)
 
 If your total namespace storage exceeds the available namespace storage quota, all projects under the namespace are locked.
 A locked project cannot push to the repository, run pipelines and jobs, or build and push packages.
