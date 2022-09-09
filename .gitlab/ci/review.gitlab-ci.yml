@@ -23,6 +23,22 @@ review-cleanup:
     - ruby -rrubygems scripts/review_apps/automated_cleanup.rb
     - gcp_cleanup
 
+review-delete-deployment:
+  extends:
+    - .default-retry
+    - .review:rules:review-delete-deployment
+  image: ${REVIEW_APPS_IMAGE}
+  resource_group: review/${CI_COMMIT_REF_SLUG}${SCHEDULE_TYPE} # CI_ENVIRONMENT_SLUG is not available here and we want this to be the same as the environment
+  stage: prepare
+  before_script:
+    - source scripts/utils.sh
+    - source scripts/review_apps/review-apps.sh
+    - source scripts/review_apps/gcp_cleanup.sh
+    - install_gitlab_gem
+    - setup_gcp_dependencies
+  script:
+    - delete_release
+
 start-review-app-pipeline:
   extends:
     - .review:rules:start-review-app-pipeline
