@@ -31,6 +31,7 @@ include:
     - .test-variables
   image: ${REGISTRY_HOST}/${REGISTRY_GROUP}/gitlab-build-images/debian-bullseye-ruby-${RUBY_VERSION}:bundler-2.3-git-2.33-lfs-2.9-chrome-${CHROME_VERSION}-docker-${DOCKER_VERSION}-gcloud-383-kubectl-1.23
   stage: qa
+  resource_group: review/${CI_COMMIT_REF_SLUG}${SCHEDULE_TYPE} # CI_ENVIRONMENT_SLUG is not available here and we want this to be the same as the environment
   needs:
     - review-deploy
     - download-knapsack-report
