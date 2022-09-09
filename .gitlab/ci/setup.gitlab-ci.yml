@@ -118,6 +118,7 @@ detect-tests:
   variables:
     RSPEC_TESTS_MAPPING_ENABLED: "true"
   script:
+    - echo "$CI_MERGE_REQUEST_APPROVED"
     - source ./scripts/utils.sh
     - source ./scripts/rspec_helpers.sh
     - install_gitlab_gem
