@@ -87,6 +87,7 @@ review-deploy:
   extends:
     - .review-workflow-base
     - .review:rules:review-deploy
+  resource_group: review/${CI_COMMIT_REF_SLUG}${SCHEDULE_TYPE} # CI_ENVIRONMENT_SLUG is not available here and we want this to be the same as the environment
   stage: deploy
   needs: ["review-build-cng"]
   before_script:
