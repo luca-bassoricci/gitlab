@@ -11506,9 +11506,9 @@ CREATE TABLE application_settings (
     error_tracking_api_url text,
     git_rate_limit_users_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     error_tracking_access_token_encrypted text,
-    invitation_flow_enforcement boolean DEFAULT false NOT NULL,
     package_registry_cleanup_policies_worker_capacity integer DEFAULT 2 NOT NULL,
     deactivate_dormant_users_period integer DEFAULT 90 NOT NULL,
+    invitation_flow_enforcement boolean DEFAULT false NOT NULL,
     auto_ban_user_on_excessive_projects_download boolean DEFAULT false NOT NULL,
     max_pages_custom_domains_per_project integer DEFAULT 0 NOT NULL,
     cube_api_base_url text,
@@ -17905,7 +17905,6 @@ CREATE TABLE namespace_settings (
     subgroup_runner_token_expiration_interval integer,
     project_runner_token_expiration_interval integer,
     exclude_from_free_user_cap boolean DEFAULT false NOT NULL,
-    show_diff_preview_in_email boolean DEFAULT true NOT NULL,
     enabled_git_access_protocol smallint DEFAULT 0 NOT NULL,
     unique_project_download_limit smallint DEFAULT 0 NOT NULL,
     unique_project_download_limit_interval_in_seconds integer DEFAULT 0 NOT NULL,
@@ -17913,6 +17912,7 @@ CREATE TABLE namespace_settings (
     include_for_free_user_cap_preview boolean DEFAULT false NOT NULL,
     unique_project_download_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     auto_ban_user_on_excessive_projects_download boolean DEFAULT false NOT NULL,
+    show_diff_preview_in_email boolean DEFAULT true NOT NULL,
     CONSTRAINT check_0ba93c78c7 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT namespace_settings_unique_project_download_limit_allowlist_size CHECK ((cardinality(unique_project_download_limit_allowlist) <= 100))
 );
@@ -20066,7 +20066,8 @@ CREATE TABLE project_statistics (
     uploads_size bigint DEFAULT 0 NOT NULL,
     container_registry_size bigint DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    lock_version integer
 );
 
 CREATE SEQUENCE project_statistics_id_seq
