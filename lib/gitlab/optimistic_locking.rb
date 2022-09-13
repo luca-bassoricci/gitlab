@@ -17,6 +17,7 @@ module Gitlab
       rescue ActiveRecord::StaleObjectError
         raise unless retry_attempts < max_retries
 
+        log_retry_attempt
         subject.reset
 
         retry_attempts += 1
@@ -57,6 +58,10 @@ module Gitlab
           {},
           [0, 1, 2, 3, 5, 10, 50]
         )
+    end
+
+    def log_retry_attempt
+      # no-op: overriden in models
     end
   end
 end
