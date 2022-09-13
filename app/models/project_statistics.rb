@@ -3,6 +3,8 @@
 class ProjectStatistics < ApplicationRecord
   include AfterCommitQueue
   include CounterAttribute
+  include Gitlab::OptimisticLocking
+  extend ::Gitlab::Utils::Override
 
   belongs_to :project
   belongs_to :namespace
@@ -49,7 +51,9 @@ class ProjectStatistics < ApplicationRecord
       schedule_namespace_aggregation_worker
     end
 
-    save!
+    with_optimistic_lock do
+      save!
+    end
   end
 
   def update_commit_count
@@ -111,7 +115,10 @@ class ProjectStatistics < ApplicationRecord
 
   def refresh_storage_size!
     update_storage_size
-    save!
+
+    with_optimistic_lock do
+      save!
+    end
   end
 
   # Since this incremental update method does not call update_storage_size above through before_save,
@@ -150,7 +157,9 @@ class ProjectStatistics < ApplicationRecord
       end
     end
 
-    update_all(updates.join(', '))
+    with_optimistic_lock do
+      update_all(updates.join(', '))
+    end
   end
 
   def self.incrementable_attribute?(key)
@@ -159,10 +168,43 @@ class ProjectStatistics < ApplicationRecord
 
   private
 
+  class << self
+    include Gitlab::OptimisticLocking
+
+    def with_optimistic_lock(&block)
+      retry_optimistic_lock(self, name: 'project_statistics_update') do
+        yield
+      end
+    end
+  end
+
   def schedule_namespace_aggregation_worker
     run_after_commit do
       Namespaces::ScheduleAggregationWorker.perform_async(project.namespace_id)
     end
+  end
+
+  override :unsafe_update_counters
+  def unsafe_update_counters(id, increments)
+    with_optimistic_lock do
+      super
+    end
+  end
+
+  def with_optimistic_lock(&block)
+    retry_optimistic_lock(self, name: 'project_statistics_update') do
+      yield
+    end
+  end
+
+  def log_retry_attempt
+    payload = Gitlab::ApplicationContext.current.merge(
+      message: 'Potential ProjectStatistics race condition on update',
+      project_id: project_id,
+      changes: changes
+    )
+
+    Gitlab::AppLogger.info(payload)
   end
 end
 
