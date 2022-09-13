@@ -11,16 +11,56 @@ module Gitlab
         end
 
         def decoded_plist
-          p7 = OpenSSL::PKCS7.new(@filedata)
-          p7.verify(nil, OpenSSL::X509::Store.new, nil, OpenSSL::PKCS7::NOVERIFY)
-          p7.data
-        rescue StandardError => e
-          @error = e
-          nil
+          @decoded_plist ||= begin
+            p7 = OpenSSL::PKCS7.new(@filedata)
+            p7.verify(nil, OpenSSL::X509::Store.new, nil, OpenSSL::PKCS7::NOVERIFY)
+            p7.data
+          rescue StandardError => e
+            @error = e
+            nil
+          end
+        end
+
+        def properties
+          @properties ||= begin
+            list = CFPropertyList::List.new(data: decoded_plist).value
+            CFPropertyList.native_types(list)
+          rescue CFFormatError
+            nil
+          end
         end
 
         def value_for(key)
           properties[key]
+        end
+
+        def internal_attributes
+          [
+            {
+              name: 'UUID',
+              value: uuid
+            },
+            {
+              name: 'Expires on',
+              value: expires_on
+            },
+            {
+              name: 'Platforms',
+              value: platforms.join(',')
+            },
+            {
+              name: 'Team',
+              value: "#{team_name} (#{team_identifier.first})"
+            },
+            {
+              name: 'App',
+              value: "#{app_name} (#{name})"
+            },
+            {
+              name: 'Certificates',
+              value: developer_certificates.map(&:serial).join(',')
+            }
+          ]
         end
 
         def uuid
@@ -76,47 +116,6 @@ module Gitlab
           platforms[0]
         end
 
-        # Detect is development type of mobileprovision
-        #
-        # related link: https://stackoverflow.com/questions/1003066/what-does-get-task-allow-do-in-xcode
-        def development?
-          case platform.downcase.to_sym
-          when :ios
-            entitlements['get-task-allow'] == true
-          when :macos
-            !devices.nil?
-          else
-            raise Error, "Not implement with platform: #{platform}"
-          end
-        end
-
-        # Detect app store type
-        #
-        # related link: https://developer.apple.com/library/archive/qa/qa1830/_index.html
-        def appstore?
-          case platform.downcase.to_sym
-          when :ios
-            !development? && entitlements.key?('beta-reports-active')
-          when :macos
-            !development?
-          else
-            raise Error, "Not implement with platform: #{platform}"
-          end
-        end
-
-        def adhoc?
-          return false if platform == :macos # macOS no need adhoc
-
-          !development? && !devices.nil?
-        end
-
-        def enterprise?
-          return false if platform == :macos # macOS no need adhoc
-
-          !development? && !adhoc? && !appstore?
-        end
-        alias_method :inhouse?, :enterprise?
-
         def developer_certificates
           certificates = value_for('DeveloperCertificates')
           return if certificates.empty?
@@ -124,13 +123,6 @@ module Gitlab
           certificates.each_with_object([]) do |cert, obj|
             obj << SigningCertificate.new(cert)
           end
-        end
-
-        def properties
-          list = CFPropertyList::List.new(data: decoded_plist).value
-          @properties = CFPropertyList.native_types(list)
-        rescue CFFormatError
-          @properties = nil
         end
       end
     end

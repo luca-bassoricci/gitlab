@@ -1,0 +1,26 @@
+- @content_class = "limit-container-width"
+
+- page_title s_('Mobile DevOps')
+
+%h4 Mobile DevOps
+
+%p= s_("GitLab Mobile DevOps makes it easy to create and automate build, test, and release processes for your mobile apps.")
+
+%h4 Code Signing
+
+%p= s_("Manage code signing certificates and profiles")
+
+- @project.secure_files.each do |secure_file|
+  %p
+    .gl-card
+      .gl-card-header
+        %strong= secure_file.name
+      .gl-card-body
+        %p
+          %strong Uploaded at:
+          = secure_file.created_at
+        - if secure_file.internal_attributes.any?
+          - secure_file.internal_attributes.each do |attribute|
+            %p
+              %strong #{attribute[:name]}:
+              = attribute[:value]

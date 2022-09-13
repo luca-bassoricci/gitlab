@@ -17,6 +17,7 @@ module Sidebars
           add_item(ci_cd_menu_item)
           add_item(packages_and_registries_menu_item)
           add_item(pages_menu_item)
+          add_item(mobile_devops_menu_item)
           add_item(monitor_menu_item)
           add_item(usage_quotas_menu_item)
 
@@ -101,6 +102,17 @@ module Sidebars
             link: project_settings_ci_cd_path(context.project),
             active_routes: { path: 'ci_cd#show' },
             item_id: :ci_cd
+          )
+        end
+
+        def mobile_devops_menu_item
+          # TODO: check permissions and feature flag
+
+          ::Sidebars::MenuItem.new(
+            title: _('Mobile DevOps'),
+            link: project_settings_mobile_devops_path(context.project),
+            active_routes: { path: 'mobile_devops#show' },
+            item_id: :mobile_devops
           )
         end
 

@@ -31,6 +31,16 @@ module Ci
       CHECKSUM_ALGORITHM
     end
 
+    def internal_attributes
+      if name.ends_with?('.mobileprovision')
+        Gitlab::Ci::SecureFiles::Mobileprovision.new(file.read).internal_attributes
+      elsif name.ends_with?('.cer')
+        Gitlab::Ci::SecureFiles::SigningCertificate.new(file.read).internal_attributes
+      else
+        []
+      end
+    end
+
     private
 
     def assign_checksum

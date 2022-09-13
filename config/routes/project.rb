@@ -122,6 +122,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             get :runner_setup_scripts, format: :json
           end
 
+          resource :mobile_devops, only: [:show]
+
           resource :operations, only: [:show, :update] do
             member do
               post :reset_alerting_token
