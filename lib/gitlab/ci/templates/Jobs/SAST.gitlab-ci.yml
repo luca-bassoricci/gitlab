@@ -8,7 +8,6 @@ variables:
   # (SAST, Dependency Scanning, ...)
   SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
   SAST_IMAGE_SUFFIX: ""
-  SAST_FOO: "bar"
   SAST_EXCLUDED_ANALYZERS: ""
   SAST_EXCLUDED_PATHS: "spec, test, tests, tmp"
   SCAN_KUBERNETES_MANIFESTS: "false"

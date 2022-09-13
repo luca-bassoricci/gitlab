@@ -1309,6 +1309,7 @@ RSpec.describe Ci::CreatePipelineService, :yaml_processor_feature_flag_corectnes
         end
 
         it 'has a job without environment' do
+          expect(1).to eq(1)
           expect(pipeline.builds.count).to eq(1)
           expect(pipeline.builds.first.persisted_environment).to be_nil
           expect(pipeline.builds.first.deployment).to be_nil
