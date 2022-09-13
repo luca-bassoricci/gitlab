@@ -23,7 +23,7 @@ RSpec.describe 'Container-Scanning.gitlab-ci.yml' do
     end
 
     context 'when project has no license' do
-      context 'by default' do
+      context 'when branch pipeline' do
         it 'includes job' do
           expect(build_names).to match_array(%w[container_scanning])
         end
