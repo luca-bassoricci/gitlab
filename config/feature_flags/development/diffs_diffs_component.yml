@@ -2,7 +2,7 @@
 name: diffs_diffs_component
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/97935
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/373837
-milestone: '15.3'
+milestone: '15.5'
 type: development
 group: group::source code
 default_enabled: false

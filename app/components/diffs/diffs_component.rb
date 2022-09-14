@@ -65,7 +65,7 @@ module Diffs
 
     def expand_diffs_toggle
       return if diffs_expanded?
-      return unless diff_files.any? { |diff_file| diff_file.collapsed? }
+      return unless diff_files.any?(&:collapsed?)
 
       link_to _('Expand all'), url_for(safe_params.merge(expanded: 1, format: nil)), class: 'gl-button btn btn-default'
     end
@@ -80,13 +80,13 @@ module Diffs
 
     def render_diffs
       render partial: 'projects/diffs/file',
-        collection: diff_files,
-        as: :diff_file,
-        locals: {
-          project: @project,
-          environment: @environment,
-          diff_page_context: page_context
-        }
+             collection: diff_files,
+             as: :diff_file,
+             locals: {
+               project: @project,
+               environment: @environment,
+               diff_page_context: page_context
+             }
     end
   end
 end
