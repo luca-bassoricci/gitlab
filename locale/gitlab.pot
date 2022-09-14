@@ -8731,6 +8731,9 @@ msgstr ""
 msgid "ClusterAgents|Are you sure you want to revoke this token? You cannot undo this action."
 msgstr ""
 
+msgid "ClusterAgents|CI/CD workflow with restricted access"
+msgstr ""
+
 msgid "ClusterAgents|Certificate"
 msgstr ""
 
@@ -8830,6 +8833,9 @@ msgstr ""
 msgid "ClusterAgents|Install using Helm (recommended)"
 msgstr ""
 
+msgid "ClusterAgents|Integration Status"
+msgstr ""
+
 msgid "ClusterAgents|Last connected %{timeAgo}."
 msgstr ""
 
@@ -8856,6 +8862,9 @@ msgid_plural "ClusterAgents|No activity occurred in the past %d days"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "ClusterAgents|No agent access token"
+msgstr ""
+
 msgid "ClusterAgents|No agents"
 msgstr ""
 
@@ -8863,6 +8872,9 @@ msgid "ClusterAgents|No clusters connected through cluster certificates"
 msgstr ""
 
 msgid "ClusterAgents|Not connected"
+msgstr ""
+
+msgid "ClusterAgents|Premium"
 msgstr ""
 
 msgid "ClusterAgents|Recommended"
@@ -8929,6 +8941,9 @@ msgid "ClusterAgents|Token revoked by %{userName}"
 msgstr ""
 
 msgid "ClusterAgents|Unknown user"
+msgstr ""
+
+msgid "ClusterAgents|Valid access token"
 msgstr ""
 
 msgid "ClusterAgents|View all %{number} agents"
@@ -19809,6 +19824,9 @@ msgstr ""
 msgid "IdentityVerification|For added security, you'll need to verify your identity. We've sent a verification code to %{email}"
 msgstr ""
 
+msgid "IdentityVerification|GitLab will not charge or store your payment information, it will only be used for verification."
+msgstr ""
+
 msgid "IdentityVerification|Help us keep GitLab secure"
 msgstr ""
 
@@ -19867,6 +19885,9 @@ msgid "IdentityVerification|Verification successful"
 msgstr ""
 
 msgid "IdentityVerification|Verify code"
+msgstr ""
+
+msgid "IdentityVerification|Verify payment method"
 msgstr ""
 
 msgid "IdentityVerification|Verify your identity"
@@ -38471,7 +38492,13 @@ msgstr ""
 msgid "SuperSonics|Activation code"
 msgstr ""
 
-msgid "SuperSonics|An error occurred while adding your subscription."
+msgid "SuperSonics|Activation not possible due to seat mismatch"
+msgstr ""
+
+msgid "SuperSonics|Activation not possible due to true-up value mismatch"
+msgstr ""
+
+msgid "SuperSonics|An error occurred while adding your subscription"
 msgstr ""
 
 msgid "SuperSonics|Billable users"
@@ -38480,7 +38507,7 @@ msgstr ""
 msgid "SuperSonics|Buy subscription"
 msgstr ""
 
-msgid "SuperSonics|Cannot activate instance due to a connectivity issue."
+msgid "SuperSonics|Cannot activate instance due to a connectivity issue"
 msgstr ""
 
 msgid "SuperSonics|Cloud licensing"
@@ -38596,7 +38623,13 @@ msgstr ""
 msgid "SuperSonics|You have added a license that activates on %{date}. Please see the subscription history table below for more details."
 msgstr ""
 
+msgid "SuperSonics|You have applied a true-up for %{trueUpQuantity} %{trueUpQuantityUsers} but you need one for %{expectedTrueUpQuantity} %{expectedTrueUpQuantityUsers}. To pay for seat overages, contact your sales representative. For further assistance, contact %{licenseSupportLinkStart}GitLab support%{licenseSupportLinkEnd}."
+msgstr ""
+
 msgid "SuperSonics|You have successfully added a license that activates on %{date}. Please see the subscription history table below for more details."
+msgstr ""
+
+msgid "SuperSonics|You may have entered an expired or ineligible activation code. To request a new activation code, %{purchaseSubscriptionLinkStart}purchase a new subscription%{purchaseSubscriptionLinkEnd} or %{supportLinkStart}contact GitLab Support%{supportLinkEnd} for further assistance."
 msgstr ""
 
 msgid "SuperSonics|You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement."
@@ -38605,16 +38638,22 @@ msgstr ""
 msgid "SuperSonics|Your %{subscriptionEntryName} cannot be displayed at the moment. Please refresh the page to try again."
 msgstr ""
 
+msgid "SuperSonics|Your current GitLab installation has %{userCount} active %{userCountUsers}, which exceeds your new subscription seat count of %{licenseUserCount} by %{overageCount}. To activate your new subscription, %{purchaseLinkStart}purchase%{purchaseLinkEnd} an additional %{overageCount} %{overageCountSeats}, or %{deactivateLinkStart}deactivate%{deactivateLinkEnd} or %{blockLinkStart}block%{blockLinkEnd} %{overageCount} %{overageCountUsers}. For further assistance, contact %{licenseSupportLinkStart}GitLab support%{licenseSupportLinkEnd}."
+msgstr ""
+
 msgid "SuperSonics|Your future dated license was successfully added"
 msgstr ""
 
 msgid "SuperSonics|Your subscription"
 msgstr ""
 
+msgid "SuperSonics|Your subscription cannot be located"
+msgstr ""
+
 msgid "SuperSonics|Your subscription details will sync shortly."
 msgstr ""
 
-msgid "SuperSonics|Your subscription is expired."
+msgid "SuperSonics|Your subscription is expired"
 msgstr ""
 
 msgid "SuperSonics|Your subscription was successfully activated. You can see the details below."
@@ -47802,6 +47841,11 @@ msgstr ""
 msgid "scan-execution-policy: policy not applied, %{policy_path} file is missing"
 msgstr ""
 
+msgid "seat"
+msgid_plural "seats"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "security Reports|There was an error creating the merge request"
 msgstr ""
 
@@ -47975,6 +48019,11 @@ msgstr ""
 
 msgid "uploads"
 msgstr ""
+
+msgid "user"
+msgid_plural "users"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "user avatar"
 msgstr ""
