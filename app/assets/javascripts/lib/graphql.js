@@ -1,4 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client/core';
+import { persistCacheSync, LocalStorageWrapper } from 'apollo3-cache-persist';
+
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { createUploadLink } from 'apollo-upload-client';
 import ActionCableLink from '~/actioncable_link';
@@ -110,6 +112,7 @@ export default (resolvers = {}, config = {}) => {
     typeDefs,
     path = '/api/graphql',
     useGet = false,
+    persistLocally = false,
   } = config;
   let ac = null;
   let uri = `${gon.relative_url_root || ''}${path}`;
@@ -218,21 +221,32 @@ export default (resolvers = {}, config = {}) => {
     ),
   );
 
+  const newCache = new InMemoryCache({
+    ...cacheConfig,
+    typePolicies: {
+      ...typePolicies,
+      ...cacheConfig.typePolicies,
+    },
+    possibleTypes: {
+      ...possibleTypes,
+      ...cacheConfig.possibleTypes,
+    },
+  });
+
+  if (persistLocally) {
+    console.log('Setting up persistent cache ', newCache);
+    // await before instantiating ApolloClient, else queries might run before the cache is persisted
+    persistCacheSync({
+      cache: newCache,
+      storage: new LocalStorageWrapper(window.localStorage),
+    });
+  }
+
   ac = new ApolloClient({
     typeDefs,
     link: appLink,
     connectToDevTools: process.env.NODE_ENV !== 'production',
-    cache: new InMemoryCache({
-      ...cacheConfig,
-      typePolicies: {
-        ...typePolicies,
-        ...cacheConfig.typePolicies,
-      },
-      possibleTypes: {
-        ...possibleTypes,
-        ...cacheConfig.possibleTypes,
-      },
-    }),
+    cache: newCache,
     resolvers,
     defaultOptions: {
       query: {

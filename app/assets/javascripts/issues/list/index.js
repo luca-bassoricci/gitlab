@@ -125,7 +125,7 @@ export function mountIssuesListApp() {
     el,
     name: 'IssuesListRoot',
     apolloProvider: new VueApollo({
-      defaultClient: createDefaultClient(resolvers),
+      defaultClient: createDefaultClient(resolvers, { persistLocally: true }),
     }),
     router: new VueRouter({
       base: window.location.pathname,
