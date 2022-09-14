@@ -6707,6 +6707,9 @@ msgstr ""
 msgid "Bold text"
 msgstr ""
 
+msgid "Bot"
+msgstr ""
+
 msgid "Both SSH and HTTP(S)"
 msgstr ""
 
@@ -19373,7 +19376,7 @@ msgstr ""
 msgid "HarborRegistry|To widen your search, change or remove the filters above."
 msgstr ""
 
-msgid "HarborRegistry|We are having trouble connecting to the Harbor Registry. Please try refreshing the page. If this error persists, please review  %{docLinkStart}the troubleshooting documentation%{docLinkEnd}."
+msgid "HarborRegistry|We are having trouble connecting to the Harbor Registry. Please try refreshing the page. If this error persists, please review %{docLinkStart}the documentation%{docLinkEnd}."
 msgstr ""
 
 msgid "HarborRegistry|With the Harbor Registry, every project can connect to a harbor space to store its Docker images."
@@ -21323,6 +21326,9 @@ msgstr ""
 msgid "Integrations|Add namespace"
 msgstr ""
 
+msgid "Integrations|Adding a namespace only works in browsers that allow cross-site cookies. %{linkStart}Learn more%{linkEnd}."
+msgstr ""
+
 msgid "Integrations|All details"
 msgstr ""
 
@@ -21383,10 +21389,16 @@ msgstr ""
 msgid "Integrations|Enable comments"
 msgstr ""
 
+msgid "Integrations|Ensure your instance URL is correct and your instance is configured correctly. %{linkStart}Learn more%{linkEnd}."
+msgstr ""
+
 msgid "Integrations|Enter your alias"
 msgstr ""
 
 msgid "Integrations|Failed to link namespace. Please try again."
+msgstr ""
+
+msgid "Integrations|Failed to load Jira Connect Application ID. Please try again."
 msgstr ""
 
 msgid "Integrations|Failed to load namespaces. Please try again."
@@ -21399,6 +21411,9 @@ msgid "Integrations|Failed to sign in to GitLab."
 msgstr ""
 
 msgid "Integrations|Failed to unlink namespace. Please try again."
+msgstr ""
+
+msgid "Integrations|Failed to update GitLab version. Please try again."
 msgstr ""
 
 msgid "Integrations|GitLab administrators can set up integrations that all groups and projects inherit and use by default. These integrations apply to all groups and projects that don't already use custom settings. You can override custom settings for a group or project if the settings are necessary at that level. Learn more about %{integrations_link_start}instance-level integration management%{link_end}."
@@ -32314,16 +32329,43 @@ msgstr ""
 msgid "PushRules|All committed filenames cannot match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any filename is allowed."
 msgstr ""
 
+msgid "PushRules|Branch name"
+msgstr ""
+
+msgid "PushRules|Check whether the commit author is a GitLab user"
+msgstr ""
+
+msgid "PushRules|Commit author's email"
+msgstr ""
+
 msgid "PushRules|Commit messages cannot match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, commit messages are not rejected based on any expression."
 msgstr ""
 
 msgid "PushRules|Do not allow users to remove Git tags with %{code_block_start}git push%{code_block_end}"
 msgstr ""
 
+msgid "PushRules|Maximum file size (MB)"
+msgstr ""
+
+msgid "PushRules|Prevent pushing secret files"
+msgstr ""
+
+msgid "PushRules|Prohibited file names"
+msgstr ""
+
 msgid "PushRules|Reject any files likely to contain secrets. %{secret_files_link_start}What secret files are rejected?%{secret_files_link_end}"
 msgstr ""
 
+msgid "PushRules|Reject expression in commit messages"
+msgstr ""
+
 msgid "PushRules|Reject file sizes equal to or greater than this size. If set to 0, files of any size are allowed. This rule does not apply to files tracked by Git LFS."
+msgstr ""
+
+msgid "PushRules|Reject unsigned commits"
+msgstr ""
+
+msgid "PushRules|Require expression in commit messages"
 msgstr ""
 
 msgid "PushRules|Restrict commits to existing GitLab users."
