@@ -2240,6 +2240,14 @@ The error message could be produced by other reasons, thus before proceeding wit
 
 1. If the error message was produced because the port was already taken, you should see in the file a message like the following:
 
+- In [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734):
+
+```log
+Failed to bind to address http://127.0.0.1:5500: address already in use.
+```
+
+- In GitLab 15.3 and earlier:
+
 ```log
 Failed to bind to address http://[::]:5000: address already in use.
 ```
@@ -2252,8 +2260,11 @@ Once you have confirmed the issue was produced because the port was already take
 
 **Error message**
 
-- `Failed to start session with scanner. Please retry, and if the problem persists reach out to support.`  (from job console output)
-- `Failed to bind to address http://[::]:5000: address already in use.` (from debug logs)
+- In job console output
+  - `Failed to start session with scanner. Please retry, and if the problem persists reach out to support.`
+- In `gl-api-security-scanner.log`
+  - In [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734), `Failed to bind to address http://127.0.0.1:5500: address already in use.`
+  - In GitLab 15.3 and earlier, `Failed to bind to address http://[::]:5000: address already in use.`
 
 **Solution**
 
