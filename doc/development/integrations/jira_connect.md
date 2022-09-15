@@ -81,9 +81,6 @@ If you use Gitpod and you get an error about Jira not being able to access the d
 
 GitLab for Jira users can authenticate with GitLab using GitLab OAuth.
 
-WARNING:
-This feature is not ready for production use. The feature flag should only be enabled in development.
-
 The following steps describe setting up an environment to test the GitLab OAuth flow:
 
 1. Start a Gitpod session and open the rails console.
@@ -100,13 +97,12 @@ The following steps describe setting up an environment to test the GitLab OAuth 
 
 1. On your GitLab instance, go to **Admin > Applications**.
 1. Create a new application with the following settings:
-    - Name: `Jira Connect`
+    - Name: `GitLab for Jira app`
     - Redirect URI: `YOUR_GITPOD_INSTANCE/-/jira_connect/oauth_callbacks`
     - Scopes: `api`
     - Trusted: **No**
     - Confidential: **No**
 1. Copy the Application ID.
 1. Go to **Admin > Settings > General**.
-1. Scroll down and expand the GitLab for Jira App section.
-1. Go to [gitpod.io/variables](https://gitpod.io/variables).
+1. Scroll down and expand the **GitLab for Jira App** section.
 1. Paste the Application ID into the **Jira Connect Application ID** field and click **Save changes**

@@ -77,6 +77,8 @@ If the app requires additional permissions, [the update must first be manually a
 If your GitLab instance is self-managed, you must follow some
 extra steps to install the GitLab.com for Jira Cloud app, and your GitLab instance must be accessible by Jira.
 
+Starting from GitLab 15.5, you first need to [Create an OAuth application for Jira](#create-an-oauth-application-for-jira).
+
 Each Jira Cloud application must be installed from a single location. Jira fetches
 a [manifest file](https://developer.atlassian.com/cloud/jira/platform/connect-app-descriptor/)
 from the location you provide. The manifest file describes the application to the system. To support
@@ -137,6 +139,20 @@ To create a Marketplace listing:
 NOTE:
 This method uses [automated updates](#update-the-gitlabcom-for-jira-cloud-app)
 the same way as our GitLab.com Marketplace listing.
+
+### Create an OAuth application for Jira
+
+1. On your GitLab instance, go to **Admin > Applications**.
+1. Create a new application with the following settings:
+    - Name: `GitLab for Jira app`
+    - Redirect URI: `YOUR_GITLAB_INSTANCE/-/jira_connect/oauth_callbacks`
+    - Scopes: `api`
+    - Trusted: **No**
+    - Confidential: **No**
+1. Copy the Application ID.
+1. Go to **Admin > Settings > General**.
+1. Scroll down and expand the **GitLab for Jira App** section.
+1. Paste the Application ID into the **Jira Connect Application ID** field and click **Save changes**
 
 ## Troubleshoot GitLab.com for Jira Cloud app
 
