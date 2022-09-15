@@ -7,6 +7,7 @@ module Ci
 
     FILE_SIZE_LIMIT = 5.megabytes.freeze
     CHECKSUM_ALGORITHM = 'sha256'
+    PARSABLE_EXTENSIONS = ['.cer', '.mobileprovision'].freeze
 
     self.limit_scope = :project
     self.limit_name = 'project_ci_secure_files'
@@ -23,6 +24,8 @@ module Ci
     scope :order_by_created_at, -> { order(created_at: :desc) }
     scope :project_id_in, ->(ids) { where(project_id: ids) }
 
+    serialize :metadata, Hash # rubocop:disable Cop/ActiveRecordSerialize
+
     default_value_for(:file_store) { Ci::SecureFileUploader.default_store }
 
     mount_file_store_uploader Ci::SecureFileUploader
@@ -31,14 +34,31 @@ module Ci
       CHECKSUM_ALGORITHM
     end
 
-    def internal_attributes
-      if name.ends_with?('.mobileprovision')
-        Gitlab::Ci::SecureFiles::Mobileprovision.new(file.read).internal_attributes
-      elsif name.ends_with?('.cer')
-        Gitlab::Ci::SecureFiles::SigningCertificate.new(file.read).internal_attributes
-      else
-        []
+    def metadata_parsable?
+      PARSABLE_EXTENSIONS.include?(File.extname(name))
+    end
+
+    def metadata_parser_name
+      File.extname(name).gsub(/^\./, '')
+    end
+
+    def metadata_parser
+      return unless metadata_parsable?
+
+      @metadata_parser ||= begin
+        klass = metadata_parser_name.capitalize
+        "Gitlab::Ci::SecureFiles::#{klass}".constantize
       end
+    end
+
+    def update_metadata
+      return unless metadata_parser
+
+      parser = metadata_parser.new(file.read)
+
+      self.metadata = parser.metadata
+      self.expires_at = parser.expires_at if parser.respond_to?(:expires_at)
+      save!
     end
 
     private

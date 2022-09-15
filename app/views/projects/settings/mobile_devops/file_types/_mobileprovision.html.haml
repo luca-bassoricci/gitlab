@@ -1,0 +1,23 @@
+- metadata = Hashie::Mash.new(secure_file.metadata)
+
+%p
+  %strong App:
+  #{metadata.app_name} (#{metadata.app_id})
+%p
+  %strong Team:
+  #{metadata.team_name} (#{metadata.team_id.join(',')})
+%p
+  %strong Platforms:
+  = metadata.platforms.join(',')
+%p
+  %strong Expires at:
+  = secure_file.expires_at
+%p
+  %strong UUID:
+  = metadata.uuid
+%p
+  %strong Certificates:
+  = metadata.certificate_ids.join(',')
+%p
+  %strong Uploaded at:
+  = secure_file.created_at

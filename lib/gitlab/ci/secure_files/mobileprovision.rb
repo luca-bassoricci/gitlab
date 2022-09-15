@@ -30,99 +30,43 @@ module Gitlab
           end
         end
 
-        def value_for(key)
-          properties[key]
+        def metadata
+          {
+            uuid: properties['UUID'],
+            expires_at: properties['ExpirationDate'],
+            platforms: properties["Platform"],
+            team_name: properties['TeamName'],
+            team_id: properties['TeamIdentifier'],
+            app_name: properties['AppIDName'],
+            app_id: properties['Name'],
+            app_id_prefix: properties['ApplicationIdentifierPrefix'],
+            xcode_managed: properties['IsXcodeManaged'],
+            entitlements: properties['Entitlements'],
+            devices: properties['ProvisionedDevices'],
+            certificate_ids: certificate_ids
+          }
         end
 
-        def internal_attributes
-          [
-            {
-              name: 'UUID',
-              value: uuid
-            },
-            {
-              name: 'Expires on',
-              value: expires_on
-            },
-            {
-              name: 'Platforms',
-              value: platforms.join(',')
-            },
-            {
-              name: 'Team',
-              value: "#{team_name} (#{team_identifier.first})"
-            },
-            {
-              name: 'App',
-              value: "#{app_name} (#{name})"
-            },
-            {
-              name: 'Certificates',
-              value: developer_certificates.map(&:serial).join(',')
-            }
-          ]
+        def expires_at
+          properties['ExpirationDate']
         end
 
-        def uuid
-          value_for('UUID')
-        end
+        def certificate_ids
+          return [] if developer_certificates.empty?
 
-        def name
-          value_for('Name')
-        end
-
-        def app_name
-          value_for('AppIDName')
-        end
-
-        def devices
-          value_for('ProvisionedDevices')
-        end
-
-        def team_identifier
-          value_for('TeamIdentifier')
-        end
-
-        def team_name
-          value_for('TeamName')
-        end
-
-        def profile_name
-          value_for('Name')
-        end
-
-        def created_on
-          value_for('CreationDate')
-        end
-
-        def expires_on
-          value_for('ExpirationDate')
-        end
-
-        def entitlements
-          value_for('Entitlements')
-        end
-
-        def platforms
-          return unless platforms = value_for('Platform')
-
-          platforms.map do |v|
-            v = 'macOS' if v == 'OSX'
-            v.downcase.to_sym
-          end
-        end
-
-        def platform
-          platforms[0]
+          developer_certificates.map(&:serial)
         end
 
         def developer_certificates
-          certificates = value_for('DeveloperCertificates')
+          certificates = properties['DeveloperCertificates']
           return if certificates.empty?
 
+          certs = []
           certificates.each_with_object([]) do |cert, obj|
-            obj << SigningCertificate.new(cert)
+            certs << Cer.new(cert)
           end
+
+          certs
         end
       end
     end

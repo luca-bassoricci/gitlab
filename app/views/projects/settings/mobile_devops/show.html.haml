@@ -16,11 +16,7 @@
       .gl-card-header
         %strong= secure_file.name
       .gl-card-body
-        %p
-          %strong Uploaded at:
-          = secure_file.created_at
-        - if secure_file.internal_attributes.any?
-          - secure_file.internal_attributes.each do |attribute|
-            %p
-              %strong #{attribute[:name]}:
-              = attribute[:value]
+        - if secure_file.metadata_parsable?
+          = render "projects/settings/mobile_devops/file_types/#{secure_file.metadata_parser_name}", secure_file: secure_file
+        - else
+          = render 'projects/settings/mobile_devops/file_types/unsupported', secure_file: secure_file
