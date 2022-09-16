@@ -1662,9 +1662,6 @@
 ################
 # Review rules #
 ################
-.review-change-pattern: &review-change-pattern
-  APP_CHANGE_TRIGGER: "true"
-
 # The following rules needs to be the same as the one for .review:rules:review-cleanup
 # except that:
 # - most rules re automatic here (i.e. no `when: manual`) and not allowed to fail (i.e. no `allow_failure: true`) here
@@ -1680,16 +1677,12 @@
       changes: *ci-review-patterns
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *frontend-build-patterns
-      variables: *review-change-pattern
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *controllers-patterns
-      variables: *review-change-pattern
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *models-patterns
-      variables: *review-change-pattern
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *lib-gitlab-patterns
-      variables: *review-change-pattern
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *qa-patterns
     - <<: *if-dot-com-gitlab-org-merge-request
