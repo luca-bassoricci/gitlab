@@ -16,7 +16,7 @@
       .gl-card-header
         %strong= secure_file.name
       .gl-card-body
-        - if secure_file.metadata_parsable?
+        - if secure_file.metadata_parsable? && secure_file.metadata.present?
           = render "projects/settings/mobile_devops/file_types/#{secure_file.metadata_parser_name}", secure_file: secure_file
         - else
           = render 'projects/settings/mobile_devops/file_types/unsupported', secure_file: secure_file

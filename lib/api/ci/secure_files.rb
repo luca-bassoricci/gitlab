@@ -74,6 +74,7 @@ module API
             file_too_large! unless secure_file.file.size < ::Ci::SecureFile::FILE_SIZE_LIMIT.to_i
 
             if secure_file.save
+              ::Ci::ParseSecureFileMetadataWorker.perform_async(secure_file.id) # rubocop:disable CodeReuse/Worker
               present secure_file, with: Entities::Ci::SecureFile
             else
               render_validation_error!(secure_file)
