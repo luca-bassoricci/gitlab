@@ -468,6 +468,7 @@ class ProjectPolicy < BasePolicy
     enable :update_escalation_status
     enable :read_secure_files
     enable :update_sentry_issue
+    enable :read_mobile_devops
   end
 
   rule { can?(:developer_access) & user_confirmed? }.policy do
@@ -523,6 +524,7 @@ class ProjectPolicy < BasePolicy
     enable :read_web_hooks
     enable :read_upload
     enable :destroy_upload
+    enable :admin_mobile_devops
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do

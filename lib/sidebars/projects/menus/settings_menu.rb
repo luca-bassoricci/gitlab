@@ -106,7 +106,10 @@ module Sidebars
         end
 
         def mobile_devops_menu_item
-          # TODO: check permissions and feature flag
+          unless Feature.enabled?(:mobile_devops_settings, context.project) &&
+              can?(context.current_user, :read_mobile_devops, context.project)
+            return ::Sidebars::NilMenuItem.new(item_id: :mobile_devops)
+          end
 
           ::Sidebars::MenuItem.new(
             title: _('Mobile DevOps'),
