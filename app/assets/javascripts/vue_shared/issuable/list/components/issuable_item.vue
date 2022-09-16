@@ -70,7 +70,10 @@ export default {
       return this.issuable.author || {};
     },
     webUrl() {
-      return this.issuable.gitlabWebUrl || this.issuable.webUrl;
+      return (this.issuable.gitlabWebUrl || this.issuable.webUrl).replace(
+        'http://127.0.0.1:3000',
+        '',
+      );
     },
     authorId() {
       return getIdFromGraphQLId(this.author.id);

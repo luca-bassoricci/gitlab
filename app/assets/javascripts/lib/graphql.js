@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client/core';
-import { persistCacheSync, LocalStorageWrapper } from 'apollo3-cache-persist';
+import { CachePersistor, LocalForageWrapper } from 'apollo3-cache-persist';
+import localForage from 'localforage';
 
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { createUploadLink } from 'apollo-upload-client';
@@ -112,7 +113,7 @@ export default (resolvers = {}, config = {}) => {
     typeDefs,
     path = '/api/graphql',
     useGet = false,
-    persistLocally = false,
+    localCacheKey = null,
   } = config;
   let ac = null;
   let uri = `${gon.relative_url_root || ''}${path}`;
@@ -233,13 +234,16 @@ export default (resolvers = {}, config = {}) => {
     },
   });
 
-  if (persistLocally) {
-    console.log('Setting up persistent cache ', newCache);
+  if (localCacheKey) {
+    console.log('Setting up persistent cache ', localCacheKey);
     // await before instantiating ApolloClient, else queries might run before the cache is persisted
-    persistCacheSync({
+    const persistor = new CachePersistor({
       cache: newCache,
-      storage: new LocalStorageWrapper(window.localStorage),
+      key: localCacheKey,
+      serialize: false,
+      storage: new LocalForageWrapper(localForage.createInstance({})),
     });
+    persistor.restore();
   }
 
   ac = new ApolloClient({

@@ -189,6 +189,7 @@ export default {
         return data[this.namespace]?.issues.nodes ?? [];
       },
       result({ data }) {
+        console.log('Issues : ', data);
         if (!data) {
           return;
         }
@@ -483,6 +484,7 @@ export default {
     this.cache = {};
   },
   mounted() {
+    console.log('Mounted Issues');
     eventHub.$on('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
   },
   beforeDestroy() {
