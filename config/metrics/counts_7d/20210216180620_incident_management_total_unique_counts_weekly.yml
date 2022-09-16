@@ -30,6 +30,13 @@ options:
   - incident_management_timeline_event_created
   - incident_management_timeline_event_edited
   - incident_management_timeline_event_deleted
+  - incident_management_resource_links_created
+  - incident_management_resource_links_edited
+  - incident_management_resource_links_deleted
+  - incident_management_alert_create_incident
+  - quickactions_promote_to_incident
+  - quickactions_publish
+  - quickactions_severity
 distribution:
 - ce
 - ee
