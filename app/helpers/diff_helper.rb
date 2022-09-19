@@ -256,8 +256,6 @@ module DiffHelper
     {}
   end
 
-  private
-
   def commit_diff_whitespace_link(project, commit, options)
     url = project_commit_path(project, commit.id, params_with_whitespace)
     toggle_whitespace_link(url, options)
@@ -273,17 +271,19 @@ module DiffHelper
     toggle_whitespace_link(url, options)
   end
 
+  def toggle_whitespace_link(url, options)
+    options[:class] = [*options[:class], 'btn gl-button btn-default'].join(' ')
+    link_to "#{hide_whitespace? ? 'Show' : 'Hide'} whitespace changes", url, class: options[:class]
+  end
+
+  private
+
   def hide_whitespace?
     params[:w] == '1'
   end
 
   def params_with_whitespace
     hide_whitespace? ? request.query_parameters.except(:w) : request.query_parameters.merge(w: 1)
-  end
-
-  def toggle_whitespace_link(url, options)
-    options[:class] = [*options[:class], 'btn gl-button btn-default'].join(' ')
-    link_to "#{hide_whitespace? ? 'Show' : 'Hide'} whitespace changes", url, class: options[:class]
   end
 
   def code_navigation_path(diffs)

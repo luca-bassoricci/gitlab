@@ -58,13 +58,13 @@ module Diffs
       return unless @show_whitespace_toggle
 
       if current_controller?(:commit)
-        commit_diff_whitespace_link(project, context, class: 'd-none d-sm-inline-block')
+        helpers.commit_diff_whitespace_link(project, @context, class: 'd-none d-sm-inline-block')
       elsif current_controller?('projects/merge_requests/diffs')
-        diff_merge_request_whitespace_link(project, context, class: 'd-none d-sm-inline-block')
+        helpers.diff_merge_request_whitespace_link(project, context, class: 'd-none d-sm-inline-block')
       elsif current_controller?(:compare)
-        diff_compare_whitespace_link(project, params[:from], params[:to], class: 'd-none d-sm-inline-block')
+        helpers.diff_compare_whitespace_link(project, params[:from], params[:to], class: 'd-none d-sm-inline-block')
       elsif current_controller?(:wikis)
-        toggle_whitespace_link(url_for(params_with_whitespace), class: 'd-none d-sm-inline-block')
+        helpers.toggle_whitespace_link(url_for(params_with_whitespace), class: 'd-none d-sm-inline-block')
       end
     end
 
