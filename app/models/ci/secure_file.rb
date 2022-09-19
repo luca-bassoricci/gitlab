@@ -24,7 +24,7 @@ module Ci
     scope :order_by_created_at, -> { order(created_at: :desc) }
     scope :project_id_in, ->(ids) { where(project_id: ids) }
 
-    serialize :metadata, Hash # rubocop:disable Cop/ActiveRecordSerialize
+    serialize :metadata, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
 
     default_value_for(:file_store) { Ci::SecureFileUploader.default_store }
 
@@ -56,7 +56,7 @@ module Ci
 
       parser = metadata_parser.new(file.read)
 
-      self.metadata = parser.metadata
+      self.metadata = parser.metadata.to_json
       self.expires_at = parser.expires_at if parser.respond_to?(:expires_at)
       save!
     end

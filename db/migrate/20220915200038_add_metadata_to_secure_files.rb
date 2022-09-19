@@ -4,11 +4,8 @@
 # for more information on how to write migrations for GitLab.
 
 class AddMetadataToSecureFiles < Gitlab::Database::Migration[2.0]
-  disable_ddl_transaction!
-
   def change
-    add_column :ci_secure_files, :metadata, :text
-    add_text_limit :ci_secure_files, :metadata, 10_000
+    add_column :ci_secure_files, :metadata, :jsonb
     add_column :ci_secure_files, :expires_at, :datetime_with_timezone
   end
 end
