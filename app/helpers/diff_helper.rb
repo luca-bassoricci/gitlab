@@ -116,6 +116,18 @@ module DiffHelper
     diff_btn('Side-by-side', 'parallel', diff_view == :parallel)
   end
 
+  def diff_btn(title, name, selected)
+    params_copy = safe_params.dup
+    params_copy[:view] = name
+
+    # Always use HTML to handle case where JSON diff rendered this button
+    params_copy.delete(:format)
+
+    link_to url_for(params_copy), id: "#{name}-diff-btn", class: (selected ? 'btn gl-button btn-default selected' : 'btn gl-button btn-default'), data: { view_type: name } do
+      title
+    end
+  end
+
   def submodule_link(blob, ref, repository = @repository)
     urls = submodule_links(blob, ref, repository)
 
@@ -245,18 +257,6 @@ module DiffHelper
   end
 
   private
-
-  def diff_btn(title, name, selected)
-    params_copy = safe_params.dup
-    params_copy[:view] = name
-
-    # Always use HTML to handle case where JSON diff rendered this button
-    params_copy.delete(:format)
-
-    link_to url_for(params_copy), id: "#{name}-diff-btn", class: (selected ? 'btn gl-button btn-default selected' : 'btn gl-button btn-default'), data: { view_type: name } do
-      title
-    end
-  end
 
   def commit_diff_whitespace_link(project, commit, options)
     url = project_commit_path(project, commit.id, params_with_whitespace)

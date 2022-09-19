@@ -10,11 +10,11 @@
 
     = render Diffs::StatsComponent.new(diff_files: diff_files)
 
-- if render_overflow_warning?(diffs)
+- if render_overflow_warning?(@diffs)
   = render Diffs::OverflowWarningComponent.new(diff_files: diff_files, project: @project, commit: @commit, merge_request: @merge_request)
 
 .files{ data: { can_create_note: can_create_note? } }
-  - if load_diff_files_async
+  - if @load_diff_files_async
     - url = url_for(safe_params.merge(action: 'diff_files'))
     .js-diffs-batch{ data: { diff_files_path: url } }
       .text-center

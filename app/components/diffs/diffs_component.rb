@@ -28,11 +28,16 @@ module Diffs
     end
 
     def project
-      diffs.project
+      @diffs.project
     end
 
     def diff_files
-      helpers.conditionally_paginate_diff_files(diffs, paginate: paginate_diffs, per: paginate_diffs_per_page)
+      helpers.conditionally_paginate_diff_files(
+        @diffs,
+        paginate: @paginate_diffs,
+        per: @paginate_diffs_per_page,
+        page: @page
+      )
     end
 
     def page_context
@@ -50,7 +55,7 @@ module Diffs
     end
 
     def whitespace_toggle
-      return unless show_whitespace_toggle?
+      return unless @show_whitespace_toggle
 
       if current_controller?(:commit)
         commit_diff_whitespace_link(project, context, class: 'd-none d-sm-inline-block')
