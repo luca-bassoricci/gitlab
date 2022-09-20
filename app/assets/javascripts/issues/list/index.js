@@ -46,7 +46,7 @@ export function mountJiraIssuesListApp() {
   });
 }
 
-export function mountIssuesListApp() {
+export async function mountIssuesListApp() {
   const el = document.querySelector('.js-issues-list');
 
   if (!el) {
@@ -121,11 +121,13 @@ export function mountIssuesListApp() {
     signInPath,
   } = el.dataset;
 
+  const newClient = await createDefaultClient(resolvers, { localCacheKey: 'user_issues' });
+
   return new Vue({
     el,
     name: 'IssuesListRoot',
     apolloProvider: new VueApollo({
-      defaultClient: createDefaultClient(resolvers, { localCacheKey: 'user_issues' }),
+      defaultClient: newClient,
     }),
     router: new VueRouter({
       base: window.location.pathname,

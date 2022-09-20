@@ -183,17 +183,18 @@ export default {
     issues: {
       query: getIssuesQuery,
       variables() {
+        console.trace('GET APOLLO VARIABLES ', this);
         return this.queryVariables;
       },
       update(data) {
         return data[this.namespace]?.issues.nodes ?? [];
       },
-      result({ data }) {
-        console.log('Issues : ', data);
-        if (!data) {
+      result(queryResult) {
+        console.log('Issues : ', queryResult);
+        if (!queryResult?.data) {
           return;
         }
-        this.pageInfo = data[this.namespace]?.issues.pageInfo ?? {};
+        this.pageInfo = queryResult?.data[this.namespace]?.issues.pageInfo ?? {};
         this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
       },
       error(error) {

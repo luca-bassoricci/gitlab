@@ -1,5 +1,5 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client/core';
-import { CachePersistor, LocalForageWrapper } from 'apollo3-cache-persist';
+import { CachePersistor, LocalForageWrapper, LocalStorageWrapper } from 'apollo3-cache-persist';
 import localForage from 'localforage';
 
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
@@ -8,6 +8,9 @@ import ActionCableLink from '~/actioncable_link';
 import { apolloCaptchaLink } from '~/captcha/apollo_captcha_link';
 import possibleTypes from '~/graphql_shared/possible_types.json';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
+
+import { DexieWrapper } from './apollo/dexie_wrapper';
+
 import csrf from '~/lib/utils/csrf';
 import { objectToQuery, queryToObject } from '~/lib/utils/url_utility';
 import PerformanceBarService from '~/performance_bar/services/performance_bar_service';
@@ -104,7 +107,7 @@ Object.defineProperty(window, 'pendingApolloRequests', {
   },
 });
 
-export default (resolvers = {}, config = {}) => {
+export default async (resolvers = {}, config = {}) => {
   const {
     baseUrl,
     batchMax = 10,
@@ -241,9 +244,13 @@ export default (resolvers = {}, config = {}) => {
       cache: newCache,
       key: localCacheKey,
       serialize: false,
-      storage: new LocalForageWrapper(localForage.createInstance({})),
+      // storage: new LocalStorageWrapper(window.localStorage),
+      storage: new DexieWrapper(),
+      debug: true,
     });
-    persistor.restore();
+    await persistor.restore();
+    console.log('PERS : ', persistor);
+    persistor.getLogs(true);
   }
 
   ac = new ApolloClient({
