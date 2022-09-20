@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab application security tutorial
 
-This tutorial helps you get started with GitLab application security.
+This tutorial walks you through setting up GitLab application security using Google Cloud and a Kubernetes cluster.
 
 You may use the provided project, or your own application, to learn how to configure your security settings.
 
