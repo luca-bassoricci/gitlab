@@ -2,13 +2,16 @@
 
 - page_title s_('Mobile DevOps')
 
-%h4 Mobile DevOps
+%p.float-right.gl-badge.badge.badge-pill.badge-info.sm #{@project.project_setting.target_platforms.join(', ')} #{s_('detected')}
 
-%p= s_("GitLab Mobile DevOps makes it easy to create and automate build, test, and release processes for your mobile apps.")
+%h4= s_('Mobile DevOps')
+
+- docs_link = link_to(s_('Mobile DevOps docs'), 'https://docs.gitlab.com/ee/ci/mobile_devops.html', target: '_blank', rel: 'noopener noreferrer')
+%p= s_("GitLab Mobile DevOps makes it easy to create and automate build, test, and release processes for your mobile apps. For more information, please see the %{docs_link}.").html_safe % { docs_link: docs_link }
 
 %h4 Code Signing
 
-%p= s_("Manage code signing certificates and profiles")
+%p= s_("Supported code signing certificates and profile files can be viewed below.")
 
 - @project.secure_files.each do |secure_file|
   %p

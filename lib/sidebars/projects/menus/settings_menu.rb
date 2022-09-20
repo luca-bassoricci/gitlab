@@ -107,7 +107,8 @@ module Sidebars
 
         def mobile_devops_menu_item
           unless Feature.enabled?(:mobile_devops_settings, context.project) &&
-              can?(context.current_user, :read_mobile_devops, context.project)
+              can?(context.current_user, :read_mobile_devops, context.project) &&
+              context.project.mobile_platform_detected?
             return ::Sidebars::NilMenuItem.new(item_id: :mobile_devops)
           end
 

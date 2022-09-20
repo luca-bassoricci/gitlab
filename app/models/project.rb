@@ -3042,6 +3042,10 @@ class Project < ApplicationRecord
     pages_domains.count < Gitlab::CurrentSettings.max_pages_custom_domains_per_project
   end
 
+  def mobile_platform_detected?
+    project_setting.target_platforms.include?('ios')
+  end
+
   private
 
   # overridden in EE
