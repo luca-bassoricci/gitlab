@@ -1,6 +1,5 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client/core';
-import { CachePersistor, LocalForageWrapper, LocalStorageWrapper } from 'apollo3-cache-persist';
-import localForage from 'localforage';
+import { CachePersistor } from 'apollo3-cache-persist';
 
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { createUploadLink } from 'apollo-upload-client';
@@ -9,11 +8,11 @@ import { apolloCaptchaLink } from '~/captcha/apollo_captcha_link';
 import possibleTypes from '~/graphql_shared/possible_types.json';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
 
-import { DexieWrapper } from './apollo/dexie_wrapper';
-
 import csrf from '~/lib/utils/csrf';
 import { objectToQuery, queryToObject } from '~/lib/utils/url_utility';
 import PerformanceBarService from '~/performance_bar/services/performance_bar_service';
+
+import { DexieWrapper } from './apollo/dexie_wrapper';
 import { getInstrumentationLink } from './apollo/instrumentation_link';
 import { getSuppressNetworkErrorsDuringNavigationLink } from './apollo/suppress_network_errors_during_navigation_link';
 
