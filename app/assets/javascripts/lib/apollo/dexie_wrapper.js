@@ -13,7 +13,6 @@ export class DexieWrapper {
     resultObj.ROOT_QUERY = selectedQuery;
 
     const parseObjectsForRef = async (selObject) => {
-      console.log('Parse Object : ', selObject);
       for (const key in selObject) {
         if (Object.prototype.hasOwnProperty.call(selObject, key)) {
           if (selObject[key]) {
@@ -25,9 +24,6 @@ export class DexieWrapper {
                 const selectedEntity = await db
                   .table(pathParts[0].toLowerCase())
                   .get(pathId.substr(pathParts[0].length + 1));
-
-                console.log('Found Entity : ', selectedEntity);
-
                 if (selectedEntity) {
                   await parseObjectsForRef(selectedEntity);
                   resultObj[pathId] = selectedEntity;

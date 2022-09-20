@@ -244,13 +244,9 @@ export default async (resolvers = {}, config = {}) => {
       cache: newCache,
       key: localCacheKey,
       serialize: false,
-      // storage: new LocalStorageWrapper(window.localStorage),
       storage: new DexieWrapper(),
-      debug: true,
     });
     await persistor.restore();
-    console.log('PERS : ', persistor);
-    persistor.getLogs(true);
   }
 
   ac = new ApolloClient({

@@ -205,6 +205,7 @@ export default {
         return !this.hasAnyIssues;
       },
       debounce: 200,
+      // fetchPolicy: 'cache-and-network',
     },
     issuesCounts: {
       query: getIssuesCountsQuery,
@@ -487,6 +488,12 @@ export default {
   mounted() {
     console.log('Mounted Issues');
     eventHub.$on('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
+
+    // Its rendered so we can refetch
+    const that = this;
+    setTimeout(() => {
+      that.$apollo.queries.issues.refetch();
+    }, 300);
   },
   beforeDestroy() {
     eventHub.$off('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
@@ -785,7 +792,7 @@ export default {
       :current-tab="state"
       :tab-counts="tabCounts"
       :truncate-counts="!isProject"
-      :issuables-loading="$apollo.queries.issues.loading"
+      :issuables-loading="$apollo.queries.issues.loading || $apollo.queries.issues.starting"
       :is-manual-ordering="isManualOrdering"
       :show-bulk-edit-sidebar="showBulkEditSidebar"
       :show-pagination-controls="showPaginationControls"

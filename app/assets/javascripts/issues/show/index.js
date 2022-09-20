@@ -12,12 +12,12 @@ import apolloProvider from './graphql';
 import getIssueStateQuery from './queries/get_issue_state.query.graphql';
 
 const bootstrapApollo = (state = {}) => {
-  return apolloProvider.clients.defaultClient.cache.writeQuery({
-    query: getIssueStateQuery,
-    data: {
-      issueState: state,
-    },
-  });
+  // return apolloProvider.clients.defaultClient.cache.writeQuery({
+  //  query: getIssueStateQuery,
+  //  data: {
+  //    issueState: state,
+  //   },
+  // });
 };
 
 export function initIncidentApp(issueData = {}) {

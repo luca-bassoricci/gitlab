@@ -100,7 +100,7 @@ export default {
     issuablesLoading: {
       type: Boolean,
       required: false,
-      default: false,
+      default: true,
     },
     showPaginationControls: {
       type: Boolean,
@@ -323,7 +323,7 @@ export default {
         <slot name="sidebar-items" :checked-issuables="bulkEditIssuables"></slot>
       </template>
     </issuable-bulk-edit-sidebar>
-    <ul v-if="issuablesLoading" class="content-list">
+    <ul v-if="issuablesLoading && issuables.length === 0" class="content-list">
       <li v-for="n in skeletonItemCount" :key="n" class="issue gl-px-5! gl-py-5!">
         <gl-skeleton-loader />
       </li>
