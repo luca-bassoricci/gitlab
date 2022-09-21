@@ -18,13 +18,14 @@ module Ci
     validates :checksum, :file_store, :name, :project_id, presence: true
     validates :name, uniqueness: { scope: :project }
 
+    serialize :metadata, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
+    validates :metadata, json_schema: { filename: 'ci_secure_file_metadata', hash_conversion: true }, allow_blank: true
+
     after_initialize :generate_key_data
     before_validation :assign_checksum
 
     scope :order_by_created_at, -> { order(created_at: :desc) }
     scope :project_id_in, ->(ids) { where(project_id: ids) }
-
-    serialize :metadata, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
 
     default_value_for(:file_store) { Ci::SecureFileUploader.default_store }
 
@@ -56,8 +57,9 @@ module Ci
 
       parser = metadata_parser.new(file.read)
 
-      self.metadata = parser.metadata.to_json
+      self.metadata = parser.metadata
       self.expires_at = parser.expires_at if parser.respond_to?(:expires_at)
+
       save!
     end
 

@@ -1,4 +1,4 @@
-- metadata = Hashie::Mash.new(Gitlab::Json.parse(secure_file.metadata))
+- metadata = Hashie::Mash.new(secure_file.metadata)
 
 %p
   %strong App:
@@ -11,7 +11,7 @@
   = metadata.platforms.join(',')
 %p
   %strong UUID:
-  = metadata.uuid
+  = metadata.id
 %p
   %strong Certificates:
   = metadata.certificate_ids.join(',')

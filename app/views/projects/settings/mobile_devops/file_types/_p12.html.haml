@@ -1,11 +1,11 @@
-- metadata = Hashie::Mash.new(Gitlab::Json.parse(secure_file.metadata))
+- metadata = Hashie::Mash.new(secure_file.metadata)
 
 %p
   %strong Name:
   = metadata.subject.CN
 %p
   %strong Serial:
-  = metadata.serial
+  = metadata.id
 %p
   %strong Team:
   #{metadata.subject.O} (#{metadata.subject.OU})

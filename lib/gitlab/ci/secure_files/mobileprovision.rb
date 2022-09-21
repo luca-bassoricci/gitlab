@@ -32,7 +32,7 @@ module Gitlab
 
         def metadata
           {
-            uuid: properties['UUID'],
+            id: properties['UUID'],
             expires_at: properties['ExpirationDate'],
             platforms: properties["Platform"],
             team_name: properties['TeamName'],

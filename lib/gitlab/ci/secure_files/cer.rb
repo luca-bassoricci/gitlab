@@ -25,7 +25,7 @@ module Gitlab
           {
             issuer: X509Name.parse(certificate_data.issuer),
             subject: X509Name.parse(certificate_data.subject),
-            serial: certificate_data.serial.to_s,
+            id: certificate_data.serial.to_s,
             expires_at: certificate_data.not_before
           }
         end
