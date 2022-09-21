@@ -13,9 +13,8 @@ console.log('Every Project Page --- here');
 if (!window.paletteCallbacks) window.paletteCallbacks = [];
 window.paletteCallbacks.push({
   id: 'project-items',
-  callback: function (items) {
+  callback: (items) => {
     const projectTitle = 'Project ' + document.querySelector('.sidebar-context-title').innerText;
-    console.log('ADD PROJECT PALETTE ITEMS');
     items.push({
       id: 'project-overview',
       section: projectTitle,

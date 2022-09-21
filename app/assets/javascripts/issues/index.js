@@ -91,8 +91,7 @@ function initIssueCommandPalette() {
   if (!window.paletteCallbacks) window.paletteCallbacks = [];
   window.paletteCallbacks.push({
     id: 'project-items',
-    callback: function (items) {
-      console.log('ADD ISSUE PALETTE ITEMS');
+    callback: (items) => {
       items.unshift({
         id: 'issue-label-add',
         section: 'Issue',

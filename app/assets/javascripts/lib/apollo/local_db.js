@@ -10,5 +10,6 @@ db.version(1).stores({
   issue: 'id, state, title',
   label: 'id, title',
   milestone: 'id',
+  groupmember: 'id',
 });
 db.open();

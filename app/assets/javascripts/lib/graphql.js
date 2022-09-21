@@ -106,7 +106,7 @@ Object.defineProperty(window, 'pendingApolloRequests', {
   },
 });
 
-export default async (resolvers = {}, config = {}) => {
+export default (resolvers = {}, config = {}) => {
   const {
     baseUrl,
     batchMax = 10,
@@ -245,7 +245,7 @@ export default async (resolvers = {}, config = {}) => {
       serialize: false,
       storage: new DexieWrapper(),
     });
-    await persistor.restore();
+    persistor.restore();
   }
 
   ac = new ApolloClient({
