@@ -1,11 +1,11 @@
 <script>
-import $ from 'jquery';
-import { escape, debounce } from 'lodash';
+import { GlAvatar, GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
+import { debounce } from 'lodash';
 import Api from 'ee/api';
-import { renderAvatar } from '~/helpers/avatar_helper';
-import { loadCSSFile } from '~/lib/utils/css_utils';
+import { sanitize } from '~/lib/dompurify';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { AVATAR_SHAPE_OPTION_CIRCLE } from '~/vue_shared/constants';
 import { NAMESPACE_TYPES } from 'ee/security_orchestration/constants';
 import { TYPE_USER, TYPE_GROUP } from '../constants';
 
@@ -13,49 +13,13 @@ function addType(type) {
   return (items) => items.map((obj) => Object.assign(obj, { type }));
 }
 
-function formatSelection(group) {
-  return escape(group.full_name || group.name);
-}
-
-function formatResultUser(result) {
-  const { name, username } = result;
-  const avatar = renderAvatar(result, { sizeClass: 's40' });
-
-  return `
-    <div class="user-result">
-      <div class="user-image">
-        ${avatar}
-      </div>
-      <div class="user-info">
-        <div class="user-name">${escape(name)}</div>
-        <div class="user-username">@${escape(username)}</div>
-      </div>
-    </div>
-  `;
-}
-
-function formatResultGroup(result) {
-  const { full_name: fullName, full_path: fullPath } = result;
-  const avatar = renderAvatar(result, { sizeClass: 's40' });
-
-  return `
-    <div class="user-result group-result">
-      <div class="group-image">
-        ${avatar}
-      </div>
-      <div class="group-info">
-        <div class="group-name">${escape(fullName)}</div>
-        <div class="group-path">${escape(fullPath)}</div>
-      </div>
-    </div>
-  `;
-}
-
-function formatResult(result) {
-  return result.type === TYPE_USER ? formatResultUser(result) : formatResultGroup(result);
-}
-
 export default {
+  components: {
+    GlAvatar,
+    GlDropdown,
+    GlDropdownItem,
+    GlSearchBoxByType,
+  },
   mixins: [glFeatureFlagsMixin()],
   props: {
     value: {
@@ -88,59 +52,37 @@ export default {
       default: NAMESPACE_TYPES.PROJECT,
     },
   },
+  data() {
+    return {
+      initialLoading: false,
+      results: [],
+      searchTerm: '',
+      searching: false,
+      selected: {},
+    };
+  },
   computed: {
     isFeatureEnabled() {
       return this.glFeatures.permitAllSharedGroupsForApproval;
     },
   },
-  watch: {
-    value(val) {
-      if (val.length > 0) {
-        this.clear();
-      }
-    },
-    isInvalid(val) {
-      const $container = $(this.$refs.input).select2('container');
-
-      if (val) {
-        $container.addClass('is-invalid');
-      } else {
-        $container.removeClass('is-invalid');
-      }
-    },
-  },
   mounted() {
-    const query = debounce(
-      ({ term, callback }) => this.fetchGroupsAndUsers(term).then(callback),
-      500,
-    );
-
-    import(/* webpackChunkName: 'select2' */ 'select2/select2')
-      .then(() => {
-        // eslint-disable-next-line promise/no-nesting
-        loadCSSFile(gon.select2_css_path)
-          .then(() => {
-            $(this.$refs.input)
-              .select2({
-                placeholder: __('Search users or groups'),
-                minimumInputLength: 0,
-                multiple: true,
-                closeOnSelect: false,
-                formatResult,
-                formatSelection,
-                query,
-                id: ({ type, id }) => `${type}${id}`,
-              })
-              .on('change', (e) => this.onChange(e));
-          })
-          .catch(() => {});
-      })
-      .catch(() => {});
-  },
-  beforeDestroy() {
-    $(this.$refs.input).select2('destroy');
+    this.initialLoading = true;
+    this.fetchGroupsAndUsers('')
+      .catch(() => {})
+      .finally(() => {
+        this.initialLoading = false;
+      });
   },
   methods: {
+    search: debounce(function debouncedSearch() {
+      this.searching = true;
+      this.fetchGroupsAndUsers(this.searchTerm)
+        .catch(() => {})
+        .finally(() => {
+          this.searching = false;
+        });
+    }, 500),
     fetchGroupsAndUsers(term) {
       const groupsAsync = this.fetchGroups(term).then(addType(TYPE_GROUP));
 
@@ -151,7 +93,9 @@ export default {
 
       return Promise.all([groupsAsync, usersAsync])
         .then(([groups, users]) => groups.concat(users))
-        .then((results) => ({ results }));
+        .then((results) => {
+          this.results = results;
+        });
     },
     fetchGroups(term) {
       if (this.isFeatureEnabled) {
@@ -187,19 +131,72 @@ export default {
         skip_users: this.skipUserIds,
       });
     },
-    onChange() {
-      // call data instead of val to get array of objects
-      const value = $(this.$refs.input).select2('data');
+    onSelect(value) {
+      this.results = this.results.filter((el) => !(el.type === value.type) || el.id !== value.id);
 
-      this.$emit('input', value);
+      this.searchTerm = '';
+
+      this.$emit('input', [value]);
     },
-    clear() {
-      $(this.$refs.input).select2('data', []);
-    },
+    sanitize,
   },
+  i18n: {
+    header: __('Search users or groups'),
+  },
+  TYPE_USER,
+  AVATAR_SHAPE_OPTION_CIRCLE,
 };
 </script>
 
 <template>
-  <input ref="input" name="members" type="hidden" />
+  <gl-dropdown
+    :class="{ 'is-invalid': isInvalid }"
+    class="gl-w-full gl-dropdown-menu-full-width"
+    :header-text="$options.i18n.header"
+    :loading="initialLoading"
+  >
+    <template #header>
+      <gl-search-box-by-type v-model="searchTerm" :is-loading="searching" @input="search" />
+    </template>
+    <gl-dropdown-item
+      v-for="result in results"
+      :key="`${result.type}.${result.id}`"
+      @click="onSelect(result)"
+    >
+      <div v-if="result.type === $options.TYPE_USER" class="user-result">
+        <div class="user-image">
+          <gl-avatar
+            :shape="$options.AVATAR_SHAPE_OPTION_CIRCLE"
+            :entity-id="result.id"
+            :entity-name="result.name"
+            :src="result.avatar_url"
+            :alt="result.name"
+            :size="32"
+          />
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ sanitize(result.name) }}</div>
+          <div class="user-username">{{ sanitize(result.username) }}</div>
+        </div>
+      </div>
+      <template v-else>
+        <div class="user-result group-result">
+          <div class="group-image">
+            <gl-avatar
+              :shape="$options.AVATAR_SHAPE_OPTION_CIRCLE"
+              :entity-id="result.id"
+              :entity-name="result.name"
+              :src="result.avatar_url"
+              :alt="result.name"
+              :size="32"
+            />
+          </div>
+          <div class="group-info">
+            <div class="group-name">{{ sanitize(result.full_name) }}</div>
+            <div class="group-path">{{ sanitize(result.full_path) }}</div>
+          </div>
+        </div>
+      </template>
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>

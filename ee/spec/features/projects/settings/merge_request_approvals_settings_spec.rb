@@ -25,21 +25,21 @@ RSpec.describe 'Project settings > [EE] Merge Request Approvals', :js do
     visit project_settings_merge_requests_path(project)
 
     open_modal(text: 'Add approval rule', expand: false)
+    wait_for_requests
+
     open_approver_select
 
-    expect(find('.select2-results')).to have_content(user.name)
-    expect(find('.select2-results')).not_to have_content(non_member.name)
+    expect(find('.gl-new-dropdown-contents')).to have_content(user.name)
+    expect(find('.gl-new-dropdown-contents')).not_to have_content(non_member.name)
 
-    find('.user-result', text: user.name).click
-    close_approver_select
+    find('.user-name', text: user.name).click
 
     expect(find('.content-list')).to have_content(user.name)
 
     open_approver_select
 
-    expect(find('.select2-results')).not_to have_content(user.name)
+    expect(find('.gl-new-dropdown-contents')).not_to have_content(user.name)
 
-    close_approver_select
     within('.modal-content') do
       click_button 'Add approval rule'
     end
@@ -52,12 +52,13 @@ RSpec.describe 'Project settings > [EE] Merge Request Approvals', :js do
     visit project_settings_merge_requests_path(project)
 
     open_modal(text: 'Add approval rule', expand: false)
+    wait_for_requests
+
     open_approver_select
 
-    expect(find('.select2-results')).to have_content(group.name)
+    expect(find('.gl-new-dropdown-contents')).to have_content(group.name)
 
-    find('.user-result', text: group.name).click
-    close_approver_select
+    find('.group-name', text: group.name).click
 
     expect(find('.content-list')).to have_content(group.name)
 
@@ -83,6 +84,8 @@ RSpec.describe 'Project settings > [EE] Merge Request Approvals', :js do
       expect_avatar(find('.js-members'), rule.approvers)
 
       open_modal(text: 'Edit', expand: false)
+      wait_for_requests
+
       remove_approver(group.name)
       click_button "Update approval rule"
       wait_for_requests

@@ -15,15 +15,9 @@ module FeatureApprovalHelper
 
   def open_approver_select
     within(modal_selector) do
-      find('.select2-input').click
+      find('.gl-new-dropdown').click
     end
     wait_for_requests
-  end
-
-  def close_approver_select
-    within(modal_selector) do
-      find('.select2-input').send_keys :escape
-    end
   end
 
   def remove_approver(name)
