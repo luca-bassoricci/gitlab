@@ -7264,6 +7264,9 @@ msgstr ""
 msgid "CICD|Deployment strategy"
 msgstr ""
 
+msgid "CICD|Enable feature to limit job token access to the following projects."
+msgstr ""
+
 msgid "CICD|Jobs"
 msgstr ""
 
@@ -30041,6 +30044,9 @@ msgid "Please type %{phrase_code} to proceed or close this modal to cancel."
 msgstr ""
 
 msgid "Please use this form to report to the admin users who create spam issues, comments or behave inappropriately."
+msgstr ""
+
+msgid "Please wait a few moments while we load the file history for this line."
 msgstr ""
 
 msgid "Please wait a moment, this page will automatically refresh when ready."
