@@ -1,0 +1,20 @@
+- metadata = Hashie::Mash.new(Gitlab::Json.parse(secure_file.metadata))
+
+%p
+  %strong Name:
+  = metadata.subject.CN
+%p
+  %strong Serial:
+  = metadata.serial
+%p
+  %strong Team:
+  #{metadata.subject.O} (#{metadata.subject.OU})
+%p
+  %strong Issuer:
+  #{metadata.issuer.CN} - #{metadata.issuer.OU}
+%p
+  %strong Uploaded at:
+  = secure_file.created_at
+%p
+  %strong Expires at:
+  = secure_file.expires_at
