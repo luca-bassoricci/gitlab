@@ -1,7 +1,14 @@
+/* eslint-disable func-names */
 import $ from 'jquery';
+
+import Vue from 'vue';
+import CommandPalette from './vue_shared/command_palette/command_palette.vue';
+
 import ContextualSidebar from './contextual_sidebar';
 import initFlyOutNav from './fly_out_nav';
 import { setNotification } from './whats_new/utils/notification';
+
+import { db } from './lib/apollo/local_db';
 
 function hideEndFade($scrollingTabs) {
   $scrollingTabs.each(function scrollTabsLoop() {
@@ -10,6 +17,31 @@ function hideEndFade($scrollingTabs) {
       .siblings('.fade-right')
       .toggleClass('scrolling', Math.round($this.width()) < $this.prop('scrollWidth'));
   });
+}
+
+function initCommandMenu() {
+  // Simple mount of the command menu
+  const e = document.createElement('div');
+  e.id = 'command-palette-div';
+  document.body.appendChild(e);
+  new Vue({
+    el: '#command-palette-div',
+    render(r) {
+      return r(CommandPalette, {
+        props: {},
+      });
+    },
+  });
+
+  // Count Page activity
+  db.table('pages').put(
+    {
+      url: document.location.href,
+      title: document.title.replace(' · GitLab', ''),
+      timestamp: new Date(),
+    },
+    document.location.href,
+  );
 }
 
 function initDeferred() {
@@ -26,6 +58,8 @@ function initDeferred() {
       })
       .catch(() => {});
   });
+
+  initCommandMenu();
 }
 
 export default function initLayoutNav() {

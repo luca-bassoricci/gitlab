@@ -186,6 +186,7 @@
     "visibilityjs": "^1.2.4",
     "vue": "2.6.14",
     "vue-apollo": "^3.0.7",
+    "vue-cmd-menu": "^0.1.9",
     "vue-loader": "15.9.6",
     "vue-observe-visibility": "^1.0.0",
     "vue-resize": "^1.0.1",

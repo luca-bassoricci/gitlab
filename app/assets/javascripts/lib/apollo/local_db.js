@@ -3,6 +3,7 @@ import Dexie from 'dexie';
 
 export const db = new Dexie('GLLocalCache');
 db.version(1).stores({
+  pages: 'url, timestamp',
   queries: '',
   project: 'id',
   usercore: 'id',
