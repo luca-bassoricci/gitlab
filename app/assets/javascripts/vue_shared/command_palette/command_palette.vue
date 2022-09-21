@@ -1,5 +1,6 @@
 <script>
 import Vue from 'vue';
+import { GlIcon } from '@gitlab/ui';
 import CommandMenu from 'vue-cmd-menu';
 
 import { db } from '../../lib/apollo/local_db';
@@ -7,6 +8,7 @@ import { db } from '../../lib/apollo/local_db';
 export default Vue.extend({
   components: {
     CommandMenu,
+    GlIcon,
   },
   data() {
     return {
@@ -24,6 +26,7 @@ export default Vue.extend({
         text: 'My Last Pages',
         tag: 'My Last Pages',
         placeholder: 'Last Pages',
+        icon: 'archive',
         childActions: [],
       };
       this.ownPages.forEach((page, ind) => {
@@ -43,6 +46,7 @@ export default Vue.extend({
         text: 'My Issues',
         tag: 'My Issues',
         placeholder: 'Issues',
+        icon: 'issues',
         childActions: [
           {
             id: 'show-issues-assigned',
@@ -79,6 +83,7 @@ export default Vue.extend({
         text: 'My Merge Requests',
         tag: 'My Merge Requests',
         placeholder: 'Merge Requests',
+        icon: 'git-merge',
         childActions: [
           {
             id: 'mr-assigned-to-you',
@@ -103,15 +108,35 @@ export default Vue.extend({
         section: 'Your GitLab',
         text: 'My Projects',
         tag: 'My Projects',
+        icon: 'project',
         placeholder: 'My Projects',
         childActions: [],
       };
       returnItems.push(myProjects);
 
+      const myGroups = {
+        id: 'my-groups',
+        section: 'Your GitLab',
+        text: 'My Groups',
+        tag: 'My Groups',
+        icon: 'group',
+        placeholder: 'My Groups',
+        childActions: [],
+      };
+      returnItems.push(myGroups);
+
+      if (window.paletteCallbacks) {
+        window.paletteCallbacks.forEach((cbItem) => {
+          if (cbItem.callback) cbItem.callback(returnItems);
+        });
+      }
+
       return returnItems;
     },
   },
   mounted() {
+    console.log('Mounted Command Palette');
+
     db.issue.toArray().then((items) => {
       this.ownIssues = items;
     });
@@ -128,6 +153,8 @@ export default Vue.extend({
 
 <template>
   <div id="app">
-    <command-menu :actions="actions" />
+    <command-menu :actions="actions">
+      <template v-slot:icon="{ icon }"> <gl-icon :name="icon" /> </template>
+    </command-menu>
   </div>
 </template>

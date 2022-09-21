@@ -78,7 +78,50 @@ export function initShow() {
 
   initAwardsApp(document.getElementById('js-vue-awards-block'));
 
+  initIssueCommandPalette();
+
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
     .then((module) => module.default())
     .catch(() => {});
+}
+
+function initIssueCommandPalette() {
+  console.log('ISSUE COMMAND PALETTE');
+
+  if (!window.paletteCallbacks) window.paletteCallbacks = [];
+  window.paletteCallbacks.push({
+    id: 'project-items',
+    callback: function (items) {
+      console.log('ADD ISSUE PALETTE ITEMS');
+      items.unshift({
+        id: 'issue-label-add',
+        section: 'Issue',
+        text: 'Add Label ...',
+        icon: 'label',
+        action: () => {
+          alert('List of all Labels to select');
+        },
+      });
+
+      items.unshift({
+        id: 'issue-label-remove',
+        section: 'Issue',
+        text: 'Remove Label ...',
+        icon: 'label',
+        action: () => {
+          alert('List of all current Labels to remove one');
+        },
+      });
+
+      items.unshift({
+        id: 'issue-assign-me',
+        section: 'Issue',
+        text: 'Assign to me',
+        icon: 'assignee',
+        action: () => {
+          alert('Automatic assign to me / if assigned, possibility to unassign');
+        },
+      });
+    },
+  });
 }
