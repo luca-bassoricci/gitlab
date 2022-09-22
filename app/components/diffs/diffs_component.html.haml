@@ -22,5 +22,5 @@
   - else
     = render_diffs
 
-    - if paginate_diffs
+    - if @paginate_diffs
       = paginate(diff_files, theme: "gitlab")

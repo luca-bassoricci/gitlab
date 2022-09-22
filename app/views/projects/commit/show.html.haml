@@ -13,7 +13,14 @@
   = render "commit_box"
   = render "ci_menu"
   - if Feature.enabled?(:diffs_diffs_component, @project)
-    = render Diffs::DiffsComponent.new(context: @commit, diffs: @diffs, discussions: @discussions, environment: @environment, page_context: "is-commit", paginate_diffs: true, paginate_diffs_per_page: Projects::CommitController::COMMIT_DIFFS_PER_PAGE, page: pagination_params[:page])
+    = render Diffs::DiffsComponent.new context: @commit,
+                                       diffs: @diffs,
+                                       discussions: @discussions,
+                                       environment: @environment,
+                                       page_context: "is-commit",
+                                       paginate_diffs: true,
+                                       paginate_diffs_per_page: Projects::CommitController::COMMIT_DIFFS_PER_PAGE,
+                                       page: pagination_params[:page]
   - else
     = render "projects/diffs/diffs",
       diffs: @diffs,

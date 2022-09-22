@@ -88,7 +88,7 @@ module Diffs
              collection: diff_files,
              as: :diff_file,
              locals: {
-               project: @project,
+               project: project,
                environment: @environment,
                diff_page_context: page_context
              }
