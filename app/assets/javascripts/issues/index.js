@@ -36,6 +36,44 @@ export function initFilteredSearchServiceDesk() {
   }
 }
 
+function initIssueCommandPalette() {
+  if (!window.paletteCallbacks) window.paletteCallbacks = [];
+  window.paletteCallbacks.push({
+    id: 'project-items',
+    callback: (items) => {
+      items.unshift({
+        id: 'issue-label-add',
+        section: 'Issue',
+        text: 'Add Label ...',
+        icon: 'label',
+        action: () => {
+          alert('List of all Labels to select');
+        },
+      });
+
+      items.unshift({
+        id: 'issue-label-remove',
+        section: 'Issue',
+        text: 'Remove Label ...',
+        icon: 'label',
+        action: () => {
+          alert('List of all current Labels to remove one');
+        },
+      });
+
+      items.unshift({
+        id: 'issue-assign-me',
+        section: 'Issue',
+        text: 'Assign to me',
+        icon: 'assignee',
+        action: () => {
+          alert('Automatic assign to me / if assigned, possibility to unassign');
+        },
+      });
+    },
+  });
+}
+
 export function initForm() {
   new GLForm($('.issue-form')); // eslint-disable-line no-new
   new IssuableForm($('.issue-form')); // eslint-disable-line no-new
@@ -83,44 +121,4 @@ export function initShow() {
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
     .then((module) => module.default())
     .catch(() => {});
-}
-
-function initIssueCommandPalette() {
-  console.log('ISSUE COMMAND PALETTE');
-
-  if (!window.paletteCallbacks) window.paletteCallbacks = [];
-  window.paletteCallbacks.push({
-    id: 'project-items',
-    callback: (items) => {
-      items.unshift({
-        id: 'issue-label-add',
-        section: 'Issue',
-        text: 'Add Label ...',
-        icon: 'label',
-        action: () => {
-          alert('List of all Labels to select');
-        },
-      });
-
-      items.unshift({
-        id: 'issue-label-remove',
-        section: 'Issue',
-        text: 'Remove Label ...',
-        icon: 'label',
-        action: () => {
-          alert('List of all current Labels to remove one');
-        },
-      });
-
-      items.unshift({
-        id: 'issue-assign-me',
-        section: 'Issue',
-        text: 'Assign to me',
-        icon: 'assignee',
-        action: () => {
-          alert('Automatic assign to me / if assigned, possibility to unassign');
-        },
-      });
-    },
-  });
 }
