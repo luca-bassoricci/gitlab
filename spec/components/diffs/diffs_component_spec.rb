@@ -11,7 +11,7 @@ RSpec.describe Diffs::DiffsComponent, type: :component do
       diffs: diffs,
       discussions: [],
       page_context: page_context,
-      environment: [],
+      environment: environment,
       show_whitespace_toggle: show_whitespace_toggle,
       diff_notes_disabled: diff_notes_disabled,
       paginate_diffs: paginate_diffs,
@@ -24,12 +24,17 @@ RSpec.describe Diffs::DiffsComponent, type: :component do
   let_it_be(:repository) { project.repository }
   let_it_be(:commit) { project.commit(sample_commit.id) }
   let_it_be(:diffs) { commit.diffs }
+  let_it_be(:user) { create(:user) }
 
   let(:show_whitespace_toggle) { true }
   let(:diff_notes_disabled) { false }
   let(:paginate_diffs) { false }
   let(:paginate_diffs_per_page) { Projects::CommitController::COMMIT_DIFFS_PER_PAGE }
   let(:page) { 1 }
+
+  let(:environment) do
+    ::Environments::EnvironmentsByDeploymentsFinder.new(project, user, commit: commit, find_latest: true).execute.last
+  end
 
   shared_examples "rendered component" do
     subject { rendered_content }
