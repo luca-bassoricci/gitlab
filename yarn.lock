@@ -1064,9 +1064,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-3.3.0.tgz#99b044484fcf3d5a6431281e320e2405540ff5a9"
   integrity sha512-S8Hqf+ms8aNrSgmci9SVoIyj/0qQnizU5uV5vUPAOwiufMDFDyI5qfcgn4EYZ6mnju3LiO+ReSL/PPTD4qNgHA==
 
-"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/3023795993/artifacts/raw/gitlab-ui.1874-listbox-support-filtering.tgz":
-  version "43.16.0"
-  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/3023795993/artifacts/raw/gitlab-ui.1874-listbox-support-filtering.tgz#296d86723c06dbd62c1cf9d025405bec261d1225"
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/3070263148/artifacts/raw/gitlab-ui.1874-listbox-support-filtering.tgz":
+  version "43.18.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/3070263148/artifacts/raw/gitlab-ui.1874-listbox-support-filtering.tgz#b33be5bf098b5d753539dedaa875d088a43b3802"
   dependencies:
     "@popperjs/core" "^2.11.2"
     bootstrap-vue "2.20.1"
