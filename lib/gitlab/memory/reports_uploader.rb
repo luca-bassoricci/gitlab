@@ -3,7 +3,7 @@
 module Gitlab
   module Memory
     class ReportsUploader
-      # This is no-op currently, it will only write logs.
+      # NOOP. Will be removed soon. See https://gitlab.com/gitlab-org/gitlab/-/issues/376014
       # The uploader implementation will be done in the next MR(s). For more details, check:
       # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/97155#note_1099244930
       def upload(path)

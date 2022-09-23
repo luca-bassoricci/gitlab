@@ -363,6 +363,9 @@ gem 'prometheus-client-mmap', '~> 0.16', require: 'prometheus/client'
 
 gem 'warning', '~> 1.3.0'
 
+# For diagnostic reports uploader
+gem 'listen', '~> 3.7.1', require: false
+
 group :development do
   gem 'lefthook', '~> 1.1.1', require: false
   gem 'rubocop'

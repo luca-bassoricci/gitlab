@@ -3,6 +3,7 @@
 module Gitlab
   module Memory
     class UploadAndCleanupReports
+      # NOOP. Will be removed soon. See https://gitlab.com/gitlab-org/gitlab/-/issues/376014
       DEFAULT_SLEEP_TIME_SECONDS = 900 # 15 minutes
 
       def initialize(
