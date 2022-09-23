@@ -40,6 +40,17 @@ module Diffs
       )
     end
 
+    def render_diffs
+      render partial: 'projects/diffs/file',
+             collection: diff_files,
+             as: :diff_file,
+             locals: {
+               project: project,
+               environment: @environment,
+               diff_page_context: page_context
+             }
+    end
+
     def page_context
       @page_context ||=
         case context.class
@@ -76,22 +87,25 @@ module Diffs
     end
 
     def inline_diff_btn
-      helpers.diff_btn('Inline', 'inline', helpers.diff_view == :inline)
+      diff_btn('Inline', 'inline', helpers.diff_view == :inline)
     end
 
     def parallel_diff_btn
-      helpers.diff_btn('Side-by-side', 'parallel', helpers.diff_view == :parallel)
+      diff_btn('Side-by-side', 'parallel', helpers.diff_view == :parallel)
     end
 
-    def render_diffs
-      render partial: 'projects/diffs/file',
-             collection: diff_files,
-             as: :diff_file,
-             locals: {
-               project: project,
-               environment: @environment,
-               diff_page_context: page_context
-             }
+    private
+
+    def diff_btn(title, name, selected)
+      params_copy = safe_params.dup
+      params_copy[:view] = name
+
+      # Always use HTML to handle case where JSON diff rendered this button
+      params_copy.delete(:format)
+
+      link_to url_for(params_copy), id: "#{name}-diff-btn", class: (selected ? 'btn gl-button btn-default selected' : 'btn gl-button btn-default'), data: { view_type: name } do
+        title
+      end
     end
   end
 end
