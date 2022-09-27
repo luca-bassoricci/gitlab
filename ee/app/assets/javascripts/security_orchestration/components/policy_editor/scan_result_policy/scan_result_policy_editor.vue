@@ -19,15 +19,19 @@ import { assignSecurityPolicyProject, modifyPolicy } from '../utils';
 import DimDisableContainer from '../dim_disable_container.vue';
 import PolicyActionBuilder from './policy_action_builder.vue';
 import PolicyRuleBuilder from './policy_rule_builder.vue';
-import {
-  DEFAULT_SCAN_RESULT_POLICY,
-  fromYaml,
-  toYaml,
-  buildRule,
-  approversOutOfSync,
-  invalidScanners,
-  humanizeInvalidBranchesError,
-} from './lib';
+
+// import {
+//   DEFAULT_SCAN_RESULT_POLICY,
+//   fromYaml,
+//   toYaml,
+//   buildRule,
+//   approversOutOfSync,
+//   invalidScanners,
+//   humanizeInvalidBranchesError,
+// } from './lib';
+
+import * as SECURITY_SCANNING from './lib/security_scanning/export';
+import * as LICENSE_SCANNING from './lib/license_scanning/export';
 
 export default {
   ADD_RULE_LABEL,
@@ -80,15 +84,15 @@ export default {
   },
   data() {
     const yamlEditorValue = this.existingPolicy
-      ? toYaml(this.existingPolicy)
-      : DEFAULT_SCAN_RESULT_POLICY;
+      ? SECURITY_SCANNING.toYaml(this.existingPolicy)
+      : SECURITY_SCANNING.DEFAULT_SCAN_RESULT_POLICY;
 
     return {
       error: '',
       isCreatingMR: false,
       isRemovingPolicy: false,
       newlyCreatedPolicyProject: null,
-      policy: fromYaml(yamlEditorValue),
+      policy: SECURITY_SCANNING.fromYaml(yamlEditorValue),
       yamlEditorValue,
       documentationPath: setUrlFragment(
         this.scanPolicyDocumentationPath,
@@ -110,7 +114,7 @@ export default {
         : this.$options.SECURITY_POLICY_ACTIONS.APPEND;
     },
     policyYaml() {
-      return this.hasParsingError ? '' : toYaml(this.policy);
+      return this.hasParsingError ? '' : SECURITY_SCANNING.toYaml(this.policy);
     },
     hasParsingError() {
       return Boolean(this.yamlEditorError);
@@ -122,7 +126,7 @@ export default {
   watch: {
     invalidBranches(branches) {
       if (branches.length > 0) {
-        this.handleError(new Error(humanizeInvalidBranchesError([...branches])));
+        this.handleError(new Error(SECURITY_SCANNING.humanizeInvalidBranchesError([...branches])));
       } else {
         this.$emit('error', '');
       }
@@ -134,7 +138,7 @@ export default {
       this.policy.actions.splice(actionIndex, 1, values);
     },
     addRule() {
-      this.policy.rules.push(buildRule());
+      this.policy.rules.push(SECURITY_SCANNING.buildRule());
     },
     removeRule(ruleIndex) {
       this.policy.rules.splice(ruleIndex, 1);
@@ -165,11 +169,11 @@ export default {
       try {
         const assignedPolicyProject = await this.getSecurityPolicyProject();
         const yamlValue =
-          this.mode === EDITOR_MODE_YAML ? this.yamlEditorValue : toYaml(this.policy);
+          this.mode === EDITOR_MODE_YAML ? this.yamlEditorValue : SECURITY_SCANNING.toYaml(this.policy);
         const mergeRequest = await modifyPolicy({
           action,
           assignedPolicyProject,
-          name: this.originalName || fromYaml(yamlValue)?.name,
+          name: this.originalName || SECURITY_SCANNING.fromYaml(yamlValue)?.name,
           namespacePath: this.namespacePath,
           yamlEditorValue: yamlValue,
         });
@@ -205,7 +209,7 @@ export default {
       this.yamlEditorError = null;
 
       try {
-        const newPolicy = fromYaml(manifest);
+        const newPolicy = SECURITY_SCANNING.fromYaml(manifest);
         if (newPolicy.error) {
           throw new Error(newPolicy.error);
         }
@@ -217,7 +221,7 @@ export default {
     changeEditorMode(mode) {
       this.mode = mode;
       if (mode === EDITOR_MODE_YAML && !this.hasParsingError) {
-        this.yamlEditorValue = toYaml(this.policy);
+        this.yamlEditorValue = SECURITY_SCANNING.toYaml(this.policy);
       } else if (mode === EDITOR_MODE_RULE && !this.hasParsingError) {
         if (this.invalidForRuleMode()) {
           this.yamlEditorError = new Error();
@@ -231,8 +235,8 @@ export default {
     },
     invalidForRuleMode() {
       return (
-        approversOutOfSync(this.policy.actions[0], this.existingApprovers) ||
-        invalidScanners(this.policy.rules)
+        SECURITY_SCANNING.approversOutOfSync(this.policy.actions[0], this.existingApprovers) ||
+        SECURITY_SCANNING.invalidScanners(this.policy.rules)
       );
     },
     allBranches() {
