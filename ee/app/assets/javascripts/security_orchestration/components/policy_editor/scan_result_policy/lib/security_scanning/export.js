@@ -6,4 +6,4 @@ export {
   approversOutOfSync,
   invalidScanners,
   humanizeInvalidBranchesError,
-} from './';
+} from '.';
