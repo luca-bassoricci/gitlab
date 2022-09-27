@@ -8,7 +8,10 @@ module Banzai
       XPATH = Gitlab::Utils::Nokogiri.css_to_xpath(CSS).freeze
 
       def call
-        doc.xpath(XPATH).add_class('js-render-mermaid')
+        doc.xpath(XPATH).each do |el|
+          el.add_class('js-render-mermaid')
+          el.parent['data-mermaid-style'] = 'display'
+        end
 
         doc
       end
