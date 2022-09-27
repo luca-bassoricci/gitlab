@@ -30,8 +30,17 @@ import PolicyRuleBuilder from './policy_rule_builder.vue';
 //   humanizeInvalidBranchesError,
 // } from './lib';
 
-import * as SECURITY_SCANNING from './lib/security_scanning/export';
-import * as LICENSE_SCANNING from './lib/license_scanning/export';
+/* 
+ * Imports common between all scan result types
+ * TODO: Remove unused scan result policy type specific code
+ */
+import {
+  fromYaml,
+  SCAN_POLICY_TYPES,
+} from './lib';
+
+import * as SECURITY_SCANNING_MODULE from './lib/security_scanning/export';
+import * as LICENSE_SCANNING_MODULE from './lib/license_scanning/export';
 
 export default {
   ADD_RULE_LABEL,
@@ -76,6 +85,11 @@ export default {
       required: false,
       default: null,
     },
+    scanResultPolicyType: {
+      type: String,
+      required: false,
+      default: SCAN_POLICY_TYPES.SECURITY_SCANNING,
+    },
     isEditing: {
       type: Boolean,
       required: false,
@@ -83,16 +97,31 @@ export default {
     },
   },
   data() {
+    /*
+     *  toYaml is the same between both scan result policies, no need to distingish.
+     *  When createding a new scan policy the prop is set from the parent component, dependent
+     *  on which Card was selected from the intial menu screen
+     */
     const yamlEditorValue = this.existingPolicy
-      ? SECURITY_SCANNING.toYaml(this.existingPolicy)
-      : SECURITY_SCANNING.DEFAULT_SCAN_RESULT_POLICY;
+      ? this.toYaml(this.existingPolicy)
+      : this.scanPolicy(this.scanResultPolicyType).DEFAULT_SCAN_RESULT_POLICY;
+
+    /*
+     * For parssing purposes, we need to distinguish the scan result type.
+     * fromYaml in this instance is the COMMON fromYaml function
+     */ 
+    const scanPolicyType = fromYaml(yamlEditorValue).type;
 
     return {
       error: '',
       isCreatingMR: false,
       isRemovingPolicy: false,
       newlyCreatedPolicyProject: null,
-      policy: SECURITY_SCANNING.fromYaml(yamlEditorValue),
+      // Allows us to call this.scanPolicy() without having to specify the type every time 
+      // when invoked outside the data() function. 
+      scanPolicyType,
+      // Call the scan result type specific fromYaml function
+      policy: this.scanPolicy(scanPolicyType).fromYaml(yamlEditorValue),
       yamlEditorValue,
       documentationPath: setUrlFragment(
         this.scanPolicyDocumentationPath,
@@ -114,7 +143,7 @@ export default {
         : this.$options.SECURITY_POLICY_ACTIONS.APPEND;
     },
     policyYaml() {
-      return this.hasParsingError ? '' : SECURITY_SCANNING.toYaml(this.policy);
+      return this.hasParsingError ? '' : this.scanPolicy().toYaml(this.policy);
     },
     hasParsingError() {
       return Boolean(this.yamlEditorError);
@@ -126,7 +155,7 @@ export default {
   watch: {
     invalidBranches(branches) {
       if (branches.length > 0) {
-        this.handleError(new Error(SECURITY_SCANNING.humanizeInvalidBranchesError([...branches])));
+        this.handleError(new Error(this.scanPolicy().humanizeInvalidBranchesError([...branches])));
       } else {
         this.$emit('error', '');
       }
@@ -134,11 +163,25 @@ export default {
   },
   methods: {
     ...mapActions('scanResultPolicies', ['fetchBranches']),
+    scanPolicy(type='') {
+      /* 
+       * We need to explicitly define the type when invoked from data() because
+       * the data isn't set yet, otherwise determine the value from data.scanPolicyType
+       */
+      switch (type || this.scanPolicyType) {
+        case SCAN_POLICY_TYPES.SECURITY_SCANNING:
+          return SECURITY_SCANNING_MODULE;      
+        case SCAN_POLICY_TYPES.LICENSE_SCANNING:
+          return LICENSE_SCANNING_MODULE;
+        default:
+          return SECURITY_SCANNING_MODULE;
+      }
+    },
     updateAction(actionIndex, values) {
       this.policy.actions.splice(actionIndex, 1, values);
     },
     addRule() {
-      this.policy.rules.push(SECURITY_SCANNING.buildRule());
+      this.policy.rules.push(this.scanPolicy().buildRule());
     },
     removeRule(ruleIndex) {
       this.policy.rules.splice(ruleIndex, 1);
@@ -169,11 +212,11 @@ export default {
       try {
         const assignedPolicyProject = await this.getSecurityPolicyProject();
         const yamlValue =
-          this.mode === EDITOR_MODE_YAML ? this.yamlEditorValue : SECURITY_SCANNING.toYaml(this.policy);
+          this.mode === EDITOR_MODE_YAML ? this.yamlEditorValue : this.scanPolicy().toYaml(this.policy);
         const mergeRequest = await modifyPolicy({
           action,
           assignedPolicyProject,
-          name: this.originalName || SECURITY_SCANNING.fromYaml(yamlValue)?.name,
+          name: this.originalName || this.scanPolicy().fromYaml(yamlValue)?.name,
           namespacePath: this.namespacePath,
           yamlEditorValue: yamlValue,
         });
@@ -209,7 +252,7 @@ export default {
       this.yamlEditorError = null;
 
       try {
-        const newPolicy = SECURITY_SCANNING.fromYaml(manifest);
+        const newPolicy = this.scanPolicy().fromYaml(manifest);
         if (newPolicy.error) {
           throw new Error(newPolicy.error);
         }
@@ -221,7 +264,7 @@ export default {
     changeEditorMode(mode) {
       this.mode = mode;
       if (mode === EDITOR_MODE_YAML && !this.hasParsingError) {
-        this.yamlEditorValue = SECURITY_SCANNING.toYaml(this.policy);
+        this.yamlEditorValue = this.scanPolicy().toYaml(this.policy);
       } else if (mode === EDITOR_MODE_RULE && !this.hasParsingError) {
         if (this.invalidForRuleMode()) {
           this.yamlEditorError = new Error();
@@ -235,8 +278,8 @@ export default {
     },
     invalidForRuleMode() {
       return (
-        SECURITY_SCANNING.approversOutOfSync(this.policy.actions[0], this.existingApprovers) ||
-        SECURITY_SCANNING.invalidScanners(this.policy.rules)
+        this.scanPolicy().approversOutOfSync(this.policy.actions[0], this.existingApprovers) ||
+        this.scanPolicy().invalidScanners(this.policy.rules)
       );
     },
     allBranches() {

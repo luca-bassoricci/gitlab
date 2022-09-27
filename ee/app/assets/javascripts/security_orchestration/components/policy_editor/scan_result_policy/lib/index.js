@@ -6,6 +6,11 @@ export { buildRule, invalidScanners } from './rules';
 export { approversOutOfSync } from './actions';
 export * from './humanize';
 
+export const SCAN_POLICY_TYPES = {
+  SECURITY_SCANNING: 'scan_result_policy',
+  LICENSE_SCANNING: 'license_scan_result_policy'
+}
+
 export const DEFAULT_SCAN_RESULT_POLICY = `type: scan_result_policy
 name: ''
 description: ''
