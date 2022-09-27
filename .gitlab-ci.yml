@@ -81,13 +81,9 @@ variables:
   DEBIAN_VERSION: "bullseye"
   CHROME_VERSION: "103"
   DOCKER_VERSION: "20.10.14"
-<<<<<<< HEAD
   RUBY_VERSION: "3.0"
-  NOTIFY_PIPELINE_FAILURE_CHANNEL: "f_ruby3"
-=======
-  RUBY_VERSION: "2.7"
   GO_VERSION: "1.18"
->>>>>>> ee/master
+  NOTIFY_PIPELINE_FAILURE_CHANNEL: "f_ruby3"
 
   TMP_TEST_FOLDER: "${CI_PROJECT_DIR}/tmp/tests"
   GITLAB_WORKHORSE_FOLDER: "gitlab-workhorse"
