@@ -30,14 +30,11 @@ import PolicyRuleBuilder from './policy_rule_builder.vue';
 //   humanizeInvalidBranchesError,
 // } from './lib';
 
-/* 
+/*
  * Imports common between all scan result types
  * TODO: Remove unused scan result policy type specific code
  */
-import {
-  fromYaml,
-  SCAN_POLICY_TYPES,
-} from './lib';
+import { fromYaml, SCAN_POLICY_TYPES } from './lib';
 
 import * as SECURITY_SCANNING_MODULE from './lib/security_scanning/export';
 import * as LICENSE_SCANNING_MODULE from './lib/license_scanning/export';
@@ -109,7 +106,7 @@ export default {
     /*
      * For parssing purposes, we need to distinguish the scan result type.
      * fromYaml in this instance is the COMMON fromYaml function
-     */ 
+     */
     const scanPolicyType = fromYaml(yamlEditorValue).type;
 
     return {
@@ -117,8 +114,8 @@ export default {
       isCreatingMR: false,
       isRemovingPolicy: false,
       newlyCreatedPolicyProject: null,
-      // Allows us to call this.scanPolicy() without having to specify the type every time 
-      // when invoked outside the data() function. 
+      // Allows us to call this.scanPolicy() without having to specify the type every time
+      // when invoked outside the data() function.
       scanPolicyType,
       // Call the scan result type specific fromYaml function
       policy: this.scanPolicy(scanPolicyType).fromYaml(yamlEditorValue),
@@ -163,14 +160,14 @@ export default {
   },
   methods: {
     ...mapActions('scanResultPolicies', ['fetchBranches']),
-    scanPolicy(type='') {
-      /* 
+    scanPolicy(type = '') {
+      /*
        * We need to explicitly define the type when invoked from data() because
        * the data isn't set yet, otherwise determine the value from data.scanPolicyType
        */
       switch (type || this.scanPolicyType) {
         case SCAN_POLICY_TYPES.SECURITY_SCANNING:
-          return SECURITY_SCANNING_MODULE;      
+          return SECURITY_SCANNING_MODULE;
         case SCAN_POLICY_TYPES.LICENSE_SCANNING:
           return LICENSE_SCANNING_MODULE;
         default:
@@ -212,7 +209,9 @@ export default {
       try {
         const assignedPolicyProject = await this.getSecurityPolicyProject();
         const yamlValue =
-          this.mode === EDITOR_MODE_YAML ? this.yamlEditorValue : this.scanPolicy().toYaml(this.policy);
+          this.mode === EDITOR_MODE_YAML
+            ? this.yamlEditorValue
+            : this.scanPolicy().toYaml(this.policy);
         const mergeRequest = await modifyPolicy({
           action,
           assignedPolicyProject,
