@@ -53,10 +53,9 @@ module Diffs
 
     def page_context
       @page_context ||=
-        case context.class
-        when Commit
+        if @context.is_a?(Commit)
           "is-commit"
-        when MergeRequest
+        elsif @context.is_a?(MergeRequest)
           "is-merge-request"
         end
     end
@@ -71,7 +70,7 @@ module Diffs
       if current_controller?(:commit)
         helpers.commit_diff_whitespace_link(project, @context, class: 'd-none d-sm-inline-block')
       elsif current_controller?('projects/merge_requests/diffs')
-        helpers.diff_merge_request_whitespace_link(project, context, class: 'd-none d-sm-inline-block')
+        helpers.diff_merge_request_whitespace_link(project, @context, class: 'd-none d-sm-inline-block')
       elsif current_controller?(:compare)
         helpers.diff_compare_whitespace_link(project, params[:from], params[:to], class: 'd-none d-sm-inline-block')
       elsif current_controller?(:wikis)
