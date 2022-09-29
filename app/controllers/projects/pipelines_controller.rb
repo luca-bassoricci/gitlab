@@ -26,6 +26,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:pipeline_tabs_vue, @project)
+    push_frontend_feature_flag(:pipeline_summary, @project)
     push_frontend_feature_flag(:run_pipeline_graphql, @project)
   end
 

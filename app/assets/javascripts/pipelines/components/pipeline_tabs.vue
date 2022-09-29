@@ -1,8 +1,17 @@
 <script>
 import { GlBadge, GlTabs, GlTab } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { failedJobsTabName, jobsTabName, needsTabName, testReportTabName } from '../constants';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import {
+  failedJobsTabName,
+  jobsTabName,
+  needsTabName,
+  pipelineTabName,
+  summaryTabName,
+  testReportTabName,
+} from '../constants';
 import PipelineGraphWrapper from './graph/graph_component_wrapper.vue';
+import PipelineSummary from './summary/pipeline_summary.vue';
 import Dag from './dag/dag.vue';
 import FailedJobsApp from './jobs/failed_jobs_app.vue';
 import JobsApp from './jobs/jobs_app.vue';
@@ -15,14 +24,17 @@ export default {
       jobsTitle: __('Jobs'),
       needsTitle: __('Needs'),
       pipelineTitle: __('Pipeline'),
+      summaryTitle: __('Summary'),
       testsTitle: __('Tests'),
     },
   },
   tabNames: {
+    pipeline: pipelineTabName,
     needs: needsTabName,
     jobs: jobsTabName,
     failures: failedJobsTabName,
     tests: testReportTabName,
+    summary: summaryTabName,
   },
   components: {
     Dag,
@@ -32,8 +44,11 @@ export default {
     JobsApp,
     FailedJobsApp,
     PipelineGraphWrapper,
+    PipelineSummary,
     TestReports,
   },
+  mixins: [glFeatureFlagMixin()],
+
   inject: [
     'defaultTabValue',
     'failedJobsCount',
@@ -44,6 +59,9 @@ export default {
   computed: {
     showFailedJobsTab() {
       return this.failedJobsCount > 0;
+    },
+    showSummaryTab() {
+      return this.glFeatures.pipelineSummary;
     },
   },
   methods: {
@@ -57,7 +75,17 @@ export default {
 <template>
   <gl-tabs>
     <gl-tab
+      v-if="showSummaryTab"
+      ref="summaryTab"
+      :title="$options.i18n.tabs.summaryTitle"
+      data-testid="summary-tab"
+      lazy
+    >
+      <pipeline-summary />
+    </gl-tab>
+    <gl-tab
       ref="pipelineTab"
+      :active="isActive($options.tabNames.pipeline)"
       :title="$options.i18n.tabs.pipelineTitle"
       data-testid="pipeline-tab"
       lazy

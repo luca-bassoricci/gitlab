@@ -1,0 +1,8 @@
+---
+name: pipeline_summary
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '15.5'
+type: development
+group: group::pipeline authoring
+default_enabled: false

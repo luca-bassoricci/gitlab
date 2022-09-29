@@ -1,11 +1,13 @@
-query getPipelineSummary($fullPath: ID!, $pipelineIid: ID!) {
+query getManualJobs($fullPath: ID!, $pipelineIid: ID!) {
   project(fullPath: $fullPath) {
     id
     pipeline(iid: $pipelineIid) {
       id
       status
-      jobs(statuses: FAILED) {
+      jobs(statuses: MANUAL) {
         nodes {
+          allowFailure
+          duration
           status
           detailedStatus {
             id
@@ -30,6 +32,7 @@ query getPipelineSummary($fullPath: ID!, $pipelineIid: ID!) {
             name
           }
           name
+          playable
           retryable
           userPermissions {
             readBuild

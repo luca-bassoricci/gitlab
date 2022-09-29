@@ -49,11 +49,13 @@ export const CHILD_VIEW = 'child';
 
 export const TAB_QUERY_PARAM = 'tab';
 
+export const pipelineTabName = 'pipeline';
 export const needsTabName = 'dag';
 export const jobsTabName = 'builds';
 export const failedJobsTabName = 'failures';
 export const testReportTabName = 'test_report';
 export const securityTabName = 'security';
+export const summaryTabName = 'summary';
 export const licensesTabName = 'licenses';
 export const codeQualityTabName = 'codequality_report';
 
@@ -65,6 +67,7 @@ export const validPipelineTabNames = [
   securityTabName,
   licensesTabName,
   codeQualityTabName,
+  summaryTabName,
 ];
 
 // Constants for the ID and IID selection dropdown

@@ -3,9 +3,18 @@ query getPipelineSummary($fullPath: ID!, $pipelineIid: ID!) {
     id
     pipeline(iid: $pipelineIid) {
       id
+      detailedStatus {
+        id
+        icon
+        label
+        text
+        tooltip
+      }
       status
       jobs(statuses: FAILED) {
         nodes {
+          allowFailure
+          duration
           status
           detailedStatus {
             id
