@@ -4,30 +4,30 @@ module Gitlab
   module Memory
     class ReportUploader
       def initialize(gcs_key:, gcs_project:, gcs_bucket:)
-        fog = Fog::Storage::Google.new(google_project: gcs_project, google_json_key_location: gcs_key)
-        @bucket = fog.directories.new(key: gcs_bucket)
+        @gcs_bucket = gcs_bucket
+        @fog = Fog::Storage::Google.new(google_project: gcs_project, google_json_key_location: gcs_key)
       end
 
       def call(path)
         log_upload_requested(path)
         start_monotonic_time = Gitlab::Metrics::System.monotonic_time
 
-        File.open(path) { |body| @bucket.files.create(key: File.basename(path), body: body) }
+        File.open(path.to_s) { |file| @fog.put_object(@gcs_bucket, File.basename(path), file) }
 
         duration_s = Gitlab::Metrics::System.monotonic_time - start_monotonic_time
         log_upload_success(path, duration_s)
-      rescue StandardError => error
+      rescue StandardError, Errno::ENOENT => error
         log_exception(error)
       ensure
-        cleanup!(path)
+        cleanup!(path.to_s)
       end
 
       private
 
       def cleanup!(path)
-        File.unlink(path)
+        File.unlink(path) if File.exist?(path)
       rescue Errno::ENOENT
-        # We expect file to exist. Rescue to be extra safe.
+        # Path does not exist: Ignore. We already check `File.exist?`. Rescue to be extra safe.
       end
 
       def log_upload_requested(path)
