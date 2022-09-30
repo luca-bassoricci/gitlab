@@ -53,15 +53,22 @@ module Diffs
 
     def page_context
       @page_context ||=
-        if @context.is_a?(Commit)
+        case @context
+        when Commit
           "is-commit"
-        elsif @context.is_a?(MergeRequest)
+        when MergeRequest
           "is-merge-request"
         end
     end
 
     def can_create_note?
       !@diff_notes_disabled && can?(current_user, :create_note, project)
+    end
+
+    def load_diff_files_async?
+      return false unless current_controller?(:commit)
+
+      @load_diff_files_async
     end
 
     def whitespace_toggle
@@ -73,9 +80,15 @@ module Diffs
         helpers.diff_merge_request_whitespace_link(project, @context, class: 'd-none d-sm-inline-block')
       elsif current_controller?(:compare)
         helpers.diff_compare_whitespace_link(project, params[:from], params[:to], class: 'd-none d-sm-inline-block')
+      # This last conditional needs test coverage adding, but the context required to test
+      # it is currently unclear.
+      # rubocop: disable Gitlab/NoCodeCoverageComment
+      # :nocov:
       elsif current_controller?(:wikis)
         helpers.toggle_whitespace_link(url_for(params_with_whitespace), class: 'd-none d-sm-inline-block')
       end
+      # :nocov:
+      # rubocop: enable Gitlab/NoCodeCoverageComment
     end
 
     def expand_diffs_toggle
@@ -91,6 +104,10 @@ module Diffs
 
     def parallel_diff_btn
       diff_btn('Side-by-side', 'parallel', helpers.diff_view == :parallel)
+    end
+
+    def diff_files_async_url
+      url_for(safe_params.merge(action: 'diff_files'))
     end
 
     private
@@ -111,6 +128,14 @@ module Diffs
       link_to url_for(params_copy), args do
         title
       end
+    end
+
+    def hide_whitespace?
+      params[:w] == '1'
+    end
+
+    def params_with_whitespace
+      hide_whitespace? ? request.query_parameters.except(:w) : request.query_parameters.merge(w: 1)
     end
   end
 end

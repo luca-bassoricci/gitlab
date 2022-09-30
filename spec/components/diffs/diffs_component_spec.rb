@@ -35,6 +35,7 @@ RSpec.describe Diffs::DiffsComponent, type: :component do
   let(:paginate_diffs_per_page) { Projects::CommitController::COMMIT_DIFFS_PER_PAGE }
   let(:page) { 1 }
   let(:request_controller) { Projects::CommitController }
+  let(:request_url) { "#{project.full_path}/-/commit/#{commit.id}" }
 
   let(:environment) do
     ::Environments::EnvironmentsByDeploymentsFinder.new(project, user, commit: commit, find_latest: true).execute.last
@@ -43,7 +44,7 @@ RSpec.describe Diffs::DiffsComponent, type: :component do
   subject { rendered_content }
 
   before do
-    with_request_url "#{project.full_path}/-/commit/#{commit.id}" do
+    with_request_url request_url do
       with_controller_class request_controller do
         render_inline component
       end
@@ -99,6 +100,18 @@ RSpec.describe Diffs::DiffsComponent, type: :component do
       let(:show_whitespace_toggle) { false }
 
       it { is_expected.to be_nil }
+    end
+
+    context "when on the compare page" do
+      let(:request_url) { "#{project.full_path}/-/compare/?from=#{commit.id}&to=#{commit.id}" }
+      let(:request_controller) { Projects::CompareController }
+
+      before do
+        allow(component).to receive(:current_controller?).and_return(false)
+        allow(component).to receive(:current_controller?).with(:compare).and_return(true)
+      end
+
+      it { is_expected.not_to be_nil }
     end
   end
 end

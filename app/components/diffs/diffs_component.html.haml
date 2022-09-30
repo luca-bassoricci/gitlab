@@ -14,9 +14,8 @@
   = render Diffs::OverflowWarningComponent.new(diff_files: diff_files, project: @project, commit: @commit, merge_request: @merge_request)
 
 .files{ data: { can_create_note: can_create_note? } }
-  - if @load_diff_files_async
-    - url = url_for(safe_params.merge(action: 'diff_files'))
-    .js-diffs-batch{ data: { diff_files_path: url } }
+  - if load_diff_files_async?
+    .js-diffs-batch{ data: { diff_files_path: diff_files_async_url } }
       .text-center
         %span.gl-spinner.gl-spinner-md
   - else
