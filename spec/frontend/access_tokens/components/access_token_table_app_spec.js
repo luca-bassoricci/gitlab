@@ -73,7 +73,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     wrapper?.destroy();
   });
 
-  it('should render the `GlTable` with default empty message', () => {
+  it('should render an empty table with a default message', () => {
     createComponent();
 
     const cells = findCells();
@@ -83,7 +83,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     );
   });
 
-  it('should render the `GlTable` with custom empty message', () => {
+  it('should render an empty table with a custom message', () => {
     const noTokensMessage = 'This group has no active access tokens.';
     createComponent({ noActiveTokensMessage: noTokensMessage });
 
@@ -92,7 +92,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     expect(cells.at(0).text()).toBe(noTokensMessage);
   });
 
-  it('should render an h5 element', () => {
+  it('should show a title indicating the amount of tokens', () => {
     createComponent();
 
     expect(wrapper.find('h5').text()).toBe(
@@ -110,38 +110,40 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     expect(wrapper.findByTestId('information-section').text()).toBe(info);
   });
 
-  it('should render the `GlTable` component with default 6 column headers', () => {
-    createComponent();
+  describe('table headers', () => {
+    it('should include `Action` column', () => {
+      createComponent();
 
-    const headers = findHeaders();
-    expect(headers).toHaveLength(6);
-    [
-      __('Token name'),
-      __('Scopes'),
-      s__('AccessTokens|Created'),
-      __('Last Used'),
-      __('Expires'),
-      __('Action'),
-    ].forEach((text, index) => {
-      expect(headers.at(index).text()).toBe(text);
+      const headers = findHeaders();
+      expect(headers).toHaveLength(6);
+      [
+        __('Token name'),
+        __('Scopes'),
+        s__('AccessTokens|Created'),
+        __('Last Used'),
+        __('Expires'),
+        __('Action'),
+      ].forEach((text, index) => {
+        expect(headers.at(index).text()).toBe(text);
+      });
     });
-  });
 
-  it('should render the `GlTable` component with 7 headers', () => {
-    createComponent({ showRole: true });
+    it('should include `Role` column', () => {
+      createComponent({ showRole: true });
 
-    const headers = findHeaders();
-    expect(headers).toHaveLength(7);
-    [
-      __('Token name'),
-      __('Scopes'),
-      s__('AccessTokens|Created'),
-      __('Last Used'),
-      __('Expires'),
-      __('Role'),
-      __('Action'),
-    ].forEach((text, index) => {
-      expect(headers.at(index).text()).toBe(text);
+      const headers = findHeaders();
+      expect(headers).toHaveLength(7);
+      [
+        __('Token name'),
+        __('Scopes'),
+        s__('AccessTokens|Created'),
+        __('Last Used'),
+        __('Expires'),
+        __('Role'),
+        __('Action'),
+      ].forEach((text, index) => {
+        expect(headers.at(index).text()).toBe(text);
+      });
     });
   });
 
@@ -159,7 +161,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     expect(assistiveElement.text()).toBe(s__('AccessTokens|The last time a token was used'));
   });
 
-  it('updates the table after a success AJAX event', async () => {
+  it('updates the table after new tokens are created', async () => {
     createComponent({ showRole: true });
     await triggerSuccess();
 
