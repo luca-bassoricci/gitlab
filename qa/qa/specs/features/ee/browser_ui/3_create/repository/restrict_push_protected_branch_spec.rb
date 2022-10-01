@@ -63,7 +63,7 @@ module QA
           end
         end
 
-        it_behaves_like 'unselected maintainer', 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347775'
+        it_behaves_like 'unselected maintainer', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/375603', type: :investigating }, 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347775'
         it_behaves_like 'selected developer', 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347774'
       end
 
