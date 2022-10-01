@@ -86,35 +86,45 @@ RSpec.describe Projects::AutocompleteSourcesController do
   end
 
   describe 'GET members' do
-    before do
-      group.add_owner(user)
-      sign_in(user)
+    context 'when logged in' do
+      before do
+        group.add_owner(user)
+        sign_in(user)
+      end
+
+      it 'returns 400 when no target type specified' do
+        get :members, format: :json, params: { namespace_id: group.path, project_id: project.path }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+
+      it 'returns an array of member object' do
+        get :members, format: :json, params: { namespace_id: group.path, project_id: project.path, type: issue.class.name, type_id: issue.id }
+
+        expect(members_by_username('all').symbolize_keys).to include(
+          username: 'all',
+          name: 'All Project and Group Members',
+          count: 1)
+
+        expect(members_by_username(group.full_path).symbolize_keys).to include(
+          type: group.class.name,
+          name: group.full_name,
+          avatar_url: group.avatar_url,
+          count: 1)
+
+        expect(members_by_username(user.username).symbolize_keys).to include(
+          type: user.class.name,
+          name: user.name,
+          avatar_url: user.avatar_url)
+      end
     end
 
-    it 'returns 400 when no target type specified' do
-      get :members, format: :json, params: { namespace_id: group.path, project_id: project.path }
+    context 'when anonymous' do
+      it 'returns an empty array' do
+        get :members, format: :json, params: { namespace_id: group.path, project_id: project.path, type: issue.class.name, type_id: issue.id }
 
-      expect(response).to have_gitlab_http_status(:bad_request)
-    end
-
-    it 'returns an array of member object' do
-      get :members, format: :json, params: { namespace_id: group.path, project_id: project.path, type: issue.class.name, type_id: issue.id }
-
-      expect(members_by_username('all').symbolize_keys).to include(
-        username: 'all',
-        name: 'All Project and Group Members',
-        count: 1)
-
-      expect(members_by_username(group.full_path).symbolize_keys).to include(
-        type: group.class.name,
-        name: group.full_name,
-        avatar_url: group.avatar_url,
-        count: 1)
-
-      expect(members_by_username(user.username).symbolize_keys).to include(
-        type: user.class.name,
-        name: user.name,
-        avatar_url: user.avatar_url)
+        expect(json_response).to eq([])
+      end
     end
   end
 
