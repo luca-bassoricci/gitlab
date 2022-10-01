@@ -61,7 +61,7 @@ module QA
         expect(epic.due_date).to eq(new_milestone_due_date)
       end
 
-      it 'updates epic dates when removing issue', :reliable, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347957' do
+      it 'updates epic dates when removing issue', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/375849', type: :investigating }, :reliable, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347957' do
         epic = create_epic_issue_milestone[0]
 
         # Get epic_issue_id
