@@ -3,6 +3,7 @@
 class Projects::AutocompleteSourcesController < Projects::ApplicationController
   before_action :authorize_read_milestone!, only: :milestones
   before_action :authorize_read_crm_contact!, only: :contacts
+  before_action :ensure_target_type_parameter!, only: [:members, :labels, :commands]
 
   feature_category :team_planning, [:issues, :labels, :milestones, :commands, :contacts]
   feature_category :code_review, [:merge_requests]
@@ -58,6 +59,12 @@ class Projects::AutocompleteSourcesController < Projects::ApplicationController
 
   def authorize_read_crm_contact!
     render_404 unless can?(current_user, :read_crm_contact, project.root_ancestor)
+  end
+
+  def ensure_target_type_parameter!
+    return if params[:type].present?
+
+    render status: :bad_request, json: { message: _('Missing type parameter') }
   end
 end
 

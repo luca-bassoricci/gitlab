@@ -5,17 +5,96 @@ require 'spec_helper'
 RSpec.describe Projects::AutocompleteSourcesController do
   let_it_be(:group, reload: true) { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
-  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:development) { create(:label, project: project, name: 'Development') }
+  let_it_be(:issue) { create(:labeled_issue, project: project, labels: [development]) }
   let_it_be(:user) { create(:user) }
 
   def members_by_username(username)
     json_response.find { |member| member['username'] == username }
   end
 
+  describe 'GET commands' do
+    before do
+      group.add_owner(user)
+    end
+
+    context 'with a public project' do
+      let_it_be(:public_project) { create(:project, :public, group: group) }
+
+      shared_examples 'issuable commands' do
+        it 'returns empty array when no user logged in' do
+          get :commands, format: :json, params: { namespace_id: group.path, project_id: public_project.path, type: issuable_type, type_id: issuable_iid }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to eq([])
+        end
+
+        it 'returns 400 when no target type specified' do
+          sign_in(user)
+
+          get :commands, format: :json, params: { namespace_id: group.path, project_id: project.path }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+
+        it 'returns an array of commands' do
+          sign_in(user)
+
+          get :commands, format: :json, params: { namespace_id: group.path, project_id: public_project.path, type: issuable_type, type_id: issuable_iid }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_present
+        end
+      end
+
+      context 'with an issue' do
+        let(:issuable_type) { issue.class.name }
+        let(:issuable_iid) { issue.iid }
+
+        it_behaves_like 'issuable commands'
+      end
+
+      context 'with merge request' do
+        let(:merge_request) { create(:merge_request, target_project: public_project, source_project: public_project) }
+        let(:issuable_type) { merge_request.class.name }
+        let(:issuable_iid) { merge_request.iid }
+
+        it_behaves_like 'issuable commands'
+      end
+    end
+  end
+
+  describe 'GET labels' do
+    before do
+      group.add_owner(user)
+      sign_in(user)
+    end
+
+    it 'returns 400 when no target type specified' do
+      get :labels, format: :json, params: { namespace_id: group.path, project_id: project.path }
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    it 'returns an array of labels' do
+      get :labels, format: :json, params: { namespace_id: group.path, project_id: project.path, type: issue.class.name, type_id: issue.id }
+
+      expect(json_response).to be_a(Array)
+      expect(json_response.count).to eq(1)
+      expect(json_response[0]['title']).to eq('Development')
+    end
+  end
+
   describe 'GET members' do
     before do
       group.add_owner(user)
       sign_in(user)
+    end
+
+    it 'returns 400 when no target type specified' do
+      get :members, format: :json, params: { namespace_id: group.path, project_id: project.path }
+
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it 'returns an array of member object' do

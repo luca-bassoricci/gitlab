@@ -26019,6 +26019,9 @@ msgstr ""
 msgid "Missing commit signatures endpoint!"
 msgstr ""
 
+msgid "Missing type parameter"
+msgstr ""
+
 msgid "MissingSSHKeyWarningLink|Add SSH key"
 msgstr ""
 
