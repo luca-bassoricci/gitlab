@@ -11,6 +11,8 @@ fragment IssueFragment on Issue {
   moved
   state
   title
+  description
+  descriptionHtml
   updatedAt
   closedAt
   upvotes

@@ -86,14 +86,14 @@ export function initForm() {
   initTypePopover();
 }
 
-export function initShow() {
+export function initShow(cachedIssueData) {
   const el = document.getElementById('js-issuable-app');
 
   if (!el) {
     return;
   }
 
-  const { issueType, ...issuableData } = parseIssuableData(el);
+  const { issueType, ...issuableData } = parseIssuableData(el, true);
 
   if (issueType === IssueType.Incident) {
     initIncidentApp({ ...issuableData, issuableId: el.dataset.issuableId });
@@ -101,7 +101,7 @@ export function initShow() {
     initLinkedResources();
     initRelatedIssues(IssueType.Incident);
   } else {
-    initIssueApp(issuableData, store);
+    initIssueApp(issuableData, store, cachedIssueData);
     initHeaderActions(store);
   }
 

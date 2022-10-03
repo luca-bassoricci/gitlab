@@ -179,6 +179,10 @@ export default {
       }
       return '';
     },
+    showIssueDetail(issue) {
+      const event = new CustomEvent('showIssue', { detail: issue });
+      document.dispatchEvent(event);
+    },
   },
 };
 </script>
@@ -219,9 +223,9 @@ export default {
         <gl-link
           class="issue-title-text"
           dir="auto"
-          :href="webUrl"
           data-qa-selector="issuable_title_link"
           v-bind="issuableTitleProps"
+          @click="showIssueDetail(issuable)"
         >
           {{ issuable.title }}
           <gl-icon v-if="isIssuableUrlExternal" name="external-link" class="gl-ml-2" />

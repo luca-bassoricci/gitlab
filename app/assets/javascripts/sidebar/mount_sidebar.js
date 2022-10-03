@@ -306,6 +306,7 @@ export function mountSidebarLabels() {
           fullPath: el.dataset.projectPath,
           allowLabelRemove: parseBoolean(el.dataset.canEdit),
           allowMultiselect: true,
+          cachedLabels: JSON.parse(el.dataset.selectedLabels),
           footerCreateLabelTitle: __('Create project label'),
           footerManageLabelTitle: __('Manage project labels'),
           labelsCreateTitle: __('Create project label'),

@@ -183,14 +183,12 @@ export default {
     issues: {
       query: getIssuesQuery,
       variables() {
-        console.trace('GET APOLLO VARIABLES ', this);
         return this.queryVariables;
       },
       update(data) {
         return data[this.namespace]?.issues.nodes ?? [];
       },
       result(queryResult) {
-        console.log('Issues : ', queryResult);
         if (!queryResult?.data) {
           return;
         }
@@ -486,7 +484,6 @@ export default {
     this.cache = {};
   },
   mounted() {
-    console.log('Mounted Issues');
     eventHub.$on('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
 
     // Its rendered so we can refetch

@@ -4,9 +4,9 @@ import { sanitize } from '~/lib/dompurify';
 // We currently load + parse the data from the issue app and related merge request
 let cachedParsedData;
 
-export const parseIssuableData = (el) => {
+export const parseIssuableData = (el, force) => {
   try {
-    if (cachedParsedData) return cachedParsedData;
+    if (cachedParsedData && force !== true) return cachedParsedData;
 
     const parsedData = JSON.parse(el.dataset.initial);
     parsedData.initialTitleHtml = sanitize(parsedData.initialTitleHtml);

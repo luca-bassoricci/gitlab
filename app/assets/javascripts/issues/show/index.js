@@ -75,7 +75,7 @@ export function initIncidentApp(issueData = {}) {
   });
 }
 
-export function initIssueApp(issueData, store) {
+export function initIssueApp(issueData, store, cachedIssue) {
   const el = document.getElementById('js-issuable-app');
 
   if (!el) {
@@ -89,6 +89,8 @@ export function initIssueApp(issueData, store) {
   bootstrapApollo({ ...issueState, issueType: el.dataset.issueType });
 
   const { canCreateIncident, hasIssueWeightsFeature, ...issueProps } = issueData;
+
+  console.log('Init Issue App : ', issueProps);
 
   return new Vue({
     el,

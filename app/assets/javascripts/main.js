@@ -37,6 +37,7 @@ import initBroadcastNotifications from './broadcast_notification';
 import { initTopNav } from './nav';
 import { initCopyCodeButton } from './behaviors/copy_code';
 import initHeaderSearch from './header_search/init';
+import { initAppLaunchers } from './launchers';
 
 import 'ee_else_ce/main_ee';
 import 'jh_else_ce/main_jh';
@@ -148,6 +149,7 @@ const bootstrapBreakpoint = bp.getBreakpointSize();
 initUserTracking();
 initLayoutNav();
 initAlertHandler();
+initAppLaunchers();
 
 // `hashchange` is not triggered when link target is already in window.location
 $body.on('click', 'a[href^="#"]', function clickHashLinkCallback() {

@@ -55,6 +55,11 @@ export default {
       required: false,
       default: DropdownVariant.Sidebar,
     },
+    cachedLabels: {
+      type: Array,
+      required: false,
+      default: null,
+    },
     labelsFilterBasePath: {
       type: String,
       required: false,
@@ -124,7 +129,7 @@ export default {
       return this.issuableLabels.map((label) => label.id);
     },
     issuableLabels() {
-      return this.issuable?.labels.nodes || [];
+      return this.issuable?.labels.nodes || this.cachedLabels || [];
     },
     issuableId() {
       return this.issuable?.id;
