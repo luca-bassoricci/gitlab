@@ -29,7 +29,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'creates a group iteration automatically through an iteration cadence', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347943' do
+      it 'creates a group iteration automatically through an iteration cadence', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/376121', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347943' do
         EE::Resource::GroupCadence.fabricate_via_browser_ui! do |cadence|
           cadence.group = iteration_group
           cadence.title = title
