@@ -4,7 +4,7 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# CI/CD analytics **(FREE)**
+# CI/CD & DORA analytics **(FREE)**
 
 Use the CI/CD analytics page to view pipeline success rates and duration, and the history of [DORA metrics](index.md#devops-research-and-assessment-dora-key-metrics) over time.
 
@@ -35,7 +35,7 @@ To view CI/CD analytics:
 1. On the top bar, select **Main menu > Projects** and find your project.
 1. On the left sidebar, select **Analytics > CI/CD Analytics**.
 
-## View deployment frequency chart **(ULTIMATE)**
+## View DORA deployment frequency chart **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/275991) in GitLab 13.8.
 
@@ -56,7 +56,7 @@ To view the deployment frequency chart:
 
 ![Deployment frequency](img/deployment_frequency_charts_v13_12.png)
 
-## View lead time for changes chart **(ULTIMATE)**
+## View DORA lead time for changes chart **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250329) in GitLab 13.11.
 
@@ -78,7 +78,7 @@ To view the lead time for changes chart:
 
 ![Lead time](img/lead_time_chart_v13_11.png)
 
-## View time to restore service chart **(ULTIMATE)**
+## View DORA time to restore service chart **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/356959) in GitLab 15.1
 
@@ -94,7 +94,7 @@ To view the time to restore service chart:
 
 ![Lead time](img/time_to_restore_service_charts_v15_1.png)
 
-## View change failure rate chart **(ULTIMATE)**
+## View DORA change failure rate chart **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/357072) in GitLab 15.2
 
