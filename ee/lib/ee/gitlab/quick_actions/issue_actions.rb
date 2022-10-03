@@ -175,7 +175,6 @@ module EE
           types Issue
           condition do
             current_user.can?(:update_escalation_status, quick_action_target) &&
-            quick_action_target.persisted? &&
             quick_action_target.escalation_policies_available?
           end
 
@@ -184,20 +183,8 @@ module EE
             if policy.nil?
               @execution_message[:page] = _("Policy '%{escalation_policy_name}' does not exist.") % { escalation_policy_name: escalation_policy_name }
             else
-              issue = ::Issues::UpdateService
-                .new(project: quick_action_target.project,
-                     current_user: current_user,
-                     params: {
-                       escalation_status: { status: :triggered, policy: policy }
-                     }
-                    ).execute(quick_action_target)
-
-              @execution_message[:page] =
-                if issue.escalation_status.saved_change_to_updated_at?
-                  _('Started escalation for this incident.')
-                else
-                  _("This incident is already escalated with '%{escalation_policy_name}'.") % { escalation_policy_name: escalation_policy_name }
-                end
+              @updates[:escalation_status] = { status: :triggered, policy: policy }
+              @execution_message[:page] = _('Started escalation for this incident.')
             end
           end
         end
