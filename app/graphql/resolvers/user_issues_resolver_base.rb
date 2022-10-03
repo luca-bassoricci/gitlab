@@ -36,6 +36,18 @@ module Resolvers
       super(**args)
     end
 
+    def continue_issue_resolve(parent, finder, **args)
+      issues = Gitlab::Graphql::Loaders::IssuableLoader.new(nil, finder).batching_find_all { |q| apply_lookahead(q) }
+
+      if non_stable_cursor_sort?(args[:sort])
+        # Certain complex sorts are not supported by the stable cursor pagination yet.
+        # In these cases, we use offset pagination, so we can return the correct connection.
+        offset_pagination(issues)
+      else
+        issues
+      end
+    end
+
     def resolve(**args)
       prepare_args(args)
       key = :"#{user_role}_id"
