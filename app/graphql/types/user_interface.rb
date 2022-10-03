@@ -101,6 +101,12 @@ module Types
           resolver: Resolvers::ReviewRequestedMergeRequestsResolver,
           description: 'Merge requests assigned to the user for review.'
 
+    # Issues can be authored or assigned. This is PoC code, not intended for
+    # production deployment.
+    field :assigned_issues,
+          resolver: Resolvers::AssignedIssuesResolver,
+          description: 'Issues assigned to the user.'
+
     field :snippets,
           description: 'Snippets authored by the user.',
           resolver: Resolvers::Users::SnippetsResolver
