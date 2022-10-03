@@ -86,7 +86,7 @@ module QA
                                error: Regexp.escape('File name id_rsa was prohibited by the pattern "id_rsa$"'))
         end
 
-        it 'restricts removal of tag', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347782' do
+        it 'restricts removal of tag', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/376120', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347782' do
           tag = Resource::Tag.fabricate_via_api! do |tag|
             tag.project = @project
             tag.ref = @project.default_branch
