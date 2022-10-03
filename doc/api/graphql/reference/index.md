@@ -14238,6 +14238,57 @@ A user assigned to a merge request.
 
 #### Fields with arguments
 
+##### `MergeRequestAssignee.assignedIssues`
+
+Issues assigned to the user.
+
+Returns [`IssueConnection`](#issueconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mergerequestassigneeassignedissuesassigneeid"></a>`assigneeId` | [`String`](#string) | ID of a user assigned to the issues. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestassigneeassignedissuesassigneeusername"></a>`assigneeUsername` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.11. Use `assigneeUsernames`. |
+| <a id="mergerequestassigneeassignedissuesassigneeusernames"></a>`assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| <a id="mergerequestassigneeassignedissuesauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| <a id="mergerequestassigneeassignedissuesclosedafter"></a>`closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| <a id="mergerequestassigneeassignedissuesclosedbefore"></a>`closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| <a id="mergerequestassigneeassignedissuesconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter for confidential issues. If "false", excludes confidential issues. If "true", returns only confidential issues. |
+| <a id="mergerequestassigneeassignedissuescreatedafter"></a>`createdAfter` | [`Time`](#time) | Issues created after this date. |
+| <a id="mergerequestassigneeassignedissuescreatedbefore"></a>`createdBefore` | [`Time`](#time) | Issues created before this date. |
+| <a id="mergerequestassigneeassignedissuescrmcontactid"></a>`crmContactId` | [`String`](#string) | ID of a contact assigned to the issues. |
+| <a id="mergerequestassigneeassignedissuescrmorganizationid"></a>`crmOrganizationId` | [`String`](#string) | ID of an organization assigned to the issues. |
+| <a id="mergerequestassigneeassignedissuesepicid"></a>`epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| <a id="mergerequestassigneeassignedissueshealthstatus"></a>`healthStatus` **{warning-solid}** | [`HealthStatus`](#healthstatus) | **Deprecated** in 15.4. Use `healthStatusFilter`. |
+| <a id="mergerequestassigneeassignedissueshealthstatusfilter"></a>`healthStatusFilter` | [`HealthStatusFilter`](#healthstatusfilter) | Health status of the issue, "none" and "any" values are supported. |
+| <a id="mergerequestassigneeassignedissuesiid"></a>`iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| <a id="mergerequestassigneeassignedissuesiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
+| <a id="mergerequestassigneeassignedissuesin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'. |
+| <a id="mergerequestassigneeassignedissuesincludesubepics"></a>`includeSubepics` | [`Boolean`](#boolean) | Whether to include subepics when filtering issues by epicId. |
+| <a id="mergerequestassigneeassignedissuesiterationid"></a>`iterationId` | [`[ID]`](#id) | List of iteration Global IDs applied to the issue. |
+| <a id="mergerequestassigneeassignedissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
+| <a id="mergerequestassigneeassignedissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| <a id="mergerequestassigneeassignedissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="mergerequestassigneeassignedissuesmilestonewildcardid"></a>`milestoneWildcardId` | [`MilestoneWildcardId`](#milestonewildcardid) | Filter issues by milestone ID wildcard. |
+| <a id="mergerequestassigneeassignedissuesmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestassigneeassignedissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
+| <a id="mergerequestassigneeassignedissuesprojectid"></a>`projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored issues should be in. Incompatible with projectPath. |
+| <a id="mergerequestassigneeassignedissuesprojectpath"></a>`projectPath` | [`String`](#string) | The full-path of the project the authored issues should be in. Incompatible with projectId. |
+| <a id="mergerequestassigneeassignedissuesreleasetag"></a>`releaseTag` | [`[String!]`](#string) | Release tag associated with the issue's milestone. |
+| <a id="mergerequestassigneeassignedissuesreleasetagwildcardid"></a>`releaseTagWildcardId` | [`ReleaseTagWildcardId`](#releasetagwildcardid) | Filter issues by release tag ID wildcard. |
+| <a id="mergerequestassigneeassignedissuessearch"></a>`search` | [`String`](#string) | Search query for title or description. |
+| <a id="mergerequestassigneeassignedissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| <a id="mergerequestassigneeassignedissuesstate"></a>`state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| <a id="mergerequestassigneeassignedissuestypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| <a id="mergerequestassigneeassignedissuesupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| <a id="mergerequestassigneeassignedissuesupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| <a id="mergerequestassigneeassignedissuesweight"></a>`weight` | [`String`](#string) | Weight applied to the issue, "none" and "any" values are supported. |
+
 ##### `MergeRequestAssignee.assignedMergeRequests`
 
 Merge requests assigned to the user.
@@ -14467,6 +14518,57 @@ The author of the merge request.
 | <a id="mergerequestauthorweburl"></a>`webUrl` | [`String!`](#string) | Web URL of the user. |
 
 #### Fields with arguments
+
+##### `MergeRequestAuthor.assignedIssues`
+
+Issues assigned to the user.
+
+Returns [`IssueConnection`](#issueconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mergerequestauthorassignedissuesassigneeid"></a>`assigneeId` | [`String`](#string) | ID of a user assigned to the issues. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestauthorassignedissuesassigneeusername"></a>`assigneeUsername` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.11. Use `assigneeUsernames`. |
+| <a id="mergerequestauthorassignedissuesassigneeusernames"></a>`assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| <a id="mergerequestauthorassignedissuesauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| <a id="mergerequestauthorassignedissuesclosedafter"></a>`closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| <a id="mergerequestauthorassignedissuesclosedbefore"></a>`closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| <a id="mergerequestauthorassignedissuesconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter for confidential issues. If "false", excludes confidential issues. If "true", returns only confidential issues. |
+| <a id="mergerequestauthorassignedissuescreatedafter"></a>`createdAfter` | [`Time`](#time) | Issues created after this date. |
+| <a id="mergerequestauthorassignedissuescreatedbefore"></a>`createdBefore` | [`Time`](#time) | Issues created before this date. |
+| <a id="mergerequestauthorassignedissuescrmcontactid"></a>`crmContactId` | [`String`](#string) | ID of a contact assigned to the issues. |
+| <a id="mergerequestauthorassignedissuescrmorganizationid"></a>`crmOrganizationId` | [`String`](#string) | ID of an organization assigned to the issues. |
+| <a id="mergerequestauthorassignedissuesepicid"></a>`epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| <a id="mergerequestauthorassignedissueshealthstatus"></a>`healthStatus` **{warning-solid}** | [`HealthStatus`](#healthstatus) | **Deprecated** in 15.4. Use `healthStatusFilter`. |
+| <a id="mergerequestauthorassignedissueshealthstatusfilter"></a>`healthStatusFilter` | [`HealthStatusFilter`](#healthstatusfilter) | Health status of the issue, "none" and "any" values are supported. |
+| <a id="mergerequestauthorassignedissuesiid"></a>`iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| <a id="mergerequestauthorassignedissuesiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
+| <a id="mergerequestauthorassignedissuesin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'. |
+| <a id="mergerequestauthorassignedissuesincludesubepics"></a>`includeSubepics` | [`Boolean`](#boolean) | Whether to include subepics when filtering issues by epicId. |
+| <a id="mergerequestauthorassignedissuesiterationid"></a>`iterationId` | [`[ID]`](#id) | List of iteration Global IDs applied to the issue. |
+| <a id="mergerequestauthorassignedissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
+| <a id="mergerequestauthorassignedissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| <a id="mergerequestauthorassignedissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="mergerequestauthorassignedissuesmilestonewildcardid"></a>`milestoneWildcardId` | [`MilestoneWildcardId`](#milestonewildcardid) | Filter issues by milestone ID wildcard. |
+| <a id="mergerequestauthorassignedissuesmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestauthorassignedissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
+| <a id="mergerequestauthorassignedissuesprojectid"></a>`projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored issues should be in. Incompatible with projectPath. |
+| <a id="mergerequestauthorassignedissuesprojectpath"></a>`projectPath` | [`String`](#string) | The full-path of the project the authored issues should be in. Incompatible with projectId. |
+| <a id="mergerequestauthorassignedissuesreleasetag"></a>`releaseTag` | [`[String!]`](#string) | Release tag associated with the issue's milestone. |
+| <a id="mergerequestauthorassignedissuesreleasetagwildcardid"></a>`releaseTagWildcardId` | [`ReleaseTagWildcardId`](#releasetagwildcardid) | Filter issues by release tag ID wildcard. |
+| <a id="mergerequestauthorassignedissuessearch"></a>`search` | [`String`](#string) | Search query for title or description. |
+| <a id="mergerequestauthorassignedissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| <a id="mergerequestauthorassignedissuesstate"></a>`state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| <a id="mergerequestauthorassignedissuestypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| <a id="mergerequestauthorassignedissuesupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| <a id="mergerequestauthorassignedissuesupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| <a id="mergerequestauthorassignedissuesweight"></a>`weight` | [`String`](#string) | Weight applied to the issue, "none" and "any" values are supported. |
 
 ##### `MergeRequestAuthor.assignedMergeRequests`
 
@@ -14717,6 +14819,57 @@ A user participating in a merge request.
 
 #### Fields with arguments
 
+##### `MergeRequestParticipant.assignedIssues`
+
+Issues assigned to the user.
+
+Returns [`IssueConnection`](#issueconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mergerequestparticipantassignedissuesassigneeid"></a>`assigneeId` | [`String`](#string) | ID of a user assigned to the issues. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestparticipantassignedissuesassigneeusername"></a>`assigneeUsername` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.11. Use `assigneeUsernames`. |
+| <a id="mergerequestparticipantassignedissuesassigneeusernames"></a>`assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| <a id="mergerequestparticipantassignedissuesauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| <a id="mergerequestparticipantassignedissuesclosedafter"></a>`closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| <a id="mergerequestparticipantassignedissuesclosedbefore"></a>`closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| <a id="mergerequestparticipantassignedissuesconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter for confidential issues. If "false", excludes confidential issues. If "true", returns only confidential issues. |
+| <a id="mergerequestparticipantassignedissuescreatedafter"></a>`createdAfter` | [`Time`](#time) | Issues created after this date. |
+| <a id="mergerequestparticipantassignedissuescreatedbefore"></a>`createdBefore` | [`Time`](#time) | Issues created before this date. |
+| <a id="mergerequestparticipantassignedissuescrmcontactid"></a>`crmContactId` | [`String`](#string) | ID of a contact assigned to the issues. |
+| <a id="mergerequestparticipantassignedissuescrmorganizationid"></a>`crmOrganizationId` | [`String`](#string) | ID of an organization assigned to the issues. |
+| <a id="mergerequestparticipantassignedissuesepicid"></a>`epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| <a id="mergerequestparticipantassignedissueshealthstatus"></a>`healthStatus` **{warning-solid}** | [`HealthStatus`](#healthstatus) | **Deprecated** in 15.4. Use `healthStatusFilter`. |
+| <a id="mergerequestparticipantassignedissueshealthstatusfilter"></a>`healthStatusFilter` | [`HealthStatusFilter`](#healthstatusfilter) | Health status of the issue, "none" and "any" values are supported. |
+| <a id="mergerequestparticipantassignedissuesiid"></a>`iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| <a id="mergerequestparticipantassignedissuesiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
+| <a id="mergerequestparticipantassignedissuesin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'. |
+| <a id="mergerequestparticipantassignedissuesincludesubepics"></a>`includeSubepics` | [`Boolean`](#boolean) | Whether to include subepics when filtering issues by epicId. |
+| <a id="mergerequestparticipantassignedissuesiterationid"></a>`iterationId` | [`[ID]`](#id) | List of iteration Global IDs applied to the issue. |
+| <a id="mergerequestparticipantassignedissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
+| <a id="mergerequestparticipantassignedissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| <a id="mergerequestparticipantassignedissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="mergerequestparticipantassignedissuesmilestonewildcardid"></a>`milestoneWildcardId` | [`MilestoneWildcardId`](#milestonewildcardid) | Filter issues by milestone ID wildcard. |
+| <a id="mergerequestparticipantassignedissuesmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestparticipantassignedissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
+| <a id="mergerequestparticipantassignedissuesprojectid"></a>`projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored issues should be in. Incompatible with projectPath. |
+| <a id="mergerequestparticipantassignedissuesprojectpath"></a>`projectPath` | [`String`](#string) | The full-path of the project the authored issues should be in. Incompatible with projectId. |
+| <a id="mergerequestparticipantassignedissuesreleasetag"></a>`releaseTag` | [`[String!]`](#string) | Release tag associated with the issue's milestone. |
+| <a id="mergerequestparticipantassignedissuesreleasetagwildcardid"></a>`releaseTagWildcardId` | [`ReleaseTagWildcardId`](#releasetagwildcardid) | Filter issues by release tag ID wildcard. |
+| <a id="mergerequestparticipantassignedissuessearch"></a>`search` | [`String`](#string) | Search query for title or description. |
+| <a id="mergerequestparticipantassignedissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| <a id="mergerequestparticipantassignedissuesstate"></a>`state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| <a id="mergerequestparticipantassignedissuestypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| <a id="mergerequestparticipantassignedissuesupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| <a id="mergerequestparticipantassignedissuesupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| <a id="mergerequestparticipantassignedissuesweight"></a>`weight` | [`String`](#string) | Weight applied to the issue, "none" and "any" values are supported. |
+
 ##### `MergeRequestParticipant.assignedMergeRequests`
 
 Merge requests assigned to the user.
@@ -14964,6 +15117,57 @@ A user assigned to a merge request as a reviewer.
 | <a id="mergerequestreviewerweburl"></a>`webUrl` | [`String!`](#string) | Web URL of the user. |
 
 #### Fields with arguments
+
+##### `MergeRequestReviewer.assignedIssues`
+
+Issues assigned to the user.
+
+Returns [`IssueConnection`](#issueconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mergerequestreviewerassignedissuesassigneeid"></a>`assigneeId` | [`String`](#string) | ID of a user assigned to the issues. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestreviewerassignedissuesassigneeusername"></a>`assigneeUsername` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.11. Use `assigneeUsernames`. |
+| <a id="mergerequestreviewerassignedissuesassigneeusernames"></a>`assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| <a id="mergerequestreviewerassignedissuesauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| <a id="mergerequestreviewerassignedissuesclosedafter"></a>`closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| <a id="mergerequestreviewerassignedissuesclosedbefore"></a>`closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| <a id="mergerequestreviewerassignedissuesconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter for confidential issues. If "false", excludes confidential issues. If "true", returns only confidential issues. |
+| <a id="mergerequestreviewerassignedissuescreatedafter"></a>`createdAfter` | [`Time`](#time) | Issues created after this date. |
+| <a id="mergerequestreviewerassignedissuescreatedbefore"></a>`createdBefore` | [`Time`](#time) | Issues created before this date. |
+| <a id="mergerequestreviewerassignedissuescrmcontactid"></a>`crmContactId` | [`String`](#string) | ID of a contact assigned to the issues. |
+| <a id="mergerequestreviewerassignedissuescrmorganizationid"></a>`crmOrganizationId` | [`String`](#string) | ID of an organization assigned to the issues. |
+| <a id="mergerequestreviewerassignedissuesepicid"></a>`epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| <a id="mergerequestreviewerassignedissueshealthstatus"></a>`healthStatus` **{warning-solid}** | [`HealthStatus`](#healthstatus) | **Deprecated** in 15.4. Use `healthStatusFilter`. |
+| <a id="mergerequestreviewerassignedissueshealthstatusfilter"></a>`healthStatusFilter` | [`HealthStatusFilter`](#healthstatusfilter) | Health status of the issue, "none" and "any" values are supported. |
+| <a id="mergerequestreviewerassignedissuesiid"></a>`iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| <a id="mergerequestreviewerassignedissuesiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
+| <a id="mergerequestreviewerassignedissuesin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'. |
+| <a id="mergerequestreviewerassignedissuesincludesubepics"></a>`includeSubepics` | [`Boolean`](#boolean) | Whether to include subepics when filtering issues by epicId. |
+| <a id="mergerequestreviewerassignedissuesiterationid"></a>`iterationId` | [`[ID]`](#id) | List of iteration Global IDs applied to the issue. |
+| <a id="mergerequestreviewerassignedissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
+| <a id="mergerequestreviewerassignedissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| <a id="mergerequestreviewerassignedissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="mergerequestreviewerassignedissuesmilestonewildcardid"></a>`milestoneWildcardId` | [`MilestoneWildcardId`](#milestonewildcardid) | Filter issues by milestone ID wildcard. |
+| <a id="mergerequestreviewerassignedissuesmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="mergerequestreviewerassignedissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
+| <a id="mergerequestreviewerassignedissuesprojectid"></a>`projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored issues should be in. Incompatible with projectPath. |
+| <a id="mergerequestreviewerassignedissuesprojectpath"></a>`projectPath` | [`String`](#string) | The full-path of the project the authored issues should be in. Incompatible with projectId. |
+| <a id="mergerequestreviewerassignedissuesreleasetag"></a>`releaseTag` | [`[String!]`](#string) | Release tag associated with the issue's milestone. |
+| <a id="mergerequestreviewerassignedissuesreleasetagwildcardid"></a>`releaseTagWildcardId` | [`ReleaseTagWildcardId`](#releasetagwildcardid) | Filter issues by release tag ID wildcard. |
+| <a id="mergerequestreviewerassignedissuessearch"></a>`search` | [`String`](#string) | Search query for title or description. |
+| <a id="mergerequestreviewerassignedissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| <a id="mergerequestreviewerassignedissuesstate"></a>`state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| <a id="mergerequestreviewerassignedissuestypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| <a id="mergerequestreviewerassignedissuesupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| <a id="mergerequestreviewerassignedissuesupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| <a id="mergerequestreviewerassignedissuesweight"></a>`weight` | [`String`](#string) | Weight applied to the issue, "none" and "any" values are supported. |
 
 ##### `MergeRequestReviewer.assignedMergeRequests`
 
@@ -18730,6 +18934,57 @@ Core represention of a GitLab user.
 | <a id="usercoreweburl"></a>`webUrl` | [`String!`](#string) | Web URL of the user. |
 
 #### Fields with arguments
+
+##### `UserCore.assignedIssues`
+
+Issues assigned to the user.
+
+Returns [`IssueConnection`](#issueconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="usercoreassignedissuesassigneeid"></a>`assigneeId` | [`String`](#string) | ID of a user assigned to the issues. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="usercoreassignedissuesassigneeusername"></a>`assigneeUsername` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.11. Use `assigneeUsernames`. |
+| <a id="usercoreassignedissuesassigneeusernames"></a>`assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| <a id="usercoreassignedissuesauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| <a id="usercoreassignedissuesclosedafter"></a>`closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| <a id="usercoreassignedissuesclosedbefore"></a>`closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| <a id="usercoreassignedissuesconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter for confidential issues. If "false", excludes confidential issues. If "true", returns only confidential issues. |
+| <a id="usercoreassignedissuescreatedafter"></a>`createdAfter` | [`Time`](#time) | Issues created after this date. |
+| <a id="usercoreassignedissuescreatedbefore"></a>`createdBefore` | [`Time`](#time) | Issues created before this date. |
+| <a id="usercoreassignedissuescrmcontactid"></a>`crmContactId` | [`String`](#string) | ID of a contact assigned to the issues. |
+| <a id="usercoreassignedissuescrmorganizationid"></a>`crmOrganizationId` | [`String`](#string) | ID of an organization assigned to the issues. |
+| <a id="usercoreassignedissuesepicid"></a>`epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| <a id="usercoreassignedissueshealthstatus"></a>`healthStatus` **{warning-solid}** | [`HealthStatus`](#healthstatus) | **Deprecated** in 15.4. Use `healthStatusFilter`. |
+| <a id="usercoreassignedissueshealthstatusfilter"></a>`healthStatusFilter` | [`HealthStatusFilter`](#healthstatusfilter) | Health status of the issue, "none" and "any" values are supported. |
+| <a id="usercoreassignedissuesiid"></a>`iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| <a id="usercoreassignedissuesiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
+| <a id="usercoreassignedissuesin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'. |
+| <a id="usercoreassignedissuesincludesubepics"></a>`includeSubepics` | [`Boolean`](#boolean) | Whether to include subepics when filtering issues by epicId. |
+| <a id="usercoreassignedissuesiterationid"></a>`iterationId` | [`[ID]`](#id) | List of iteration Global IDs applied to the issue. |
+| <a id="usercoreassignedissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
+| <a id="usercoreassignedissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| <a id="usercoreassignedissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="usercoreassignedissuesmilestonewildcardid"></a>`milestoneWildcardId` | [`MilestoneWildcardId`](#milestonewildcardid) | Filter issues by milestone ID wildcard. |
+| <a id="usercoreassignedissuesmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="usercoreassignedissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
+| <a id="usercoreassignedissuesprojectid"></a>`projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored issues should be in. Incompatible with projectPath. |
+| <a id="usercoreassignedissuesprojectpath"></a>`projectPath` | [`String`](#string) | The full-path of the project the authored issues should be in. Incompatible with projectId. |
+| <a id="usercoreassignedissuesreleasetag"></a>`releaseTag` | [`[String!]`](#string) | Release tag associated with the issue's milestone. |
+| <a id="usercoreassignedissuesreleasetagwildcardid"></a>`releaseTagWildcardId` | [`ReleaseTagWildcardId`](#releasetagwildcardid) | Filter issues by release tag ID wildcard. |
+| <a id="usercoreassignedissuessearch"></a>`search` | [`String`](#string) | Search query for title or description. |
+| <a id="usercoreassignedissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| <a id="usercoreassignedissuesstate"></a>`state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| <a id="usercoreassignedissuestypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| <a id="usercoreassignedissuesupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| <a id="usercoreassignedissuesupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| <a id="usercoreassignedissuesweight"></a>`weight` | [`String`](#string) | Weight applied to the issue, "none" and "any" values are supported. |
 
 ##### `UserCore.assignedMergeRequests`
 
@@ -22770,6 +23025,57 @@ Implementations:
 | <a id="userweburl"></a>`webUrl` | [`String!`](#string) | Web URL of the user. |
 
 ##### Fields with arguments
+
+###### `User.assignedIssues`
+
+Issues assigned to the user.
+
+Returns [`IssueConnection`](#issueconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+####### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="userassignedissuesassigneeid"></a>`assigneeId` | [`String`](#string) | ID of a user assigned to the issues. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="userassignedissuesassigneeusername"></a>`assigneeUsername` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.11. Use `assigneeUsernames`. |
+| <a id="userassignedissuesassigneeusernames"></a>`assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| <a id="userassignedissuesauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| <a id="userassignedissuesclosedafter"></a>`closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| <a id="userassignedissuesclosedbefore"></a>`closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| <a id="userassignedissuesconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter for confidential issues. If "false", excludes confidential issues. If "true", returns only confidential issues. |
+| <a id="userassignedissuescreatedafter"></a>`createdAfter` | [`Time`](#time) | Issues created after this date. |
+| <a id="userassignedissuescreatedbefore"></a>`createdBefore` | [`Time`](#time) | Issues created before this date. |
+| <a id="userassignedissuescrmcontactid"></a>`crmContactId` | [`String`](#string) | ID of a contact assigned to the issues. |
+| <a id="userassignedissuescrmorganizationid"></a>`crmOrganizationId` | [`String`](#string) | ID of an organization assigned to the issues. |
+| <a id="userassignedissuesepicid"></a>`epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| <a id="userassignedissueshealthstatus"></a>`healthStatus` **{warning-solid}** | [`HealthStatus`](#healthstatus) | **Deprecated** in 15.4. Use `healthStatusFilter`. |
+| <a id="userassignedissueshealthstatusfilter"></a>`healthStatusFilter` | [`HealthStatusFilter`](#healthstatusfilter) | Health status of the issue, "none" and "any" values are supported. |
+| <a id="userassignedissuesiid"></a>`iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| <a id="userassignedissuesiids"></a>`iids` | [`[String!]`](#string) | List of IIDs of issues. For example, `["1", "2"]`. |
+| <a id="userassignedissuesin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument.'. |
+| <a id="userassignedissuesincludesubepics"></a>`includeSubepics` | [`Boolean`](#boolean) | Whether to include subepics when filtering issues by epicId. |
+| <a id="userassignedissuesiterationid"></a>`iterationId` | [`[ID]`](#id) | List of iteration Global IDs applied to the issue. |
+| <a id="userassignedissuesiterationwildcardid"></a>`iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
+| <a id="userassignedissueslabelname"></a>`labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| <a id="userassignedissuesmilestonetitle"></a>`milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| <a id="userassignedissuesmilestonewildcardid"></a>`milestoneWildcardId` | [`MilestoneWildcardId`](#milestonewildcardid) | Filter issues by milestone ID wildcard. |
+| <a id="userassignedissuesmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. Wildcard values "NONE" and "ANY" are supported. |
+| <a id="userassignedissuesnot"></a>`not` | [`NegatedIssueFilterInput`](#negatedissuefilterinput) | Negated arguments. |
+| <a id="userassignedissuesprojectid"></a>`projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored issues should be in. Incompatible with projectPath. |
+| <a id="userassignedissuesprojectpath"></a>`projectPath` | [`String`](#string) | The full-path of the project the authored issues should be in. Incompatible with projectId. |
+| <a id="userassignedissuesreleasetag"></a>`releaseTag` | [`[String!]`](#string) | Release tag associated with the issue's milestone. |
+| <a id="userassignedissuesreleasetagwildcardid"></a>`releaseTagWildcardId` | [`ReleaseTagWildcardId`](#releasetagwildcardid) | Filter issues by release tag ID wildcard. |
+| <a id="userassignedissuessearch"></a>`search` | [`String`](#string) | Search query for title or description. |
+| <a id="userassignedissuessort"></a>`sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| <a id="userassignedissuesstate"></a>`state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| <a id="userassignedissuestypes"></a>`types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| <a id="userassignedissuesupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| <a id="userassignedissuesupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| <a id="userassignedissuesweight"></a>`weight` | [`String`](#string) | Weight applied to the issue, "none" and "any" values are supported. |
 
 ###### `User.assignedMergeRequests`
 
