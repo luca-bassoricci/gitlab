@@ -70,7 +70,9 @@ export default Vue.extend({
           id: 'issue-' + issue.id,
           text: issue.title,
           action: () => {
-            window.location.href = issue.webUrl;
+            // window.location.href = issue.webUrl;
+            const event = new CustomEvent('showIssue', { detail: issue });
+            document.dispatchEvent(event);
           },
         });
       });
