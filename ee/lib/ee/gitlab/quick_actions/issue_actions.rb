@@ -183,8 +183,36 @@ module EE
             if policy.nil?
               @execution_message[:page] = _("Policy '%{escalation_policy_name}' does not exist.") % { escalation_policy_name: escalation_policy_name }
             else
-              @updates[:escalation_status] = { status: :triggered, policy: policy }
-              @execution_message[:page] = _('Started escalation for this incident.')
+              if quick_action_target.persisted?
+                issue = ::Issues::UpdateService
+                  .new(project: quick_action_target.project,
+                       current_user: current_user,
+                       params: {
+                         escalation_status: { status: :triggered, policy: policy }
+                       }
+                      ).execute(quick_action_target)
+                @execution_message[:page] =
+                  if issue.escalation_status.saved_change_to_updated_at?
+                    _('Started escalation for this incident.')
+                  else
+                    _("This incident is already escalated with '%{escalation_policy_name}'.") % { escalation_policy_name: escalation_policy_name }
+                  end
+              else
+                result = ::IncidentManagement::IssuableEscalationStatuses::PrepareUpdateService.new(
+                  quick_action_target,
+                  current_user,
+                  { status: :triggered, policy: policy }
+                ).execute
+
+                return unless result.success? && result[:escalation_status].present?
+
+                quick_action_target.build_incident_management_issuable_escalation_status(result[:escalation_status])
+                ::IncidentManagement::IssuableEscalationStatuses::AfterUpdateService.new(
+                  quick_action_target,
+                  current_user
+                ).execute
+                @execution_message[:page] = _('Started escalation for this incident.')
+              end
             end
           end
         end
