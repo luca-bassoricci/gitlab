@@ -46,7 +46,7 @@ export function mountJiraIssuesListApp() {
   });
 }
 
-export async function mountIssuesListApp() {
+export async function mountIssuesListApp(isOwnIssueList) {
   const el = document.querySelector('.js-issues-list');
 
   if (!el) {
@@ -182,6 +182,7 @@ export async function mountIssuesListApp() {
       quickActionsHelpPath,
       resetPath,
     },
-    render: (createComponent) => createComponent(IssuesListApp),
+    render: (createComponent) =>
+      createComponent(IssuesListApp, { props: { ownIssueList: 'true' } }),
   });
 }

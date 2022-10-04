@@ -49,7 +49,7 @@ const linkIssuesButton = async () => {
 
   el.addEventListener('click', () => {
     prepareBody();
-    mountIssuesListApp();
+    mountIssuesListApp(true);
   });
 };
 

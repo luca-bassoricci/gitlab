@@ -11,6 +11,7 @@ import {
 import * as Sentry from '@sentry/browser';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import IssueCardTimeInfo from 'ee_else_ce/issues/list/components/issue_card_time_info.vue';
+import getOwnIssuesQuery from 'ee_else_ce/issues/list/queries/get_own_issues.query.graphql';
 import getIssuesQuery from 'ee_else_ce/issues/list/queries/get_issues.query.graphql';
 import getIssuesCountsQuery from 'ee_else_ce/issues/list/queries/get_issues_counts.query.graphql';
 import createFlash, { FLASH_TYPES } from '~/flash';
@@ -163,6 +164,11 @@ export default {
       required: false,
       default: () => [],
     },
+    ownIssueList: {
+      type: Boolean,
+      required: false,
+      default: () => true,
+    },
   },
   data() {
     return {
@@ -181,18 +187,27 @@ export default {
   },
   apollo: {
     issues: {
-      query: getIssuesQuery,
+      query() {
+        return this.ownIssueList ? getOwnIssuesQuery : getIssuesQuery;
+      },
       variables() {
         return this.queryVariables;
       },
       update(data) {
+        if (data.currentUser) {
+          return data.currentUser.assignedIssues.nodes ?? [];
+        }
         return data[this.namespace]?.issues.nodes ?? [];
       },
       result(queryResult) {
         if (!queryResult?.data) {
           return;
         }
-        this.pageInfo = queryResult?.data[this.namespace]?.issues.pageInfo ?? {};
+        if (queryResult?.data.currentUser) {
+          this.pageInfo = queryResult?.data.currentUser.assignedIssues.pageInfo ?? {};
+        } else {
+          this.pageInfo = queryResult?.data[this.namespace]?.issues.pageInfo ?? {};
+        }
         this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
       },
       error(error) {

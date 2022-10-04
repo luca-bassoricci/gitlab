@@ -1,3 +1,4 @@
+import { select } from 'd3-selection';
 import { parse } from 'micromatch';
 import { db } from './local_db';
 
@@ -9,8 +10,12 @@ export class DexieWrapper {
 
     const resultObj = {};
     const selectedQuery = await db.table('queries').get(queryId);
-    console.log('Query ', selectedQuery);
+    delete selectedQuery['project({"fullPath":"flightjs/Flight"})'];
+
+    console.log('Query Get ', selectedQuery);
     resultObj.ROOT_QUERY = selectedQuery;
+
+    const lookupTable = [];
 
     const parseObjectsForRef = async (selObject) => {
       for (const key in selObject) {
@@ -20,7 +25,8 @@ export class DexieWrapper {
               const pathId = selObject[key].__ref;
               const pathParts = pathId.split(':');
 
-              if (!resultObj[pathId]) {
+              if (!resultObj[pathId] && !lookupTable.includes(pathId)) {
+                lookupTable.push(pathId);
                 const selectedEntity = await db
                   .table(pathParts[0].toLowerCase())
                   .get(pathId.substr(pathParts[0].length + 1));
@@ -44,7 +50,7 @@ export class DexieWrapper {
 
     await parseObjectsForRef(resultObj.ROOT_QUERY);
 
-    console.log('FINAL RESULT OBJECT : ', resultObj);
+    // console.log('FINAL RESULT OBJECT : ', resultObj);
 
     return resultObj;
   }
