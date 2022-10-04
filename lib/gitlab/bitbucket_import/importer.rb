@@ -8,7 +8,7 @@ module Gitlab
                 { title: 'proposal', color: '#69D100' },
                 { title: 'task', color: '#7F8C8D' }].freeze
 
-      attr_reader :project, :client, :errors, :users
+      attr_reader :project, :client, :errors, :users, :issues_labels_links
 
       def initialize(project)
         @project = project
@@ -17,6 +17,7 @@ module Gitlab
         @labels = {}
         @errors = []
         @users = {}
+        @issues_labels_links = {}
       end
 
       def execute
@@ -88,66 +89,81 @@ module Gitlab
 
         issue_type_id = WorkItems::Type.default_issue_type.id
 
-        client.issues(repo).each do |issue|
-          import_issue(issue, issue_type_id)
+        issues_attributes = client.issues(repo).map do |issue|
+          metrics.issues_counter.increment
+          collect_issues_attributes(issue, issue_type_id)
         end
+
+        gitlab_issues = ::Issue.insert_all!(
+          issues_attributes,
+          returning: %w[id iid]
+        ).map(&:symbolize_keys)
+
+        import_labels(gitlab_issues)
+        import_issue_comments(gitlab_issues)
       end
 
-      # rubocop: disable CodeReuse/ActiveRecord
-      def import_issue(issue, issue_type_id)
+      def collect_issues_attributes(issue, issue_type_id)
         description = ''
         description += @formatter.author_line(issue.author) unless find_user_id(issue.author)
         description += issue.description
 
-        label_name = issue.kind
-        milestone = issue.milestone ? project.milestones.find_or_create_by(title: issue.milestone) : nil
+        issues_labels_links[issue.iid] = { label_id: @labels[issue.kind].id }
 
-        gitlab_issue = project.issues.create!(
+        milestone_id = issue.milestone ? project.milestones.find_or_create_by(title: issue.milestone).id : nil # rubocop: disable CodeReuse/ActiveRecord
+
+        {
           iid: issue.iid,
           title: issue.title,
           description: description,
           state_id: Issue.available_states[issue.state],
           author_id: gitlab_user_id(project, issue.author),
           namespace_id: project.project_namespace_id,
-          milestone: milestone,
+          project_id: project.id,
+          milestone_id: milestone_id,
           work_item_type_id: issue_type_id,
           created_at: issue.created_at,
           updated_at: issue.updated_at
-        )
-
-        metrics.issues_counter.increment
-
-        gitlab_issue.labels << @labels[label_name]
-
-        import_issue_comments(issue, gitlab_issue) if gitlab_issue.persisted?
-      rescue StandardError => e
-        errors << { type: :issue, iid: issue.iid, errors: e.message }
+        }
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
-      def import_issue_comments(issue, gitlab_issue)
-        client.issue_comments(repo, issue.iid).each do |comment|
-          # The note can be blank for issue service messages like "Changed title: ..."
-          # We would like to import those comments as well but there is no any
-          # specific parameter that would allow to process them, it's just an empty comment.
-          # To prevent our importer from just crashing or from creating useless empty comments
-          # we do this check.
-          next unless comment.note.present?
+      def import_labels(issues)
+        labels_attributes = issues.map do |issue|
+          issues_labels_links[issue[:iid]].merge(target_id: issue[:id])
+        end
 
-          note = ''
-          note += @formatter.author_line(comment.author) unless find_user_id(comment.author)
-          note += comment.note
+        LabelLink.insert_all!(labels_attributes)
+      end
 
-          begin
-            gitlab_issue.notes.create!(
-              project: project,
+      def import_issue_comments(issues)
+        issue_comments_attributes = collect_issue_comments_attributes(issues)
+
+        Note.insert_all!(issue_comments_attributes) if issue_comments_attributes.any?
+      end
+
+      def collect_issue_comments_attributes(issues)
+        issues.flat_map do |issue|
+          client.issue_comments(repo, issue[:iid]).map do |comment|
+            # The note can be blank for issue service messages like "Changed title: ..."
+            # We would like to import those comments as well but there is no any
+            # specific parameter that would allow to process them, it's just an empty comment.
+            # To prevent our importer from just crashing or from creating useless empty comments
+            # we do this check.
+            next unless comment.note.present?
+
+            note = ''
+            note += @formatter.author_line(comment.author) unless find_user_id(comment.author)
+            note += comment.note
+
+            {
+              project_id: project.id,
               note: note,
+              noteable_type: 'Issue',
+              noteable_id: issue[:id],
               author_id: gitlab_user_id(project, comment.author),
               created_at: comment.created_at,
               updated_at: comment.updated_at
-            )
-          rescue StandardError => e
-            errors << { type: :issue_comment, iid: issue.iid, errors: e.message }
+            }
           end
         end
       end

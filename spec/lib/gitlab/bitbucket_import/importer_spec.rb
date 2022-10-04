@@ -58,16 +58,15 @@ RSpec.describe Gitlab::BitbucketImport::Importer do
     issues
   end
 
-  let(:project_identifier) { 'namespace/repo' }
-  let(:data) { { 'token' => 'token' } }
+  let_it_be(:project_identifier) { 'namespace/repo' }
 
-  let(:project) do
+  let_it_be_with_reload(:project) do
     create(
       :project,
       :repository,
       import_source: project_identifier,
       import_url: "https://bitbucket.org/#{project_identifier}.git",
-      import_data_attributes: { credentials: data }
+      import_data_attributes: { credentials: { 'token' => 'token' } }
     )
   end
 
@@ -362,6 +361,29 @@ RSpec.describe Gitlab::BitbucketImport::Importer do
         importer.execute
 
         expect(project.issues.map(&:work_item_type_id).uniq).to contain_exactly(WorkItems::Type.default_issue_type.id)
+      end
+
+      context 'with issue comments' do
+        let(:inline_note) do
+          instance_double(Bitbucket::Representation::Comment, note: 'Hello world', author: 'someuser', created_at: Time.now, updated_at: Time.now)
+        end
+
+        before do
+          allow_next_instance_of(Bitbucket::Client) do |instance|
+            allow(instance).to receive(:issue_comments).and_return([inline_note])
+          end
+        end
+
+        it 'imports issue comments' do
+          allow(importer).to receive(:import_wiki)
+          importer.execute
+
+          comment = project.notes.first
+          expect(project.notes.size).to eq(7)
+          expect(comment.note).to include(inline_note.note)
+          expect(comment.note).to include(inline_note.author)
+          expect(importer.errors).to be_empty
+        end
       end
     end
 
