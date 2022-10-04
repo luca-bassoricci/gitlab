@@ -71,7 +71,7 @@
                   = number_with_delimiter(issues_count)
             = nav_link(path: 'dashboard#issues', html_options: { class: "user-counter" }) do
               = link_to assigned_issues_dashboard_path, title: _('Issues'), class: 'dashboard-shortcuts-issues-old', aria: { label: _('Issues - Old List') },
-                data: { qa_selector: 'issues_shortcut_button', toggle: 'tooltip', placement: 'bottom',
+                data: { qa_selector: 'issues_shortcut_button-old', toggle: 'tooltip', placement: 'bottom',
                 track_label: 'main_navigation',
                 track_action: 'click_issues_link',
                 track_property: 'navigation',

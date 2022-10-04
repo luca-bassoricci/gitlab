@@ -141,6 +141,9 @@ module Types
     field :timelogs, Types::TimelogType.connection_type, null: false,
                                                          description: 'Timelogs on the issue.'
 
+    field :project, Types::ProjectType, null: false,
+                                        description: 'Alias for project.'
+
     field :project_id, GraphQL::Types::Int, null: false, method: :project_id,
                                             description: 'ID of the issue project.'
 

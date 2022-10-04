@@ -50,6 +50,7 @@ const linkIssuesButton = async () => {
   el.addEventListener('click', () => {
     prepareBody();
     mountIssuesListApp(true);
+    window.history.pushState({}, '', '/dashboard/issues?assignee_username=root');
   });
 };
 

@@ -20,6 +20,13 @@ fragment IssueFragment on Issue {
   webPath
   webUrl
   type
+  project {
+    id
+    visibility
+    path
+    fullPath
+  }
+  projectId
   assignees @skip(if: $hideUsers) {
     nodes {
       id

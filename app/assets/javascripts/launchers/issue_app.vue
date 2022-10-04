@@ -43,7 +43,7 @@ export default {
         canDestroy: true,
         canUpdateTimelineEvent: true,
         issuableRef: `#${this.issue.id}`,
-        markdownPreviewPath: `/flightjs/Flight/preview_markdown?target_id=${this.issue.id}&target_type=Issue`,
+        markdownPreviewPath: `/${this.issue.project.fullPath}/preview_markdown?target_id=${this.issue.id}&target_type=Issue`,
         markdownDocsPath: '/help/user/markdown',
         lockVersion: 4,
         state: this.issue.state,
@@ -186,7 +186,7 @@ export default {
         quickActionsDocsPath: '/help/user/project/quick_actions',
         closePath: '/flightjs/Flight/-/issues/1.json?issue%5Bstate_event%5D=close',
         reopenPath: '/flightjs/Flight/-/issues/1.json?issue%5Bstate_event%5D=reopen',
-        notesPath: `/flightjs/Flight/noteable/issue/${this.issue.id.replace(
+        notesPath: `/${this.issue.project.fullPath}/noteable/issue/${this.issue.id.replace(
           'gid://gitlab/Issue/',
           '',
         )}/notes`,

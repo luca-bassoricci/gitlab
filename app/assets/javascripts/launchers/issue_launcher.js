@@ -12,9 +12,9 @@ import IssueApp from './issue_app.vue';
 export function initIssueLauncher() {
   document.addEventListener('showIssue', (e) => {
     console.log('Show Issue : ', e);
-    addProjectBody('flightjs/Flight', IssueApp, {
+    addProjectBody(e.detail.project.fullPath, IssueApp, {
       props: {
-        projectId: 'flightjs/Flight',
+        projectId: e.detail.project.fullPath,
         issue: e.detail,
       },
     });
@@ -24,6 +24,8 @@ export function initIssueLauncher() {
 
     initSidebarBundle(store);
     initRelatedIssues();
+
+    window.history.pushState({}, '', e.detail.webPath);
   });
 }
 
