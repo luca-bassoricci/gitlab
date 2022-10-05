@@ -58,7 +58,7 @@ module Groups
       raise_transfer_error(:namespace_with_same_path) if namespace_with_same_path?
       raise_transfer_error(:group_contains_images) if group_projects_contain_registry_images?
       raise_transfer_error(:cannot_transfer_to_subgroup) if transfer_to_subgroup?
-      raise_transfer_error(:group_contains_npm_packages) if group_with_npm_packages?
+      raise_transfer_error(:group_contains_namespaced_npm_packages) if group_with_namespaced_npm_packages?
       raise_transfer_error(:no_permissions_to_migrate_crm) if no_permissions_to_migrate_crm?
     end
 
@@ -72,12 +72,13 @@ module Groups
       false
     end
 
-    def group_with_npm_packages?
+    def group_with_namespaced_npm_packages?
       return false unless group.packages_feature_enabled?
 
       npm_packages = ::Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
+      namespaced_packages = npm_packages.select {|p| group.root_ancestor.path == ::Packages::Npm.scope_of(p.name)}
 
-      different_root_ancestor? && npm_packages.exists?
+      different_root_ancestor? && namespaced_packages.any?
     end
 
     def different_root_ancestor?
@@ -216,7 +217,7 @@ module Groups
         invalid_policies: s_("TransferGroup|You don't have enough permissions."),
         group_contains_images: s_('TransferGroup|Cannot update the path because there are projects under this group that contain Docker images in their Container Registry. Please remove the images from your projects first and try again.'),
         cannot_transfer_to_subgroup: s_('TransferGroup|Cannot transfer group to one of its subgroup.'),
-        group_contains_npm_packages: s_('TransferGroup|Group contains projects with NPM packages.'),
+        group_contains_namespaced_npm_packages: s_('TransferGroup|Group contains projects with NPM packages.'),
         no_permissions_to_migrate_crm: s_("TransferGroup|Group contains contacts/organizations and you don't have enough permissions to move them to the new root group.")
       }.freeze
     end

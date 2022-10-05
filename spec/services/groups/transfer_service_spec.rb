@@ -47,19 +47,19 @@ RSpec.describe Groups::TransferService, :sidekiq_inline do
 
     context 'with an npm package' do
       before do
-        create(:npm_package, project: project)
+        create(:npm_package, project: project, name: "@testscope/test")
       end
 
-      shared_examples 'transfer not allowed' do
-        it 'does not allow transfer when there is a root namespace change' do
+      shared_examples 'transfer allowed' do
+        it 'allows transfer' do
           transfer_service.execute(new_group)
 
-          expect(transfer_service.error).to eq('Transfer failed: Group contains projects with NPM packages.')
-          expect(group.parent).not_to eq(new_group)
+          expect(transfer_service.error).to be nil
+          expect(group.parent).to eq(new_group)
         end
       end
 
-      it_behaves_like 'transfer not allowed'
+      it_behaves_like 'transfer allowed'
 
       context 'with a project within subgroup' do
         let_it_be(:root_group) { create(:group) }
@@ -69,23 +69,38 @@ RSpec.describe Groups::TransferService, :sidekiq_inline do
           root_group.add_owner(user)
         end
 
-        it_behaves_like 'transfer not allowed'
+        it_behaves_like 'transfer allowed'
 
         context 'without a root namespace change' do
           let(:new_group) { create(:group, parent: root_group) }
 
-          it 'allows transfer' do
-            transfer_service.execute(new_group)
+          it_behaves_like 'transfer allowed'
+        end
 
-            expect(transfer_service.error).to be nil
-            expect(group.parent).to eq(new_group)
+        context 'with namespaced packages present' do
+          let!(:namespaced_package) { create(:npm_package, project: project, name: "@#{project.root_namespace.path}/test") }
+    
+          it 'does not allow transfer' do
+            transfer_service.execute(new_group)
+  
+            expect(transfer_service.error).to eq('Transfer failed: Group contains projects with NPM packages.')
+            expect(group.parent).not_to eq(new_group)
+          end
+  
+          context 'namespaced package is pending destruction' do
+            before do
+              namespaced_package.pending_destruction!
+            end
+    
+            it_behaves_like 'transfer allowed'
           end
         end
 
         context 'when transferring a group into a root group' do
           let(:new_group) { nil }
 
-          it_behaves_like 'transfer not allowed'
+          it_behaves_like 'transfer allowed'
+
         end
       end
     end

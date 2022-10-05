@@ -23,7 +23,7 @@ RSpec.describe Projects::TransferService do
     let!(:package) { create(:npm_package, project: project, name: "@testscope/test") }
 
     context 'with a root namespace change' do
-      it 'does not allow the transfer' do
+      it 'allow the transfer' do
         expect(transfer_service.execute(group)).to be true
         expect(project.errors[:new_namespace]).to be_empty
       end
@@ -59,7 +59,7 @@ RSpec.describe Projects::TransferService do
         other_group.add_owner(user)
       end
 
-      it 'does allow the transfer' do
+      it 'allow the transfer' do
         expect(transfer_service.execute(other_group)).to be true
         expect(project.errors[:new_namespace]).to be_empty
       end
