@@ -3,32 +3,25 @@
 module Gitlab
   module Memory
     class UploadAndCleanupReports
-      # NOOP. Will be removed soon. See https://gitlab.com/gitlab-org/gitlab/-/issues/376014
       DEFAULT_SLEEP_TIME_SECONDS = 900 # 15 minutes
 
       def initialize(
-        sleep_time_seconds: ENV['GITLAB_DIAGNOSTIC_REPORTS_UPLOADER_SLEEP_S']&.to_i || DEFAULT_SLEEP_TIME_SECONDS,
-        reports_path: ENV["GITLAB_DIAGNOSTIC_REPORTS_PATH"])
+        uploader:,
+        reports_path:,
+        sleep_time_seconds: ENV['GITLAB_DIAGNOSTIC_REPORTS_UPLOADER_SLEEP_S']&.to_i || DEFAULT_SLEEP_TIME_SECONDS)
 
-        @sleep_time_seconds = sleep_time_seconds
+        @uploader = uploader
         @reports_path = reports_path
-
-        unless @reports_path.present?
-          log_error_reports_path_missing
-          return
-        end
-
-        @uploader = ReportsUploader.new
-
+        @sleep_time_seconds = sleep_time_seconds
         @alive = true
       end
 
-      attr_reader :sleep_time_seconds, :reports_path, :uploader, :alive
+      attr_reader :uploader, :reports_path, :sleep_time_seconds
 
       def call
         log_started
 
-        while alive
+        loop do
           sleep(sleep_time_seconds)
 
           next unless Feature.enabled?(:gitlab_diagnostic_reports_uploader, type: :ops)
@@ -40,9 +33,11 @@ module Gitlab
       private
 
       def upload_and_cleanup!(path)
-        cleanup!(path) if uploader.upload(path)
-      rescue StandardError => error
+        uploader.upload(path)
+      rescue StandardError, Errno::ENOENT => error
         log_exception(error)
+      ensure
+        cleanup!(path)
       end
 
       def cleanup!(path)
@@ -55,10 +50,6 @@ module Gitlab
         Dir.entries(reports_path)
           .map { |path| File.join(reports_path, path) }
           .select { |path| File.file?(path) }
-      end
-
-      def log_error_reports_path_missing
-        Gitlab::AppLogger.error(log_labels.merge(perf_report_status: "path is not configured"))
       end
 
       def log_started

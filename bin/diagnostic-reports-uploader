@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "listen"
-
 # Fail fast if we necessary ENV vars are not set. We could not recover from that.
 reports_path = ENV["GITLAB_DIAGNOSTIC_REPORTS_PATH"].to_s
 raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PATH dir is missing' unless Dir.exist?(reports_path)
@@ -17,11 +15,4 @@ gcs_bucket = ENV["GITLAB_DIAGNOSTIC_REPORTS_BUCKET"].to_s
 raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_BUCKET is missing' unless gcs_bucket.present?
 
 uploader = Gitlab::Memory::ReportUploader.new(gcs_key: gcs_key, gcs_project: gcs_project, gcs_bucket: gcs_bucket)
-
-# Yield: [modified, added, removed] the changed files. We only listen for `added`.
-listener = Listen.to(reports_path) do |_, added, _|
-  added.each { |path| uploader.call(path) }
-end
-
-listener.start
-sleep
+Gitlab::Memory::UploadAndCleanupReports.new(uploader: uploader, reports_path: reports_path).call

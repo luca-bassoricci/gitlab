@@ -8,7 +8,7 @@ module Gitlab
         @fog = Fog::Storage::Google.new(google_project: gcs_project, google_json_key_location: gcs_key)
       end
 
-      def call(path)
+      def upload(path)
         log_upload_requested(path)
         start_monotonic_time = Gitlab::Metrics::System.monotonic_time
 
@@ -18,8 +18,6 @@ module Gitlab
         log_upload_success(path, duration_s)
       rescue StandardError, Errno::ENOENT => error
         log_exception(error)
-      ensure
-        cleanup!(path.to_s)
       end
 
       private
