@@ -76,7 +76,7 @@ module Groups
       return false unless group.packages_feature_enabled?
 
       npm_packages = ::Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
-      namespaced_packages = npm_packages.select {|p| group.root_ancestor.path == ::Packages::Npm.scope_of(p.name)}
+      namespaced_packages = npm_packages.select { |p| group.root_ancestor.path == ::Packages::Npm.scope_of(p.name) }
 
       different_root_ancestor? && namespaced_packages.any?
     end

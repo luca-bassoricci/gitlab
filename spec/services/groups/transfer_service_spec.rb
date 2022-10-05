@@ -79,19 +79,19 @@ RSpec.describe Groups::TransferService, :sidekiq_inline do
 
         context 'with namespaced packages present' do
           let!(:namespaced_package) { create(:npm_package, project: project, name: "@#{project.root_namespace.path}/test") }
-    
+
           it 'does not allow transfer' do
             transfer_service.execute(new_group)
-  
+
             expect(transfer_service.error).to eq('Transfer failed: Group contains projects with NPM packages.')
             expect(group.parent).not_to eq(new_group)
           end
-  
+
           context 'namespaced package is pending destruction' do
             before do
               namespaced_package.pending_destruction!
             end
-    
+
             it_behaves_like 'transfer allowed'
           end
         end
@@ -100,7 +100,6 @@ RSpec.describe Groups::TransferService, :sidekiq_inline do
           let(:new_group) { nil }
 
           it_behaves_like 'transfer allowed'
-
         end
       end
     end
