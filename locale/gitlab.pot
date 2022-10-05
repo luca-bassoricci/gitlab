@@ -2663,6 +2663,15 @@ msgstr ""
 msgid "AdminDashboard|Error loading the statistics. Please try again"
 msgstr ""
 
+msgid "AdminEmail|Body"
+msgstr ""
+
+msgid "AdminEmail|Recipient group"
+msgstr ""
+
+msgid "AdminEmail|Subject"
+msgstr ""
+
 msgid "AdminLabels|Define your default set of project labels"
 msgstr ""
 

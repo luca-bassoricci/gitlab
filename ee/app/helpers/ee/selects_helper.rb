@@ -18,7 +18,7 @@ module EE
       css_class << opts[:class] if opts[:class]
       value = opts[:selected] || ''
 
-      hidden_field_tag(id, value, class: css_class.join(' '))
+      hidden_field_tag(id, value, class: css_class.join(' '), required: true)
     end
 
     override :users_select_data_attributes
