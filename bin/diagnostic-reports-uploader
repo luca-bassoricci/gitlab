@@ -14,5 +14,5 @@ raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PROJECT is missing' unless gcs_p
 gcs_bucket = ENV["GITLAB_DIAGNOSTIC_REPORTS_BUCKET"].to_s
 raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_BUCKET is missing' unless gcs_bucket.present?
 
-uploader = Gitlab::Memory::ReportUploader.new(gcs_key: gcs_key, gcs_project: gcs_project, gcs_bucket: gcs_bucket)
+uploader = Gitlab::Memory::ReportsUploader.new(gcs_key: gcs_key, gcs_project: gcs_project, gcs_bucket: gcs_bucket)
 Gitlab::Memory::UploadAndCleanupReports.new(uploader: uploader, reports_path: reports_path).call

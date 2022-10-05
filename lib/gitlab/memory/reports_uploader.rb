@@ -2,7 +2,7 @@
 
 module Gitlab
   module Memory
-    class ReportUploader
+    class ReportsUploader
       def initialize(gcs_key:, gcs_project:, gcs_bucket:)
         @gcs_bucket = gcs_bucket
         @fog = Fog::Storage::Google.new(google_project: gcs_project, google_json_key_location: gcs_key)

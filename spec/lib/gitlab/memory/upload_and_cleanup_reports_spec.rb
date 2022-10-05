@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Memory::UploadAndCleanupReports, :aggregate_failures do
-  let(:uploader) { instance_double(Gitlab::Memory::ReportUploader) }
+  let(:uploader) { instance_double(Gitlab::Memory::ReportsUploader) }
 
   describe '#initalize' do
     let(:reports_path) { '/path/to/reports' }
