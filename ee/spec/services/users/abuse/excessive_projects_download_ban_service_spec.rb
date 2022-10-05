@@ -120,7 +120,7 @@ RSpec.describe Users::Abuse::ExcessiveProjectsDownloadBanService do
     context 'when auto_ban_user_on_excessive_projects_download is disabled and user gets throttled' do
       before do
         stub_application_setting(auto_ban_user_on_excessive_projects_download: false)
-        
+
         mock_throttled_calls(project, false, true)
       end
 

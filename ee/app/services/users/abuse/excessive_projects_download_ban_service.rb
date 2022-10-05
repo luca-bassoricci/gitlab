@@ -3,8 +3,6 @@
 module Users
   module Abuse
     class ExcessiveProjectsDownloadBanService < BaseService
-      attr_reader :admins_alerted
-
       def self.execute(user, project)
         new(project, user).execute
       end
