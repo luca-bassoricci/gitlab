@@ -177,39 +177,15 @@ module EE
             current_user.can?(:update_escalation_status, quick_action_target) &&
             quick_action_target.escalation_policies_available?
           end
-
           command :page do |escalation_policy_name|
             policy = quick_action_target.project.incident_management_escalation_policies.find_by_name(escalation_policy_name)
+
             if policy.nil?
               @execution_message[:page] = _("Policy '%{escalation_policy_name}' does not exist.") % { escalation_policy_name: escalation_policy_name }
-            elsif quick_action_target.persisted?
-              issue = ::Issues::UpdateService
-                .new(project: quick_action_target.project,
-                     current_user: current_user,
-                     params: {
-                       escalation_status: { status: :triggered, policy: policy }
-                     }
-                    ).execute(quick_action_target)
-              @execution_message[:page] =
-                if issue.escalation_status.saved_change_to_updated_at?
-                  _('Started escalation for this incident.')
-                else
-                  _("This incident is already escalated with '%{escalation_policy_name}'.") % { escalation_policy_name: escalation_policy_name }
-                end
+            elsif policy.id == quick_action_target.escalation_status&.policy_id
+              @execution_message[:page] = _("This incident is already escalated with '%{escalation_policy_name}'.") % { escalation_policy_name: escalation_policy_name }
             else
-              result = ::IncidentManagement::IssuableEscalationStatuses::PrepareUpdateService.new(
-                quick_action_target,
-                current_user,
-                { status: :triggered, policy: policy }
-              ).execute
-
-              break unless result.success? && result[:escalation_status].present?
-
-              quick_action_target.build_incident_management_issuable_escalation_status(result[:escalation_status])
-              ::IncidentManagement::IssuableEscalationStatuses::AfterUpdateService.new(
-                quick_action_target,
-                current_user
-              ).execute
+              @updates[:escalation_status] = { policy: policy }
               @execution_message[:page] = _('Started escalation for this incident.')
             end
           end
