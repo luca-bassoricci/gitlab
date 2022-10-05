@@ -382,7 +382,7 @@ module SearchHelper
 
   def search_filter_link_json(scope, label, data, search)
     search_params = params.merge(search).merge({ scope: scope }).permit(SEARCH_GENERIC_PARAMS)
-    active_scope = @scope == scope
+    active_scope = @scope == scope.to_s
 
     result = { label: label, scope: scope, data: data, link: search_path(search_params), active: active_scope }
     result[:count] =  @search_results.formatted_count(scope) if active_scope && !@timeout
@@ -408,11 +408,9 @@ module SearchHelper
   end
 
   def search_navigation_json
-    result = {}
-    search_navigation.each do |scope, nav|
-      result[scope] = search_filter_link_json(scope.to_s, nav[:label], nav[:data], nav[:search]) if nav[:condition]
-    end
-    result.to_json
+    search_navigation.each_with_object({}) do |(key, value), hash|
+      hash[key] = search_filter_link_json(key, value[:label], value[:data], value[:search]) if value[:condition]
+    end.to_json
   end
 
   def search_filter_input_options(type, placeholder = _('Search or filter results...'))
