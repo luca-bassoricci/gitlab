@@ -3,6 +3,7 @@ query getPipelineSummary($fullPath: ID!, $pipelineIid: ID!) {
     id
     pipeline(iid: $pipelineIid) {
       id
+      duration
       detailedStatus {
         id
         icon
@@ -11,7 +12,7 @@ query getPipelineSummary($fullPath: ID!, $pipelineIid: ID!) {
         tooltip
       }
       status
-      jobs(statuses: FAILED) {
+      jobs {
         nodes {
           allowFailure
           duration

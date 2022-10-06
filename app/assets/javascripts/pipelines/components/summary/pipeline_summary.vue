@@ -2,10 +2,12 @@
 import { GlLoadingIcon, GlSprintf, GlTableLite } from '@gitlab/ui';
 import { __ } from '~/locale';
 import CiIconBadge from '~/vue_shared/components/ci_badge_link.vue';
+import getFailedJobs from '../../graphql/queries/get_failed_jobs.query.graphql';
 import getManualJobs from '../../graphql/queries/get_manual_jobs.query.graphql';
 import getPipelineSummary from '../../graphql/queries/get_pipeline_summary.query.graphql';
 import ActionComponent from '../jobs_shared/action_component.vue';
 import { getQueryHeaders } from '../graph/utils';
+import PipelineProgressBar from './pipeline_progress_bar.vue';
 
 export default {
   components: {
@@ -14,13 +16,10 @@ export default {
     GlLoadingIcon,
     GlSprintf,
     GlTableLite,
+    PipelineProgressBar,
   },
+
   inject: ['fullPath', 'graphqlResourceEtag', 'pipelineIid'],
-  data() {
-    return {
-      failedJobs: [],
-    };
-  },
   apollo: {
     manualJobs: {
       query: getManualJobs,
@@ -38,6 +37,19 @@ export default {
         return data?.project?.pipeline?.jobs?.nodes;
       },
     },
+    failedJobs: {
+      query: getFailedJobs,
+      pollInterval: 10000,
+      variables() {
+        return {
+          fullPath: this.fullPath,
+          pipelineIid: this.pipelineIid,
+        };
+      },
+      update(data) {
+        return data?.project?.pipeline?.jobs?.nodes || [];
+      },
+    },
     pipeline: {
       query: getPipelineSummary,
       pollInterval: 10000,
@@ -52,12 +64,6 @@ export default {
       },
       update(data) {
         return data?.project?.pipeline;
-      },
-      result({ data }) {
-        this.failedJobs = data?.project?.pipeline?.jobs?.nodes || [];
-      },
-      error(e) {
-        console.log(e);
       },
     },
   },
@@ -99,29 +105,42 @@ export default {
     nbOfManuals() {
       return this.manualJobs.length;
     },
+    pipelineProgress() {
+      return [
+        { color: 'red', title: '10 Failed Jobs', value: 10 },
+        { color: 'green', title: '50 Successful Jobs', value: 40 },
+        { color: 'blue', title: '20 Running jobs', value: 20 },
+      ];
+    },
   },
   methods: {
     generateDuration(duration) {
       return duration ? __(`${duration} s`) : 'N/A';
     },
+    refetchFailedJobs() {
+      this.$apollo.queries.pipeline.refetch();
+    },
+    refetchManualJobs() {
+      this.$apollo.queries.manualJobs.refetch();
+    },
     showAction(job) {
       return job?.detailedStatus?.action?.path && job.userPermissions.updateBuild;
     },
   },
-  failedJobsFields: [
+  jobsFields: [
     {
       key: 'name',
       label: __('Job name'),
       tdClass: 'gl-w-10p',
     },
     {
-      key: 'stage.name',
-      label: __('Stage'),
-      tdClass: 'gl-vertical-align-middle! gl-w-5p',
+      key: 'status',
+      label: 'Status',
+      tdClass: 'gl-w-10p',
     },
     {
-      key: 'allowFailure',
-      label: __('Allowed to fail'),
+      key: 'stage.name',
+      label: __('Stage'),
       tdClass: 'gl-vertical-align-middle! gl-w-5p',
     },
     {
@@ -136,6 +155,7 @@ export default {
     },
   ],
   i18n: {
+    allJobs: __('All jobs'),
     attentionMessages: {
       failedJobs: __('You have %{nbOfFailures} failed jobs.'),
       failedJobsWarning: 'You have %{nbOfFailures} failed jobs that are allowed to fail.',
@@ -160,7 +180,8 @@ export default {
     <gl-loading-icon v-if="isLoading" />
     <div v-else>
       <h2>{{ $options.i18n.pipelineReportTitle }}</h2>
-      <ul>
+      <pipeline-progress-bar :values="pipelineProgress" :duration="pipeline.duration" />
+      <ul class="gl-mt-6">
         <li :class="$options.jobItemClasses">
           {{ $options.i18n.pipelineStatus }}
           <ci-icon-badge :status="pipeline.detailedStatus" />
@@ -193,7 +214,7 @@ export default {
 
       <div></div>
       <h3>{{ $options.i18n.manual }}</h3>
-      <gl-table-lite :fields="$options.failedJobsFields" :items="manualJobs">
+      <gl-table-lite :fields="$options.jobsFields" :items="manualJobs">
         <template #cell(duration)="{ item: { duration } }">
           {{ generateDuration(duration) }}
         </template>
@@ -204,12 +225,16 @@ export default {
             :action-icon="item.detailedStatus.action.icon"
             :link="item.detailedStatus.action.path"
             :tooltip-text="item.detailedStatus.action.title"
+            @click="refetchManualJobs"
           />
         </template>
       </gl-table-lite>
 
       <h3>{{ $options.i18n.failedJobsTitle }}</h3>
-      <gl-table-lite :fields="$options.failedJobsFields" :items="failedJobs">
+      <gl-table-lite :fields="$options.jobsFields" :items="failedJobs">
+        <template #cell(status)="{ item }">
+          <ci-icon-badge :size="24" :status="item.detailedStatus" class="gl-line-height-0" />
+        </template>
         <template #cell(duration)="{ item: { duration } }">
           {{ generateDuration(duration) }}
         </template>
@@ -220,6 +245,7 @@ export default {
             :action-icon="item.detailedStatus.action.icon"
             :link="item.detailedStatus.action.path"
             :tooltip-text="item.detailedStatus.action.title"
+            @click="refetchFailedJobs"
           />
         </template>
       </gl-table-lite>
