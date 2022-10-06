@@ -412,7 +412,7 @@ PARTITION BY RANGE (process_at);
 
 CREATE TABLE loose_foreign_keys_deleted_records (
     id bigint NOT NULL,
-    partition bigint DEFAULT 1 NOT NULL,
+    partition bigint DEFAULT 4 NOT NULL,
     primary_key_value bigint NOT NULL,
     status smallint DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -10762,6 +10762,18 @@ CREATE SEQUENCE alert_management_http_integrations_id_seq
 
 ALTER SEQUENCE alert_management_http_integrations_id_seq OWNED BY alert_management_http_integrations.id;
 
+CREATE TABLE alert_metric_image_states (
+    verification_started_at timestamp with time zone,
+    verification_retry_at timestamp with time zone,
+    verified_at timestamp with time zone,
+    alert_metric_image_id bigint NOT NULL,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_retry_count smallint,
+    verification_checksum bytea,
+    verification_failure text,
+    CONSTRAINT check_3d6f40c541 CHECK ((char_length(verification_failure) <= 255))
+);
+
 CREATE TABLE allowed_email_domains (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -11420,21 +11432,16 @@ CREATE TABLE application_settings (
     database_grafana_api_url text,
     database_grafana_tag text,
     public_runner_releases_url text DEFAULT 'https://gitlab.com/api/v4/projects/gitlab-org%2Fgitlab-runner/releases'::text NOT NULL,
-    password_uppercase_required boolean DEFAULT false NOT NULL,
-    password_lowercase_required boolean DEFAULT false NOT NULL,
-    password_number_required boolean DEFAULT false NOT NULL,
-    password_symbol_required boolean DEFAULT false NOT NULL,
+    delete_inactive_projects boolean DEFAULT false NOT NULL,
+    inactive_projects_delete_after_months integer DEFAULT 2 NOT NULL,
+    inactive_projects_min_size_mb integer DEFAULT 0 NOT NULL,
+    inactive_projects_send_warning_email_after_months integer DEFAULT 1 NOT NULL,
     encrypted_arkose_labs_public_api_key bytea,
     encrypted_arkose_labs_public_api_key_iv bytea,
     encrypted_arkose_labs_private_api_key bytea,
     encrypted_arkose_labs_private_api_key_iv bytea,
     arkose_labs_verify_api_url text,
-    delete_inactive_projects boolean DEFAULT false NOT NULL,
-    inactive_projects_delete_after_months integer DEFAULT 2 NOT NULL,
-    inactive_projects_min_size_mb integer DEFAULT 0 NOT NULL,
-    inactive_projects_send_warning_email_after_months integer DEFAULT 1 NOT NULL,
     delayed_group_deletion boolean DEFAULT true NOT NULL,
-    maven_package_requests_forwarding boolean DEFAULT true NOT NULL,
     arkose_labs_namespace text DEFAULT 'client'::text NOT NULL,
     max_export_size integer DEFAULT 0,
     encrypted_slack_app_signing_secret bytea,
@@ -11449,9 +11456,13 @@ CREATE TABLE application_settings (
     encrypted_dingtalk_app_key_iv bytea,
     encrypted_dingtalk_app_secret bytea,
     encrypted_dingtalk_app_secret_iv bytea,
-    jira_connect_application_key text,
     globally_allowed_ips text DEFAULT ''::text NOT NULL,
+    password_uppercase_required boolean DEFAULT false NOT NULL,
+    password_lowercase_required boolean DEFAULT false NOT NULL,
+    password_number_required boolean DEFAULT false NOT NULL,
+    password_symbol_required boolean DEFAULT false NOT NULL,
     container_registry_pre_import_tags_rate numeric(6,2) DEFAULT 0.5 NOT NULL,
+    jira_connect_application_key text,
     license_usage_data_exported boolean DEFAULT false NOT NULL,
     phone_verification_code_enabled boolean DEFAULT false NOT NULL,
     max_number_of_repository_downloads smallint DEFAULT 0 NOT NULL,
@@ -11465,10 +11476,11 @@ CREATE TABLE application_settings (
     error_tracking_api_url text,
     git_rate_limit_users_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     error_tracking_access_token_encrypted text,
-    invitation_flow_enforcement boolean DEFAULT false NOT NULL,
     package_registry_cleanup_policies_worker_capacity integer DEFAULT 2 NOT NULL,
     deactivate_dormant_users_period integer DEFAULT 90 NOT NULL,
     auto_ban_user_on_excessive_projects_download boolean DEFAULT false NOT NULL,
+    invitation_flow_enforcement boolean DEFAULT false NOT NULL,
+    maven_package_requests_forwarding boolean DEFAULT true NOT NULL,
     max_pages_custom_domains_per_project integer DEFAULT 0 NOT NULL,
     cube_api_base_url text,
     encrypted_cube_api_key bytea,
@@ -15484,20 +15496,6 @@ CREATE SEQUENCE geo_cache_invalidation_events_id_seq
 
 ALTER SEQUENCE geo_cache_invalidation_events_id_seq OWNED BY geo_cache_invalidation_events.id;
 
-CREATE TABLE geo_container_repository_updated_events (
-    id bigint NOT NULL,
-    container_repository_id integer NOT NULL
-);
-
-CREATE SEQUENCE geo_container_repository_updated_events_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE geo_container_repository_updated_events_id_seq OWNED BY geo_container_repository_updated_events.id;
-
 CREATE TABLE geo_event_log (
     id bigint NOT NULL,
     created_at timestamp without time zone NOT NULL,
@@ -15510,7 +15508,6 @@ CREATE TABLE geo_event_log (
     hashed_storage_attachments_event_id bigint,
     reset_checksum_event_id bigint,
     cache_invalidation_event_id bigint,
-    container_repository_updated_event_id bigint,
     geo_event_id integer
 );
 
@@ -17917,7 +17914,6 @@ CREATE TABLE namespace_settings (
     subgroup_runner_token_expiration_interval integer,
     project_runner_token_expiration_interval integer,
     exclude_from_free_user_cap boolean DEFAULT false NOT NULL,
-    show_diff_preview_in_email boolean DEFAULT true NOT NULL,
     enabled_git_access_protocol smallint DEFAULT 0 NOT NULL,
     unique_project_download_limit smallint DEFAULT 0 NOT NULL,
     unique_project_download_limit_interval_in_seconds integer DEFAULT 0 NOT NULL,
@@ -17925,6 +17921,7 @@ CREATE TABLE namespace_settings (
     include_for_free_user_cap_preview boolean DEFAULT false NOT NULL,
     unique_project_download_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     auto_ban_user_on_excessive_projects_download boolean DEFAULT false NOT NULL,
+    show_diff_preview_in_email boolean DEFAULT true NOT NULL,
     CONSTRAINT check_0ba93c78c7 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT namespace_settings_unique_project_download_limit_allowlist_size CHECK ((cardinality(unique_project_download_limit_allowlist) <= 100))
 );
@@ -23595,8 +23592,6 @@ ALTER TABLE ONLY fork_networks ALTER COLUMN id SET DEFAULT nextval('fork_network
 
 ALTER TABLE ONLY geo_cache_invalidation_events ALTER COLUMN id SET DEFAULT nextval('geo_cache_invalidation_events_id_seq'::regclass);
 
-ALTER TABLE ONLY geo_container_repository_updated_events ALTER COLUMN id SET DEFAULT nextval('geo_container_repository_updated_events_id_seq'::regclass);
-
 ALTER TABLE ONLY geo_event_log ALTER COLUMN id SET DEFAULT nextval('geo_event_log_id_seq'::regclass);
 
 ALTER TABLE ONLY geo_events ALTER COLUMN id SET DEFAULT nextval('geo_events_id_seq'::regclass);
@@ -24848,6 +24843,9 @@ ALTER TABLE ONLY alert_management_alerts
 ALTER TABLE ONLY alert_management_http_integrations
     ADD CONSTRAINT alert_management_http_integrations_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY alert_metric_image_states
+    ADD CONSTRAINT alert_metric_image_states_pkey PRIMARY KEY (alert_metric_image_id);
+
 ALTER TABLE ONLY allowed_email_domains
     ADD CONSTRAINT allowed_email_domains_pkey PRIMARY KEY (id);
 
@@ -25495,9 +25493,6 @@ ALTER TABLE ONLY fork_networks
 
 ALTER TABLE ONLY geo_cache_invalidation_events
     ADD CONSTRAINT geo_cache_invalidation_events_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY geo_container_repository_updated_events
-    ADD CONSTRAINT geo_container_repository_updated_events_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT geo_event_log_pkey PRIMARY KEY (id);
@@ -27636,8 +27631,6 @@ CREATE UNIQUE INDEX idx_environment_merge_requests_unique_index ON deployment_me
 
 CREATE UNIQUE INDEX idx_external_audit_event_destination_id_key_uniq ON audit_events_streaming_headers USING btree (key, external_audit_event_destination_id);
 
-CREATE INDEX idx_geo_con_rep_updated_events_on_container_repository_id ON geo_container_repository_updated_events USING btree (container_repository_id);
-
 CREATE INDEX idx_installable_conan_pkgs_on_project_id_id ON packages_packages USING btree (project_id, id) WHERE ((package_type = 3) AND (status = ANY (ARRAY[0, 1])));
 
 CREATE INDEX idx_installable_helm_pkgs_on_project_id_id ON packages_packages USING btree (project_id, id);
@@ -27811,6 +27804,14 @@ CREATE UNIQUE INDEX index_alert_management_alerts_on_project_id_and_iid ON alert
 CREATE INDEX index_alert_management_alerts_on_prometheus_alert_id ON alert_management_alerts USING btree (prometheus_alert_id) WHERE (prometheus_alert_id IS NOT NULL);
 
 CREATE INDEX index_alert_management_http_integrations_on_project_id ON alert_management_http_integrations USING btree (project_id);
+
+CREATE INDEX index_alert_metric_image_states_failed_verification ON alert_metric_image_states USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX index_alert_metric_image_states_needs_verification ON alert_metric_image_states USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
+CREATE INDEX index_alert_metric_image_states_on_verification_state ON alert_metric_image_states USING btree (verification_state);
+
+CREATE INDEX index_alert_metric_image_states_pending_verification ON alert_metric_image_states USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
 
 CREATE UNIQUE INDEX index_alert_user_mentions_on_alert_id ON alert_management_alert_user_mentions USING btree (alert_management_alert_id) WHERE (note_id IS NULL);
 
@@ -28073,8 +28074,6 @@ CREATE INDEX index_ci_builds_metadata_on_build_id_and_has_exposed_artifacts ON c
 CREATE INDEX index_ci_builds_metadata_on_build_id_and_id_and_interruptible ON ci_builds_metadata USING btree (build_id) INCLUDE (id) WHERE (interruptible = true);
 
 CREATE UNIQUE INDEX index_ci_builds_metadata_on_build_id_partition_id_unique ON ci_builds_metadata USING btree (build_id, partition_id);
-
-CREATE UNIQUE INDEX index_ci_builds_metadata_on_id_partition_id_unique ON ci_builds_metadata USING btree (id, partition_id);
 
 CREATE INDEX index_ci_builds_metadata_on_project_id ON ci_builds_metadata USING btree (project_id);
 
@@ -28833,8 +28832,6 @@ CREATE UNIQUE INDEX index_fork_network_members_on_project_id ON fork_network_mem
 CREATE UNIQUE INDEX index_fork_networks_on_root_project_id ON fork_networks USING btree (root_project_id);
 
 CREATE INDEX index_geo_event_log_on_cache_invalidation_event_id ON geo_event_log USING btree (cache_invalidation_event_id) WHERE (cache_invalidation_event_id IS NOT NULL);
-
-CREATE INDEX index_geo_event_log_on_container_repository_updated_event_id ON geo_event_log USING btree (container_repository_updated_event_id);
 
 CREATE INDEX index_geo_event_log_on_geo_event_id ON geo_event_log USING btree (geo_event_id) WHERE (geo_event_id IS NOT NULL);
 
@@ -32437,9 +32434,6 @@ ALTER TABLE ONLY ghost_user_migrations
 ALTER TABLE ONLY coverage_fuzzing_corpuses
     ADD CONSTRAINT fk_204d40056a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY geo_container_repository_updated_events
-    ADD CONSTRAINT fk_212c89c706 FOREIGN KEY (container_repository_id) REFERENCES container_repositories(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY ci_build_trace_metadata
     ADD CONSTRAINT fk_21d25cac1a FOREIGN KEY (trace_artifact_id) REFERENCES ci_job_artifacts(id) ON DELETE CASCADE;
 
@@ -32670,9 +32664,6 @@ ALTER TABLE ONLY merge_requests
 
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_6a77f66919 FOREIGN KEY (tmp_project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY geo_event_log
-    ADD CONSTRAINT fk_6ada82d42a FOREIGN KEY (container_repository_updated_event_id) REFERENCES geo_container_repository_updated_events(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY projects
     ADD CONSTRAINT fk_6ca23af0a3 FOREIGN KEY (project_namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -33666,6 +33657,9 @@ ALTER TABLE ONLY cluster_groups
 
 ALTER TABLE ONLY note_diff_files
     ADD CONSTRAINT fk_rails_3d66047aeb FOREIGN KEY (diff_note_id) REFERENCES notes(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY alert_metric_image_states
+    ADD CONSTRAINT fk_rails_3d83342abe FOREIGN KEY (alert_metric_image_id) REFERENCES alert_management_alert_metric_images(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY snippet_user_mentions
     ADD CONSTRAINT fk_rails_3e00189191 FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE;

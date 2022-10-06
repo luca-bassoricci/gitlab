@@ -72,4 +72,10 @@ RSpec.describe 'Gets registries' do
     registry_factory: :geo_ci_secure_file_registry,
     registry_foreign_key_field_name: 'ciSecureFileId'
   }
+  it_behaves_like 'gets registries for', {
+    field_name: 'alertMetricImageRegistries',
+    registry_class_name: 'AlertMetricImageRegistry',
+    registry_factory: :geo_alert_metric_image_registry,
+    registry_foreign_key_field_name: 'alertManagmentMetricImageId'
+  }
 end

@@ -510,6 +510,19 @@ Example response:
     "container_repositories_registry_count": 5,
     "container_repositories_synced_in_percentage": "100.00%",
     "container_repositories_synced_missing_on_primary_count": 0,
+    "alert_metric_images_count": 4,
+    "alert_metric_images_checksum_total_count": 3,
+    "alert_metric_images_checksummed_count": 3,
+    "alert_metric_images_checksum_failed_count": 4,
+    "alert_metric_images_synced_count": 4,
+    "alert_metric_images_failed_count": 2,
+    "alert_metric_images_registry_count": 6,
+    "alert_metric_images_verification_total_count": 6,
+    "alert_metric_images_verified_count": 6,
+    "alert_metric_images_verification_failed_count": 6,
+    "alert_metric_images_synced_in_percentage": "100.00%",
+    "alert_metric_images_verified_in_percentage": "100.00%"
+
   },
   {
     "geo_node_id": 2,
@@ -681,6 +694,18 @@ Example response:
     "container_repositories_registry_count": 5,
     "container_repositories_synced_in_percentage": "100.00%",
     "container_repositories_synced_missing_on_primary_count": 0,
+    "alert_metric_images_count": 4,
+    "alert_metric_images_checksum_total_count": 3,
+    "alert_metric_images_checksummed_count": 3,
+    "alert_metric_images_checksum_failed_count": 4,
+    "alert_metric_images_synced_count": 4,
+    "alert_metric_images_failed_count": 2,
+    "alert_metric_images_registry_count": 6,
+    "alert_metric_images_verification_total_count": 6,
+    "alert_metric_images_verified_count": 6,
+    "alert_metric_images_verification_failed_count": 6,
+    "alert_metric_images_synced_in_percentage": "100.00%",
+    "alert_metric_images_verified_in_percentage": "100.00%"
   }
 ]
 ```
@@ -862,6 +887,18 @@ Example response:
   "container_repositories_registry_count": 5,
   "container_repositories_synced_in_percentage": "100.00%",
   "container_repositories_synced_missing_on_primary_count": 0,
+  "alert_metric_images_count": 4,
+  "alert_metric_images_checksum_total_count": 3,
+  "alert_metric_images_checksummed_count": 3,
+  "alert_metric_images_checksum_failed_count": 4,
+  "alert_metric_images_synced_count": 4,
+  "alert_metric_images_failed_count": 2,
+  "alert_metric_images_registry_count": 6,
+  "alert_metric_images_verification_total_count": 6,
+  "alert_metric_images_verified_count": 6,
+  "alert_metric_images_verification_failed_count": 6,
+  "alert_metric_images_synced_in_percentage": "100.00%",
+  "alert_metric_images_verified_in_percentage": "100.00%"
 }
 ```
 

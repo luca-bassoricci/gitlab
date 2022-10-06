@@ -15,4 +15,9 @@ RSpec.describe AlertManagement::MetricImage do
     it { is_expected.to validate_length_of(:url).is_at_most(255) }
     it { is_expected.to validate_length_of(:url_text).is_at_most(128) }
   end
+
+  include_examples 'a replicable model with a separate table for verification state' do
+    let(:verifiable_model_record) { build(:alert_metric_image) }
+    let(:unverifiable_model_record) { build(:alert_metric_image) }
+  end
 end

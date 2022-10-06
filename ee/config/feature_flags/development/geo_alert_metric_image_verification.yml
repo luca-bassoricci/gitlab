@@ -1,0 +1,8 @@
+---
+name: geo_alert_metric_image_verification
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '15.5'
+type: development
+group: group::geo
+default_enabled: false

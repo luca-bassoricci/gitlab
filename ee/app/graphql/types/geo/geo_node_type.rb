@@ -7,6 +7,12 @@ module Types
 
       authorize :read_geo_node
 
+      field :alert_metric_image_registries, ::Types::Geo::AlertMetricImageRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::AlertMetricImageRegistriesResolver,
+            alpha: { milestone: '15.5' },
+            description: 'Find Alert Metric Image registries on this Geo node.'\
+                        'Ignored if `geo_alert_metric_image_replication` feature flag is disabled.'
       field :ci_secure_file_registries, ::Types::Geo::CiSecureFileRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::CiSecureFileRegistriesResolver,

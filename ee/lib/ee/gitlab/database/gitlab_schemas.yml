@@ -14,3 +14,5 @@ project_registry: :gitlab_geo
 secondary_usage_data: :gitlab_geo
 snippet_repository_registry: :gitlab_geo
 terraform_state_version_registry: :gitlab_geo
+alert_metric_image_registry: :gitlab_geo
+alert_metric_image_states: :gitlab_main

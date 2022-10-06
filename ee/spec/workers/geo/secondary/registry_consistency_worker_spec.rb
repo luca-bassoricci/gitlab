@@ -103,6 +103,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       expect(Geo::PagesDeploymentRegistry.where(pages_deployment: pages_deployment.id).count).to eq(0)
       expect(Geo::JobArtifactRegistry.where(job_artifact: job_artifact.id).count).to eq(0)
       expect(Geo::CiSecureFileRegistry.where(ci_secure_file: ci_secure_file.id).count).to eq(0)
+      expect(Geo::AlertMetricImageRegistry.where(ci_secure_file: ci_secure_file.id).count).to eq(0)
 
       subject.perform
 
@@ -119,6 +120,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       expect(Geo::PagesDeploymentRegistry.where(pages_deployment: pages_deployment.id).count).to eq(1)
       expect(Geo::JobArtifactRegistry.where(job_artifact: job_artifact.id).count).to eq(1)
       expect(Geo::CiSecureFileRegistry.where(ci_secure_file: ci_secure_file.id).count).to eq(1)
+      expect(Geo::AlertMetricImageRegistry.where(ci_secure_file: ci_secure_file.id).count).to eq(1)
     end
 
     context 'when the current Geo node is disabled or primary' do

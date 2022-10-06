@@ -61,7 +61,8 @@ module EE
         Geo::PackageFileRegistry => :package_file,
         Geo::UploadRegistry => :upload,
         Geo::JobArtifactRegistry => :ci_job_artifact,
-        Geo::CiSecureFileRegistry => :ci_secure_file
+        Geo::CiSecureFileRegistry => :ci_secure_file,
+        Geo::AlertMetricImageRegistry => :alert_metric_image
       }.fetch(registry_class, default_factory_name)
     end
 

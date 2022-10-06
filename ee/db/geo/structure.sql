@@ -1,3 +1,34 @@
+CREATE TABLE alert_metric_image_registry (
+    id bigint NOT NULL,
+    alert_metric_image_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    last_synced_at timestamp with time zone,
+    retry_at timestamp with time zone,
+    verified_at timestamp with time zone,
+    verification_started_at timestamp with time zone,
+    verification_retry_at timestamp with time zone,
+    state smallint DEFAULT 0 NOT NULL,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    retry_count smallint DEFAULT 0 NOT NULL,
+    verification_retry_count smallint DEFAULT 0 NOT NULL,
+    checksum_mismatch boolean DEFAULT false NOT NULL,
+    verification_checksum bytea,
+    verification_checksum_mismatched bytea,
+    verification_failure text,
+    last_sync_failure text,
+    CONSTRAINT check_0a20edf4da CHECK ((char_length(last_sync_failure) <= 255)),
+    CONSTRAINT check_7c0d21fdc3 CHECK ((char_length(verification_failure) <= 255))
+);
+
+CREATE SEQUENCE alert_metric_image_registry_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE alert_metric_image_registry_id_seq OWNED BY alert_metric_image_registry.id;
+
 CREATE TABLE ar_internal_metadata (
     key character varying NOT NULL,
     value character varying,
@@ -158,18 +189,18 @@ CREATE TABLE job_artifact_registry (
     success boolean,
     sha256 character varying,
     missing_on_primary boolean DEFAULT false NOT NULL,
-    state smallint DEFAULT 0 NOT NULL,
     last_synced_at timestamp with time zone,
-    last_sync_failure character varying(255),
     verified_at timestamp with time zone,
     verification_started_at timestamp with time zone,
     verification_retry_at timestamp with time zone,
+    state smallint DEFAULT 0 NOT NULL,
     verification_state smallint DEFAULT 0 NOT NULL,
     verification_retry_count smallint DEFAULT 0 NOT NULL,
     verification_checksum bytea,
     verification_checksum_mismatched bytea,
     checksum_mismatch boolean DEFAULT false NOT NULL,
-    verification_failure character varying(255)
+    verification_failure character varying(255),
+    last_sync_failure character varying(255)
 );
 
 CREATE SEQUENCE job_artifact_registry_id_seq
@@ -464,6 +495,8 @@ CREATE SEQUENCE terraform_state_version_registry_id_seq
 
 ALTER SEQUENCE terraform_state_version_registry_id_seq OWNED BY terraform_state_version_registry.id;
 
+ALTER TABLE ONLY alert_metric_image_registry ALTER COLUMN id SET DEFAULT nextval('alert_metric_image_registry_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_secure_file_registry ALTER COLUMN id SET DEFAULT nextval('ci_secure_file_registry_id_seq'::regclass);
 
 ALTER TABLE ONLY container_repository_registry ALTER COLUMN id SET DEFAULT nextval('container_repository_registry_id_seq'::regclass);
@@ -495,6 +528,9 @@ ALTER TABLE ONLY secondary_usage_data ALTER COLUMN id SET DEFAULT nextval('secon
 ALTER TABLE ONLY snippet_repository_registry ALTER COLUMN id SET DEFAULT nextval('snippet_repository_registry_id_seq'::regclass);
 
 ALTER TABLE ONLY terraform_state_version_registry ALTER COLUMN id SET DEFAULT nextval('terraform_state_version_registry_id_seq'::regclass);
+
+ALTER TABLE ONLY alert_metric_image_registry
+    ADD CONSTRAINT alert_metric_image_registry_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
@@ -550,6 +586,12 @@ ALTER TABLE ONLY snippet_repository_registry
 ALTER TABLE ONLY terraform_state_version_registry
     ADD CONSTRAINT terraform_state_version_registry_pkey PRIMARY KEY (id);
 
+CREATE INDEX alert_metric_image_registry_failed_verification ON alert_metric_image_registry USING btree (verification_retry_at NULLS FIRST) WHERE ((state = 2) AND (verification_state = 3));
+
+CREATE INDEX alert_metric_image_registry_needs_verification ON alert_metric_image_registry USING btree (verification_state) WHERE ((state = 2) AND (verification_state = ANY (ARRAY[0, 3])));
+
+CREATE INDEX alert_metric_image_registry_pending_verification ON alert_metric_image_registry USING btree (verified_at NULLS FIRST) WHERE ((state = 2) AND (verification_state = 0));
+
 CREATE INDEX ci_secure_file_registry_failed_verification ON ci_secure_file_registry USING btree (verification_retry_at NULLS FIRST) WHERE ((state = 2) AND (verification_state = 3));
 
 CREATE INDEX ci_secure_file_registry_needs_verification ON ci_secure_file_registry USING btree (verification_state) WHERE ((state = 2) AND (verification_state = ANY (ARRAY[0, 3])));
@@ -583,6 +625,12 @@ CREATE INDEX idx_project_registry_synced_repositories_partial ON project_registr
 CREATE INDEX idx_repository_checksum_mismatch ON project_registry USING btree (project_id) WHERE (repository_checksum_mismatch = true);
 
 CREATE INDEX idx_wiki_checksum_mismatch ON project_registry USING btree (project_id) WHERE (wiki_checksum_mismatch = true);
+
+CREATE UNIQUE INDEX index_alert_metric_image_registry_on_alert_metric_image_id ON alert_metric_image_registry USING btree (alert_metric_image_id);
+
+CREATE INDEX index_alert_metric_image_registry_on_retry_at ON alert_metric_image_registry USING btree (retry_at);
+
+CREATE INDEX index_alert_metric_image_registry_on_state ON alert_metric_image_registry USING btree (state);
 
 CREATE UNIQUE INDEX index_ci_secure_file_registry_on_ci_secure_file_id ON ci_secure_file_registry USING btree (ci_secure_file_id);
 

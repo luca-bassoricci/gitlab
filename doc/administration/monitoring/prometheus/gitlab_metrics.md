@@ -318,6 +318,16 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `geo_ci_secure_files_verification_total`         | Gauge   | 15.3  | Number of secure files verifications tried on secondary | `url` |
 | `geo_ci_secure_files_verified`                   | Gauge   | 15.3  | Number of secure files verified on secondary | `url` |
 | `geo_ci_secure_files_verification_failed`        | Gauge   | 15.3  | Number of secure files verifications failed on secondary | `url` |
+| `geo_alert_metric_images`                        | Gauge   | 15.5  | Number of alert metric images on primary | `url` |
+| `geo_alert_metric_images_checksum_total`         | Gauge   | 15.5  | Number of alert metric images tried to checksum on primary | `url` |
+| `geo_alert_metric_images_checksummed`            | Gauge   | 15.5  | Number of alert metric images successfully checksummed on primary | `url` |
+| `geo_alert_metric_images_checksum_failed`        | Gauge   | 15.5  | Number of alert metric images failed to calculate the checksum on primary | `url` |
+| `geo_alert_metric_images_synced`                 | Gauge   | 15.5  | Number of syncable alert metric images synced on secondary | `url` |
+| `geo_alert_metric_images_failed`                 | Gauge   | 15.5  | Number of syncable alert metric images failed to sync on secondary | `url` |
+| `geo_alert_metric_images_registry`               | Gauge   | 15.5  | Number of alert metric images in the registry | `url` |
+| `geo_alert_metric_images_verification_total`     | Gauge   | 15.5  | Number of alert metric images verifications tried on secondary | `url` |
+| `geo_alert_metric_images_verified`               | Gauge   | 15.5  | Number of alert metric images verified on secondary | `url` |
+| `geo_alert_metric_images_verification_failed`    | Gauge   | 15.5  | Number of alert metric images verifications failed on secondary | `url` |
 
 ## Database load balancing metrics **(PREMIUM SELF)**
 

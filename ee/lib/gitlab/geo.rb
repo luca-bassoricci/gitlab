@@ -37,7 +37,8 @@ module Gitlab
       ::Geo::UploadReplicator,
       ::Geo::JobArtifactReplicator,
       ::Geo::CiSecureFileReplicator,
-      ::Geo::ContainerRepositoryReplicator
+      ::Geo::ContainerRepositoryReplicator,
+      ::Geo::AlertMetricImageReplicator
     ].freeze
 
     # We "regenerate" an 1hour valid JWT every 30 minutes, resulting in

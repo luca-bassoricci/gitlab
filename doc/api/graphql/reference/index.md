@@ -6010,6 +6010,29 @@ The edge type for [`AlertManagementIntegration`](#alertmanagementintegration).
 | <a id="alertmanagementintegrationedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="alertmanagementintegrationedgenode"></a>`node` | [`AlertManagementIntegration`](#alertmanagementintegration) | The item at the end of the edge. |
 
+#### `AlertMetricImageRegistryConnection`
+
+The connection type for [`AlertMetricImageRegistry`](#alertmetricimageregistry).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="alertmetricimageregistryconnectionedges"></a>`edges` | [`[AlertMetricImageRegistryEdge]`](#alertmetricimageregistryedge) | A list of edges. |
+| <a id="alertmetricimageregistryconnectionnodes"></a>`nodes` | [`[AlertMetricImageRegistry]`](#alertmetricimageregistry) | A list of nodes. |
+| <a id="alertmetricimageregistryconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `AlertMetricImageRegistryEdge`
+
+The edge type for [`AlertMetricImageRegistry`](#alertmetricimageregistry).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="alertmetricimageregistryedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="alertmetricimageregistryedgenode"></a>`node` | [`AlertMetricImageRegistry`](#alertmetricimageregistry) | The item at the end of the edge. |
+
 #### `AuditEventStreamingHeaderConnection`
 
 The connection type for [`AuditEventStreamingHeader`](#auditeventstreamingheader).
@@ -9820,6 +9843,25 @@ An endpoint and credentials used to accept Prometheus alerts for a project.
 | <a id="alertmanagementprometheusintegrationtype"></a>`type` | [`AlertManagementIntegrationType!`](#alertmanagementintegrationtype) | Type of integration. |
 | <a id="alertmanagementprometheusintegrationurl"></a>`url` | [`String`](#string) | Endpoint which accepts alert notifications. |
 
+### `AlertMetricImageRegistry`
+
+Represents the Geo replication and verification state of a alert_metric_image.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="alertmetricimageregistryalertmetricimageid"></a>`alertMetricImageId` | [`ID!`](#id) | ID of the Alert Metric Image. |
+| <a id="alertmetricimageregistrycreatedat"></a>`createdAt` | [`Time`](#time) | Timestamp when the AlertMetricImageRegistry was created. |
+| <a id="alertmetricimageregistryid"></a>`id` | [`ID!`](#id) | ID of the AlertMetricImageRegistry. |
+| <a id="alertmetricimageregistrylastsyncfailure"></a>`lastSyncFailure` | [`String`](#string) | Error message during sync of the AlertMetricImageRegistry. |
+| <a id="alertmetricimageregistrylastsyncedat"></a>`lastSyncedAt` | [`Time`](#time) | Timestamp of the most recent successful sync of the AlertMetricImageRegistry. |
+| <a id="alertmetricimageregistryretryat"></a>`retryAt` | [`Time`](#time) | Timestamp after which the AlertMetricImageRegistry is resynced. |
+| <a id="alertmetricimageregistryretrycount"></a>`retryCount` | [`Int`](#int) | Number of consecutive failed sync attempts of the AlertMetricImageRegistry. |
+| <a id="alertmetricimageregistrystate"></a>`state` | [`RegistryState`](#registrystate) | Sync state of the AlertMetricImageRegistry. |
+| <a id="alertmetricimageregistryverificationretryat"></a>`verificationRetryAt` | [`Time`](#time) | Timestamp after which the AlertMetricImageRegistry is reverified. |
+| <a id="alertmetricimageregistryverifiedat"></a>`verifiedAt` | [`Time`](#time) | Timestamp of the most recent successful verification of the AlertMetricImageRegistry. |
+
 ### `ApiFuzzingCiConfiguration`
 
 Data associated with configuring API fuzzing scans in GitLab CI.
@@ -12392,6 +12434,28 @@ Represents an external issue.
 | <a id="geonodeverificationmaxcapacity"></a>`verificationMaxCapacity` | [`Int`](#int) | Maximum concurrency of repository verification for this secondary node. |
 
 #### Fields with arguments
+
+##### `GeoNode.alertMetricImageRegistries`
+
+Find Alert Metric Image registries on this Geo node.Ignored if `geo_alert_metric_image_replication` feature flag is disabled.
+
+WARNING:
+**Introduced** in 15.5.
+This feature is in Alpha. It can be changed or removed at any time.
+
+Returns [`AlertMetricImageRegistryConnection`](#alertmetricimageregistryconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="geonodealertmetricimageregistriesids"></a>`ids` | [`[ID!]`](#id) | Filters registries by their ID. |
+| <a id="geonodealertmetricimageregistriesreplicationstate"></a>`replicationState` | [`ReplicationStateEnum`](#replicationstateenum) | Filters registries by their replication state. |
+| <a id="geonodealertmetricimageregistriesverificationstate"></a>`verificationState` | [`VerificationStateEnum`](#verificationstateenum) | Filters registries by their verification state. |
 
 ##### `GeoNode.ciSecureFileRegistries`
 

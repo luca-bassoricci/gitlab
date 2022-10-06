@@ -34,6 +34,7 @@ ActiveSupport::Inflector.inflections do |inflect|
     snippet_repository_registry
     system_note_metadata
     terraform_state_version_registry
+    alert_metric_image_registry
     vulnerabilities_feedback
     vulnerability_feedback
   )
