@@ -22,12 +22,6 @@ module Gitlab
 
       private
 
-      def cleanup!(path)
-        File.unlink(path) if File.exist?(path)
-      rescue Errno::ENOENT
-        # Path does not exist: Ignore. We already check `File.exist?`. Rescue to be extra safe.
-      end
-
       def log_upload_requested(path)
         Gitlab::AppLogger.info(log_labels.merge(perf_report_status: 'upload requested', perf_report_path: path))
       end
