@@ -97,7 +97,7 @@ Depending on your role, you can also use the following methods to manage or redu
 - [Reduce wiki repository size](../administration/wikis/index.md#reduce-wiki-repository-size)
 - [Reduce snippets repository size](../user/snippets.md#reduce-snippets-repository-size)
 
-For [CI/CD artifacts](../ci/caching/index.md#artifacts) storage type including artifacts generated from like those from a pipeline or job, they will expire after 30 days, but you can define a [custom expiration time](../ci/yaml/index.md#artifactsexpire_in) to reduce storage usage on an ongoing basis. If a specific job artifact was updated via the [keep artifact API](../api/job_artifacts.html#keep-artifacts) then that artifact will not be marked for deletion even if the expiration duration is set. Job artifacts can be deleted via the [artifacts API](../api/job_artifacts.html#delete-job-artifacts).
+For [CI/CD artifacts](../ci/caching/index.md#artifacts) storage type including artifacts generated from like those from a pipeline or job, they will expire after 30 days, but you can define a [custom expiration time](../ci/yaml/index.md#artifactsexpire_in) to reduce storage usage on an ongoing basis. If a specific job artifact was updated via the [keep artifact API](../api/job_artifacts.md#keep-artifacts) then that artifact will not be marked for deletion even if the expiration duration is set. Job artifacts can be deleted via the [artifacts API](../api/job_artifacts.md#delete-job-artifacts).
 
 ## Excess storage usage
 
