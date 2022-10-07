@@ -162,12 +162,9 @@ describe('~/access_tokens/components/access_token_table_app', () => {
 
   it('updates the table after new tokens are created', async () => {
     createComponent({ initialActiveAccessTokens: [], showRole: true });
-    let cells = findCells();
-    expect(cells).toHaveLength(1);
-
     await triggerSuccess();
 
-    cells = findCells();
+    const cells = findCells();
     expect(cells).toHaveLength(14);
 
     // First row
@@ -280,24 +277,25 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     expect(cells.at(10).text()).toBe('Never');
   });
 
-  it('should show the pagination component when needed', () => {
-    createComponent({ initialActiveAccessTokens: [] });
-    expect(findPagination().exists()).toBe(false);
+  describe('pagination', () => {
+    it('does not show pagination component', () => {
+      createComponent({
+        initialActiveAccessTokens: Array(PAGE_SIZE).fill(defaultActiveAccessTokens[0]),
+      });
 
-    createComponent({
-      initialActiveAccessTokens: Array(PAGE_SIZE).fill(defaultActiveAccessTokens[0]),
+      expect(findPagination().exists()).toBe(false);
     });
-    expect(findPagination().exists()).toBe(false);
 
-    createComponent({
-      initialActiveAccessTokens: Array(PAGE_SIZE + 1).fill(defaultActiveAccessTokens[0]),
+    it('shows the pagination component', () => {
+      createComponent({
+        initialActiveAccessTokens: Array(PAGE_SIZE + 1).fill(defaultActiveAccessTokens[0]),
+      });
+      expect(findPagination().exists()).toBe(true);
     });
-    expect(findPagination().exists()).toBe(true);
   });
 
-  it('matches the snapshot', async () => {
+  it('matches the snapshot', () => {
     createComponent({ showRole });
-    await triggerSuccess();
 
     expect(wrapper.element).toMatchSnapshot();
   });
