@@ -284,4 +284,11 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     await triggerSuccess(Array(PAGE_SIZE + 1).fill(defaultActiveAccessTokens[0]));
     expect(findPagination().exists()).toBe(true);
   });
+
+  it('matches the snapshot', async () => {
+    createComponent({ showRole });
+    await triggerSuccess();
+
+    expect(wrapper.element).toMatchSnapshot();
+  });
 });

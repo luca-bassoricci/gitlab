@@ -121,6 +121,7 @@ export default {
       </p>
 
       <gl-table
+        id="active_tokens_table"
         data-testid="active-tokens"
         :empty-text="noActiveTokensMessage"
         :fields="filteredFields"

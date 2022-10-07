@@ -1,0 +1,326 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`~/access_tokens/components/access_token_table_app matches the snapshot 1`] = `
+<div>
+  <hr />
+   
+  <h5>
+    Active personal access tokens (2)
+  </h5>
+   
+  <!---->
+   
+  <table
+    aria-busy="false"
+    aria-colcount="6"
+    class="table b-table gl-table"
+    data-testid="active-tokens"
+    id="active_tokens_table"
+    role="table"
+  >
+    <!---->
+    <!---->
+    <thead
+      class=""
+      role="rowgroup"
+    >
+      <!---->
+      <tr
+        class=""
+        role="row"
+      >
+        <th
+          aria-colindex="1"
+          aria-sort="none"
+          class=""
+          role="columnheader"
+          scope="col"
+          tabindex="0"
+        >
+          <div>
+            Token name
+          </div>
+          <span
+            class="sr-only"
+          >
+             (Click to sort Ascending)
+          </span>
+        </th>
+        <th
+          aria-colindex="2"
+          aria-sort="none"
+          class=""
+          role="columnheader"
+          scope="col"
+          tabindex="0"
+        >
+          <div>
+            Scopes
+          </div>
+          <span
+            class="sr-only"
+          >
+             (Click to sort Ascending)
+          </span>
+        </th>
+        <th
+          aria-colindex="3"
+          aria-sort="none"
+          class=""
+          role="columnheader"
+          scope="col"
+          tabindex="0"
+        >
+          <div>
+            Created
+          </div>
+          <span
+            class="sr-only"
+          >
+             (Click to sort Ascending)
+          </span>
+        </th>
+        <th
+          aria-colindex="4"
+          aria-sort="none"
+          class=""
+          role="columnheader"
+          scope="col"
+          tabindex="0"
+        >
+          <span>
+            Last Used
+          </span>
+           
+          <a
+            class="gl-link"
+            href="/help/user/profile/personal_access_tokens.md#view-the-last-time-a-token-was-used"
+          >
+            <svg
+              aria-hidden="true"
+              class="gl-icon s16"
+              data-testid="question-o-icon"
+              role="img"
+            >
+              <use
+                href="#question-o"
+              />
+            </svg>
+            <span
+              class="gl-sr-only"
+            >
+              The last time a token was used
+            </span>
+          </a>
+          <span
+            class="sr-only"
+          >
+             (Click to sort Ascending)
+          </span>
+        </th>
+        <th
+          aria-colindex="5"
+          aria-sort="none"
+          class=""
+          role="columnheader"
+          scope="col"
+          tabindex="0"
+        >
+          <div>
+            Expires
+          </div>
+          <span
+            class="sr-only"
+          >
+             (Click to sort Ascending)
+          </span>
+        </th>
+        <th
+          aria-colindex="6"
+          class=""
+          role="columnheader"
+          scope="col"
+        >
+          <div>
+            Action
+          </div>
+        </th>
+      </tr>
+    </thead>
+    <tbody
+      role="rowgroup"
+    >
+      <!---->
+      <tr
+        aria-rowindex="1"
+        class=""
+        role="row"
+      >
+        <td
+          aria-colindex="1"
+          class=""
+          role="cell"
+        >
+          a
+        </td>
+        <td
+          aria-colindex="2"
+          class=""
+          role="cell"
+        >
+          api
+        </td>
+        <td
+          aria-colindex="3"
+          class=""
+          role="cell"
+        >
+          <span>
+            
+  1 May, 2021
+
+          </span>
+        </td>
+        <td
+          aria-colindex="4"
+          class=""
+          role="cell"
+        >
+           Never
+        </td>
+        <td
+          aria-colindex="5"
+          class=""
+          role="cell"
+        >
+          <span
+            title="Token valid until revoked"
+          >
+            Never
+          </span>
+        </td>
+        <td
+          aria-colindex="6"
+          class="gl-py-3!"
+          role="cell"
+        >
+          <a
+            aria-label="Revoke"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            data-confirm="Are you sure you want to revoke this personal access token? This action cannot be undone."
+            data-confirm-btn-variant="danger"
+            data-method="put"
+            data-qa-selector="revoke_button"
+            href="/-/profile/personal_access_tokens/1/revoke"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="remove-icon"
+              role="img"
+            >
+              <use
+                href="#remove"
+              />
+            </svg>
+              
+            <!---->
+          </a>
+        </td>
+      </tr>
+      <tr
+        aria-rowindex="2"
+        class=""
+        role="row"
+      >
+        <td
+          aria-colindex="1"
+          class=""
+          role="cell"
+        >
+          b
+        </td>
+        <td
+          aria-colindex="2"
+          class=""
+          role="cell"
+        >
+          api, sudo
+        </td>
+        <td
+          aria-colindex="3"
+          class=""
+          role="cell"
+        >
+          <span>
+            
+  21 Apr, 2022
+
+          </span>
+        </td>
+        <td
+          aria-colindex="4"
+          class=""
+          role="cell"
+        >
+          <time
+            class=""
+            datetime="2022-04-21T00:00:00.000Z"
+            title="Apr 21, 2022 12:00am UTC"
+          >
+            in 1 year
+          </time>
+        </td>
+        <td
+          aria-colindex="5"
+          class=""
+          role="cell"
+        >
+          <span
+            class="text-danger"
+          >
+            Expired
+          </span>
+        </td>
+        <td
+          aria-colindex="6"
+          class="gl-py-3!"
+          role="cell"
+        >
+          <a
+            aria-label="Revoke"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            data-confirm="Are you sure you want to revoke this personal access token? This action cannot be undone."
+            data-confirm-btn-variant="danger"
+            data-method="put"
+            data-qa-selector="revoke_button"
+            href="/-/profile/personal_access_tokens/2/revoke"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="remove-icon"
+              role="img"
+            >
+              <use
+                href="#remove"
+              />
+            </svg>
+              
+            <!---->
+          </a>
+        </td>
+      </tr>
+      <!---->
+      <!---->
+    </tbody>
+    <!---->
+  </table>
+   
+  <!---->
+</div>
+`;
