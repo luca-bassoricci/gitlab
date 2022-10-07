@@ -1039,7 +1039,7 @@ can be added, removed, and modified by creating a custom configuration.
 | `SECURE_ANALYZERS_PREFIX`                            | Specify the Docker registry base address from which to download the analyzer. |
 | `DAST_API_VERSION`                                   | Specify DAST API container version. Defaults to `2`. |
 | `DAST_API_IMAGE_SUFFIX`                              | Specify a container image suffix. Defaults to none. |
-| `DAST_API_API_PORT`                                  | Specify the communication port number used by DAST API engine. Defaults to `5500`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) in GitLab 15.4. |
+| `DAST_API_API_PORT`                                  | Specify the communication port number used by DAST API engine. Defaults to `5500`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) in GitLab 15.5. |
 | `DAST_API_TARGET_URL`                                 | Base URL of API testing target. |
 |[`DAST_API_CONFIG`](#configuration-files)              | DAST API configuration file. Defaults to `.gitlab-dast-api.yml`. |
 |[`DAST_API_PROFILE`](#configuration-files)             | Configuration profile to use during testing. Defaults to `Quick`. |
@@ -2100,11 +2100,13 @@ The error message could be produced by other reasons, thus before proceeding wit
 
 1. If the error message was produced because the port was already taken, you should see in the file a message like the following:
 
+- In [GitLab 15.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734):
+
 ```log
 Failed to bind to address http://127.0.0.1:5500: address already in use.
 ```
 
-- In GitLab 15.3 and earlier:
+- In GitLab 15.4 and earlier:
 
 ```log
 Failed to bind to address http://[::]:5000: address already in use.
@@ -2114,15 +2116,15 @@ The text `http://[::]:5000` in the previous message could be different in your c
 
 If you did not find evidence that the port was already taken, consider checking other troubleshoot sections which also address the same error message shown in the job console output. If there are not more options, feel free to [get support or request an improvement](#get-support-or-request-an-improvement) through the proper channels.
 
-Once you have confirmed the issue was produced because the port was already taken. Then, [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) introduced the configuration variable `DAST_API_API_PORT`. This configuration variable allows setting a fixed port number for the scanner background component. 
+Once you have confirmed the issue was produced because the port was already taken. Then, [GitLab 15.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) introduced the configuration variable `DAST_API_API_PORT`. This configuration variable allows setting a fixed port number for the scanner background component.
 
 **Error message**
 
 - In job console output
   - `Failed to start session with scanner. Please retry, and if the problem persists reach out to support.`
 - In `gl-api-security-scanner.log`
-  - In [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734), `Failed to bind to address http://127.0.0.1:5500: address already in use.`
-  - In GitLab 15.3 and earlier, `Failed to bind to address http://[::]:5000: address already in use.`
+  - In [GitLab 15.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734), `Failed to bind to address http://127.0.0.1:5500: address already in use.`
+  - In GitLab 15.4 and earlier, `Failed to bind to address http://[::]:5000: address already in use.`
 
 **Solution**
 

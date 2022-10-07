@@ -1093,7 +1093,7 @@ profile increases as the number of tests increases.
 | `SECURE_ANALYZERS_PREFIX`                                   | Specify the Docker registry base address from which to download the analyzer. |
 | `FUZZAPI_VERSION`                                           | Specify API Fuzzing container version. Defaults to `2`. |
 | `FUZZAPI_IMAGE_SUFFIX`                                      | Specify a container image suffix. Defaults to none. |
-| `FUZZAPI_API_PORT`                                          | Specify the communication port number used by API Fuzzing engine. Defaults to `5500`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) in GitLab 15.4. |
+| `FUZZAPI_API_PORT`                                          | Specify the communication port number used by API Fuzzing engine. Defaults to `5500`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) in GitLab 15.5. |
 | `FUZZAPI_TARGET_URL`                                        | Base URL of API testing target. |
 | `FUZZAPI_CONFIG`                                            | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/276395) in GitLab 13.12, replaced with default `.gitlab/gitlab-api-fuzzing-config.yml`. API Fuzzing configuration file. |
 |[`FUZZAPI_PROFILE`](#api-fuzzing-profiles)                   | Configuration profile to use during testing. Defaults to `Quick-10`. |
@@ -2240,13 +2240,13 @@ The error message could be produced by other reasons, thus before proceeding wit
 
 1. If the error message was produced because the port was already taken, you should see in the file a message like the following:
 
-- In [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734):
+- In [GitLab 15.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734):
 
 ```log
 Failed to bind to address http://127.0.0.1:5500: address already in use.
 ```
 
-- In GitLab 15.3 and earlier:
+- In GitLab 15.4 and earlier:
 
 ```log
 Failed to bind to address http://[::]:5000: address already in use.
@@ -2256,15 +2256,15 @@ The text `http://[::]:5000` in the previous message could be different in your c
 
 If you did not find evidence that the port was already taken, consider checking other troubleshoot sections which also address the same error message shown in the job console output. If there are not more options, feel free to [get support or request an improvement](#get-support-or-request-an-improvement) through the proper channels.
 
-Once you have confirmed the issue was produced because the port was already taken. Then, [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) introduced the configuration variable `FUZZAPI_API_PORT`. This configuration variable allows setting a fixed port number for the scanner background component. 
+Once you have confirmed the issue was produced because the port was already taken. Then, [GitLab 15.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) introduced the configuration variable `FUZZAPI_API_PORT`. This configuration variable allows setting a fixed port number for the scanner background component.
 
 **Error message**
 
 - In job console output
   - `Failed to start session with scanner. Please retry, and if the problem persists reach out to support.`
 - In `gl-api-security-scanner.log`
-  - In [GitLab 15.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734), `Failed to bind to address http://127.0.0.1:5500: address already in use.`
-  - In GitLab 15.3 and earlier, `Failed to bind to address http://[::]:5000: address already in use.`
+  - In [GitLab 15.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/367734), `Failed to bind to address http://127.0.0.1:5500: address already in use.`
+  - In GitLab 15.4 and earlier, `Failed to bind to address http://[::]:5000: address already in use.`
 
 **Solution**
 
