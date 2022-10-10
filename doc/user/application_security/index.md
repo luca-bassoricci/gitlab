@@ -49,7 +49,7 @@ Each of the GitLab application security tools is relevant to specific phases of 
 - Deploy
   - Operational Container Scanning
 
-[CI/CD stages and matching GitLab application security tools](img/secure_tools_and_cicd_stages.svg)
+[CI/CD stages and matching GitLab application security tools](img/secure_tools_and_cicd_stages.png)
 
 ### Source code analysis
 
