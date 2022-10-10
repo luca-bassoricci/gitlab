@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Fail fast if we necessary ENV vars are not set. We could not recover from that.
+# Fail fast if the necessary ENV vars are not set.
 reports_path = ENV["GITLAB_DIAGNOSTIC_REPORTS_PATH"].to_s
 raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PATH dir is missing' unless Dir.exist?(reports_path)
 
