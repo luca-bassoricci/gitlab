@@ -3,16 +3,16 @@
 
 # Fail fast if the necessary ENV vars are not set.
 reports_path = ENV["GITLAB_DIAGNOSTIC_REPORTS_PATH"].to_s
-raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PATH dir is missing' unless Dir.exist?(reports_path)
+fail 'GITLAB_DIAGNOSTIC_REPORTS_PATH dir is missing' unless Dir.exist?(reports_path)
 
 gcs_key = ENV["GITLAB_GCP_KEY_PATH"].to_s
-raise StandardError, 'GITLAB_GCP_KEY_PATH is missing' unless File.exist?(gcs_key)
+fail 'GITLAB_GCP_KEY_PATH is missing' unless File.exist?(gcs_key)
 
 gcs_project = ENV["GITLAB_DIAGNOSTIC_REPORTS_PROJECT"].to_s
-raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PROJECT is missing' unless gcs_project.present?
+fail 'GITLAB_DIAGNOSTIC_REPORTS_PROJECT is missing' unless gcs_project.present?
 
 gcs_bucket = ENV["GITLAB_DIAGNOSTIC_REPORTS_BUCKET"].to_s
-raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_BUCKET is missing' unless gcs_bucket.present?
+fail 'GITLAB_DIAGNOSTIC_REPORTS_BUCKET is missing' unless gcs_bucket.present?
 
 uploader = Gitlab::Memory::ReportsUploader.new(gcs_key: gcs_key, gcs_project: gcs_project, gcs_bucket: gcs_bucket)
 Gitlab::Memory::UploadAndCleanupReports.new(uploader: uploader, reports_path: reports_path).call
