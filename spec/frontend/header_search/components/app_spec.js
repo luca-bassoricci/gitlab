@@ -3,6 +3,7 @@ import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { s__, sprintf } from '~/locale';
+import Tracking from '~/tracking';
 import HeaderSearchApp from '~/header_search/components/app.vue';
 import HeaderSearchAutocompleteItems from '~/header_search/components/header_search_autocomplete_items.vue';
 import HeaderSearchDefaultItems from '~/header_search/components/header_search_default_items.vue';
@@ -360,22 +361,30 @@ describe('HeaderSearchApp', () => {
 
     describe('Header Search Input', () => {
       describe('when dropdown is closed', () => {
-        it('onFocus opens dropdown', async () => {
+        let eventSpy;
+
+        beforeEach(() => {
+          eventSpy = jest.spyOn(Tracking, 'event');
+        });
+
+        it('onFocus opens dropdown and triggers snowplow event', async () => {
           expect(findHeaderSearchDropdown().exists()).toBe(false);
           findHeaderSearchInput().vm.$emit('focus');
 
           await nextTick();
 
           expect(findHeaderSearchDropdown().exists()).toBe(true);
+          expect(eventSpy).toHaveBeenCalledTimes(1);
         });
 
-        it('onClick opens dropdown', async () => {
+        it('onClick opens dropdown and triggers snowplow event', async () => {
           expect(findHeaderSearchDropdown().exists()).toBe(false);
           findHeaderSearchInput().vm.$emit('click');
 
           await nextTick();
 
           expect(findHeaderSearchDropdown().exists()).toBe(true);
+          expect(eventSpy).toHaveBeenCalledTimes(1);
         });
       });
 
