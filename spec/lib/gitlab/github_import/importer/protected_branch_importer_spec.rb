@@ -126,22 +126,33 @@ RSpec.describe Gitlab::GithubImport::Importer::ProtectedBranchImporter do
 
       context 'when required_signatures rule is enabled' do
         let(:required_signatures) { true }
+        let(:push_rules_feature_available?) { true }
 
-        context 'when the push_rules feature is available' do
-          before do
-            stub_licensed_features(push_rules: true)
+        before do
+          stub_licensed_features(push_rules: push_rules_feature_available?)
+        end
+
+        context 'when the push_rules feature is available', if: Gitlab.ee? do
+          context 'when project push_rules did previously exist' do
+            before do
+              create(:push_rule, project: project)
+            end
+
+            it 'updates push_rule reject_unsigned_commits attribute' do
+              expect { importer.execute }.to change { project.reload.push_rule.reject_unsigned_commits }.to(true)
+            end
           end
 
-          it 'creates project push_rule with the enabled reject_unsigned_commits attr' do
-            expect { importer.execute }.to change(project, :push_rule).from(nil)
-            expect(project.push_rule.reject_unsigned_commits).to be_truthy
+          context 'when project push_rules did not previously exist' do
+            it 'creates project push_rule with the enabled reject_unsigned_commits attribute' do
+              expect { importer.execute }.to change(project, :push_rule).from(nil)
+              expect(project.push_rule.reject_unsigned_commits).to be_truthy
+            end
           end
         end
 
         context 'when the push_rules feature is not available' do
-          before do
-            stub_licensed_features(push_rules: false)
-          end
+          let(:push_rules_feature_available?) { false }
 
           it_behaves_like 'does not change project attributes'
         end

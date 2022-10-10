@@ -64,12 +64,9 @@ module Gitlab
           return unless project.licensed_feature_available?(:push_rules)
           return unless protected_branch.required_signatures
 
-          unless project.push_rule
-            push_rule = project.create_push_rule
-            project.project_setting.update(push_rule_id: push_rule.id)
-          end
-
-          project.push_rule.update(reject_unsigned_commits: true)
+          push_rule = project.push_rule || project.build_push_rule
+          push_rule.update!(reject_unsigned_commits: true)
+          project.project_setting.update!(push_rule_id: push_rule.id)
         end
       end
     end
