@@ -5,8 +5,8 @@
 reports_path = ENV["GITLAB_DIAGNOSTIC_REPORTS_PATH"].to_s
 raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PATH dir is missing' unless Dir.exist?(reports_path)
 
-gcs_key = ENV["GOOGLE_APPLICATION_CREDENTIALS"].to_s
-raise StandardError, 'GOOGLE_APPLICATION_CREDENTIALS is missing' unless File.exist?(gcs_key)
+gcs_key = ENV["GITLAB_GCP_KEY_PATH"].to_s
+raise StandardError, 'GITLAB_GCP_KEY_PATH is missing' unless File.exist?(gcs_key)
 
 gcs_project = ENV["GITLAB_DIAGNOSTIC_REPORTS_PROJECT"].to_s
 raise StandardError, 'GITLAB_DIAGNOSTIC_REPORTS_PROJECT is missing' unless gcs_project.present?
