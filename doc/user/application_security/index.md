@@ -49,28 +49,7 @@ Each of the GitLab application security tools is relevant to specific phases of 
 - Deploy
   - Operational Container Scanning
 
-```mermaid
-gantt
-  title CI/CD phases and GitLab application security tools
-  dateFormat  YYYY-MM-DD HH:mm
-  axisFormat %
-  section Phase
-  Commit: 2022-02-25 00:00, 15m
-  Build: 2022-02-25 00:15, 15m
-  Test: 2022-02-25 00:30, 15m
-  Deploy: 2022-02-25 00:45, 15m
-  section Scanning activity
-  SAST :a1, 2022-02-25 00:00, 15m
-  Secret Detection :a1, 2022-02-25 00:00, 15m
-  IaC Scanning :a1, 2022-02-25 00:00, 15m
-  Dependency Scanning :a1, 2022-02-25 00:00, 15m
-  License Scanning :a1, 2022-02-25 00:00, 15m
-  Coverage-guide Fuzz Testing :a1, 2022-02-25 00:00, 15m
-  Container Scanning :a1, 2022-02-25 00:15, 15m
-  API Security :a1, 2022-02-25 00:30, 15m
-  DAST :a1, 2022-02-25 00:30, 15m
-  Operational Container Scanning :a1, 2022-02-25 00:45, 15m
-```
+[CI/CD stages and matching GitLab application security tools](img/secure_tools_and_cicd_stages.svg)
 
 ### Source code analysis
 
