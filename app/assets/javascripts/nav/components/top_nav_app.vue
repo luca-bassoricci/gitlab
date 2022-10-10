@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     trackToggleEvent() {
-      Tracking.event(undefined, 'click_dropdown', {
+      Tracking.event(undefined, 'click_nav', {
         label: 'hamburger_menu',
         property: 'top_navigation',
       });
