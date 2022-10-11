@@ -140,3 +140,8 @@ rules apply:
 For example, if you purchase a license for 100 users, you can have 110 users when you add
 your license. However, if you have 111 users, you must purchase more users before you can add
 the license.
+
+
+### Still see `Start GitLab Ultimate trial` after applying legacy license
+
+To fix this issue, restart your instance. 
