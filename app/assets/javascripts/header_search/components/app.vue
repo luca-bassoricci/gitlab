@@ -164,13 +164,17 @@ export default {
     ...mapActions(['setSearch', 'fetchAutocompleteOptions', 'clearAutocomplete']),
     openDropdown() {
       this.showDropdown = true;
-      this.isFocused = true;
-      this.$emit('expandSearchBar', true);
 
-      Tracking.event(undefined, 'focus_input', {
-        label: 'global_search',
-        property: 'top_navigation',
-      });
+      // check isFocused state to avoid firing duplicate events
+      if (!this.isFocused) {
+        this.isFocused = true;
+        this.$emit('expandSearchBar', true);
+
+        Tracking.event(undefined, 'focus_input', {
+          label: 'global_search',
+          property: 'top_navigation',
+        });
+      }
     },
     closeDropdown() {
       this.showDropdown = false;
