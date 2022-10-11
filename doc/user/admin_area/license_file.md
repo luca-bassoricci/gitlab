@@ -144,4 +144,5 @@ the license.
 
 ### Still see `Start GitLab Ultimate trial` after applying legacy license
 
-To fix this issue, restart your instance. 
+To fix this issue, restart [Puma or your entire GitLab instance](https://docs.gitlab.com/ee/administration/restart_gitlab.html).
+
