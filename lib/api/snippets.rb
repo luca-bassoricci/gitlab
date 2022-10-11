@@ -52,7 +52,7 @@ module API
 
         use :pagination
       end
-      get 'public', do
+      get 'public' do
         authenticate!
 
         filter_params = declared_params(include_missing: false).merge(only_personal: true)
